@@ -1,0 +1,33 @@
+project/
+│
+├── frontend/
+│ ├── public/
+│ ├── src/
+│ │ ├── components/
+│ │ ├── pages/
+│ │ ├── modules/
+│ │ │ ├── sellers/
+│ │ │ ├── buyers/
+│ │ │ └── invoices/
+│ │ └── utils/
+│ └── package.json
+│
+├── backend/
+│ ├── src/
+│ │ ├── config/
+│ │ ├── modules/
+│ │ │ ├── sellers/
+│ │ │ │ ├── sellers.model.js
+│ │ │ │ ├── sellers.controller.js
+│ │ │ │ ├── sellers.routes.js
+│ │ │ │ └── sellers.service.js
+│ │ │ ├── buyers/
+│ │ │ └── invoices/
+│ │ ├── middlewares/
+│ │ └── utils/
+│ ├── package.json
+│ └── server.js
+│
+├── docs/
+├── scripts/
+└── README.md
