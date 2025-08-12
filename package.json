@@ -23,5 +23,8 @@
     "express": "^5.1.0",
     "pg": "^8.16.3",
     "react-router-dom": "^7.8.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"
   }
 }

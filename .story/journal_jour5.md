@@ -24,6 +24,8 @@ Le résultat est fluide, simple, et surtout rapide à mettre en place. Cela m’
 
 Je me suis aussi permis d’ajouter Bootstrap pour un peu de mise en forme générale, histoire que les champs de recherche et la structure globale soient plus agréables visuellement, sans devoir partir dans du CSS complexe.
 
+![](images/jour5/sellers.png)
+
 ## Ce que ça m’a appris
 
 - La sécurité, même sur un petit projet, c’est fondamental et il ne faut pas l’oublier.  

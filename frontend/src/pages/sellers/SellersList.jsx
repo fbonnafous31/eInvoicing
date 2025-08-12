@@ -14,10 +14,10 @@ export default function SellersList() {
 
   const columns = [
     {
-      name: 'ID',
-      selector: row => row.id,
+      name: 'Identifiant',
+      selector: row => row.legal_identifier,
       sortable: true,
-      width: '80px',
+      width: '150px',
     },
     {
       name: 'Nom légal',
@@ -25,16 +25,32 @@ export default function SellersList() {
       sortable: true,
     },
     {
+      name: 'Adresse',
+      selector: row => row.address,
+      sortable: true,
+    },   
+    {
+      name: 'Code postal',
+      selector: row => row.postal_code,
+      sortable: true,
+    },       
+    {
       name: 'Ville',
       selector: row => row.city,
       sortable: true,
     },
-  ];
+ ];
 
-  const filteredItems = sellers.filter(
-    item =>
-      item.legal_name && item.legal_name.toLowerCase().includes(filterText.toLowerCase())
-  );
+  const filteredItems = sellers.filter(item => {
+    const search = filterText.toLowerCase();
+    return (
+      (item.legal_name && item.legal_name.toLowerCase().includes(search)) ||
+      (item.legal_identifier && item.legal_identifier.toLowerCase().includes(search)) ||
+      (item.address && item.address.toLowerCase().includes(search)) ||
+      (item.postal_code && item.postal_code.toLowerCase().includes(search)) ||
+      (item.city && item.city.toLowerCase().includes(search))
+    );
+  });
 
   return (
     <div className="container mt-4">
