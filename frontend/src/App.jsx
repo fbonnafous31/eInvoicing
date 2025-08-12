@@ -1,15 +1,19 @@
-import React from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import SellersList from './pages/sellers/SellersList' 
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import NavBar from './components/NavBar';
+import SellersList from './pages/sellers/SellersList';
 import NewSeller from './pages/sellers/NewSeller';
 
-export default function App() {
+function App() {
   return (
-    <BrowserRouter>
+    <Router>
+      <NavBar />
       <Routes>
         <Route path="/sellers" element={<SellersList />} />
         <Route path="/sellers/new" element={<NewSeller />} />
+        {/* autres routes */}
       </Routes>
-    </BrowserRouter>
-  )
+    </Router>
+  );
 }
+
+export default App;

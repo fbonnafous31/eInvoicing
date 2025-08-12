@@ -69,6 +69,7 @@ export default function SellersList() {
         columns={columns}
         data={filteredItems}
         pagination
+        paginationPerPage={20}
         highlightOnHover
         striped
         responsive

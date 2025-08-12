@@ -1,30 +1,54 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import SellerForm from '../sellers/SellerForm';
 
 export default function NewSeller() {
-  async function handleCreateSeller(data) {
+  const navigate = useNavigate();
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleCreateSeller = async (formData) => {
+    setIsSubmitting(true);
+    setErrorMessage('');
     try {
-      const response = await fetch('http://localhost:3000/api/sellers', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+      const response = await fetch("http://localhost:3000/api/sellers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
 
-      if (!response.ok) throw new Error('Erreur lors de la création du vendeur');
+      if (!response.ok) throw new Error("Erreur lors de la création du vendeur");
+      
+      setSuccessMessage("Vendeur créé avec succès ! 🎉");
 
-      const newSeller = await response.json();
-      console.log('Vendeur créé:', newSeller);
-      // Tu peux ajouter une redirection ou un message de succès ici
+      setTimeout(() => {
+        setSuccessMessage('');
+        navigate('/sellers');
+      }, 2000);
     } catch (error) {
-      console.error(error);
-      alert('Erreur lors de la création du vendeur');
+      setErrorMessage(error.message);
+    } finally {
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div>
       <h1>Créer un nouveau vendeur</h1>
-      <SellerForm onSubmit={handleCreateSeller} />
+
+      {successMessage && (
+        <div className="alert alert-success" role="alert">
+          {successMessage}
+        </div>
+      )}
+      {errorMessage && (
+        <div className="alert alert-danger" role="alert">
+          {errorMessage}
+        </div>
+      )}
+
+      <SellerForm onSubmit={handleCreateSeller} disabled={isSubmitting} />
     </div>
   );
 }
