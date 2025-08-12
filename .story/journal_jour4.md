@@ -6,10 +6,39 @@ Aujourd’hui, j’ai passé la journée à connecter concrètement le frontend 
 
 J’ai commencé par créer l’API REST permettant de récupérer la liste des vendeurs depuis ma base PostgreSQL.  
 J’ai structuré mon code avec un découpage clair :  
-- un modèle pour interroger la base,  
+- un modèle pour interroger la base, 
+  ```js
+  async function getAllSellers() {
+    const result = await pool.query(
+      `SELECT id, legal_name, legal_identifier, address, city, postal_code, country_code, 
+              vat_number, registration_info, share_capital, bank_details, created_at, updated_at 
+      FROM invoicing.sellers`
+    );
+    return result.rows;
+  } 
+  ```
 - un service pour orchestrer la logique métier,  
-- un contrôleur pour gérer les requêtes HTTP,  
+  ```js
+  async function listSellers() {
+    return await SellersModel.getAllSellers();
+  }
+  ```
+- un contrôleur pour gérer les requêtes HTTP,
+  ```js
+  async function getSellers(req, res) {
+    try {
+      const sellers = await SellersService.listSellers();
+      res.json(sellers);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
+  }  
+  ```
 - une route pour exposer le point d’entrée `/api/sellers`.  
+  ```js
+  router.get('/', SellersController.getSellers);
+  ```
 
 C’était l’occasion de me plonger dans Express, de gérer les erreurs, et de vérifier que mes données remontaient bien via l’API.  
 Après quelques ajustements (notamment le bon chemin des fichiers et la configuration CORS), le serveur tourne parfaitement sur le port 3000.

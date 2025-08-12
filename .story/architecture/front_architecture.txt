@@ -1,20 +1,15 @@
-.
+frontend
 ├── App.css
 ├── App.jsx
 ├── assets
 │   └── react.svg
 ├── components
-├── front_architecture.txt
 ├── index.css
 ├── main.jsx
 ├── pages
 │   ├── buyers
 │   ├── invoices
 │   └── sellers
-│       ├── NewSeller.jsx
-│       ├── SellerForm.jsx
-│       ├── SellersList.jsx
-│       └── SellersPage.jsx
-└── utils
+│── utils
 
 8 directories, 10 files

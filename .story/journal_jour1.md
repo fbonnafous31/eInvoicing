@@ -21,8 +21,57 @@ Mon environnement de développement est basé sur Ubuntu avec VSCode comme édit
 Aujourd'hui, j'ai :
 - Mis à jour Node.js vers la dernière version LTS grâce à NVM (Node Version Manager).
 - Installé Vite et initialisé le projet frontend.
+  
+```bash
+# Mise à jour de Node.js via NVM
+nvm install --lts
+nvm use --lts
+
+# Initialisation du projet frontend avec Vite + React
+npm create vite@latest frontend -- --template react
+cd frontend
+npm install
+
+# Initialisation du backend Node.js + Express
+mkdir backend && cd backend
+npm init -y
+npm install express pg cors dotenv
+
+# Structure des dossiers (extrait)
+mkdir src
+touch src/index.js
+```
+
 - Configuré les extensions VSCode nécessaires : ESLint, Prettier, PostgreSQL et REST Client.
 - Préparé la structure du projet avec deux dossiers séparés : **frontend** et **backend**.
+  
+**backend**
+```
+├── config
+│   └── db.js
+├── middlewares
+├── modules
+│   ├── buyers
+│   ├── invoices
+│   └── sellers
+└── utils
+```
+
+**frontend**
+```
+├── App.css
+├── App.jsx
+├── assets
+│   └── react.svg
+├── components
+├── index.css
+├── main.jsx
+├── pages
+│   ├── buyers
+│   ├── invoices
+│   └── sellers
+│── utils
+```
 
 ## Prochaines étapes
 

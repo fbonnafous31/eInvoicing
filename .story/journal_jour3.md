@@ -13,7 +13,7 @@ Dans ce contexte, garder une séparation technique entre front-end et back-end, 
 
 Voici la structure que j’ai choisie pour le projet :  
 
-![Architecture de la solution](images/project_architecture.png)
+![Architecture de la solution](images/jour3/project_architecture.png)
 
 Cela me permet de :  
 - conserver une séparation claire entre interface utilisateur et logique serveur,  

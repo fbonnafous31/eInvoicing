@@ -19,6 +19,40 @@ Ensuite, je me suis penché sur la partie visible, ce qui compte aussi beaucoup 
 Au départ, mon tableau de vendeurs était fonctionnel mais vraiment très basique, sans aucune mise en forme ni ergonomie.
 
 Pour y remédier, j’ai intégré la bibliothèque **react-data-table-component**, qui apporte tout ce qu’il faut pour un tableau élégant, avec des bordures, un tri facile, une recherche instantanée, une pagination et un rendu responsive.
+```js
+import DataTable from 'react-data-table-component';
+
+// SellerList.jsx
+<DataTable
+    columns={columns}
+    data={filteredItems}
+    pagination
+    paginationPerPage={20}
+    highlightOnHover
+    striped
+    responsive
+    dense
+    noHeader
+    customStyles={{
+        table: {
+        style: {
+            border: '1px solid #ddd',
+            borderRadius: '4px',
+        },
+        },
+        headRow: {
+        style: {
+            borderBottom: '2px solid #ccc',
+        },
+        },
+        rows: {
+        style: {
+            borderBottom: '1px solid #eee',
+        },
+        },
+    }}
+/>
+```
 
 Le résultat est fluide, simple, et surtout rapide à mettre en place. Cela m’a donné une belle base pour harmoniser le style de l’ensemble du site et améliorer l’expérience utilisateur dès les premières fonctionnalités.
 

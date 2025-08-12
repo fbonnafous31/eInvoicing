@@ -1,5 +1,5 @@
 .
-├── back_architecture.txt
+backend
 ├── config
 │   └── db.js
 ├── middlewares
