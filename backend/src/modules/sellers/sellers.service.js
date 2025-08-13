@@ -13,4 +13,18 @@ async function getSellerById(id) {
   return await SellersModel.getSellerById(id);
 }
 
-module.exports = { listSellers, createSeller, getSellerById };
+async function deleteSeller(id) {
+  return await SellersModel.removeSeller(id);
+}
+
+async function updateSellerData(id, sellerData) {
+  return await SellersModel.updateSeller(id, sellerData);
+}
+
+module.exports = {
+  listSellers,
+  createSeller,
+  getSellerById,
+  deleteSeller,
+  updateSellerData
+};

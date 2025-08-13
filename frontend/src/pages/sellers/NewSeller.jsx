@@ -34,21 +34,19 @@ export default function NewSeller() {
   };
 
   return (
-    <div>
+    <div className="container mt-4 d-flex flex-column align-items-center">
       <h1>Créer un nouveau vendeur</h1>
-
-      {successMessage && (
-        <div className="alert alert-success" role="alert">
-          {successMessage}
-        </div>
-      )}
-      {errorMessage && (
-        <div className="alert alert-danger" role="alert">
-          {errorMessage}
-        </div>
-      )}
-
-      <SellerForm onSubmit={handleCreateSeller} disabled={isSubmitting} />
-    </div>
+        {successMessage && (
+          <div className="alert alert-success" role="alert">
+            {successMessage}
+          </div>
+        )}
+        {errorMessage && (
+          <div className="alert alert-danger" role="alert">
+            {errorMessage}
+          </div>
+        )}
+        <SellerForm onSubmit={handleCreateSeller} disabled={isSubmitting} />
+    </div>    
   );
 }

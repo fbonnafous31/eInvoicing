@@ -37,8 +37,34 @@ async function getSellerById(req, res) {
   }
 }
 
+async function deleteSeller(req, res) {
+  const { id } = req.params;
+  try {
+    const deleted = await SellersService.deleteSeller(id);
+    res.json({ message: 'Seller deleted', seller: deleted });
+  } catch (err) {
+    console.error(err);
+    res.status(404).json({ error: err.message });
+  }
+}
+
+async function updateSeller(req, res) {
+  const { id } = req.params;
+  const sellerData = req.body;
+
+  try {
+    const updatedSeller = await SellersService.updateSellerData(id, sellerData);
+    res.json(updatedSeller);
+  } catch (err) {
+    console.error(err);
+    res.status(404).json({ error: err.message });
+  }
+}
+
 module.exports = {
   getSellers,
   createSeller,
-  getSellerById
+  getSellerById,
+  deleteSeller,
+  updateSeller
 };

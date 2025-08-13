@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import countries from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
+import { isValidSiret } from '../../utils/siret';
 
 countries.registerLocale(enLocale);
 
@@ -8,8 +9,6 @@ const countryCodes = Object.entries(countries.getNames("en")).map(([code, name])
   code,
   name,
 }));
-
-
 
 export default function SellerForm({ onSubmit, disabled = false, initialData = {} }) {
   const [formData, setFormData] = useState({
@@ -52,6 +51,12 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
   // Soumission du formulaire
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (formData.country_code === 'FR' && !isValidSiret(formData.legal_identifier)) {
+      alert("Le numéro SIRET n'est pas valide !");
+      return; 
+    }
+
     if (onSubmit) {
       onSubmit(formData);
     }
@@ -202,9 +207,11 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
       </div>
 
       {!disabled && (
-        <button type="submit" className="btn btn-primary">
-          Créer le vendeur
-        </button>
+        <div className="text-end mt-3">
+          <button type="submit" className="btn btn-primary">
+            Enregistrer
+          </button>
+        </div>
       )}
 
     </form>

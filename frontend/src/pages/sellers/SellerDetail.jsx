@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import SellerForm from './SellerForm';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 export default function SellerDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [seller, setSeller] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     fetch(`http://localhost:3000/api/sellers/${id}`)
@@ -20,12 +22,17 @@ export default function SellerDetail() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updatedData)
     })
-    .then(res => res.json())
-    .then(data => {
-      setSeller(data);
-      setIsEditing(false);
-    })
-    .catch(console.error);
+      .then(res => res.json())
+      .then(data => {
+        setSeller(data);           
+        setIsEditing(false);       
+        setSuccessMessage("Vendeur mis à jour avec succès ! 🎉"); 
+        setTimeout(() => {
+          setSuccessMessage('');
+          navigate('/sellers');
+        }, 2000);        
+      })
+      .catch(console.error);
   };
 
   if (!seller) return <p>Chargement...</p>;
@@ -33,6 +40,12 @@ export default function SellerDetail() {
   return (
     <div className="container mt-4">
       <h2>Détails du vendeur</h2>
+
+      {successMessage && (
+        <div className="alert alert-success" role="alert">
+          {successMessage}
+        </div>
+      )}
 
       <SellerForm
         onSubmit={isEditing ? handleUpdate : undefined}
@@ -50,10 +63,19 @@ export default function SellerDetail() {
             ✏️ Modifier
           </button>
         )}
-        <button className="btn btn-danger" onClick={() => alert('Suppression non implémentée')}>
+        <button
+          className="btn btn-danger ms-2"
+          onClick={() => {
+            if (window.confirm('Voulez-vous vraiment supprimer ce vendeur ?')) {
+              fetch(`http://localhost:3000/api/sellers/${id}`, { method: 'DELETE' })
+                .then(() => navigate('/sellers'))
+                .catch(console.error);
+            }
+          }}
+        >
           Supprimer
         </button>
       </div>
-    </div>   
+    </div>
   );
 }

@@ -52,8 +52,72 @@ async function getSellerById(id) {
   return result.rows[0]; 
 }
 
+async function removeSeller(id) {
+  const result = await pool.query(
+    'DELETE FROM invoicing.sellers WHERE id = $1 RETURNING *',
+    [id]
+  );
+  if (result.rowCount === 0) {
+    throw new Error('Seller not found');
+  }
+  return result.rows[0]; // tu peux retourner l'objet supprimé si besoin
+}
+
+async function updateSeller(id, sellerData) {
+  const {
+    legal_name,
+    legal_identifier,
+    address,
+    city,
+    postal_code,
+    country_code,
+    vat_number,
+    registration_info,
+    share_capital,
+    bank_details
+  } = sellerData;
+
+  const result = await pool.query(
+    `UPDATE invoicing.sellers
+     SET legal_name = $1,
+         legal_identifier = CASE WHEN country_code = 'FR' THEN REPLACE($2, ' ', '') ELSE $2 END,
+         address = $3,
+         city = $4,
+         postal_code = $5,
+         country_code = $6,
+         vat_number = $7,
+         registration_info = $8,
+         share_capital = $9,
+         bank_details = $10,
+         updated_at = NOW()
+     WHERE id = $11
+     RETURNING *`,
+    [
+      legal_name,
+      legal_identifier,
+      address,
+      city,
+      postal_code,
+      country_code,
+      vat_number,
+      registration_info,
+      share_capital === '' ? null : Number(share_capital),
+      bank_details,
+      id
+    ]
+  );
+
+  if (result.rowCount === 0) {
+    throw new Error('Seller not found');
+  }
+
+  return result.rows[0];
+}
+
 module.exports = {
-  getAllSellers,  
+  getAllSellers,
   insertSeller,
-  getSellerById
+  getSellerById,
+  removeSeller,
+  updateSeller
 };
