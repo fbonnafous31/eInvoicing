@@ -48,8 +48,8 @@ export default function NavBar() {
                 Clients
               </span>
               <ul className="dropdown-menu">
-                <li><NavLink className="dropdown-item" to="/buyers">Liste</NavLink></li>
-                <li><NavLink className="dropdown-item" to="/buyers/new">Créer</NavLink></li>
+                <li><NavLink className="dropdown-item" to="/clients">Liste</NavLink></li>
+                <li><NavLink className="dropdown-item" to="/clients/new">Créer</NavLink></li>
               </ul>
             </li>
 
