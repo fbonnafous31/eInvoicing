@@ -9,4 +9,8 @@ async function createSeller(sellerData) {
   return await SellersModel.insertSeller(sellerData);
 }
 
-module.exports = { listSellers, createSeller };
+async function getSellerById(id) {
+  return await SellersModel.getSellerById(id);
+}
+
+module.exports = { listSellers, createSeller, getSellerById };

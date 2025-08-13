@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import countries from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
 
@@ -9,7 +9,9 @@ const countryCodes = Object.entries(countries.getNames("en")).map(([code, name])
   name,
 }));
 
-export default function SellerForm({ onSubmit, disabled = false }) {
+
+
+export default function SellerForm({ onSubmit, disabled = false, initialData = {} }) {
   const [formData, setFormData] = useState({
     legal_name: '',
     legal_identifier: '',
@@ -22,6 +24,24 @@ export default function SellerForm({ onSubmit, disabled = false }) {
     share_capital: '',
     bank_details: '',
   });
+
+  // Mettre à jour le formulaire quand initialData change
+  useEffect(() => {
+    if (initialData && Object.keys(initialData).length > 0) {
+      setFormData({
+        legal_name: initialData.legal_name || '',
+        legal_identifier: initialData.legal_identifier || '',
+        address: initialData.address || '',
+        city: initialData.city || '',
+        postal_code: initialData.postal_code || '',
+        country_code: initialData.country_code || 'FR',
+        vat_number: initialData.vat_number || '',
+        registration_info: initialData.registration_info || '',
+        share_capital: initialData.share_capital || '',
+        bank_details: initialData.bank_details || '',
+      });
+    }
+  }, [initialData]);
 
   // Mise à jour des champs
   const handleChange = (e) => {
@@ -181,9 +201,12 @@ export default function SellerForm({ onSubmit, disabled = false }) {
         ></textarea>
       </div>
 
-      <button type="submit" className="btn btn-primary" disabled={disabled}>
-        {disabled ? "Création en cours..." : "Créer le vendeur"}
-      </button>
+      {!disabled && (
+        <button type="submit" className="btn btn-primary">
+          Créer le vendeur
+        </button>
+      )}
+
     </form>
   );
 }

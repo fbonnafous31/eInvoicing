@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import NavBar from './components/NavBar';
 import SellersList from './pages/sellers/SellersList';
 import NewSeller from './pages/sellers/NewSeller';
+import SellerDetail from './pages/sellers/SellerDetail';
 
 function App() {
   return (
@@ -10,7 +11,7 @@ function App() {
       <Routes>
         <Route path="/sellers" element={<SellersList />} />
         <Route path="/sellers/new" element={<NewSeller />} />
-        {/* autres routes */}
+        <Route path="/sellers/:id" element={<SellerDetail />} />
       </Routes>
     </Router>
   );

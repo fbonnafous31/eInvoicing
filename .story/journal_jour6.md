@@ -72,6 +72,7 @@ npm install i18n-iso-countries
 Pour améliorer l’expérience, j’ai intégré un système d’alerte qui affiche un message de succès après création d’un vendeur, avec une redirection automatique vers la liste des vendeurs après 2 secondes.
 
 En cas d’erreur, un message d’erreur s’affiche clairement, permettant à l’utilisateur de comprendre qu’il faut revoir sa saisie ou réessayer plus tard.
+
 ![Message de succès de création](images/jour6/success.png)
 
 ## Backend adapté et robustesse
@@ -81,6 +82,7 @@ J’ai aussi mis à jour la fonction backend pour accepter toutes les données s
 ## Style et cohérence visuelle
 
 Le formulaire reprend le style Bootstrap, identique à celui de la liste des vendeurs, pour garder une interface cohérente, claire et agréable.
+
 ![Création d'un nouveau vendeur](images/jour6/NewSeller.png)
 
 ## Travail sur la barre de navigation

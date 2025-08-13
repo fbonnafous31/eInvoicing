@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import DataTable from 'react-data-table-component';
+import { useNavigate } from 'react-router-dom';
 
 export default function SellersList() {
   const [sellers, setSellers] = useState([]);
   const [filterText, setFilterText] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch('http://localhost:3000/api/sellers')
@@ -39,6 +41,18 @@ export default function SellersList() {
       selector: row => row.city,
       sortable: true,
     },
+    {
+      name: 'Actions',
+      cell: row => (
+        <button
+          className="btn btn-sm"
+          onClick={() => navigate(`/sellers/${row.id}`)}
+        >
+          ✏️
+        </button>
+      ),
+      ignoreRowClick: true
+    },    
  ];
 
   const filteredItems = sellers.filter(item => {

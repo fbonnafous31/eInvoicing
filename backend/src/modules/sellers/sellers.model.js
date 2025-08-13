@@ -47,7 +47,13 @@ async function insertSeller(sellerData) {
   return result.rows[0];
 }
 
+async function getSellerById(id) {
+  const result = await pool.query('SELECT * FROM invoicing.sellers WHERE id = $1', [id]);
+  return result.rows[0]; 
+}
+
 module.exports = {
-  getAllSellers,
+  getAllSellers,  
   insertSeller,
+  getSellerById
 };
