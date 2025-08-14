@@ -9,6 +9,7 @@ CREATE TABLE invoicing.invoice_attachments (
 	invoice_id int4 NOT NULL,
 	file_name varchar(255) NOT NULL,
 	file_path text NOT NULL,
+	attachment_type text NOT NULL,
 	uploaded_at timestamp DEFAULT now() NULL,
 	CONSTRAINT invoice_attachments_pkey PRIMARY KEY (id),
 	CONSTRAINT invoice_attachments_type_check CHECK (((attachment_type)::text = ANY ((ARRAY['main'::character varying, 'additional'::character varying])::text[])))

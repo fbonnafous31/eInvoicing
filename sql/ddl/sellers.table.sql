@@ -2,7 +2,7 @@
 
 -- Drop table
 
--- DROP TABLE invoicing.sellers;
+DROP TABLE invoicing.sellers;
 
 CREATE TABLE invoicing.sellers ( id serial4 NOT NULL, legal_name varchar(255) NOT NULL, legal_identifier varchar(50) NULL, address text NULL, city varchar(100) NULL, postal_code varchar(20) NULL, country_code bpchar(2) DEFAULT 'FR'::bpchar NULL, vat_number varchar(50) NULL, registration_info text NULL, share_capital numeric(14, 2) NULL, bank_details text NULL, created_at timestamp DEFAULT now() NULL, updated_at timestamp DEFAULT now() NULL, CONSTRAINT sellers_pkey PRIMARY KEY (id));
 
