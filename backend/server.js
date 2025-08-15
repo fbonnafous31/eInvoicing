@@ -16,8 +16,14 @@ app.use('/api/sellers', sellersRoutes);
 app.use('/api/clients', clientsRoutes);
 app.use('/api/invoices', invoicesRoutes);
 
-// Lancement serveur
-app.listen(3000, () => {
-  console.log('Backend démarré sur http://localhost:3000');
+// Middleware global pour gérer les erreurs
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Erreur serveur' });
 });
 
+// Lancement serveur
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Backend démarré sur http://localhost:${PORT}`);
+});

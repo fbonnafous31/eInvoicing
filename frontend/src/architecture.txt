@@ -1,0 +1,35 @@
+.
+├── App.css
+├── App.jsx
+├── architecture.txt
+├── assets
+│   └── react.svg
+├── components
+│   ├── InvoiceForm.jsx
+│   ├── InvoiceHeader.jsx
+│   ├── InvoiceLines.jsx
+│   ├── NavBar.jsx
+│   ├── SupportingDocs.jsx
+│   └── TaxBases.jsx
+├── index.css
+├── main.jsx
+├── pages
+│   ├── clients
+│   │   ├── ClientDetail.jsx
+│   │   ├── ClientForm.jsx
+│   │   ├── ClientsList.jsx
+│   │   ├── ClientsPage.jsx
+│   │   └── NewClient.jsx
+│   ├── invoices
+│   │   └── InvoicesList.jsx
+│   └── sellers
+│       ├── NewSeller.jsx
+│       ├── SellerDetail.jsx
+│       ├── SellerForm.jsx
+│       ├── SellersList.jsx
+│       └── SellersPage.jsx
+└── utils
+    ├── formatters.js
+    └── siret.js
+
+8 directories, 25 files
