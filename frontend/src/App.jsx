@@ -11,6 +11,9 @@ import ClientsList from './pages/clients/ClientsList';
 import NewClient from './pages/clients/NewClient';
 import ClientDetail from './pages/clients/ClientDetail';
 
+// Invoices
+import InvoicesList from './pages/invoices/InvoicesList';
+
 function App() {
   return (
     <Router>
@@ -25,6 +28,9 @@ function App() {
         <Route path="/clients" element={<ClientsList />} />
         <Route path="/clients/new" element={<NewClient />} />
         <Route path="/clients/:id" element={<ClientDetail />} />
+
+        {/* Invoices */}
+        <Route path="/invoices" element={<InvoicesList />} />
       </Routes>
     </Router>
   );

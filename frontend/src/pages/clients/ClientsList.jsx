@@ -51,28 +51,27 @@ export default function ClientsList() {
           ✏️
         </button>
       ),
-      ignoreRowClick: true
+      ignoreRowClick: true,
+      allowOverflow: true,       
+      button: true,      
+      style: { textAlign: 'right' }
     },    
  ];
 
   const filteredItems = clients.filter(item => {
     const search = filterText.toLowerCase();
-    return (
-      (item.legal_name && item.legal_name.toLowerCase().includes(search)) ||
-      (item.legal_identifier && item.legal_identifier.toLowerCase().includes(search)) ||
-      (item.address && item.address.toLowerCase().includes(search)) ||
-      (item.postal_code && item.postal_code.toLowerCase().includes(search)) ||
-      (item.city && item.city.toLowerCase().includes(search))
+    return Object.values(item).some(
+      val => val && val.toString().toLowerCase().includes(search)
     );
   });
 
   return (
-    <div className="container mt-4">
+    <div className="container-fluid mt-4">
       <h2>Liste des clients</h2>
 
       <input
         type="text"
-        placeholder="Rechercher un client..."
+        placeholder="Rechercher un client"
         className="form-control mb-3"
         value={filterText}
         onChange={e => setFilterText(e.target.value)}

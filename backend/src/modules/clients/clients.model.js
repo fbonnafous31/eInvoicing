@@ -23,7 +23,9 @@ async function insertClient(clientData) {
   const result = await pool.query(
     `INSERT INTO invoicing.clients
       (legal_name, legal_identifier, address, city, postal_code, country_code, vat_number)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     VALUES ($1, 
+             CASE WHEN $6 = 'FR' THEN REPLACE($2, ' ', '') ELSE $2 END, 
+             $3, $4, $5, $6, $7)
      RETURNING *`,
     [
       legal_name,
