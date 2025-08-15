@@ -29,10 +29,14 @@
 
 ---
 
-## ✅ Fonctionnalités développées *(jusqu’au Jour 9)*
+## ✅ Fonctionnalités développées *(jusqu’au Jour 13)*
 
 - **CRUD Vendeurs** :  
   création, lecture (liste et fiche détail), modification, suppression.  
+- **CRUD Clients** :  
+  création, lecture (liste et fiche détail), modification, suppression.    
+- **CRUD Factures** :  
+  liste       
 - **Formulaires complets et validations** :  
   - tous les champs nécessaires  
   - validations frontend et backend  
@@ -48,6 +52,45 @@
 
 ## 📌 Prochaines étapes
 
-- Création d’une **entité Client** pour compléter le flux de facturation.  
-- Consolidation des validations et flux pour gérer correctement tous les acteurs (**Vendeur** + **Client**).  
-- Poursuite de l’amélioration **UX**, ajout d’écrans et d’interactions.
+- Création du formulaire de création d'une facture pas à pas, 
+- La facture estcomposé de 4 objets :
+  - Entête 
+  - Lignes de factures
+  - Assiettes de TVA
+  - Justificatifs de facture
+- Imaginer le design, définir les meilleurs approches UX (une seule grille de formaulaires avec 4 blocs, et des blocs multilignes pour les lignes et les assiettes avec une icône +, pour ajouter une ligne) ... à définir avec l'IA
+
+
+project/
+│
+├── frontend/
+│ ├── public/
+│ ├── src/
+│ │ ├── components/
+│ │ ├── pages/
+│ │ ├── modules/
+│ │ │ ├── sellers/
+│ │ │ ├── buyers/
+│ │ │ └── invoices/
+│ │ └── utils/
+│ └── package.json
+│
+├── backend/
+│ ├── src/
+│ │ ├── config/
+│ │ ├── modules/
+│ │ │ ├── sellers/
+│ │ │ │ ├── sellers.model.js
+│ │ │ │ ├── sellers.controller.js
+│ │ │ │ ├── sellers.routes.js
+│ │ │ │ └── sellers.service.js
+│ │ │ ├── buyers/
+│ │ │ └── invoices/
+│ │ ├── middlewares/
+│ │ └── utils/
+│ ├── package.json
+│ └── server.js
+│
+├── docs/
+├── scripts/
+└── README.md

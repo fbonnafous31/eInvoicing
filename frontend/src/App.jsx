@@ -13,6 +13,7 @@ import ClientDetail from './pages/clients/ClientDetail';
 
 // Invoices
 import InvoicesList from './pages/invoices/InvoicesList';
+import InvoiceForm from './components/invoices/InvoiceForm'; 
 
 function App() {
   return (
@@ -31,9 +32,12 @@ function App() {
 
         {/* Invoices */}
         <Route path="/invoices" element={<InvoicesList />} />
+        <Route path="/invoices/new" element={<InvoiceForm />} /> 
+        
       </Routes>
     </Router>
   );
 }
 
 export default App;
+

@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
+    "axios": "^1.11.0",
     "bootstrap": "^5.3.7",
     "i18n-iso-countries": "^7.14.0",
     "react": "^19.1.1",
