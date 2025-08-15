@@ -15,6 +15,9 @@ function Layout({ children, fluid = false }) {
   );
 }
 
+// Invoices
+import InvoicesList from './pages/invoices/InvoicesList';
+
 function App() {
   return (
     <Router>
@@ -27,6 +30,7 @@ function App() {
             element.type.name === "SellersList" ||
             element.type.name === "InvoicesList";
 
+<<<<<<< HEAD
           return (
             <Route
               key={path}
@@ -35,6 +39,15 @@ function App() {
             />
           );
         })}
+=======
+        {/* Clients */}
+        <Route path="/clients" element={<ClientsList />} />
+        <Route path="/clients/new" element={<NewClient />} />
+        <Route path="/clients/:id" element={<ClientDetail />} />
+
+        {/* Invoices */}
+        <Route path="/invoices" element={<InvoicesList />} />
+>>>>>>> 5f08e77 (Jour 13 : liste des factures frontend, helpers et tooltips, stratégie de travail avec ChatGPT)
       </Routes>
     </Router>
   );

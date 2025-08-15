@@ -1,4 +1,5 @@
 const InvoicesService = require('./invoices.service');
+<<<<<<< HEAD
 const { getInvoiceById } = require('./invoices.model');
 const { generateInvoicePdf, generateInvoicePdfBuffer: generatePdfUtil } = require('../../utils/invoice-pdf/generateInvoicePdf');
 const path = require("path");
@@ -7,11 +8,16 @@ const path = require("path");
  * Liste toutes les factures
  */
 async function listInvoices(req, res) {
+=======
+
+async function getInvoices(req, res) {
+>>>>>>> 5f08e77 (Jour 13 : liste des factures frontend, helpers et tooltips, stratégie de travail avec ChatGPT)
   try {
     const invoices = await InvoicesService.listInvoices();
     res.json(invoices);
   } catch (err) {
     console.error(err);
+<<<<<<< HEAD
     res.status(500).json({ message: 'Erreur serveur' });
   }
 }
@@ -232,4 +238,12 @@ module.exports = {
   deleteInvoice,
   createInvoicePdf,
   generateInvoicePdfBuffer
+=======
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+}
+
+module.exports = {
+  getInvoices,
+>>>>>>> 5f08e77 (Jour 13 : liste des factures frontend, helpers et tooltips, stratégie de travail avec ChatGPT)
 };

@@ -37,6 +37,7 @@ async function insertSeller(sellerData) {
 
   const result = await pool.query(
     `INSERT INTO invoicing.sellers
+<<<<<<< HEAD
       (legal_name, legal_identifier, address, city, postal_code, country_code, 
        vat_number, registration_info, share_capital, iban, bic, contact_email, phone_number, 
        company_type, payment_method, payment_terms, additional_1, additional_2)
@@ -45,6 +46,12 @@ async function insertSeller(sellerData) {
        CASE WHEN $6 = 'FR' THEN REPLACE($2, ' ', '') ELSE $2 END,
        $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
      )
+=======
+      (legal_name, legal_identifier, address, city, postal_code, country_code, vat_number, registration_info, share_capital, bank_details)
+     VALUES ( $1, 
+              CASE WHEN $6 = 'FR' THEN REPLACE($2, ' ', '') ELSE $2 END, 
+              $3, $4, $5, $6, $7, $8, $9, $10)
+>>>>>>> 5f08e77 (Jour 13 : liste des factures frontend, helpers et tooltips, stratégie de travail avec ChatGPT)
      RETURNING *`,
     [
       legal_name,

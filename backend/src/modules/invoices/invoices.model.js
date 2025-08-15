@@ -1,4 +1,5 @@
 const pool = require('../../config/db');
+<<<<<<< HEAD
 const path = require('path');
 const fs = require('fs');
 const { getSellerById } = require('../sellers/sellers.model'); 
@@ -450,4 +451,18 @@ module.exports = {
   createInvoice,
   deleteInvoice,
   updateInvoice
+=======
+
+async function getAllInvoices() {
+  const result = await pool.query(
+    `SELECT invoice_number, issue_date, contract_number, purchase_order_number, seller_legal_name, client_legal_name, 
+            subtotal, total_taxes, total, payment_terms, status, created_at, updated_at
+     FROM invoicing.invoices;`
+  );
+  return result.rows;
+}
+
+module.exports = {
+  getAllInvoices
+>>>>>>> 5f08e77 (Jour 13 : liste des factures frontend, helpers et tooltips, stratégie de travail avec ChatGPT)
 };
