@@ -128,7 +128,7 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
     }
 
     await client.query('COMMIT');
-    return getInvoiceById(invoiceId);
+    return await getInvoiceById(invoiceId); // ✅ correction : ajout du await
   } catch (err) {
     await client.query('ROLLBACK');
     throw err;
@@ -136,7 +136,6 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
     client.release();
   }
 }
-
 
 /**
  * Supprime une facture par ID
