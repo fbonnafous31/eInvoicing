@@ -21,8 +21,17 @@ export default function TaxBases({ data, onChange }) {
   return (
     <div className="card p-3 mb-3">
       <h5>Assiettes de TVA</h5>
+
+      {/* Intitulés des colonnes */}
+      <div className="d-flex gap-2 mb-2 fw-bold">
+        <div style={{ flex: 2 }}>TVA (%)</div>
+        <div style={{ flex: 2 }}>Base</div>
+        <div style={{ flex: 2 }}>Montant TVA</div>
+        <div style={{ width: '50px' }}></div>
+      </div>
+
       {data.map((tax, index) => (
-        <div key={index} className="mb-2 d-flex gap-2 align-items-center">
+        <div key={index} className="mb-2 d-flex gap-2 align-items-center w-100">
           <input 
             type="number" 
             name="vat_rate" 
@@ -30,6 +39,7 @@ export default function TaxBases({ data, onChange }) {
             value={tax.vat_rate} 
             onChange={e => handleTaxChange(index, e)} 
             className="form-control" 
+            style={{ flex: 2 }}
           />
           <input 
             type="number" 
@@ -38,17 +48,20 @@ export default function TaxBases({ data, onChange }) {
             value={tax.base_amount} 
             onChange={e => handleTaxChange(index, e)} 
             className="form-control" 
+            style={{ flex: 2 }}
           />
           <input 
             type="number" 
             placeholder="Montant TVA" 
             value={tax.tax_amount?.toFixed(2) || 0} 
             className="form-control" 
+            style={{ flex: 2 }}
             readOnly 
           />
-          <button type="button" className="btn btn-danger" onClick={() => removeTax(index)}>-</button>
+          <button type="button" className="btn btn-danger" onClick={() => removeTax(index)}>−</button>
         </div>
       ))}
+
       <button type="button" className="btn btn-secondary mt-2" onClick={addTax}>Ajouter une assiette</button>
     </div>
   );

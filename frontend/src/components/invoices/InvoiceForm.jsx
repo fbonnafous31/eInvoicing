@@ -12,7 +12,7 @@ export default function InvoiceForm() {
     header: {},
     lines: [],
     taxes: [],
-    attachments: []
+    attachments: [] // tableau de File objects
   });
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -45,12 +45,25 @@ export default function InvoiceForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      await axios.post("/api/invoices", {
-        invoice: { ...invoiceData.header, subtotal, total_taxes: totalTaxes, total },
-        lines: linesWithTotals,
-        taxes: invoiceData.taxes,
-        attachments: invoiceData.attachments,
+      const formData = new FormData();
+
+      // Ajouter les données de la facture
+      formData.append(
+        "invoice",
+        JSON.stringify({ ...invoiceData.header, subtotal, total_taxes: totalTaxes, total })
+      );
+      formData.append("lines", JSON.stringify(linesWithTotals));
+      formData.append("taxes", JSON.stringify(invoiceData.taxes));
+
+      // Ajouter les fichiers uploadés
+      invoiceData.attachments.forEach((file) => {
+        formData.append("attachments", file); // doit correspondre au name du multer.array
+      });
+
+      await axios.post("/api/invoices", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       setSuccessMessage("Facture créée avec succès ! 🎉");
@@ -70,10 +83,22 @@ export default function InvoiceForm() {
         <div className="alert alert-success">{successMessage}</div>
       )}
 
-      <InvoiceHeader data={invoiceData.header} onChange={(val) => handleChange("header", val)} />
-      <InvoiceLines data={linesWithTotals} onChange={(val) => handleChange("lines", val)} />
-      <TaxBases data={invoiceData.taxes} onChange={(val) => handleChange("taxes", val)} />
-      <SupportingDocs data={invoiceData.attachments} onChange={(val) => handleChange("attachments", val)} />
+      <InvoiceHeader
+        data={invoiceData.header}
+        onChange={(val) => handleChange("header", val)}
+      />
+      <InvoiceLines
+        data={linesWithTotals}
+        onChange={(val) => handleChange("lines", val)}
+      />
+      <TaxBases
+        data={invoiceData.taxes}
+        onChange={(val) => handleChange("taxes", val)}
+      />
+      <SupportingDocs
+        data={invoiceData.attachments}
+        onChange={(val) => handleChange("attachments", val)}
+      />
 
       <div className="card p-3 mb-3">
         <h5>Récapitulatif</h5>
