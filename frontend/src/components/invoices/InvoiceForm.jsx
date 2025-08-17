@@ -82,7 +82,7 @@ export default function InvoiceForm() {
         <p>Total TTC : {total.toFixed(2)} €</p>
       </div>
 
-      <div className="d-flex justify-content-end mt-3">
+      <div className="d-flex justify-content-end mt-3 mb-3 me-3">
         <button type="submit" className="btn btn-primary">
           Créer la facture
         </button>
