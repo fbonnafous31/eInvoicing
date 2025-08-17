@@ -79,6 +79,20 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
       invoice.client_legal_name = clientRes.rows[0]?.legal_name || null;
     }
 
+    // --- Valider invoice_number fourni par l'utilisateur ---
+    if (!invoice.invoice_number) {
+      throw new Error('invoice_number obligatoire');
+    }
+    invoice.invoice_number = invoice.invoice_number.trim().slice(0, 20);
+
+    const existing = await client.query(
+      'SELECT id FROM invoicing.invoices WHERE invoice_number = $1',
+      [invoice.invoice_number]
+    );
+    if (existing.rows.length > 0) {
+      throw new Error(`invoice_number "${invoice.invoice_number}" déjà utilisé`);
+    }
+
     // --- Supprimer le champ id si présent pour éviter les doublons ---
     const invoiceDataToInsert = { ...invoice };
     delete invoiceDataToInsert.id;
@@ -128,7 +142,7 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
     }
 
     await client.query('COMMIT');
-    return await getInvoiceById(invoiceId); // ✅ correction : ajout du await
+    return await getInvoiceById(invoiceId);
   } catch (err) {
     await client.query('ROLLBACK');
     throw err;
