@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import DataTable from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
+import Breadcrumb from '../../components/Breadcrumb'; 
+import { fetchClients } from '../../services/clients'; // <- utilisation du service
 
 export default function ClientsList() {
   const [clients, setClients] = useState([]);
@@ -8,8 +10,7 @@ export default function ClientsList() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/clients')
-      .then(res => res.json())
+    fetchClients()
       .then(data => setClients(data))
       .catch(console.error);
   }, []);
@@ -56,7 +57,7 @@ export default function ClientsList() {
       button: true,      
       style: { textAlign: 'right' }
     },    
- ];
+  ];
 
   const filteredItems = clients.filter(item => {
     const search = filterText.toLowerCase();
@@ -65,9 +66,15 @@ export default function ClientsList() {
     );
   });
 
+  const breadcrumbItems = [
+    { label: 'Accueil', path: '/' },
+    { label: 'Clients', path: '/clients' },
+  ];
+
   return (
     <div className="container-fluid mt-4">
-      <h2>Liste des clients</h2>
+      <h1 className="visually-hidden">Liste des clients</h1>
+      <Breadcrumb items={breadcrumbItems} />
 
       <input
         type="text"
@@ -89,22 +96,9 @@ export default function ClientsList() {
         dense
         noHeader
         customStyles={{
-          table: {
-            style: {
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-            },
-          },
-          headRow: {
-            style: {
-              borderBottom: '2px solid #ccc',
-            },
-          },
-          rows: {
-            style: {
-              borderBottom: '1px solid #eee',
-            },
-          },
+          table: { style: { border: '1px solid #ddd', borderRadius: '4px' } },
+          headRow: { style: { borderBottom: '2px solid #ccc' } },
+          rows: { style: { borderBottom: '1px solid #eee' } },
         }}
       />
     </div>
