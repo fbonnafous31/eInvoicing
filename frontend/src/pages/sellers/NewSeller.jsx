@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SellerForm from '../sellers/SellerForm';
+import Breadcrumb from '../../components/Breadcrumb';
+import { createSeller } from '../../services/sellers'; // <-- import du service
 
 export default function NewSeller() {
   const navigate = useNavigate();
@@ -12,14 +14,8 @@ export default function NewSeller() {
     setIsSubmitting(true);
     setErrorMessage('');
     try {
-      const response = await fetch("http://localhost:3000/api/sellers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      await createSeller(formData); // <-- utilisation du service
 
-      if (!response.ok) throw new Error("Erreur lors de la création du vendeur");
-      
       setSuccessMessage("Vendeur créé avec succès ! 🎉");
 
       setTimeout(() => {
@@ -27,26 +23,40 @@ export default function NewSeller() {
         navigate('/sellers');
       }, 2000);
     } catch (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(error.message || "Erreur lors de la création du vendeur");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const breadcrumbItems = [
+    { label: 'Accueil', path: '/' },
+    { label: 'Vendeurs', path: '/sellers' },
+    { label: 'Nouveau vendeur', path: '/sellers/new' },
+  ];
+
   return (
-    <div className="container mt-4 d-flex flex-column align-items-center">
-      <h1>Créer un nouveau vendeur</h1>
-        {successMessage && (
-          <div className="alert alert-success" role="alert">
-            {successMessage}
-          </div>
-        )}
-        {errorMessage && (
-          <div className="alert alert-danger" role="alert">
-            {errorMessage}
-          </div>
-        )}
-        <SellerForm onSubmit={handleCreateSeller} disabled={isSubmitting} />
-    </div>    
+    <div className="container mt-4">
+      {/* H1 invisible pour SEO/accessibilité */}
+      <h1 className="visually-hidden">Créer un nouveau vendeur</h1>
+
+      {/* Breadcrumb */}
+      <Breadcrumb items={breadcrumbItems} />
+
+      {/* Messages */}
+      {successMessage && (
+        <div className="alert alert-success" role="alert">
+          {successMessage}
+        </div>
+      )}
+      {errorMessage && (
+        <div className="alert alert-danger" role="alert">
+          {errorMessage}
+        </div>
+      )}
+
+      {/* Formulaire */}
+      <SellerForm onSubmit={handleCreateSeller} disabled={isSubmitting} />
+    </div>
   );
 }

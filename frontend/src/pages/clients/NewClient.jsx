@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ClientForm from '../clients/ClientForm';
+import Breadcrumb from '../../components/Breadcrumb';
+import { createClient } from '../../services/clients'; // <-- import du service
 
 export default function NewClient() {
   const navigate = useNavigate();
@@ -12,14 +14,8 @@ export default function NewClient() {
     setIsSubmitting(true);
     setErrorMessage('');
     try {
-      const response = await fetch("http://localhost:3000/api/clients", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      await createClient(formData); // <-- appel au service
 
-      if (!response.ok) throw new Error("Erreur lors de la création du client");
-      
       setSuccessMessage("Client créé avec succès ! 🎉");
 
       setTimeout(() => {
@@ -33,20 +29,33 @@ export default function NewClient() {
     }
   };
 
+  const breadcrumbItems = [
+    { label: 'Accueil', path: '/' },
+    { label: 'Clients', path: '/clients' },
+    { label: 'Nouveau client', path: '/clients/new' },
+  ];
+
   return (
-    <div className="container mt-4 d-flex flex-column align-items-center">
-      <h1>Créer un nouveau client</h1>
-        {successMessage && (
-          <div className="alert alert-success" role="alert">
-            {successMessage}
-          </div>
-        )}
-        {errorMessage && (
-          <div className="alert alert-danger" role="alert">
-            {errorMessage}
-          </div>
-        )}
-        <ClientForm onSubmit={handleCreateClient} disabled={isSubmitting} />
-    </div>    
+    <div className="container mt-4">
+      {/* H1 invisible pour SEO/accessibilité */}
+      <h1 className="visually-hidden">Créer un nouveau client</h1>
+
+      {/* Breadcrumb */}
+      <Breadcrumb items={breadcrumbItems} />
+
+      {successMessage && (
+        <div className="alert alert-success" role="alert">
+          {successMessage}
+        </div>
+      )}
+      {errorMessage && (
+        <div className="alert alert-danger" role="alert">
+          {errorMessage}
+        </div>
+      )}
+
+      {/* Formulaire */}
+      <ClientForm onSubmit={handleCreateClient} disabled={isSubmitting} />
+    </div>
   );
 }

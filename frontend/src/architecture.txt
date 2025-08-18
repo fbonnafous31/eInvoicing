@@ -5,12 +5,15 @@
 ├── assets
 │   └── react.svg
 ├── components
-│   ├── InvoiceForm.jsx
-│   ├── InvoiceHeader.jsx
-│   ├── InvoiceLines.jsx
-│   ├── NavBar.jsx
-│   ├── SupportingDocs.jsx
-│   └── TaxBases.jsx
+│   ├── invoices
+│   │   ├── InvoiceForm.jsx
+│   │   ├── InvoiceHeader.jsx
+│   │   ├── InvoiceLines.jsx
+│   │   ├── SupportingDocs.jsx
+│   │   └── TaxBases.jsx
+│   └── NavBar.jsx
+├── constants
+│   └── paymentTerms.js
 ├── index.css
 ├── main.jsx
 ├── pages
@@ -32,4 +35,4 @@
     ├── formatters.js
     └── siret.js
 
-8 directories, 25 files
+10 directories, 26 files
