@@ -25,7 +25,7 @@ export default function TaxBases({ data, onChange }) {
       {/* Intitulés des colonnes */}
       <div className="d-flex gap-2 mb-2 fw-bold">
         <div style={{ flex: 2 }}>TVA (%)</div>
-        <div style={{ flex: 2 }}>Base</div>
+        <div style={{ flex: 2 }}>Base HT</div>
         <div style={{ flex: 2 }}>Montant TVA</div>
         <div style={{ width: '50px' }}></div>
       </div>
@@ -44,7 +44,7 @@ export default function TaxBases({ data, onChange }) {
           <input 
             type="number" 
             name="base_amount" 
-            placeholder="Base" 
+            placeholder="Base"  
             value={tax.base_amount} 
             onChange={e => handleTaxChange(index, e)} 
             className="form-control" 

@@ -5,9 +5,7 @@ const pool = require('../../config/db');
  */
 async function getAllInvoices() {
   const invoicesResult = await pool.query(
-    `SELECT *
-     FROM invoicing.invoices
-     ORDER BY created_at DESC`
+    `SELECT * FROM invoicing.invoices ORDER BY created_at DESC`
   );
 
   const invoices = [];
@@ -79,21 +77,45 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
       invoice.client_legal_name = clientRes.rows[0]?.legal_name || null;
     }
 
-    // --- Valider invoice_number fourni par l'utilisateur ---
+    // --- Valider invoice_number ---
     if (!invoice.invoice_number) {
       throw new Error('invoice_number obligatoire');
     }
     invoice.invoice_number = invoice.invoice_number.trim().slice(0, 20);
 
-    const existing = await client.query(
-      'SELECT id FROM invoicing.invoices WHERE invoice_number = $1',
-      [invoice.invoice_number]
-    );
-    if (existing.rows.length > 0) {
-      throw new Error(`invoice_number "${invoice.invoice_number}" déjà utilisé`);
+    // --- Calcul / validation fiscal_year ---
+    if (!invoice.fiscal_year) {
+      invoice.fiscal_year = new Date(invoice.issue_date).getFullYear();
     }
 
-    // --- Supprimer le champ id si présent pour éviter les doublons ---
+    const issueYear = new Date(invoice.issue_date).getFullYear();
+    const fy = invoice.fiscal_year;
+    if (fy < issueYear - 1 || fy > issueYear + 1) {
+      throw new Error(
+        `Exercice fiscal invalide : ${fy} pour une date d'émission ${invoice.issue_date}`
+      );
+    }
+
+    // --- Vérifier unicité seller_id + fiscal_year + invoice_number ---
+    const existing = await client.query(
+      `SELECT id 
+       FROM invoicing.invoices 
+       WHERE seller_id = $1 AND fiscal_year = $2 AND invoice_number = $3`,
+      [invoice.seller_id, invoice.fiscal_year, invoice.invoice_number]
+    );
+    if (existing.rows.length > 0) {
+      throw new Error(
+        `Une facture avec le même numéro ${invoice.invoice_number} pour ce vendeur et cet exercice existe déjà`
+      );
+    }
+
+    // --- Vérification des attachments ---
+    const mainAttachments = attachments.filter(a => a.attachment_type === 'main');
+    if (mainAttachments.length !== 1) {
+      throw new Error('Une facture doit avoir un justificatif principal.');
+    }
+
+    // --- Supprimer id pour éviter doublons ---
     const invoiceDataToInsert = { ...invoice };
     delete invoiceDataToInsert.id;
 
