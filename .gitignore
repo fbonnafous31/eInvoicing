@@ -42,3 +42,6 @@ node_modules/.vite/
 
 # VSCode settings
 .vscode/
+
+#uploads
+backend/src/uploads/invoices/*

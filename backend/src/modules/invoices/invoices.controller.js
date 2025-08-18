@@ -9,7 +9,7 @@ async function listInvoices(req, res) {
     res.json(invoices);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Erreur serveur' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 }
 
@@ -19,11 +19,11 @@ async function listInvoices(req, res) {
 async function getInvoice(req, res) {
   try {
     const invoice = await InvoicesService.getInvoice(req.params.id);
-    if (!invoice) return res.status(404).json({ error: 'Facture non trouvée' });
+    if (!invoice) return res.status(404).json({ message: 'Facture non trouvée' });
     res.json(invoice);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Erreur serveur' });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 }
 
@@ -32,15 +32,24 @@ async function getInvoice(req, res) {
  */
 async function createInvoice(req, res) {
   try {
-    // Les fichiers uploadés via multer
-    const attachments = (req.files || []).map(file => ({
+    let attachmentsMeta = [];
+    try {
+      attachmentsMeta = JSON.parse(req.body.attachments_meta || '[]');
+    } catch {}
+
+    const attachments = (req.files || []).map((file, i) => ({
       file_name: file.originalname,
-      file_path: file.path, // chemin réel sur le serveur
-      attachment_type: 'additional' // ou 'main' selon ton frontend
+      file_path: file.path,
+      attachment_type: attachmentsMeta[i]?.attachment_type || 'additional'
     }));
 
-    // Récupère les données de la facture, lines et taxes depuis le body
-    // On suppose que ce sont des JSON stringify côté frontend
+    // --- Validation principale des justificatifs ---
+    const mainCount = attachments.filter(f => f.attachment_type === 'main').length;
+    if (mainCount !== 1) {
+      return res.status(400).json({ message: "Une facture doit avoir un justificatif principal." });
+    }
+
+    // Récupération des autres données
     const invoiceData = JSON.parse(req.body.invoice || '{}');
     const lines = JSON.parse(req.body.lines || '[]');
     const taxes = JSON.parse(req.body.taxes || '[]');
@@ -55,7 +64,15 @@ async function createInvoice(req, res) {
     res.status(201).json(newInvoice);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Erreur lors de la création de la facture' });
+
+    if (err.message.includes("déjà utilisé")) {
+      return res.status(409).json({ message: err.message });
+    }
+    if (err.message.includes("exercice")) {
+      return res.status(400).json({ message: err.message });
+    }
+
+    res.status(500).json({ message: err.message || 'Erreur interne serveur' });
   }
 }
 
@@ -65,11 +82,11 @@ async function createInvoice(req, res) {
 async function deleteInvoice(req, res) {
   try {
     const deleted = await InvoicesService.deleteInvoice(req.params.id);
-    if (!deleted) return res.status(404).json({ error: 'Facture non trouvée' });
+    if (!deleted) return res.status(404).json({ message: 'Facture non trouvée' });
     res.status(204).send();
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Erreur lors de la suppression de la facture' });
+    res.status(500).json({ message: 'Erreur lors de la suppression de la facture' });
   }
 }
 

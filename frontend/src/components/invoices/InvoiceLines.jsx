@@ -38,7 +38,6 @@ export default function InvoiceLines({ data, onChange }) {
                 value={line.description}
                 onChange={(e) => handleLineChange(index, e)}
                 className="form-control"
-                placeholder="Ex: Prestation de service"
               />
             </div>
 
