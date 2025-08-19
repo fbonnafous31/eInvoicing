@@ -2,14 +2,13 @@ import React, { useEffect, useState } from 'react';
 import DataTable from 'react-data-table-component';
 import { useNavigate } from 'react-router-dom';
 import Breadcrumb from '../../components/Breadcrumb'; 
-import { fetchSellers } from '../../services/sellers'; // <-- import du service
+import { fetchSellers } from '../../services/sellers';
 
 export default function SellersList() {
   const [sellers, setSellers] = useState([]);
   const [filterText, setFilterText] = useState('');
   const navigate = useNavigate();
 
-  // Utilisation du service
   useEffect(() => {
     fetchSellers()
       .then(setSellers)
@@ -20,24 +19,45 @@ export default function SellersList() {
   }, []);
 
   const columns = [
-    { name: 'Identifiant', selector: row => row.legal_identifier, sortable: true, width: '150px' },
-    { name: 'Nom légal', selector: row => row.legal_name, sortable: true },
-    { name: 'Adresse', selector: row => row.address, sortable: true },
-    { name: 'Code postal', selector: row => row.postal_code, sortable: true },
-    { name: 'Ville', selector: row => row.city, sortable: true },
     {
       name: 'Actions',
       cell: row => (
-        <button className="btn btn-sm" onClick={() => navigate(`/sellers/${row.id}`)}>
+        <button
+          className="btn btn-sm"
+          onClick={() => navigate(`/sellers/${row.id}`)}
+        >
           ✏️
         </button>
       ),
       ignoreRowClick: true,
-      allowOverflow: true,
       button: true,
-      style: { textAlign: 'right' }
+      width: '50px',
     },
+    { name: 'Identifiant', selector: row => row.legal_identifier, sortable: true, width: '150px' },
+    { name: 'Nom légal', selector: row => row.legal_name, sortable: true },
+    { name: 'Adresse', selector: row => row.address, sortable: true },
+    { name: 'Code postal', selector: row => row.postal_code, sortable: true, width: '100px' },
+    { name: 'Ville', selector: row => row.city, sortable: true },
+    { name: 'Pays', selector: row => row.country_code, sortable: true, width: '60px' },
+    { name: 'Email', selector: row => row.contact_email, sortable: true },
+    { name: 'Téléphone', selector: row => row.phone_number || '', sortable: true },
   ];
+
+  // Panneau extensible affichant seulement les dates d'audit
+  const ExpandedComponent = ({ data }) => (
+    <div className="p-2 bg-light border rounded">
+      <p className="mb-1">        
+        <span className="text-muted small">
+          Créé le {data.created_at ? new Date(data.created_at).toLocaleDateString() : '—'}
+        </span>
+      </p>
+      <p className="mb-0">
+        <span className="text-muted small">
+          Mis à jour le {data.updated_at ? new Date(data.updated_at).toLocaleDateString() : '—'}
+        </span>
+      </p>
+    </div>
+  );
 
   const filteredItems = sellers.filter(item => {
     const search = filterText.toLowerCase();
@@ -53,13 +73,10 @@ export default function SellersList() {
 
   return (
     <div className="container-fluid mt-4">
-      {/* H1 invisible pour SEO/accessibilité */}
       <h1 className="visually-hidden">Liste des vendeurs</h1>
 
-      {/* Breadcrumb */}
       <Breadcrumb items={breadcrumbItems} />
 
-      {/* Filtre de recherche */}
       <input
         type="text"
         placeholder="Rechercher un vendeur"
@@ -69,7 +86,6 @@ export default function SellersList() {
         style={{ maxWidth: '300px' }}
       />
 
-      {/* Tableau */}
       <DataTable
         columns={columns}
         data={filteredItems}
@@ -80,10 +96,16 @@ export default function SellersList() {
         responsive
         dense
         noHeader
+        fixedHeader
+        fixedHeaderScrollHeight="70vh"
+        expandableRows
+        expandableRowsComponent={ExpandedComponent}
+        expandOnRowClicked
         customStyles={{
           table: { style: { border: '1px solid #ddd', borderRadius: '4px' } },
-          headRow: { style: { borderBottom: '2px solid #ccc' } },
-          rows: { style: { borderBottom: '1px solid #eee' } },
+          headRow: { style: { borderBottom: '2px solid #ccc', fontWeight: 'bold' } },
+          rows: { style: { borderBottom: '1px solid #eee', minHeight: '50px' } },
+          cells: { style: { whiteSpace: 'normal' } },
         }}
       />
     </div>

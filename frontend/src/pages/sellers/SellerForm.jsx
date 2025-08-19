@@ -1,14 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import countries from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
-import { isValidSiret } from '../../utils/siret';
+import InputField from '../../components/form/InputField';
+import TextAreaField from '../../components/form/TextAreaField';
+import { validateSeller } from '../../utils/validators';
 
 countries.registerLocale(enLocale);
 
-const countryCodes = Object.entries(countries.getNames("en")).map(([code, name]) => ({
-  code,
-  name,
-}));
+const countryCodes = Object.entries(countries.getNames("en")).map(([code, name]) => ({ code, name }));
+
+const companyTypes = [
+  { value: 'MICRO', label: 'Micro-entreprise' },
+  { value: 'EI', label: 'Entreprise Individuelle' },
+  { value: 'EIRL', label: 'EIRL' },
+  { value: 'SAS', label: 'SAS' },
+  { value: 'SASU', label: 'SASU' },
+  { value: 'SARL', label: 'SARL' },
+  { value: 'EURL', label: 'EURL' },
+  { value: 'SA', label: 'SA' },
+  { value: 'SNC', label: 'SNC' },
+  { value: 'SC', label: 'Société Civile' },
+  { value: 'SCOP', label: 'SCOP' },
+  { value: 'Association', label: 'Association' },
+  { value: 'Autre', label: 'Autre' },
+];
 
 export default function SellerForm({ onSubmit, disabled = false, initialData = {} }) {
   const [formData, setFormData] = useState({
@@ -22,198 +37,63 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
     registration_info: '',
     share_capital: '',
     bank_details: '',
+    contact_email: '',
+    phone_number: '',
+    company_type: 'MICRO',
   });
+  const [errors, setErrors] = useState({});
 
-  // Mettre à jour le formulaire quand initialData change
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
-      setFormData({
-        legal_name: initialData.legal_name || '',
-        legal_identifier: initialData.legal_identifier || '',
-        address: initialData.address || '',
-        city: initialData.city || '',
-        postal_code: initialData.postal_code || '',
-        country_code: initialData.country_code || 'FR',
-        vat_number: initialData.vat_number || '',
-        registration_info: initialData.registration_info || '',
-        share_capital: initialData.share_capital || '',
-        bank_details: initialData.bank_details || '',
-      });
+      setFormData(prev => ({ ...prev, ...initialData }));
     }
   }, [initialData]);
 
-  // Mise à jour des champs
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+
+    // validation instantanée
+    setErrors(validateSeller({ ...formData, [name]: value }));
   };
 
-  // Soumission du formulaire
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     e.preventDefault();
-
-    if (formData.country_code === 'FR' && !isValidSiret(formData.legal_identifier)) {
-      alert("Le numéro SIRET n'est pas valide !");
-      return; 
-    }
-
-    if (onSubmit) {
+    const newErrors = validateSeller(formData);
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length === 0 && onSubmit) {
       onSubmit(formData);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="p-3 border rounded bg-light">
-      <div className="mb-3">
-        <label htmlFor="legal_name" className="form-label">Nom légal *</label>
-        <input
-          type="text"
-          id="legal_name"
-          name="legal_name"
-          className="form-control"
-          maxLength={255}
-          required
-          disabled={disabled}
-          value={formData.legal_name}
-          onChange={handleChange}
-        />
-      </div>
+      <InputField id="legal_name" name="legal_name" label="Nom légal *" value={formData.legal_name} onChange={handleChange} disabled={disabled} error={errors.legal_name} />
+      <InputField id="legal_identifier" name="legal_identifier" label="Identifiant légal *" value={formData.legal_identifier} onChange={handleChange} disabled={disabled} error={errors.legal_identifier} />
+      <InputField id="contact_email" name="contact_email" label="Email *" type="email" value={formData.contact_email} onChange={handleChange} disabled={disabled} error={errors.contact_email} />
+      <InputField id="phone_number" name="phone_number" label="Téléphone" value={formData.phone_number} onChange={handleChange} disabled={disabled} error={errors.phone_number} />
 
-      <div className="mb-3">
-        <label htmlFor="legal_identifier" className="form-label">Identifiant légal</label>
-        <input
-          type="text"
-          id="legal_identifier"
-          name="legal_identifier"
-          className="form-control"
-          maxLength={50}
-          disabled={disabled}
-          value={formData.legal_identifier}
-          onChange={handleChange}
-        />
-      </div>
+      <select className="form-select mb-3" name="company_type" value={formData.company_type} disabled={disabled} onChange={handleChange}>
+        {companyTypes.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+      </select>
 
-      <div className="mb-3">
-        <label htmlFor="address" className="form-label">Adresse</label>
-        <textarea
-          id="address"
-          name="address"
-          className="form-control"
-          rows="2"
-          disabled={disabled}
-          value={formData.address}
-          onChange={handleChange}
-        ></textarea>
-      </div>
+      <TextAreaField id="address" name="address" label="Adresse *" value={formData.address} onChange={handleChange} disabled={disabled} error={errors.address} />
+      <InputField id="city" name="city" label="Ville *" value={formData.city} onChange={handleChange} disabled={disabled} error={errors.city} />
+      <InputField id="postal_code" name="postal_code" label="Code postal *" value={formData.postal_code} onChange={handleChange} disabled={disabled} error={errors.postal_code} />
+      <select className="form-select mb-3" name="country_code" value={formData.country_code} disabled={disabled} onChange={handleChange}>
+        {countryCodes.map(c => <option key={c.code} value={c.code}>{c.code} - {c.name}</option>)}
+      </select>
 
-      <div className="row mb-3">
-        <div className="col-md-4">
-          <label htmlFor="city" className="form-label">Ville</label>
-          <input
-            type="text"
-            id="city"
-            name="city"
-            className="form-control"
-            maxLength={100}
-            disabled={disabled}
-            value={formData.city}
-            onChange={handleChange}
-          />
-        </div>
-        <div className="col-md-4">
-          <label htmlFor="postal_code" className="form-label">Code postal</label>
-          <input
-            type="text"
-            id="postal_code"
-            name="postal_code"
-            className="form-control"
-            maxLength={20}
-            disabled={disabled}
-            value={formData.postal_code}
-            onChange={handleChange}
-          />
-        </div>
-        <div className="col-md-4">
-          <label htmlFor="country_code" className="form-label">Code pays</label>
-          <select
-            id="country_code"
-            name="country_code"
-            className="form-select"
-            disabled={disabled}
-            value={formData.country_code}
-            onChange={handleChange}
-          >
-            {countryCodes.map(({ code, name }) => (
-              <option key={code} value={code}>
-                {code} - {name}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className="mb-3">
-        <label htmlFor="vat_number" className="form-label">Numéro de TVA</label>
-        <input
-          type="text"
-          id="vat_number"
-          name="vat_number"
-          className="form-control"
-          maxLength={50}
-          disabled={disabled}
-          value={formData.vat_number}
-          onChange={handleChange}
-        />
-      </div>
-
-      <div className="mb-3">
-        <label htmlFor="registration_info" className="form-label">Informations d’enregistrement</label>
-        <textarea
-          id="registration_info"
-          name="registration_info"
-          className="form-control"
-          rows="2"
-          disabled={disabled}
-          value={formData.registration_info}
-          onChange={handleChange}
-        ></textarea>
-      </div>
-
-      <div className="mb-3">
-        <label htmlFor="share_capital" className="form-label">Capital social</label>
-        <input
-          type="number"
-          step="0.01"
-          id="share_capital"
-          name="share_capital"
-          className="form-control"
-          disabled={disabled}
-          value={formData.share_capital}
-          onChange={handleChange}
-        />
-      </div>
-
-      <div className="mb-3">
-        <label htmlFor="bank_details" className="form-label">Détails bancaires</label>
-        <textarea
-          id="bank_details"
-          name="bank_details"
-          className="form-control"
-          rows="2"
-          disabled={disabled}
-          value={formData.bank_details}
-          onChange={handleChange}
-        ></textarea>
-      </div>
+      <InputField id="vat_number" name="vat_number" label="Numéro de TVA" value={formData.vat_number} onChange={handleChange} disabled={disabled} />
+      <TextAreaField id="registration_info" name="registration_info" label="Informations d’enregistrement *" value={formData.registration_info} onChange={handleChange} disabled={disabled} error={errors.registration_info} />
+      <InputField id="share_capital" name="share_capital" label="Capital social" type="number" step="0.01" value={formData.share_capital} onChange={handleChange} disabled={disabled} />
+      <TextAreaField id="bank_details" name="bank_details" label="Détails bancaires" value={formData.bank_details} onChange={handleChange} disabled={disabled} />
 
       {!disabled && (
         <div className="text-end mt-3">
-          <button type="submit" className="btn btn-primary">
-            Enregistrer
-          </button>
+          <button type="submit" className="btn btn-primary">Enregistrer</button>
         </div>
       )}
-
     </form>
   );
 }

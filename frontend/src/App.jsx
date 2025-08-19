@@ -3,11 +3,13 @@ import NavBar from './components/NavBar';
 import routes from './AppRoutes';
 
 // Layout centralisé inline
-function Layout({ children }) {
+function Layout({ children, fluid = false }) {
   return (
     <>
       <NavBar />
-      <main className="container mt-4">{children}</main>
+      <main className={fluid ? "container-fluid mt-4" : "container mt-4"}>
+        {children}
+      </main>
     </>
   );
 }
