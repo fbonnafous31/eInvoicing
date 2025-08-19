@@ -3,7 +3,7 @@ const pool = require('../../config/db');
 async function getAllSellers() {
   const result = await pool.query(
     `SELECT id, legal_name, legal_identifier, address, city, postal_code, country_code, 
-            vat_number, registration_info, share_capital, bank_details, created_at, updated_at 
+            vat_number, registration_info, share_capital, bank_details, contact_email, phone_number, created_at, updated_at 
      FROM invoicing.sellers`
   );
   return result.rows;
@@ -21,16 +21,21 @@ async function insertSeller(sellerData) {
     registration_info,
     share_capital,
     bank_details,
+    contact_email,
+    phone_number,
+    company_type
   } = sellerData;
 
   share_capital = share_capital === '' ? null : Number(share_capital);
 
   const result = await pool.query(
     `INSERT INTO invoicing.sellers
-      (legal_name, legal_identifier, address, city, postal_code, country_code, vat_number, registration_info, share_capital, bank_details)
-     VALUES ( $1, 
-              CASE WHEN $6 = 'FR' THEN REPLACE($2, ' ', '') ELSE $2 END, 
-              $3, $4, $5, $6, $7, $8, $9, $10)
+      (legal_name, legal_identifier, address, city, postal_code, country_code, vat_number, registration_info, share_capital, bank_details, contact_email, phone_number, company_type)
+     VALUES (
+       $1, 
+       CASE WHEN $6 = 'FR' THEN REPLACE($2, ' ', '') ELSE $2 END,
+       $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+     )
      RETURNING *`,
     [
       legal_name,
@@ -43,6 +48,9 @@ async function insertSeller(sellerData) {
       registration_info,
       share_capital,
       bank_details,
+      contact_email,
+      phone_number,
+      company_type
     ]
   );
 
@@ -76,7 +84,10 @@ async function updateSeller(id, sellerData) {
     vat_number,
     registration_info,
     share_capital,
-    bank_details
+    bank_details,
+    contact_email,
+    phone_number,
+    company_type
   } = sellerData;
 
   const result = await pool.query(
@@ -91,8 +102,11 @@ async function updateSeller(id, sellerData) {
          registration_info = $8,
          share_capital = $9,
          bank_details = $10,
+         contact_email = $11,
+         phone_number = $12,
+         company_type = $13,
          updated_at = NOW()
-     WHERE id = $11
+     WHERE id = $14
      RETURNING *`,
     [
       legal_name,
@@ -105,6 +119,9 @@ async function updateSeller(id, sellerData) {
       registration_info,
       share_capital === '' ? null : Number(share_capital),
       bank_details,
+      contact_email,
+      phone_number,
+      company_type,
       id
     ]
   );

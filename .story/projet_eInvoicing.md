@@ -49,18 +49,16 @@
   - utilisation de ChatGPT comme collaborateur technique pour accélérer le développement et assurer la qualité du code.
 
 ---
+## Rappel – Composants et services réutilisables
+
+- Privilégier **les composants UI réutilisables** (`InputField`, `TextAreaField`, etc.) pour uniformité.
+- Utiliser **les services centralisés** pour les appels API afin de garder cohérence et validations.
+
 
 ## 📌 Prochaines étapes
 
-- Création du formulaire de création d'une facture pas à pas, 
-- La facture estcomposé de 4 objets :
-  - Entête 
-  - Lignes de factures
-  - Assiettes de TVA
-  - Justificatifs de facture
-- Imaginer le design, définir les meilleurs approches UX (une seule grille de formaulaires avec 4 blocs, et des blocs multilignes pour les lignes et les assiettes avec une icône +, pour ajouter une ligne) ... à définir avec l'IA
 
-
+## Architecture projet
 project/
 │
 ├── frontend/
