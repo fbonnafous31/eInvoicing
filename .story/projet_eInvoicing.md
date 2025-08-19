@@ -51,7 +51,7 @@
 ---
 ## Rappel – Composants et services réutilisables
 
-- Privilégier **les composants UI réutilisables** (`InputField`, `TextAreaField`, etc.) pour uniformité.
+- Privilégier **les composants UI réutilisables** (`InputField`, `TextAreaField`, `EllipsisCell`) pour uniformité.
 - Utiliser **les services centralisés** pour les appels API afin de garder cohérence et validations.
 
 
