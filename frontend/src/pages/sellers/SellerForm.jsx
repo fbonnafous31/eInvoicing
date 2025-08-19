@@ -1,29 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import countries from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
-import InputField from '../../components/form/InputField';
-import TextAreaField from '../../components/form/TextAreaField';
+import companyTypes from '../../constants/companyTypes';
 import { validateSeller } from '../../utils/validators';
 
+// Sections
+import LegalFields from './fields/LegalFields';
+import ContactFields from './fields/ContactFields';
+import AddressFields from './fields/AddressFields';
+import FinanceFields from './fields/FinanceFields';
+
 countries.registerLocale(enLocale);
-
 const countryCodes = Object.entries(countries.getNames("en")).map(([code, name]) => ({ code, name }));
-
-const companyTypes = [
-  { value: 'MICRO', label: 'Micro-entreprise' },
-  { value: 'EI', label: 'Entreprise Individuelle' },
-  { value: 'EIRL', label: 'EIRL' },
-  { value: 'SAS', label: 'SAS' },
-  { value: 'SASU', label: 'SASU' },
-  { value: 'SARL', label: 'SARL' },
-  { value: 'EURL', label: 'EURL' },
-  { value: 'SA', label: 'SA' },
-  { value: 'SNC', label: 'SNC' },
-  { value: 'SC', label: 'Société Civile' },
-  { value: 'SCOP', label: 'SCOP' },
-  { value: 'Association', label: 'Association' },
-  { value: 'Autre', label: 'Autre' },
-];
 
 export default function SellerForm({ onSubmit, disabled = false, initialData = {} }) {
   const [formData, setFormData] = useState({
@@ -42,6 +30,12 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
     company_type: 'MICRO',
   });
   const [errors, setErrors] = useState({});
+  const [openSections, setOpenSections] = useState({
+    legal: true,
+    contact: false,
+    address: false,
+    finances: false,
+  });
 
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
@@ -52,8 +46,6 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
   const handleChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-
-    // validation instantanée
     setErrors(validateSeller({ ...formData, [name]: value }));
   };
 
@@ -61,33 +53,92 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
     e.preventDefault();
     const newErrors = validateSeller(formData);
     setErrors(newErrors);
+
+    // Ouverture automatique des sections contenant des erreurs
+    setOpenSections({
+      legal: !!(newErrors.legal_name || newErrors.legal_identifier || newErrors.company_type),
+      contact: !!(newErrors.contact_email || newErrors.phone_number),
+      address: !!(newErrors.address || newErrors.city || newErrors.postal_code || newErrors.country_code),
+      finances: !!(newErrors.vat_number || newErrors.registration_info || newErrors.share_capital || newErrors.bank_details),
+    });
+
     if (Object.keys(newErrors).length === 0 && onSubmit) {
       onSubmit(formData);
     }
   };
 
+  const toggleSection = section => {
+    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
   return (
     <form onSubmit={handleSubmit} className="p-3 border rounded bg-light">
-      <InputField id="legal_name" name="legal_name" label="Nom légal *" value={formData.legal_name} onChange={handleChange} disabled={disabled} error={errors.legal_name} />
-      <InputField id="legal_identifier" name="legal_identifier" label="Identifiant légal *" value={formData.legal_identifier} onChange={handleChange} disabled={disabled} error={errors.legal_identifier} />
-      <InputField id="contact_email" name="contact_email" label="Email *" type="email" value={formData.contact_email} onChange={handleChange} disabled={disabled} error={errors.contact_email} />
-      <InputField id="phone_number" name="phone_number" label="Téléphone" value={formData.phone_number} onChange={handleChange} disabled={disabled} error={errors.phone_number} />
 
-      <select className="form-select mb-3" name="company_type" value={formData.company_type} disabled={disabled} onChange={handleChange}>
-        {companyTypes.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
-      </select>
+      {/* Section Légale */}
+      <div className="mb-3">
+        <button type="button" className="btn btn-link p-0 mb-2" onClick={() => toggleSection('legal')}>
+          Informations légales {openSections.legal ? '▲' : '▼'}
+          {(errors.legal_name || errors.legal_identifier || errors.company_type) && ' ⚠️'}
+        </button>
+        {openSections.legal && (
+          <LegalFields
+            formData={formData}
+            errors={errors}
+            handleChange={handleChange}
+            disabled={disabled}
+            companyTypes={companyTypes}
+          />
+        )}
+      </div>
 
-      <TextAreaField id="address" name="address" label="Adresse *" value={formData.address} onChange={handleChange} disabled={disabled} error={errors.address} />
-      <InputField id="city" name="city" label="Ville *" value={formData.city} onChange={handleChange} disabled={disabled} error={errors.city} />
-      <InputField id="postal_code" name="postal_code" label="Code postal *" value={formData.postal_code} onChange={handleChange} disabled={disabled} error={errors.postal_code} />
-      <select className="form-select mb-3" name="country_code" value={formData.country_code} disabled={disabled} onChange={handleChange}>
-        {countryCodes.map(c => <option key={c.code} value={c.code}>{c.code} - {c.name}</option>)}
-      </select>
+      {/* Section Contact */}
+      <div className="mb-3">
+        <button type="button" className="btn btn-link p-0 mb-2" onClick={() => toggleSection('contact')}>
+          Contact {openSections.contact ? '▲' : '▼'}
+          {(errors.contact_email || errors.phone_number) && ' ⚠️'}
+        </button>
+        {openSections.contact && (
+          <ContactFields
+            formData={formData}
+            errors={errors}
+            handleChange={handleChange}
+            disabled={disabled}
+          />
+        )}
+      </div>
 
-      <InputField id="vat_number" name="vat_number" label="Numéro de TVA" value={formData.vat_number} onChange={handleChange} disabled={disabled} />
-      <TextAreaField id="registration_info" name="registration_info" label="Informations d’enregistrement *" value={formData.registration_info} onChange={handleChange} disabled={disabled} error={errors.registration_info} />
-      <InputField id="share_capital" name="share_capital" label="Capital social" type="number" step="0.01" value={formData.share_capital} onChange={handleChange} disabled={disabled} />
-      <TextAreaField id="bank_details" name="bank_details" label="Détails bancaires" value={formData.bank_details} onChange={handleChange} disabled={disabled} />
+      {/* Section Adresse */}
+      <div className="mb-3">
+        <button type="button" className="btn btn-link p-0 mb-2" onClick={() => toggleSection('address')}>
+          Adresse {openSections.address ? '▲' : '▼'}
+          {(errors.address || errors.city || errors.postal_code || errors.country_code) && ' ⚠️'}
+        </button>
+        {openSections.address && (
+          <AddressFields
+            formData={formData}
+            errors={errors}
+            handleChange={handleChange}
+            disabled={disabled}
+            countryCodes={countryCodes}
+          />
+        )}
+      </div>
+
+      {/* Section Finances */}
+      <div className="mb-3">
+        <button type="button" className="btn btn-link p-0 mb-2" onClick={() => toggleSection('finances')}>
+          Finances & Bancaires {openSections.finances ? '▲' : '▼'}
+          {(errors.vat_number || errors.registration_info || errors.share_capital || errors.bank_details) && ' ⚠️'}
+        </button>
+        {openSections.finances && (
+          <FinanceFields
+            formData={formData}
+            errors={errors}
+            handleChange={handleChange}
+            disabled={disabled}
+          />
+        )}
+      </div>
 
       {!disabled && (
         <div className="text-end mt-3">
