@@ -1,12 +1,13 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
+import { resolve } from 'path';
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  server: {
-    proxy: {
-      '/api': 'http://localhost:3000',
-    },
-  },
-})
+  test: {
+    globals: true,       // permet d’utiliser test(), expect() sans import
+    environment: 'jsdom', 
+    setupFiles: './tests/setupTests.js'  // ton fichier de setup
+  }
+});
