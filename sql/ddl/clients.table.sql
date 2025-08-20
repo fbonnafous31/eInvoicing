@@ -6,7 +6,7 @@
 
 CREATE TABLE invoicing.clients (
 	id serial4 NOT NULL, -- Identifiant unique interne du client
-	legal_name varchar(255) NOT NULL, -- Raison sociale
+	legal_name varchar(255), -- Raison sociale
 	legal_identifier varchar(50) NULL, -- Identifiant légal (ex : SIRET, VAT ID)
 	address text NULL, -- Adresse complète
 	city varchar(100) NULL, -- Ville

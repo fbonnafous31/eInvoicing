@@ -1,22 +1,41 @@
 import { isValidSiret } from './siret';
 
-export function validateSeller(data) {
+export function validatePerson(data) {
   const errors = {};
 
-  const requiredFields = ['legal_name', 'legal_identifier', 'address', 'city', 'postal_code', 'registration_info', 'contact_email', 'company_type'];
+  // Pour les vendeurs, on considère toujours qu'il s'agit d'une société
+  const isCompany = data.is_company !== undefined ? data.is_company : true;
 
-  requiredFields.forEach(field => {
-    if (!data[field] || data[field].trim() === '') {
-      errors[field] = 'Ce champ est obligatoire';
+  if (isCompany) {
+    // Nom légal obligatoire
+    if (!data.legal_name?.trim()) {
+      errors.legal_name = 'Le nom légal est obligatoire';
     }
-  });
 
-  if (data.country_code === 'FR' && !isValidSiret(data.legal_identifier)) {
-    errors.legal_identifier = 'SIRET invalide';
+    // SIRET / identifiant légal si pays FR
+    if (data.country_code === 'FR' && data.legal_identifier && !isValidSiret(data.legal_identifier)) {
+      errors.legal_identifier = 'SIRET invalide';
+    }
+  } else {
+    // Pour les particuliers (si jamais tu en as un jour)
+    if (!data.firstname?.trim()) {
+      errors.firstname = 'Le prénom est obligatoire';
+    }
+    if (!data.lastname?.trim()) {
+      errors.lastname = 'Le nom est obligatoire';
+    }
+    if (data.siret) {
+      errors.siret = 'Un particulier ne peut pas avoir de SIRET';
+    }
   }
 
-  if (data.contact_email && !/\S+@\S+\.\S+/.test(data.contact_email)) {
-    errors.contact_email = 'Email invalide';
+  // Validations communes
+  if (data.email && !/\S+@\S+\.\S+/.test(data.email)) {
+    errors.email = 'Email invalide';
+  }
+
+  if (data.phone && !/^\+?[0-9\s-]{6,20}$/.test(data.phone)) {
+    errors.phone = 'Numéro de téléphone invalide';
   }
 
   return errors;
