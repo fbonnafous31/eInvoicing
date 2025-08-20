@@ -34,6 +34,24 @@ function validateClientData(clientData) {
   if (phone && !/^[0-9 +()-]{5,30}$/.test(phone)) throw new Error('Numéro de téléphone invalide');
 }
 
+// ----------------- Vérification unicité SIRET -----------------
+async function checkSiretUnique(siret, clientId = null) {
+  if (!siret) return;
+  const cleaned = siret.replace(/\D/g, '');
+  let query = 'SELECT id FROM invoicing.clients WHERE siret = $1';
+  const params = [cleaned];
+
+  if (clientId) {
+    query += ' AND id <> $2';
+    params.push(clientId);
+  }
+
+  const res = await pool.query(query, params);
+  if (res.rowCount > 0) {
+    throw new Error('Ce SIRET est déjà utilisé par un autre client');
+  }
+}
+
 // ----------------- Get all clients -----------------
 async function getAllClients() {
   const result = await pool.query(
@@ -43,6 +61,15 @@ async function getAllClients() {
      FROM invoicing.clients`
   );
   return result.rows;
+}
+
+// ----------------- Get client by ID -----------------
+async function getClientById(id) {
+  const result = await pool.query(
+    'SELECT * FROM invoicing.clients WHERE id = $1',
+    [id]
+  );
+  return result.rows[0];
 }
 
 // ----------------- Insert client -----------------
@@ -65,21 +92,24 @@ async function insertClient(clientData) {
     phone
   } = clientData;
 
+  if (is_company && country_code === 'FR') {
+    await checkSiretUnique(siret);
+  }
+
+  const cleanedSiret = country_code === 'FR' && siret ? siret.replace(/\D/g, '') : siret;
+
   const result = await pool.query(
     `INSERT INTO invoicing.clients
       (is_company, legal_name, firstname, lastname, siret, legal_identifier,
        address, city, postal_code, country_code, vat_number, email, phone)
-     VALUES ($1, $2, $3, $4, 
-             CASE WHEN $6 = 'FR' THEN REPLACE($5, ' ', '') ELSE $5 END,
-             CASE WHEN $6 = 'FR' THEN REPLACE($6, ' ', '') ELSE $6 END,
-             $7, $8, $9, $10, $11, $12, $13)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
      RETURNING *`,
     [
       is_company,
       legal_name,
       firstname,
       lastname,
-      siret,
+      cleanedSiret,
       legal_identifier,
       address,
       city,
@@ -94,31 +124,20 @@ async function insertClient(clientData) {
   return result.rows[0];
 }
 
-// ----------------- Get client by ID -----------------
-async function getClientById(id) {
-  const result = await pool.query(
-    'SELECT * FROM invoicing.clients WHERE id = $1',
-    [id]
-  );
-  return result.rows[0];
-}
-
 // ----------------- Remove client -----------------
 async function removeClient(id) {
   const result = await pool.query(
     'DELETE FROM invoicing.clients WHERE id = $1 RETURNING *',
     [id]
   );
-  if (result.rowCount === 0) {
-    throw new Error('Client not found');
-  }
+  if (result.rowCount === 0) throw new Error('Client not found');
   return result.rows[0];
 }
 
 // ----------------- Update client -----------------
 async function updateClient(id, clientData) {
   validateClientData(clientData);
-  
+
   const {
     is_company = true,
     legal_name,
@@ -135,13 +154,19 @@ async function updateClient(id, clientData) {
     phone
   } = clientData;
 
+  if (is_company && country_code === 'FR') {
+    await checkSiretUnique(siret, id);
+  }
+
+  const cleanedSiret = country_code === 'FR' && siret ? siret.replace(/\D/g, '') : siret;
+
   const result = await pool.query(
     `UPDATE invoicing.clients
      SET is_company = $1,
          legal_name = $2,
          firstname = $3,
          lastname = $4,
-         siret = CASE WHEN $10 = 'FR' THEN REPLACE($5, ' ', '') ELSE $5 END,
+         siret = $5,
          legal_identifier = $6,
          address = $7,
          city = $8,
@@ -158,7 +183,7 @@ async function updateClient(id, clientData) {
       legal_name,
       firstname,
       lastname,
-      siret,
+      cleanedSiret,
       legal_identifier,
       address,
       city,
@@ -171,9 +196,7 @@ async function updateClient(id, clientData) {
     ]
   );
 
-  if (result.rowCount === 0) {
-    throw new Error('Client not found');
-  }
+  if (result.rowCount === 0) throw new Error('Client not found');
 
   return result.rows[0];
 }

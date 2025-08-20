@@ -11,9 +11,11 @@ export default function LegalFields({ formData, errors, handleChange, disabled }
             type="radio"
             id="is_company_true"
             name="is_company"
-            value={true}
+            value="true"
             checked={formData.is_company === true}
-            onChange={() => handleChange({ target: { name: 'is_company', value: true, type: 'checkbox' } })}
+            onChange={e => handleChange({
+              target: { name: 'is_company', value: e.target.value }
+            })}
             disabled={disabled}
             className="form-check-input"
           />
@@ -24,15 +26,18 @@ export default function LegalFields({ formData, errors, handleChange, disabled }
             type="radio"
             id="is_company_false"
             name="is_company"
-            value={false}
+            value="false"
             checked={formData.is_company === false}
-            onChange={() => handleChange({ target: { name: 'is_company', value: false, type: 'checkbox' } })}
+            onChange={e => handleChange({
+              target: { name: 'is_company', value: e.target.value }
+            })}
             disabled={disabled}
             className="form-check-input"
           />
           <label htmlFor="is_company_false" className="form-check-label">Particulier</label>
         </div>
       </div>
+
 
       {formData.is_company ? (
         <>
@@ -51,38 +56,26 @@ export default function LegalFields({ formData, errors, handleChange, disabled }
             {errors.legal_name && <div className="invalid-feedback">{errors.legal_name}</div>}
           </div>
 
-          {/* SIRET */}
-          <div className="mb-3">
-            <label htmlFor="siret" className="form-label">SIRET</label>
-            <input
-              type="text"
-              id="siret"
-              name="siret"
-              className={`form-control ${errors.siret ? 'is-invalid' : ''}`}
-              disabled={disabled}
-              value={formData.siret ?? ''}
-              onChange={handleChange}
-            />
-            {errors.siret && <div className="invalid-feedback">{errors.siret}</div>}
-          </div>
-
-          {/* Identifiant légal */}
-          <div className="mb-3">
-            <label htmlFor="legal_identifier" className="form-label">Identifiant légal (optionnel)</label>
-            <input
-              type="text"
-              id="legal_identifier"
-              name="legal_identifier"
-              className="form-control"
-              disabled={disabled}
-              value={formData.legal_identifier ?? ''}
-              onChange={handleChange}
-            />
-          </div>
+          {/* SIRET uniquement si FR */}
+          {formData.country_code === 'FR' && (
+            <div className="mb-3">
+              <label htmlFor="siret" className="form-label">SIRET *</label>
+              <input
+                type="text"
+                id="siret"
+                name="siret"
+                className={`form-control ${errors.siret ? 'is-invalid' : ''}`}
+                disabled={disabled}
+                value={formData.siret ?? ''}
+                onChange={handleChange}
+              />
+              {errors.siret && <div className="invalid-feedback">{errors.siret}</div>}
+            </div>
+          )}          
         </>
       ) : (
         <>
-          {/* Prénom / Nom */}
+          {/* Particulier */}
           <div className="mb-3">
             <label htmlFor="firstname" className="form-label">Prénom *</label>
             <input

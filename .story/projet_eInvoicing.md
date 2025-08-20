@@ -4,7 +4,7 @@
 
 - Développer une application web pour la **gestion complète des factures** :  
   création, suivi, réception, génération de formats standards (**UBL**, **Factur-X**) et communication via **API**.  
-- À terme, tendre vers une **plateforme PDP** (*Plateforme de Dématérialisation Partenaire*).  
+- À terme, tendre vers un **opérateur de dématérialisation**.  
 - Application progressive, construite pas à pas avec un **découpage clair entre frontend et backend**.
 
 ---

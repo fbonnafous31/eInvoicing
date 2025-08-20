@@ -34,52 +34,79 @@ export default function ClientForm({ onSubmit, disabled = false, initialData = {
     address: false,
     finances: false,
   });
+  const [siretExists, setSiretExists] = useState(false);
 
   // ---------------------
   // Normalisation initialData
   // ---------------------
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
-      setFormData(prev => {
-        const normalized = { ...prev, ...initialData };
-        if (normalized.siret && !normalized.legal_identifier) {
-          normalized.legal_identifier = normalized.siret;
-        }
-        console.log('[useEffect] Initial data normalized:', normalized);
-        return normalized;
-      });
+      setFormData(prev => ({ ...prev, ...initialData }));
     }
   }, [initialData]);
 
   // ---------------------
-  // Synchronisation siret -> legal_identifier
+  // Vérification SIRET côté API
   // ---------------------
-  useEffect(() => {
-    setFormData(prev => {
-      // On compare prev.siret et prev.legal_identifier pour éviter le warning
-      if (prev.siret !== prev.legal_identifier) {
-        return { ...prev, legal_identifier: prev.siret };
-      }
-      return prev; // pas de changement -> pas de re-render
-    });
-  }, [formData.siret]);
+  const checkSiretAPI = async (siret) => {
+    if (!siret || siret.length !== 14) {
+      setSiretExists(false);
+      setErrors(prev => ({ ...prev, siret: undefined }));
+      return;
+    }
+    try {
+      const res = await fetch(`/api/clients/check-siret/${siret}`);
+      const data = await res.json();
+      setSiretExists(data.exists);
+      setErrors(prev => ({ ...prev, siret: data.exists ? 'Ce SIRET est déjà utilisé' : undefined }));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   // ---------------------
   // Gestion des changements
   // ---------------------
   const handleChange = e => {
     const { name, value, type } = e.target;
-    const val = type === 'checkbox' ? e.target.checked : value ?? '';
+    let val = value ?? '';
 
-    const newFormData = { ...formData, [name]: val };
-    setFormData(newFormData);
+    if (name === 'is_company') {
+      val = value === 'true';
+    } else if (type === 'checkbox') {
+      val = e.target.checked;
+    }
 
-    const newErrors = validatePerson(newFormData);
-    setErrors(newErrors);
+    setFormData(prev => {
+      const updated = { ...prev, [name]: val };
 
-    console.log(`[handleChange] Field changed: ${name} = ${val}`);
-    console.log('[handleChange] Current formData:', newFormData);
-    console.log('[handleChange] Current errors:', newErrors);
+      // Si c'est un particulier, on vide SIRET et TVA
+      if (name === 'is_company' && !val) {
+        updated.siret = '';
+        updated.legal_identifier = '';
+        updated.vat_number = '';
+      }
+
+      // Synchronisation automatique du SIRET vers legal_identifier si entreprise FR
+      if (name === 'siret') {
+        const siretVal = (val || '').toString().replace(/\D/g, '');
+        updated.siret = siretVal;
+        if (updated.is_company && updated.country_code === 'FR') {
+          updated.legal_identifier = siretVal;
+        }
+        checkSiretAPI(siretVal);
+      }
+
+      // Si on change le pays et qu'on n'est plus en FR, ne pas écraser legal_identifier
+      if (name === 'country_code' && val !== 'FR') {
+        updated.legal_identifier = prev.legal_identifier || '';
+      }
+
+      const newErrors = validatePerson(updated);
+      setErrors(prev => ({ ...prev, ...newErrors }));
+
+      return updated;
+    });
   };
 
   // ---------------------
@@ -95,11 +122,38 @@ export default function ClientForm({ onSubmit, disabled = false, initialData = {
   const handleSubmit = e => {
     e.preventDefault();
 
-    const newErrors = validatePerson(formData);
+    const cleanedSiret = (formData.siret || '').toString().replace(/\D/g, '');
+    const newErrors = validatePerson({ ...formData, siret: cleanedSiret });
+
+    // Validation entreprise FR
+    if (formData.is_company) {
+      if (formData.country_code === 'FR') {
+        if (!cleanedSiret) {
+          newErrors.siret = 'Le SIRET est requis pour une entreprise française';
+        } else if (cleanedSiret.length !== 14) {
+          newErrors.siret = 'Le SIRET doit contenir 14 chiffres';
+        }
+      } else {
+        // Validation entreprise non-FR
+        if (!formData.vat_number?.trim()) {
+          newErrors.vat_number = 'Le numéro de TVA intracommunautaire est requis pour les entreprises non françaises';
+        }
+      }
+    }
+
+    // Vérification SIRET déjà existant côté front
+    if (siretExists) {
+      newErrors.siret = 'Ce SIRET est déjà utilisé';
+    }
+
     setErrors(newErrors);
 
+    // Ouvrir uniquement les sections avec erreurs
     setOpenSections({
-      legal: !!(formData.is_company ? newErrors.legal_name || newErrors.siret : newErrors.firstname || newErrors.lastname),
+      legal: !!(
+        (formData.is_company && (newErrors.legal_name || newErrors.siret || newErrors.legal_identifier)) || 
+        (!formData.is_company && (newErrors.firstname || newErrors.lastname))
+      ),
       contact: !!(newErrors.email || newErrors.phone),
       address: !!(newErrors.address || newErrors.city || newErrors.postal_code || newErrors.country_code),
       finances: !!newErrors.vat_number,
@@ -109,11 +163,17 @@ export default function ClientForm({ onSubmit, disabled = false, initialData = {
       const payload = {
         ...formData,
         is_company: !!formData.is_company,
-        siret: formData.is_company && formData.country_code === 'FR' ? formData.siret?.trim() : null,
         legal_name: formData.is_company
           ? formData.legal_name?.trim()
           : `${formData.firstname?.trim() || ''} ${formData.lastname?.trim() || ''}`.trim(),
+        siret: formData.is_company && formData.country_code === 'FR' ? cleanedSiret : null,
+        legal_identifier: formData.is_company
+          ? formData.country_code === 'FR'
+            ? cleanedSiret
+            : formData.vat_number?.trim() || null
+          : null,
       };
+
       if (onSubmit) onSubmit(payload);
     }
   };
@@ -128,7 +188,8 @@ export default function ClientForm({ onSubmit, disabled = false, initialData = {
       <div className="mb-3">
         <button type="button" className="btn btn-link p-0 mb-2" onClick={() => toggleSection('legal')}>
           Informations légales {openSections.legal ? '▲' : '▼'}
-          {((formData.is_company && (errors.legal_name || errors.siret)) || (!formData.is_company && (errors.firstname || errors.lastname))) && ' ⚠️'}
+          {((formData.is_company && (errors.legal_name || errors.siret || errors.legal_identifier)) || 
+            (!formData.is_company && (errors.firstname || errors.lastname))) && ' ⚠️'}
         </button>
         {openSections.legal && (
           <LegalFields
