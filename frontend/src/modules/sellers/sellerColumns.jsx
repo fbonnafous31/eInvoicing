@@ -15,7 +15,6 @@ export default function useSellerColumns() {
         </button>
       ),
       ignoreRowClick: true,
-      button: true,
       width: '50px',
     },
     { 

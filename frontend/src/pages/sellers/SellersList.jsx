@@ -3,8 +3,8 @@ import DataTable from 'react-data-table-component';
 import Breadcrumb from '../../components/Breadcrumb';
 import useSellers from '../../hooks/useSellers';
 import useSellerColumns from '../../modules/sellers/sellerColumns';
-import { sellerTableStyles } from '../../modules/sellers/datatableStyles';
-import SellerAuditPanel from '../../components/common/SellerAuditPanel';
+import { datatableStyles } from '../../modules/common/datatableStyles'; // <== correction
+import AuditPanel from '../../components/common/AuditPanel';
 
 export default function SellersList() {
   const { sellers, loading, error } = useSellers();
@@ -12,7 +12,9 @@ export default function SellersList() {
   const [filterText, setFilterText] = useState('');
 
   const filteredItems = sellers.filter(item => 
-    Object.values(item).some(val => val && val.toString().toLowerCase().includes(filterText.toLowerCase()))
+    Object.values(item).some(
+      val => val && val.toString().toLowerCase().includes(filterText.toLowerCase())
+    )
   );
 
   const breadcrumbItems = [
@@ -50,12 +52,12 @@ export default function SellersList() {
         fixedHeader
         fixedHeaderScrollHeight="70vh"
         expandableRows
-        expandableRowsComponent={row => (
-          <SellerAuditPanel createdAt={row.created_at} updatedAt={row.updated_at} />
-        )}
+        expandableRowsComponent={({ data }) => (
+          <AuditPanel createdAt={data.created_at} updatedAt={data.updated_at} />
+        )}        
         expandOnRowClicked
         progressPending={loading}
-        customStyles={sellerTableStyles}
+        customStyles={datatableStyles} // <== correction
       />
     </div>
   );
