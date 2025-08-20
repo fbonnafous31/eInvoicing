@@ -5,23 +5,23 @@ export default function ContactFields({ formData, errors, handleChange, disabled
   return (
     <>
       <InputField
-        id="contact_email"
-        name="contact_email"
+        id="email"
+        name="email"
         label="Email *"
         type="email"
-        value={formData.contact_email}
+        value={formData.email}
         onChange={handleChange}
         disabled={disabled}
-        error={errors.contact_email}
+        error={errors.email}
       />
       <InputField
-        id="phone_number"
-        name="phone_number"
+        id="phone"
+        name="phone"
         label="Téléphone"
-        value={formData.phone_number}
+        value={formData.phone}
         onChange={handleChange}
         disabled={disabled}
-        error={errors.phone_number}
+        error={errors.phone}
       />
     </>
   );

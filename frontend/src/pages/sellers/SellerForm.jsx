@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import countries from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
 import companyTypes from '../../constants/companyTypes';
-import { validateSeller } from '../../utils/validators';
+import { validatePerson } from '../../utils/validators';
 
 // Sections
 import LegalFields from './fields/LegalFields';
@@ -11,7 +11,6 @@ import AddressFields from './fields/AddressFields';
 import FinanceFields from './fields/FinanceFields';
 
 countries.registerLocale(enLocale);
-const countryCodes = Object.entries(countries.getNames("en")).map(([code, name]) => ({ code, name }));
 
 export default function SellerForm({ onSubmit, disabled = false, initialData = {} }) {
   const [formData, setFormData] = useState({
@@ -25,10 +24,12 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
     registration_info: '',
     share_capital: '',
     bank_details: '',
-    contact_email: '',
-    phone_number: '',
+    email: '',
+    phone: '',
     company_type: 'MICRO',
+    is_company: true,
   });
+
   const [errors, setErrors] = useState({});
   const [openSections, setOpenSections] = useState({
     legal: true,
@@ -37,33 +38,77 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
     finances: false,
   });
 
+  // Liste des pays memoisée
+  const countryCodes = useMemo(() => {
+    return Object.entries(countries.getNames("en")).map(([code, name]) => ({ code, name }));
+  }, []);
+
+  // Normalisation des initialData pour éviter null/undefined
+  const stableInitialData = useMemo(() => initialData, [initialData]);
+
   useEffect(() => {
-    if (initialData && Object.keys(initialData).length > 0) {
-      setFormData(prev => ({ ...prev, ...initialData }));
+    if (stableInitialData && Object.keys(stableInitialData).length > 0) {
+      const normalizedData = {
+        legal_name: '',
+        legal_identifier: '',
+        address: '',
+        city: '',
+        postal_code: '',
+        country_code: 'FR',
+        vat_number: '',
+        registration_info: '',
+        share_capital: '',
+        bank_details: '',
+        email: '',
+        phone: '',
+        company_type: 'MICRO',
+        ...stableInitialData
+      };
+
+      Object.keys(normalizedData).forEach(key => {
+        if (normalizedData[key] === null || normalizedData[key] === undefined) {
+          normalizedData[key] = '';
+        }
+      });
+
+      console.log('[useEffect] Initial data normalized:', normalizedData);
+      setFormData(normalizedData);
     }
-  }, [initialData]);
+  }, [stableInitialData]);
 
   const handleChange = e => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    setErrors(validateSeller({ ...formData, [name]: value }));
+    const newFormData = { ...formData, [name]: value ?? '' };
+    setFormData(newFormData);
+
+    const newErrors = validatePerson(newFormData);
+    setErrors(newErrors);
+
+    console.log(`[handleChange] Field changed: ${name} = ${value}`);
+    console.log('[handleChange] Current formData:', newFormData);
+    console.log('[handleChange] Current errors:', newErrors);
   };
 
   const handleSubmit = e => {
     e.preventDefault();
-    const newErrors = validateSeller(formData);
-    setErrors(newErrors);
+    console.log('[handleSubmit] Submit triggered', formData);
 
-    // Ouverture automatique des sections contenant des erreurs
+    const newErrors = validatePerson(formData);
+    setErrors(newErrors);
+    console.log('[handleSubmit] Validation errors:', newErrors);
+
     setOpenSections({
       legal: !!(newErrors.legal_name || newErrors.legal_identifier || newErrors.company_type),
-      contact: !!(newErrors.contact_email || newErrors.phone_number),
+      contact: !!(newErrors.email || newErrors.phone),
       address: !!(newErrors.address || newErrors.city || newErrors.postal_code || newErrors.country_code),
       finances: !!(newErrors.vat_number || newErrors.registration_info || newErrors.share_capital || newErrors.bank_details),
     });
 
-    if (Object.keys(newErrors).length === 0 && onSubmit) {
-      onSubmit(formData);
+    if (Object.keys(newErrors).length === 0) {
+      console.log('[handleSubmit] No errors, calling onSubmit');
+      if (onSubmit) onSubmit(formData);
+    } else {
+      console.log('[handleSubmit] Form has errors, cannot submit');
     }
   };
 
@@ -95,7 +140,7 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
       <div className="mb-3">
         <button type="button" className="btn btn-link p-0 mb-2" onClick={() => toggleSection('contact')}>
           Contact {openSections.contact ? '▲' : '▼'}
-          {(errors.contact_email || errors.phone_number) && ' ⚠️'}
+          {(errors.email || errors.phone) && ' ⚠️'}
         </button>
         {openSections.contact && (
           <ContactFields

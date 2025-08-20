@@ -1,173 +1,199 @@
 import React, { useState, useEffect } from 'react';
 import countries from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
-import { isValidSiret } from '../../utils/siret';
+import { validatePerson } from '../../utils/validators';
+import LegalFields from './fields/LegalFields';
+import ContactFields from './fields/ContactFields';
+import AddressFields from './fields/AddressFields';
+import FinanceFields from './fields/FinanceFields';
 
 countries.registerLocale(enLocale);
-
-const countryCodes = Object.entries(countries.getNames("en")).map(([code, name]) => ({
-  code,
-  name,
-}));
+const countryCodes = Object.entries(countries.getNames("en")).map(([code, name]) => ({ code, name }));
 
 export default function ClientForm({ onSubmit, disabled = false, initialData = {} }) {
   const [formData, setFormData] = useState({
+    is_company: true,
     legal_name: '',
+    firstname: '',
+    lastname: '',
+    siret: '',
     legal_identifier: '',
     address: '',
     city: '',
     postal_code: '',
     country_code: 'FR',
-    vat_number: ''
+    vat_number: '',
+    email: '',
+    phone: ''
   });
 
-  // Mettre à jour le formulaire quand initialData change
+  const [errors, setErrors] = useState({});
+  const [openSections, setOpenSections] = useState({
+    legal: true,
+    contact: false,
+    address: false,
+    finances: false,
+  });
+
+  // ---------------------
+  // Normalisation initialData
+  // ---------------------
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
-      setFormData({
-        legal_name: initialData.legal_name || '',
-        legal_identifier: initialData.legal_identifier || '',
-        address: initialData.address || '',
-        city: initialData.city || '',
-        postal_code: initialData.postal_code || '',
-        country_code: initialData.country_code || 'FR',
-        vat_number: initialData.vat_number || '',
+      setFormData(prev => {
+        const normalized = { ...prev, ...initialData };
+        if (normalized.siret && !normalized.legal_identifier) {
+          normalized.legal_identifier = normalized.siret;
+        }
+        console.log('[useEffect] Initial data normalized:', normalized);
+        return normalized;
       });
     }
   }, [initialData]);
 
-  // Mise à jour des champs
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  // ---------------------
+  // Synchronisation siret -> legal_identifier
+  // ---------------------
+  useEffect(() => {
+    setFormData(prev => {
+      // On compare prev.siret et prev.legal_identifier pour éviter le warning
+      if (prev.siret !== prev.legal_identifier) {
+        return { ...prev, legal_identifier: prev.siret };
+      }
+      return prev; // pas de changement -> pas de re-render
+    });
+  }, [formData.siret]);
+
+  // ---------------------
+  // Gestion des changements
+  // ---------------------
+  const handleChange = e => {
+    const { name, value, type } = e.target;
+    const val = type === 'checkbox' ? e.target.checked : value ?? '';
+
+    const newFormData = { ...formData, [name]: val };
+    setFormData(newFormData);
+
+    const newErrors = validatePerson(newFormData);
+    setErrors(newErrors);
+
+    console.log(`[handleChange] Field changed: ${name} = ${val}`);
+    console.log('[handleChange] Current formData:', newFormData);
+    console.log('[handleChange] Current errors:', newErrors);
   };
 
-  // Soumission du formulaire
-  const handleSubmit = (e) => {
+  // ---------------------
+  // Toggle sections
+  // ---------------------
+  const toggleSection = section => {
+    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  // ---------------------
+  // Submit
+  // ---------------------
+  const handleSubmit = e => {
     e.preventDefault();
 
-    if (formData.country_code === 'FR' && !isValidSiret(formData.legal_identifier)) {
-      alert("Le numéro SIRET n'est pas valide !");
-      return; 
-    }
+    const newErrors = validatePerson(formData);
+    setErrors(newErrors);
 
-    if (onSubmit) {
-      onSubmit(formData);
+    setOpenSections({
+      legal: !!(formData.is_company ? newErrors.legal_name || newErrors.siret : newErrors.firstname || newErrors.lastname),
+      contact: !!(newErrors.email || newErrors.phone),
+      address: !!(newErrors.address || newErrors.city || newErrors.postal_code || newErrors.country_code),
+      finances: !!newErrors.vat_number,
+    });
+
+    if (Object.keys(newErrors).length === 0) {
+      const payload = {
+        ...formData,
+        is_company: !!formData.is_company,
+        siret: formData.is_company && formData.country_code === 'FR' ? formData.siret?.trim() : null,
+        legal_name: formData.is_company
+          ? formData.legal_name?.trim()
+          : `${formData.firstname?.trim() || ''} ${formData.lastname?.trim() || ''}`.trim(),
+      };
+      if (onSubmit) onSubmit(payload);
     }
   };
 
+  // ---------------------
+  // Render
+  // ---------------------
   return (
     <form onSubmit={handleSubmit} className="p-3 border rounded bg-light">
-      <div className="mb-3">
-        <label htmlFor="legal_name" className="form-label">Nom légal *</label>
-        <input
-          type="text"
-          id="legal_name"
-          name="legal_name"
-          className="form-control"
-          maxLength={255}
-          required
-          disabled={disabled}
-          value={formData.legal_name}
-          onChange={handleChange}
-        />
-      </div>
 
+      {/* Section Légale */}
       <div className="mb-3">
-        <label htmlFor="legal_identifier" className="form-label">Identifiant légal</label>
-        <input
-          type="text"
-          id="legal_identifier"
-          name="legal_identifier"
-          className="form-control"
-          maxLength={50}
-          disabled={disabled}
-          value={formData.legal_identifier}
-          onChange={handleChange}
-        />
-      </div>
-
-      <div className="mb-3">
-        <label htmlFor="address" className="form-label">Adresse</label>
-        <textarea
-          id="address"
-          name="address"
-          className="form-control"
-          rows="2"
-          disabled={disabled}
-          value={formData.address}
-          onChange={handleChange}
-        ></textarea>
-      </div>
-
-      <div className="row mb-3">
-        <div className="col-md-4">
-          <label htmlFor="city" className="form-label">Ville</label>
-          <input
-            type="text"
-            id="city"
-            name="city"
-            className="form-control"
-            maxLength={100}
+        <button type="button" className="btn btn-link p-0 mb-2" onClick={() => toggleSection('legal')}>
+          Informations légales {openSections.legal ? '▲' : '▼'}
+          {((formData.is_company && (errors.legal_name || errors.siret)) || (!formData.is_company && (errors.firstname || errors.lastname))) && ' ⚠️'}
+        </button>
+        {openSections.legal && (
+          <LegalFields
+            formData={formData}
+            errors={errors}
+            handleChange={handleChange}
             disabled={disabled}
-            value={formData.city}
-            onChange={handleChange}
           />
-        </div>
-        <div className="col-md-4">
-          <label htmlFor="postal_code" className="form-label">Code postal</label>
-          <input
-            type="text"
-            id="postal_code"
-            name="postal_code"
-            className="form-control"
-            maxLength={20}
-            disabled={disabled}
-            value={formData.postal_code}
-            onChange={handleChange}
-          />
-        </div>
-        <div className="col-md-4">
-          <label htmlFor="country_code" className="form-label">Code pays</label>
-          <select
-            id="country_code"
-            name="country_code"
-            className="form-select"
-            disabled={disabled}
-            value={formData.country_code}
-            onChange={handleChange}
-          >
-            {countryCodes.map(({ code, name }) => (
-              <option key={code} value={code}>
-                {code} - {name}
-              </option>
-            ))}
-          </select>
-        </div>
+        )}
       </div>
 
+      {/* Section Contact */}
       <div className="mb-3">
-        <label htmlFor="vat_number" className="form-label">Numéro de TVA</label>
-        <input
-          type="text"
-          id="vat_number"
-          name="vat_number"
-          className="form-control"
-          maxLength={50}
-          disabled={disabled}
-          value={formData.vat_number}
-          onChange={handleChange}
-        />
+        <button type="button" className="btn btn-link p-0 mb-2" onClick={() => toggleSection('contact')}>
+          Contact {openSections.contact ? '▲' : '▼'}
+          {(errors.email || errors.phone) && ' ⚠️'}
+        </button>
+        {openSections.contact && (
+          <ContactFields
+            formData={formData}
+            errors={errors}
+            handleChange={handleChange}
+            disabled={disabled}
+          />
+        )}
+      </div>
+
+      {/* Section Adresse */}
+      <div className="mb-3">
+        <button type="button" className="btn btn-link p-0 mb-2" onClick={() => toggleSection('address')}>
+          Adresse {openSections.address ? '▲' : '▼'}
+          {(errors.address || errors.city || errors.postal_code || errors.country_code) && ' ⚠️'}
+        </button>
+        {openSections.address && (
+          <AddressFields
+            formData={formData}
+            errors={errors}
+            handleChange={handleChange}
+            disabled={disabled}
+            countryCodes={countryCodes}
+          />
+        )}
+      </div>
+
+      {/* Section Finances */}
+      <div className="mb-3">
+        <button type="button" className="btn btn-link p-0 mb-2" onClick={() => toggleSection('finances')}>
+          Finances {openSections.finances ? '▲' : '▼'}
+          {errors.vat_number && ' ⚠️'}
+        </button>
+        {openSections.finances && (
+          <FinanceFields
+            formData={formData}
+            errors={errors}
+            handleChange={handleChange}
+            disabled={disabled}
+          />
+        )}
       </div>
 
       {!disabled && (
         <div className="text-end mt-3">
-          <button type="submit" className="btn btn-primary">
-            Enregistrer
-          </button>
+          <button type="submit" className="btn btn-primary">Enregistrer</button>
         </div>
       )}
-
     </form>
   );
 }
