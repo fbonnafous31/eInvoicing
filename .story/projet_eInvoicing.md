@@ -51,7 +51,7 @@
 ---
 ## Rappel – Composants et services réutilisables
 
-- Privilégier **les composants UI réutilisables** (`InputField`, `TextAreaField`, `EllipsisCell`) pour uniformité.
+- Privilégier **les composants UI réutilisables** (`InputField`, `TextAreaField`, `EllipsisCell`, ...) pour uniformité.
 - Utiliser **les services centralisés** pour les appels API afin de garder cohérence et validations.
 
 
@@ -92,3 +92,64 @@ project/
 ├── docs/
 ├── scripts/
 └── README.md
+
+## Architecture frontend
+├── App.css
+├── App.jsx
+├── AppRoutes.jsx
+├── architecture.txt
+├── assets
+│   └── react.svg
+├── components
+│   ├── Breadcrumb.jsx
+│   ├── common
+│   │   ├── EllipsisCell.jsx
+│   │   └── SellerAuditPanel.jsx
+│   ├── form
+│   │   ├── FormSection.jsx
+│   │   ├── InputField.jsx
+│   │   └── TextAreaField.jsx
+│   ├── invoices
+│   │   ├── InvoiceForm.jsx
+│   │   ├── InvoiceHeader.jsx
+│   │   ├── InvoiceLines.jsx
+│   │   ├── SupportingDocs.jsx
+│   │   └── TaxBases.jsx
+│   └── NavBar.jsx
+├── constants
+│   ├── companyTypes.js
+│   └── paymentTerms.js
+├── hooks
+│   └── useSellers.js
+├── index.css
+├── main.jsx
+├── modules
+│   └── sellers
+│       ├── datatableStyles.js
+│       └── sellerColumns.jsx
+├── pages
+│   ├── clients
+│   │   ├── ClientDetail.jsx
+│   │   ├── ClientForm.jsx
+│   │   ├── ClientsList.jsx
+│   │   ├── ClientsPage.jsx
+│   │   └── NewClient.jsx
+│   ├── invoices
+│   │   ├── InvoicesList.jsx
+│   │   └── NewInvoice.jsx
+│   ├── NotFound.jsx
+│   └── sellers
+│       ├── fields
+│       ├── NewSeller.jsx
+│       ├── SellerDetail.jsx
+│       ├── SellerForm.jsx
+│       ├── SellersList.jsx
+│       └── SellersPage.jsx
+├── services
+│   ├── clients.js
+│   ├── invoices.js
+│   └── sellers.js
+└── utils
+    ├── formatters.js
+    ├── siret.js
+    └── validators.js

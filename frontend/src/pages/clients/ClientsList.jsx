@@ -1,70 +1,22 @@
-import React, { useEffect, useState } from 'react';
+// frontend/src/pages/clients/ClientsList.jsx
+import React, { useState } from 'react';
 import DataTable from 'react-data-table-component';
-import { useNavigate } from 'react-router-dom';
-import Breadcrumb from '../../components/Breadcrumb'; 
-import { fetchClients } from '../../services/clients'; // <- utilisation du service
+import Breadcrumb from '../../components/Breadcrumb';
+import useClients from '../../hooks/useClients';
+import useClientColumns from '../../modules/clients/clientColumns';
+import { datatableStyles } from '../../modules/common/datatableStyles';
+import AuditPanel from '../../components/common/AuditPanel';
 
 export default function ClientsList() {
-  const [clients, setClients] = useState([]);
+  const { clients, loading, error } = useClients();
+  const columns = useClientColumns();
   const [filterText, setFilterText] = useState('');
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchClients()
-      .then(data => setClients(data))
-      .catch(console.error);
-  }, []);
-
-  const columns = [
-    {
-      name: 'Identifiant',
-      selector: row => row.legal_identifier,
-      sortable: true,
-      width: '150px',
-    },
-    {
-      name: 'Nom légal',
-      selector: row => row.legal_name,
-      sortable: true,
-    },
-    {
-      name: 'Adresse',
-      selector: row => row.address,
-      sortable: true,
-    },   
-    {
-      name: 'Code postal',
-      selector: row => row.postal_code,
-      sortable: true,
-    },       
-    {
-      name: 'Ville',
-      selector: row => row.city,
-      sortable: true,
-    },
-    {
-      name: 'Actions',
-      cell: row => (
-        <button
-          className="btn btn-sm"
-          onClick={() => navigate(`/clients/${row.id}`)}
-        >
-          ✏️
-        </button>
-      ),
-      ignoreRowClick: true,
-      allowOverflow: true,       
-      button: true,      
-      style: { textAlign: 'right' }
-    },    
-  ];
-
-  const filteredItems = clients.filter(item => {
-    const search = filterText.toLowerCase();
-    return Object.values(item).some(
-      val => val && val.toString().toLowerCase().includes(search)
-    );
-  });
+  const filteredItems = clients.filter(item =>
+    Object.values(item).some(
+      val => val && val.toString().toLowerCase().includes(filterText.toLowerCase())
+    )
+  );
 
   const breadcrumbItems = [
     { label: 'Accueil', path: '/' },
@@ -74,7 +26,10 @@ export default function ClientsList() {
   return (
     <div className="container-fluid mt-4">
       <h1 className="visually-hidden">Liste des clients</h1>
+
       <Breadcrumb items={breadcrumbItems} />
+
+      {error && <div className="alert alert-danger">{error}</div>}
 
       <input
         type="text"
@@ -95,11 +50,15 @@ export default function ClientsList() {
         responsive
         dense
         noHeader
-        customStyles={{
-          table: { style: { border: '1px solid #ddd', borderRadius: '4px' } },
-          headRow: { style: { borderBottom: '2px solid #ccc' } },
-          rows: { style: { borderBottom: '1px solid #eee' } },
-        }}
+        fixedHeader
+        fixedHeaderScrollHeight="70vh"
+        expandableRows
+        expandableRowsComponent={({ data }) => (
+          <AuditPanel createdAt={data.created_at} updatedAt={data.updated_at} />
+        )}  
+        expandOnRowClicked
+        progressPending={loading}
+        customStyles={datatableStyles}
       />
     </div>
   );

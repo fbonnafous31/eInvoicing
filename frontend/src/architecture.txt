@@ -1,10 +1,19 @@
 .
 ├── App.css
 ├── App.jsx
+├── AppRoutes.jsx
 ├── architecture.txt
 ├── assets
 │   └── react.svg
 ├── components
+│   ├── Breadcrumb.jsx
+│   ├── common
+│   │   ├── EllipsisCell.jsx
+│   │   └── SellerAuditPanel.jsx
+│   ├── form
+│   │   ├── FormSection.jsx
+│   │   ├── InputField.jsx
+│   │   └── TextAreaField.jsx
 │   ├── invoices
 │   │   ├── InvoiceForm.jsx
 │   │   ├── InvoiceHeader.jsx
@@ -13,9 +22,16 @@
 │   │   └── TaxBases.jsx
 │   └── NavBar.jsx
 ├── constants
+│   ├── companyTypes.js
 │   └── paymentTerms.js
+├── hooks
+│   └── useSellers.js
 ├── index.css
 ├── main.jsx
+├── modules
+│   └── sellers
+│       ├── datatableStyles.js
+│       └── sellerColumns.jsx
 ├── pages
 │   ├── clients
 │   │   ├── ClientDetail.jsx
@@ -24,15 +40,23 @@
 │   │   ├── ClientsPage.jsx
 │   │   └── NewClient.jsx
 │   ├── invoices
-│   │   └── InvoicesList.jsx
+│   │   ├── InvoicesList.jsx
+│   │   └── NewInvoice.jsx
+│   ├── NotFound.jsx
 │   └── sellers
+│       ├── fields
 │       ├── NewSeller.jsx
 │       ├── SellerDetail.jsx
 │       ├── SellerForm.jsx
 │       ├── SellersList.jsx
 │       └── SellersPage.jsx
+├── services
+│   ├── clients.js
+│   ├── invoices.js
+│   └── sellers.js
 └── utils
     ├── formatters.js
-    └── siret.js
+    ├── siret.js
+    └── validators.js
 
-10 directories, 26 files
+17 directories, 43 files
