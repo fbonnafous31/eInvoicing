@@ -1,6 +1,9 @@
+// ClientDetail.jsx
 import React, { useEffect, useState } from 'react';
 import ClientForm from './ClientForm';
 import { useParams, useNavigate } from 'react-router-dom';
+import Breadcrumb from '../../components/Breadcrumb';
+import { fetchClient, updateClient, deleteClient } from '../../services/clients';
 
 export default function ClientDetail() {
   const { id } = useParams();
@@ -10,19 +13,13 @@ export default function ClientDetail() {
   const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
-    fetch(`http://localhost:3000/api/clients/${id}`)
-      .then(res => res.json())
+    fetchClient(id)
       .then(data => setClient(data))
       .catch(console.error);
   }, [id]);
 
   const handleUpdate = (updatedData) => {
-    fetch(`http://localhost:3000/api/clients/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedData)
-    })
-      .then(res => res.json())
+    updateClient(id, updatedData)
       .then(data => {
         setClient(data);           
         setIsEditing(false);       
@@ -35,11 +32,25 @@ export default function ClientDetail() {
       .catch(console.error);
   };
 
+  const handleDelete = () => {
+    if (window.confirm('Voulez-vous vraiment supprimer ce client ?')) {
+      deleteClient(id)
+        .then(() => navigate('/clients'))
+        .catch(console.error);
+    }
+  };
+
   if (!client) return <p>Chargement...</p>;
+
+  const breadcrumbItems = [
+    { label: 'Accueil', path: '/' },
+    { label: 'Clients', path: '/clients' },
+    { label: client.legal_name || 'Détail', path: `/clients/${id}` },
+  ];
 
   return (
     <div className="container mt-4">
-      <h2>Détails du client</h2>
+      <Breadcrumb items={breadcrumbItems} />
 
       {successMessage && (
         <div className="alert alert-success" role="alert">
@@ -63,16 +74,7 @@ export default function ClientDetail() {
             ✏️ Modifier
           </button>
         )}
-        <button
-          className="btn btn-danger ms-2"
-          onClick={() => {
-            if (window.confirm('Voulez-vous vraiment supprimer ce client ?')) {
-              fetch(`http://localhost:3000/api/clients/${id}`, { method: 'DELETE' })
-                .then(() => navigate('/clients'))
-                .catch(console.error);
-            }
-          }}
-        >
+        <button className="btn btn-danger ms-2" onClick={handleDelete}>
           Supprimer
         </button>
       </div>

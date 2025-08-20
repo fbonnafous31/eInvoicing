@@ -99,12 +99,25 @@ async function updateClient(req, res) {
 // ----------------- Vérification SIRET côté front -----------------
 async function checkSiret(req, res) {
   try {
-    const siret = req.params.siret.replace(/\D/g, ''); // ne garder que les chiffres
-    const result = await pool.query(
-      'SELECT id FROM invoicing.clients WHERE siret = $1',
-      [siret]
-    );
+    // Récupérer le SIRET et ne garder que les chiffres
+    const siret = req.params.siret.replace(/\D/g, '');
 
+    // Récupérer l'id du client courant (optionnel) et convertir en integer
+    const clientId = req.query.id ? parseInt(req.query.id, 10) : null;
+
+    // Construire la requête SQL
+    let query = 'SELECT id FROM invoicing.clients WHERE siret = $1';
+    const params = [siret];
+
+    if (clientId) {
+      query += ' AND id != $2';
+      params.push(clientId);
+    }
+
+    // Exécuter la requête
+    const result = await pool.query(query, params);
+
+    // Renvoyer si le SIRET existe chez un autre client
     res.json({ exists: result.rowCount > 0 });
   } catch (err) {
     console.error(err);
