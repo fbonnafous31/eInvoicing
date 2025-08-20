@@ -13,9 +13,7 @@ export default function LegalFields({ formData, errors, handleChange, disabled }
             name="is_company"
             value="true"
             checked={formData.is_company === true}
-            onChange={e => handleChange({
-              target: { name: 'is_company', value: e.target.value }
-            })}
+            onChange={e => handleChange({ target: { name: 'is_company', value: e.target.value === 'true' } })}
             disabled={disabled}
             className="form-check-input"
           />
@@ -28,16 +26,13 @@ export default function LegalFields({ formData, errors, handleChange, disabled }
             name="is_company"
             value="false"
             checked={formData.is_company === false}
-            onChange={e => handleChange({
-              target: { name: 'is_company', value: e.target.value }
-            })}
+            onChange={e => handleChange({ target: { name: 'is_company', value: e.target.value === 'true' } })}
             disabled={disabled}
             className="form-check-input"
           />
           <label htmlFor="is_company_false" className="form-check-label">Particulier</label>
         </div>
       </div>
-
 
       {formData.is_company ? (
         <>
@@ -71,7 +66,7 @@ export default function LegalFields({ formData, errors, handleChange, disabled }
               />
               {errors.siret && <div className="invalid-feedback">{errors.siret}</div>}
             </div>
-          )}          
+          )}
         </>
       ) : (
         <>

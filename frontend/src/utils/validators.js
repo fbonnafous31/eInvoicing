@@ -3,21 +3,33 @@ import { isValidSiret } from './siret';
 export function validatePerson(data) {
   const errors = {};
 
-  // Pour les vendeurs, on considère toujours qu'il s'agit d'une société
   const isCompany = data.is_company !== undefined ? data.is_company : true;
 
+  // ---------------------
+  // Validation légale
+  // ---------------------
   if (isCompany) {
-    // Nom légal obligatoire
     if (!data.legal_name?.trim()) {
       errors.legal_name = 'Le nom légal est obligatoire';
     }
 
-    // SIRET / identifiant légal si pays FR
-    if (data.country_code === 'FR' && data.legal_identifier && !isValidSiret(data.legal_identifier)) {
-      errors.legal_identifier = 'SIRET invalide';
+    // SIRET obligatoire si entreprise FR
+    if (data.country_code === 'FR') {
+      const siret = (data.siret || '').toString().replace(/\D/g, '');
+      if (!siret) {
+        errors.siret = 'Le SIRET est requis pour une entreprise française';
+      } else if (siret.length !== 14) {
+        errors.siret = 'Le SIRET doit contenir 14 chiffres';
+      } else if (!isValidSiret(siret)) {
+        errors.siret = 'SIRET invalide';
+      }
+    } else {
+      if (!data.vat_number?.trim()) {
+        errors.vat_number = 'Le numéro de TVA intracommunautaire est requis pour les entreprises non françaises';
+      }
     }
   } else {
-    // Pour les particuliers (si jamais tu en as un jour)
+    // Particulier
     if (!data.firstname?.trim()) {
       errors.firstname = 'Le prénom est obligatoire';
     }
@@ -29,7 +41,9 @@ export function validatePerson(data) {
     }
   }
 
-  // Validations communes
+  // ---------------------
+  // Validation contact
+  // ---------------------
   if (data.email && !/\S+@\S+\.\S+/.test(data.email)) {
     errors.email = 'Email invalide';
   }
