@@ -27,30 +27,20 @@ export default function ClientForm({ onSubmit, disabled = false, initialData = {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    // Nettoyage SIRET pour validation
     const cleanedSiret = (formData.siret || '').toString().replace(/\D/g, '');
-    const newErrors = {};
 
-    // Validation entreprise FR
-    if (formData.is_company) {
-      if (formData.country_code === 'FR') {
-        if (!cleanedSiret) newErrors.siret = 'Le SIRET est requis pour une entreprise française';
-        else if (cleanedSiret.length !== 14) newErrors.siret = 'Le SIRET doit contenir 14 chiffres';
-      } else if (!formData.vat_number?.trim()) {
-        newErrors.vat_number = 'Le numéro de TVA intracommunautaire est requis pour les entreprises non françaises';
-      }
-    }
+    // Validation centralisée
+    const newErrors = validateClient({ ...formData, siret: cleanedSiret });
 
-    // Vérification SIRET déjà existant côté front
+    // Vérification SIRET déjà existant (base de données)
     if (siretExists) newErrors.siret = 'Ce SIRET est déjà utilisé';
-
-    // Validation générale via validators.js
-    Object.assign(newErrors, validateClient({ ...formData, siret: cleanedSiret }));
 
     setErrors(newErrors);
 
     // Ouvrir les sections avec erreurs
     Object.keys(openSections).forEach(section => {
-      const hasError = Object.keys(newErrors).some(key => keyMatchesSection(key, section));
+      const hasError = sectionHasError(section, newErrors);
       if (hasError !== openSections[section]) toggleSection(section);
     });
 
@@ -73,43 +63,17 @@ export default function ClientForm({ onSubmit, disabled = false, initialData = {
     }
   };
 
-  // ---------------------
-  // Définition dynamique des sections
-  // ---------------------
   const sections = [
-    {
-      key: 'legal',
-      label: 'Informations légales',
-      component: LegalFields,
-      show: true
-    },
-    {
-      key: 'contact',
-      label: 'Contact',
-      component: ContactFields,
-      show: true
-    },
-    {
-      key: 'address',
-      label: 'Adresse',
-      component: AddressFields,
-      show: true
-    },
-    {
-      key: 'finances',
-      label: 'Finances',
-      component: FinanceFields,
-      show: true
-    }
+    { key: 'legal', label: 'Informations légales', component: LegalFields },
+    { key: 'contact', label: 'Contact', component: ContactFields },
+    { key: 'address', label: 'Adresse', component: AddressFields },
+    { key: 'finances', label: 'Finances', component: FinanceFields }
   ];
 
   return (
     <form onSubmit={handleSubmit} className="p-3 border rounded bg-light">
-      {sections.map(({ key, label, component, show }) => {
-        if (!show) return null;
-
-        const hasError = Object.keys(errors).some(field => keyMatchesSection(field, key));
-
+      {sections.map(({ key, label, component }) => {
+        const hasError = sectionHasError(key, errors);
         const Component = component;
 
         return (
@@ -140,14 +104,15 @@ export default function ClientForm({ onSubmit, disabled = false, initialData = {
 }
 
 // ---------------------
-// Helper pour savoir quel champ appartient à quelle section
+// Helper pour savoir si une section contient des erreurs
 // ---------------------
-function keyMatchesSection(key, section) {
+function sectionHasError(section, errors) {
   const mapping = {
     legal: ['legal_name', 'siret', 'legal_identifier', 'firstname', 'lastname'],
-    contact: ['email', 'phone'],
+    contact: ['email', 'phone_number'],
     address: ['address', 'city', 'postal_code', 'country_code'],
     finances: ['vat_number']
   };
-  return mapping[section]?.includes(key);
+
+  return Object.keys(errors).some(key => mapping[section]?.includes(key));
 }
