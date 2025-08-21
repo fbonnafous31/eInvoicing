@@ -1,6 +1,5 @@
-// frontend/src/hooks/useClientForm.js
 import { useState } from 'react';
-import { validatePerson } from '../utils/validators';
+import { validateClient } from '../../utils/validators/client';
 
 export default function useClientForm(initialData = {}) {
   const [formData, setFormData] = useState({
@@ -83,7 +82,7 @@ export default function useClientForm(initialData = {}) {
         updated.legal_identifier = prev.legal_identifier || '';
       }
 
-      const newErrors = validatePerson(updated);
+      const newErrors = validateClient(updated);
       setErrors(newErrors);
 
       return updated;

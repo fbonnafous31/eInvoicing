@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import countries from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
 import companyTypes from '../../constants/companyTypes';
-import { validatePerson } from '../../utils/validators';
+import { validateSeller } from '../../utils/validators/seller';
+
 
 // Sections
 import LegalFields from './fields/LegalFields';
@@ -24,8 +25,8 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
     registration_info: '',
     share_capital: '',
     bank_details: '',
-    email: '',
-    phone: '',
+    contact_email: '',
+    phone_number: '',
     company_type: 'MICRO',
     is_company: true,
   });
@@ -59,8 +60,8 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
         registration_info: '',
         share_capital: '',
         bank_details: '',
-        email: '',
-        phone: '',
+        contact_email: '',
+        phone_number: '',
         company_type: 'MICRO',
         ...stableInitialData
       };
@@ -81,7 +82,7 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
     const newFormData = { ...formData, [name]: value ?? '' };
     setFormData(newFormData);
 
-    const newErrors = validatePerson(newFormData);
+    const newErrors = validateSeller(newFormData);
     setErrors(newErrors);
 
     console.log(`[handleChange] Field changed: ${name} = ${value}`);
@@ -93,13 +94,13 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
     e.preventDefault();
     console.log('[handleSubmit] Submit triggered', formData);
 
-    const newErrors = validatePerson(formData);
+    const newErrors = validateSeller(formData);
     setErrors(newErrors);
     console.log('[handleSubmit] Validation errors:', newErrors);
 
     setOpenSections({
       legal: !!(newErrors.legal_name || newErrors.legal_identifier || newErrors.company_type),
-      contact: !!(newErrors.email || newErrors.phone),
+      contact: !!(newErrors.contact_email || newErrors.phone_number),
       address: !!(newErrors.address || newErrors.city || newErrors.postal_code || newErrors.country_code),
       finances: !!(newErrors.vat_number || newErrors.registration_info || newErrors.share_capital || newErrors.bank_details),
     });
@@ -140,7 +141,7 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
       <div className="mb-3">
         <button type="button" className="btn btn-link p-0 mb-2" onClick={() => toggleSection('contact')}>
           Contact {openSections.contact ? '▲' : '▼'}
-          {(errors.email || errors.phone) && ' ⚠️'}
+          {(errors.contact_email || errors.phone_number) && ' ⚠️'}
         </button>
         {openSections.contact && (
           <ContactFields

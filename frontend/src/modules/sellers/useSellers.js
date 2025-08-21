@@ -1,6 +1,5 @@
-// frontend/src/hooks/useSellers.js
 import { useState, useEffect } from 'react';
-import { fetchSellers } from '../services/sellers';
+import { fetchSellers } from '../../services/sellers';
 
 export default function useSellers() {
   const [sellers, setSellers] = useState([]);

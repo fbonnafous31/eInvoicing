@@ -1,9 +1,16 @@
+// utils/validators/client.js
 import { isValidSiret } from './siret';
+import { validateContact } from './contact';
 
-export function validatePerson(data) {
+/**
+ * Validation d'un client
+ * @param {Object} data - Les données du formulaire
+ * @returns {Object} errors - Objet des erreurs de validation
+ */
+export function validateClient(data) {
   const errors = {};
 
-  const isCompany = data.is_company !== undefined ? data.is_company : true;
+  const isCompany = data.is_company ?? true;
 
   // ---------------------
   // Validation légale
@@ -13,9 +20,8 @@ export function validatePerson(data) {
       errors.legal_name = 'Le nom légal est obligatoire';
     }
 
-    // SIRET obligatoire si entreprise FR
     if (data.country_code === 'FR') {
-      const siret = (data.siret || '').toString().replace(/\D/g, '');
+      const siret = (data.siret || '').replace(/\D/g, '');
       if (!siret) {
         errors.siret = 'Le SIRET est requis pour une entreprise française';
       } else if (siret.length !== 14) {
@@ -23,19 +29,18 @@ export function validatePerson(data) {
       } else if (!isValidSiret(siret)) {
         errors.siret = 'SIRET invalide';
       }
-    } else {
-      if (!data.vat_number?.trim()) {
-        errors.vat_number = 'Le numéro de TVA intracommunautaire est requis pour les entreprises non françaises';
-      }
+    } else if (!data.vat_number?.trim()) {
+      errors.vat_number = 'Le numéro de TVA intracommunautaire est requis';
     }
   } else {
-    // Particulier
+    // Personne physique
     if (!data.firstname?.trim()) {
       errors.firstname = 'Le prénom est obligatoire';
     }
     if (!data.lastname?.trim()) {
       errors.lastname = 'Le nom est obligatoire';
     }
+
     if (data.siret) {
       errors.siret = 'Un particulier ne peut pas avoir de SIRET';
     }
@@ -44,13 +49,9 @@ export function validatePerson(data) {
   // ---------------------
   // Validation contact
   // ---------------------
-  if (data.email && !/\S+@\S+\.\S+/.test(data.email)) {
-    errors.email = 'Email invalide';
-  }
-
-  if (data.phone && !/^\+?[0-9\s-]{6,20}$/.test(data.phone)) {
-    errors.phone = 'Numéro de téléphone invalide';
-  }
-
-  return errors;
+  // Pour les clients, le champ email n'est pas obligatoire
+  return {
+    ...errors,
+    ...validateContact(data, { emailField: 'email', emailRequired: false })
+  };
 }

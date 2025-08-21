@@ -8,8 +8,8 @@
 ├── components
 │   ├── Breadcrumb.jsx
 │   ├── common
-│   │   ├── EllipsisCell.jsx
-│   │   └── SellerAuditPanel.jsx
+│   │   ├── AuditPanel.jsx
+│   │   └── EllipsisCell.jsx
 │   ├── form
 │   │   ├── FormSection.jsx
 │   │   ├── InputField.jsx
@@ -24,20 +24,25 @@
 ├── constants
 │   ├── companyTypes.js
 │   └── paymentTerms.js
-├── hooks
-│   └── useSellers.js
 ├── index.css
 ├── main.jsx
 ├── modules
+│   ├── clients
+│   │   ├── clientColumns.jsx
+│   │   ├── useClientForm.js
+│   │   └── useClients.js
+│   ├── common
+│   │   └── datatableStyles.js
 │   └── sellers
-│       ├── datatableStyles.js
-│       └── sellerColumns.jsx
+│       ├── sellerColumns.jsx
+│       └── useSellers.js
 ├── pages
 │   ├── clients
 │   │   ├── ClientDetail.jsx
 │   │   ├── ClientForm.jsx
 │   │   ├── ClientsList.jsx
 │   │   ├── ClientsPage.jsx
+│   │   ├── fields
 │   │   └── NewClient.jsx
 │   ├── invoices
 │   │   ├── InvoicesList.jsx
@@ -55,8 +60,13 @@
 │   ├── invoices.js
 │   └── sellers.js
 └── utils
-    ├── formatters.js
-    ├── siret.js
-    └── validators.js
+    ├── architecture.txt
+    ├── formatters
+    │   └── formatters.js
+    └── validators
+        ├── client.js
+        ├── contact.js
+        ├── seller.js
+        └── siret.js
 
-17 directories, 43 files
+21 directories, 49 files
