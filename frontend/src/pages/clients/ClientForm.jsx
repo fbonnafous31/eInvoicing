@@ -7,8 +7,8 @@ import LegalFields from './fields/LegalFields';
 import ContactFields from './fields/ContactFields';
 import AddressFields from './fields/AddressFields';
 import FinanceFields from './fields/FinanceFields';
-import useClientForm from '../../hooks/useClientForm';
-import { validatePerson } from '../../utils/validators';
+import useClientForm from '../../modules/clients/useClientForm';
+import { validateClient } from '../../utils/validators/client';
 
 countries.registerLocale(enLocale);
 const countryCodes = Object.entries(countries.getNames("en")).map(([code, name]) => ({ code, name }));
@@ -44,7 +44,7 @@ export default function ClientForm({ onSubmit, disabled = false, initialData = {
     if (siretExists) newErrors.siret = 'Ce SIRET est déjà utilisé';
 
     // Validation générale via validators.js
-    Object.assign(newErrors, validatePerson({ ...formData, siret: cleanedSiret }));
+    Object.assign(newErrors, validateClient({ ...formData, siret: cleanedSiret }));
 
     setErrors(newErrors);
 

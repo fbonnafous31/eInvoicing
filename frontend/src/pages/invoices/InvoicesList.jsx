@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import DataTable from 'react-data-table-component';
-import { formatCurrency, formatDate } from '../../utils/formatters';
+import { formatCurrency, formatDate } from '../../utils/formatters/formatters';
 import Breadcrumb from '../../components/Breadcrumb';
 import * as invoiceService from '../../services/invoices';
 

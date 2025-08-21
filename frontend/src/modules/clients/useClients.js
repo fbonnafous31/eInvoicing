@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchClients } from '../services/clients';
+import { fetchClients } from '../../services/clients';
 
 export default function useClients() {
   const [clients, setClients] = useState([]);

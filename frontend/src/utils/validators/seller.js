@@ -1,0 +1,59 @@
+// utils/validators/seller.js
+import { isValidSiret } from './siret';
+import { validateContact } from './contact';
+
+/**
+ * Validation d'un vendeur (toujours une entreprise)
+ * @param {Object} data - Les données du formulaire
+ * @returns {Object} errors - Objet des erreurs de validation
+ */
+export function validateSeller(data) {
+  const errors = {};
+
+  // ---------------------
+  // Validation légale
+  // ---------------------
+  if (!data.legal_name?.trim()) {
+    errors.legal_name = 'Le nom légal est obligatoire';
+  }
+
+  if (!data.legal_identifier?.trim()) {
+    errors.legal_identifier = 'Identifiant légal obligatoire';
+  }
+
+  // Contrôle SIRET pour entreprises françaises
+  if (data.country_code === 'FR') {
+    const siret = (data.legal_identifier || '').replace(/\D/g, '');
+    if (!siret) {
+      errors.legal_identifier = 'Le SIRET est requis pour une entreprise française';
+    } else if (siret.length !== 14) {
+      errors.legal_identifier = 'Le SIRET doit contenir 14 chiffres';
+    } else if (!isValidSiret(siret)) {
+      errors.legal_identifier = 'SIRET invalide';
+    }
+  } else if (!data.vat_number?.trim()) {
+    errors.vat_number = 'Le numéro de TVA intracommunautaire est requis';
+  }
+
+  // ---------------------
+  // Validation adresse
+  // ---------------------
+  if (!data.address?.trim()) {
+    errors.address = 'L’adresse est obligatoire';
+  }
+  if (!data.postal_code?.trim()) {
+    errors.postal_code = 'Le code postal est obligatoire';
+  }
+  if (!data.city?.trim()) {
+    errors.city = 'La ville est obligatoire';
+  }
+
+  // ---------------------
+  // Validation contact
+  // ---------------------
+  // Pour les vendeurs, le champ email est contact_email et obligatoire
+  return { 
+    ...errors, 
+    ...validateContact(data, { emailField: 'contact_email', emailRequired: true }) 
+  };
+}

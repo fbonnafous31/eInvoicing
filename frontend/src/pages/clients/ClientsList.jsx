@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import DataTable from 'react-data-table-component';
 import Breadcrumb from '../../components/Breadcrumb';
-import useClients from '../../hooks/useClients';
+import useClients from '../../modules/clients/useClients';
 import useClientColumns from '../../modules/clients/clientColumns';
 import { datatableStyles } from '../../modules/common/datatableStyles';
 import AuditPanel from '../../components/common/AuditPanel';
