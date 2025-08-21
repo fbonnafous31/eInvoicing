@@ -1,6 +1,7 @@
 // utils/validators/seller.js
 import { isValidSiret } from './siret';
 import { validateContact } from './contact';
+import IBAN from 'iban';
 
 /**
  * Validation d'un vendeur (toujours une entreprise)
@@ -49,11 +50,22 @@ export function validateSeller(data) {
   }
 
   // ---------------------
+  // Validation banque
+  // ---------------------
+  if (data.iban && !IBAN.isValid(data.iban)) {
+    errors.iban = 'IBAN invalide';
+  }
+
+  if (data.bic && !/^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/.test(data.bic)) {
+    errors.bic = 'BIC invalide';
+  }
+
+  // ---------------------
   // Validation contact
   // ---------------------
   // Pour les vendeurs, le champ email est contact_email et obligatoire
-  return { 
-    ...errors, 
-    ...validateContact(data, { emailField: 'contact_email', emailRequired: true }) 
+  return {
+    ...errors,
+    ...validateContact(data, { emailField: 'contact_email', emailRequired: true }),
   };
 }

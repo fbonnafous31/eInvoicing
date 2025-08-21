@@ -17,7 +17,7 @@ export default function FinanceFields({ formData, errors, handleChange, disabled
       <TextAreaField
         id="registration_info"
         name="registration_info"
-        label="Informations d’enregistrement *"
+        label="Registre du commerce"
         value={formData.registration_info}
         onChange={handleChange}
         disabled={disabled}
@@ -34,14 +34,23 @@ export default function FinanceFields({ formData, errors, handleChange, disabled
         disabled={disabled}
         error={errors.share_capital}
       />
-      <TextAreaField
-        id="bank_details"
-        name="bank_details"
-        label="Détails bancaires"
-        value={formData.bank_details}
+      <InputField
+        id="iban"
+        name="iban"
+        label="IBAN"
+        value={formData.iban}
         onChange={handleChange}
         disabled={disabled}
-        error={errors.bank_details}
+        error={errors.iban}
+      />
+      <InputField
+        id="bic"
+        name="bic"
+        label="BIC"
+        value={formData.bic}
+        onChange={handleChange}
+        disabled={disabled}
+        error={errors.bic}
       />
     </>
   );
