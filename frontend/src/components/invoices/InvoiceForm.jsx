@@ -4,7 +4,7 @@ import InvoiceHeader from "./InvoiceHeader";
 import InvoiceLines from "./InvoiceLines";
 import TaxBases from "./TaxBases";
 import SupportingDocs from "./SupportingDocs";
-import axios from "axios";
+import { createInvoice } from "../../services/invoices";
 
 export default function InvoiceForm() {
   const navigate = useNavigate();
@@ -12,9 +12,11 @@ export default function InvoiceForm() {
     header: {},
     lines: [],
     taxes: [],
-    attachments: [] // { raw_file: File, attachment_type: 'main'|'additional' }
+    attachments: []
   });
   const [successMessage, setSuccessMessage] = useState("");
+  const [errors, setErrors] = useState({});
+  const [submitted, setSubmitted] = useState(false);
 
   const { subtotal, totalTaxes, total, linesWithTotals, taxesSummary } = useMemo(() => {
     let st = 0, tt = 0;
@@ -53,51 +55,61 @@ export default function InvoiceForm() {
 
   const handleChange = (section, value) => setInvoiceData(prev => ({ ...prev, [section]: value }));
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Vérification date et exercice fiscal
+  const validate = () => {
+    const errs = {};
     const issueDate = invoiceData.header.issue_date;
     const fiscalYear = invoiceData.header.fiscal_year;
-    if (!issueDate) { alert("Veuillez saisir la date d'émission."); return; }
-    const issueYear = new Date(issueDate).getFullYear();
-    if (!fiscalYear || fiscalYear < issueYear - 1 || fiscalYear > issueYear + 1) {
-      alert(`L'exercice fiscal doit être compris entre ${issueYear - 1} et ${issueYear + 1}`);
-      return;
+
+    if (!issueDate) errs.issue_date = "Date d'émission obligatoire";
+    else {
+      const issueYear = new Date(issueDate).getFullYear();
+      if (!fiscalYear || fiscalYear < issueYear - 1 || fiscalYear > issueYear + 1) {
+        errs.fiscal_year = `Exercice fiscal doit être entre ${issueYear - 1} et ${issueYear + 1}`;
+      }
     }
 
-    // Vérification justificatif principal
     const mainCount = invoiceData.attachments.filter(a => a.attachment_type === 'main').length;
-    if (mainCount !== 1) {
-      alert("La facture doit avoir un justificatif principal.");
+    if (mainCount !== 1) errs.attachments = "La facture doit avoir un justificatif principal";
+
+    return errs;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitted(true);
+
+    const newErrors = validate();
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      // Si erreur justificatif principal → popup
+      if (newErrors.attachments) {
+        alert(newErrors.attachments);
+      }
       return;
     }
 
     try {
       const formData = new FormData();
-
       formData.append(
         "invoice",
         JSON.stringify({ ...invoiceData.header, subtotal, total_taxes: totalTaxes, total })
       );
       formData.append("lines", JSON.stringify(linesWithTotals));
       formData.append("taxes", JSON.stringify(invoiceData.taxes.length ? invoiceData.taxes : taxesSummary));
-
-      invoiceData.attachments.forEach(att => {
-        formData.append("attachments", att.raw_file);
-      });
+      invoiceData.attachments.forEach(att => formData.append("attachments", att.raw_file));
       formData.append(
         "attachments_meta",
         JSON.stringify(invoiceData.attachments.map(att => ({ attachment_type: att.attachment_type })))
       );
 
-      await axios.post("/api/invoices", formData, { headers: { "Content-Type": "multipart/form-data" } });
+      await createInvoice(formData);
 
       setSuccessMessage("Facture créée avec succès ! 🎉");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       setTimeout(() => { setSuccessMessage(""); navigate("/invoices"); }, 2000);
     } catch (err) {
-      const message = err.response?.data?.message || err.message || "Erreur lors de la création de la facture";
-      alert(message);
+      alert(err.message || "Erreur lors de la création de la facture");
     }
   };
 
@@ -105,10 +117,19 @@ export default function InvoiceForm() {
     <form onSubmit={handleSubmit}>
       {successMessage && <div className="alert alert-success">{successMessage}</div>}
 
-      <InvoiceHeader data={invoiceData.header} onChange={val => handleChange("header", val)} />
+      <InvoiceHeader
+        data={invoiceData.header}
+        onChange={val => handleChange("header", val)}
+        errors={errors}
+        submitted={submitted}
+      />
       <InvoiceLines data={linesWithTotals} onChange={val => handleChange("lines", val)} />
       <TaxBases data={invoiceData.taxes.length ? invoiceData.taxes : taxesSummary} onChange={val => handleChange("taxes", val)} />
-      <SupportingDocs data={invoiceData.attachments} onChange={val => handleChange("attachments", val)} allowPrincipal />
+      <SupportingDocs
+        data={invoiceData.attachments}
+        onChange={val => handleChange("attachments", val)}
+        allowPrincipal
+      />
 
       <div className="card p-3 mb-3">
         <h5>Récapitulatif</h5>

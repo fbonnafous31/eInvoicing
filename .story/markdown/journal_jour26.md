@@ -1,31 +1,42 @@
-# Jour 26 – Refactor seller, IBAN/BIC, validations améliorées 🛠️✨
+# Jour 26 – Refacto SellerForm et validations bancaires 🛠️✨
 
-Aujourd'hui, je me suis concentré sur l'amélioration du module **Seller** pour :
+Aujourd’hui, j’ai passé du temps à améliorer la qualité du code pour les sellers, et c’était assez magique ! 😄
 
-- Supprimer le champ `bank_details` et le remplacer par `iban` et `bic`.
-- Mettre à jour le **backend** et le **validator** pour prendre en compte ces nouveaux champs.
-- Prendre en compte la validation IBAN et BIC côté frontend.
-- S'assurer que les **sections du formulaire** s'ouvrent automatiquement lorsqu'il y a des erreurs.
-- Harmoniser les labels pour l'utilisateur (`registration_info` → "Registre du commerce et des sociétés").
-- Nettoyage et refactor léger du `useSellerForm` et du `SellerForm`.
+---
 
-## Backend
+## Ce qui a été fait
 
-- Suppression de `bank_details`.
-- Ajout de `iban` et `bic` dans les fonctions CRUD de `sellers.model.js`.
-- Adaptation des payloads pour insérer et mettre à jour les nouvelles colonnes.
+1. **Refacto `SellerForm` et `useSellerForm`**
+   - Suppression du champ `bank_details`.
+   - Ajout de champs `iban` et `bic`.
+   - Mise à jour de `FinanceFields` pour refléter ces changements.
+   - Le formulaire ouvre automatiquement les sections contenant des erreurs.
+   - Gestion des messages d’erreur améliorée, plus claire pour l’utilisateur.
 
-## Frontend
+2. **Validator Seller**
+   - Ajout de la validation de l’IBAN et du BIC grâce à la librairie `iban`.
+   - Contrôle automatique de la longueur, du format et des clés de contrôle.
+   - Simplification de la validation des SIRET / TVA.
 
-- Mise à jour de `FinanceFields.jsx` : suppression de `bank_details`, ajout de `iban` et `bic`.
-- `useSellerForm.js` mis à jour pour gérer `iban` et `bic`.
-- Validation IBAN et BIC dans `validators/seller.js`.
-- `SellerForm.jsx` corrigé pour que les sections contenant des erreurs s’ouvrent automatiquement.
-- Nettoyage et simplification de la logique de `handleSubmit`.
+3. **Back-end**
+   - Modifications dans le modèle pour supprimer `bank_details` et créer les champs `iban` et `bic`.
+   - Les controllers et services n’ont quasiment pas été touchés, car ils étaient déjà bien découplés.
 
-## Notes techniques
+---
 
-- L’IBAN et le BIC sont maintenant validés côté frontend pour éviter les erreurs de saisie.
-- Les sections “legal”, “contact”, “address” et “finances” se comportent dynamiquement en cas d’erreur.
-- La logique du SIRET est conservée, avec nettoyage automatique des espaces et des caractères non numériques.
+## Impressions
+
+Je comprends de mieux en mieux le code et j’ai l’impression de pouvoir aller beaucoup plus vite maintenant.  
+Hier, j’avais vraiment galéré avec certaines validations et la complexité du formulaire, mais aujourd’hui c’est assez magique : prendre le temps de comprendre et refactorer me permet d’avancer plus vite à terme !  
+
+Le plus cool : la validation IBAN/BIC, qui aurait pris des jours à écrire en PLSQL dans mon ancienne boîte, est maintenant gérée en quelques minutes avec une simple librairie. 💪  
+
+---
+
+## Ce que je retiens
+
+- Prendre le temps de refactorer et de comprendre le code **accélère la progression** sur le long terme.
+- Les librairies existantes peuvent transformer des tâches laborieuses en quelques lignes de code.
+- La qualité et la robustesse du formulaire sont désormais beaucoup meilleures pour l’utilisateur.
+
 

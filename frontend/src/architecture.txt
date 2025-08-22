@@ -35,6 +35,7 @@
 │   │   └── datatableStyles.js
 │   └── sellers
 │       ├── sellerColumns.jsx
+│       ├── useSellerForm.js
 │       └── useSellers.js
 ├── pages
 │   ├── clients
@@ -69,4 +70,4 @@
         ├── seller.js
         └── siret.js
 
-21 directories, 49 files
+21 directories, 50 files

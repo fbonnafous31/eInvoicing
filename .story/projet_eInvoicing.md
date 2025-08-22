@@ -94,6 +94,7 @@ project/
 └── README.md
 
 ## Architecture frontend
+.
 ├── App.css
 ├── App.jsx
 ├── AppRoutes.jsx
@@ -103,8 +104,8 @@ project/
 ├── components
 │   ├── Breadcrumb.jsx
 │   ├── common
-│   │   ├── EllipsisCell.jsx
-│   │   └── SellerAuditPanel.jsx
+│   │   ├── AuditPanel.jsx
+│   │   └── EllipsisCell.jsx
 │   ├── form
 │   │   ├── FormSection.jsx
 │   │   ├── InputField.jsx
@@ -119,20 +120,26 @@ project/
 ├── constants
 │   ├── companyTypes.js
 │   └── paymentTerms.js
-├── hooks
-│   └── useSellers.js
 ├── index.css
 ├── main.jsx
 ├── modules
+│   ├── clients
+│   │   ├── clientColumns.jsx
+│   │   ├── useClientForm.js
+│   │   └── useClients.js
+│   ├── common
+│   │   └── datatableStyles.js
 │   └── sellers
-│       ├── datatableStyles.js
-│       └── sellerColumns.jsx
+│       ├── sellerColumns.jsx
+│       ├── useSellerForm.js
+│       └── useSellers.js
 ├── pages
 │   ├── clients
 │   │   ├── ClientDetail.jsx
 │   │   ├── ClientForm.jsx
 │   │   ├── ClientsList.jsx
 │   │   ├── ClientsPage.jsx
+│   │   ├── fields
 │   │   └── NewClient.jsx
 │   ├── invoices
 │   │   ├── InvoicesList.jsx
@@ -150,6 +157,11 @@ project/
 │   ├── invoices.js
 │   └── sellers.js
 └── utils
-    ├── formatters.js
-    ├── siret.js
-    └── validators.js
+    ├── architecture.txt
+    ├── formatters
+    │   └── formatters.js
+    └── validators
+        ├── client.js
+        ├── contact.js
+        ├── seller.js
+        └── siret.js
