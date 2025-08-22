@@ -1,21 +1,28 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { paymentTermsOptions } from '../../constants/paymentTerms';
+import { paymentTermsOptions } from "../../constants/paymentTerms";
+import InputField from "../form/InputField";
+import SelectField from "../form/SelectField";
+import FormSection from "../form/FormSection";
+import { validateInvoiceField } from "../../utils/validators/invoice";
+import { fetchSellers } from "../../services/sellers";
+import { fetchClients } from "../../services/clients";
 
 export default function InvoiceHeader({ data, onChange, submitted }) {
   const [sellers, setSellers] = useState([]);
   const [clients, setClients] = useState([]);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [touchedFields, setTouchedFields] = useState({});
+  const [openSections, setOpenSections] = useState({ info: true, contract: true });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [sellersRes, clientsRes] = await Promise.all([
-          axios.get("http://localhost:3000/api/sellers"),
-          axios.get("http://localhost:3000/api/clients")
+        const [sellersData, clientsData] = await Promise.all([
+          fetchSellers(),
+          fetchClients(),
         ]);
-        setSellers(sellersRes.data);
-        setClients(clientsRes.data);
+        setSellers(sellersData);
+        setClients(clientsData);
       } catch (err) {
         console.error(err);
       }
@@ -24,54 +31,32 @@ export default function InvoiceHeader({ data, onChange, submitted }) {
   }, []);
 
   const validateField = (field, value) => {
-    let newErrors = { ...fieldErrors };
-    const issueYear = data.issue_date ? new Date(data.issue_date).getFullYear() : new Date().getFullYear();
-
-    switch (field) {
-      case "invoice_number":
-        if (!value) newErrors.invoice_number = "Ce champ est obligatoire";
-        else delete newErrors.invoice_number;
-        break;
-      case "issue_date":
-        if (!value) newErrors.issue_date = "Ce champ est obligatoire";
-        else delete newErrors.issue_date;
-        break;
-      case "fiscal_year":
-        if (value < issueYear - 1 || value > issueYear + 1) {
-          newErrors.fiscal_year = `L’exercice fiscal doit être compris entre ${issueYear - 1} et ${issueYear + 1}`;
-        } else delete newErrors.fiscal_year;
-        break;
-      case "seller_id":
-        if (!value) newErrors.seller_id = "Ce champ est obligatoire";
-        else delete newErrors.seller_id;
-        break;
-      case "client_id":
-        if (!value) newErrors.client_id = "Ce champ est obligatoire";
-        else delete newErrors.client_id;
-        break;
-      default:
-        break;
-    }
-
-    setFieldErrors(newErrors);
+    const error = validateInvoiceField(field, value, data);
+    setFieldErrors((prev) => ({ ...prev, [field]: error }));
   };
 
   const handleChange = (field, value) => {
-    let newData = { ...data, [field]: value };
-
-    // Ajuster fiscal_year par défaut si issue_date change et fiscal_year non saisi
-    if (field === 'issue_date' && (!data.fiscal_year || data.fiscal_year === '')) {
-      const issueYear = new Date(value).getFullYear();
-      newData.fiscal_year = issueYear;
+    const newData = { ...data, [field]: value };
+    if (field === "issue_date" && (!data.fiscal_year || data.fiscal_year === "")) {
+      newData.fiscal_year = new Date(value).getFullYear();
     }
-
     onChange(newData);
     validateField(field, value);
   };
 
   const handleBlur = (field, value) => {
+    setTouchedFields((prev) => ({ ...prev, [field]: true }));
     validateField(field, value);
   };
+
+  const getError = (field) => (touchedFields[field] || submitted) && fieldErrors[field];
+
+  const toggleSection = (key) => {
+    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  // Helper pour savoir si une section contient des erreurs
+  const sectionHasError = (fields) => fields.some((f) => fieldErrors[f]);
 
   const issueYear = data.issue_date ? new Date(data.issue_date).getFullYear() : new Date().getFullYear();
   const fiscalYearValue = data.fiscal_year || issueYear;
@@ -81,131 +66,113 @@ export default function InvoiceHeader({ data, onChange, submitted }) {
       <h5>Facture</h5>
       <small className="text-muted mb-2 d-block">* Champs obligatoires</small>
 
-      <div className="mb-2">
-        <label>Référence facture <span className="text-danger">*</span></label>
-        <input
-          type="text"
+      <FormSection
+        title="Infos facture"
+        sectionKey="info"
+        openSections={openSections}
+        toggleSection={toggleSection}
+        hasError={sectionHasError(["invoice_number", "issue_date", "fiscal_year", "seller_id", "client_id"])}
+      >
+        <InputField
+          id="invoice_number"
+          name="invoice_number"
+          label="Référence facture"
           value={data.invoice_number || ""}
+          onChange={(e) => handleChange("invoice_number", e.target.value)}
+          onBlur={(e) => handleBlur("invoice_number", e.target.value)}
+          error={getError("invoice_number")}
+          required
           maxLength={20}
-          onChange={e => handleChange("invoice_number", e.target.value)}
-          onBlur={e => handleBlur("invoice_number", e.target.value)}
-          className="form-control"
         />
-        {(submitted || fieldErrors.invoice_number) && fieldErrors.invoice_number && (
-          <small className="text-danger">{fieldErrors.invoice_number}</small>
-        )}
-      </div>
 
-      <div className="mb-2">
-        <label>Date émission <span className="text-danger">*</span></label>
-        <input
+        <InputField
+          id="issue_date"
+          name="issue_date"
           type="date"
+          label="Date émission"
           value={data.issue_date || ""}
-          onChange={e => handleChange("issue_date", e.target.value)}
-          onBlur={e => handleBlur("issue_date", e.target.value)}
-          className="form-control"
+          onChange={(e) => handleChange("issue_date", e.target.value)}
+          onBlur={(e) => handleBlur("issue_date", e.target.value)}
+          error={getError("issue_date")}
+          required
         />
-        {(submitted || fieldErrors.issue_date) && fieldErrors.issue_date && (
-          <small className="text-danger">{fieldErrors.issue_date}</small>
-        )}
-      </div>
 
-      <div className="mb-2">
-        <label>Exercice fiscal <span className="text-danger">*</span></label>
-        <input
+        <InputField
+          id="fiscal_year"
+          name="fiscal_year"
           type="number"
+          label="Exercice fiscal"
           value={fiscalYearValue}
+          onChange={(e) => handleChange("fiscal_year", +e.target.value)}
+          onBlur={(e) => handleBlur("fiscal_year", +e.target.value)}
+          error={getError("fiscal_year")}
+          required
           min={issueYear - 1}
           max={issueYear + 1}
-          onChange={e => handleChange("fiscal_year", +e.target.value)}
-          onBlur={e => handleBlur("fiscal_year", +e.target.value)}
-          className="form-control"
         />
-        {(submitted || fieldErrors.fiscal_year) && fieldErrors.fiscal_year && (
-          <div className="text-danger">{fieldErrors.fiscal_year}</div>
-        )}
-      </div>
 
-      <div className="mb-3">
-        <label>Date de livraison</label>
-        <input
-          type="date"
-          className="form-control"
-          value={data.supply_date || ''}
-          onChange={e => handleChange("supply_date", e.target.value)}
+        <SelectField
+          label="Vendeur"
+          value={data.seller_id}
+          onChange={(val) => handleChange("seller_id", val)}
+          onBlur={(val) => handleBlur("seller_id", val)}
+          options={sellers.map((s) => ({ value: s.id, label: s.legal_name }))}
+          error={getError("seller_id")}
+          required
         />
-      </div>
 
-      <div className="mb-2">
-        <label>Vendeur <span className="text-danger">*</span></label>
-        <select
-          value={data.seller_id || ""}
-          onChange={e => handleChange("seller_id", e.target.value)}
-          onBlur={e => handleBlur("seller_id", e.target.value)}
-          className="form-control"
-        >
-          <option value="">-- Sélectionner un vendeur --</option>
-          {sellers.map(s => (
-            <option key={s.id} value={s.id}>{s.legal_name}</option>
-          ))}
-        </select>
-        {(submitted || fieldErrors.seller_id) && fieldErrors.seller_id && (
-          <small className="text-danger">{fieldErrors.seller_id}</small>
-        )}
-      </div>
+        <SelectField
+          label="Client"
+          value={data.client_id}
+          onChange={(val) => handleChange("client_id", val)}
+          onBlur={(val) => handleBlur("client_id", val)}
+          options={clients.map((c) => ({ value: c.id, label: c.legal_name }))}
+          error={getError("client_id")}
+          required
+        />
+      </FormSection>
 
-      <div className="mb-2">
-        <label>Client <span className="text-danger">*</span></label>
-        <select
-          value={data.client_id || ""}
-          onChange={e => handleChange("client_id", e.target.value)}
-          onBlur={e => handleBlur("client_id", e.target.value)}
-          className="form-control"
-        >
-          <option value="">-- Sélectionner un client --</option>
-          {clients.map(c => (
-            <option key={c.id} value={c.id}>{c.legal_name}</option>
-          ))}
-        </select>
-        {(submitted || fieldErrors.client_id) && fieldErrors.client_id && (
-          <small className="text-danger">{fieldErrors.client_id}</small>
-        )}
-      </div>
-
-      <div className="mb-3">
-        <label>Numéro de contrat</label>
-        <input
-          type="text"
-          className="form-control"
+      <FormSection
+        title="Informations contractuelles"
+        sectionKey="contract"
+        openSections={openSections}
+        toggleSection={toggleSection}
+        hasError={sectionHasError(["contract_number", "purchase_order_number"])}
+      >
+        <InputField
+          id="contract_number"
+          name="contract_number"
+          label="Numéro de contrat"
+          value={data.contract_number || ""}
+          onChange={(e) => handleChange("contract_number", e.target.value)}
           maxLength={20}
-          value={data.contract_number || ''}
-          onChange={e => handleChange("contract_number", e.target.value)}
         />
-      </div>
 
-      <div className="mb-3">
-        <label>Numéro de commande</label>
-        <input
-          type="text"
-          className="form-control"
+        <InputField
+          id="purchase_order_number"
+          name="purchase_order_number"
+          label="Numéro de commande"
+          value={data.purchase_order_number || ""}
+          onChange={(e) => handleChange("purchase_order_number", e.target.value)}
           maxLength={20}
-          value={data.purchase_order_number || ''}
-          onChange={e => handleChange("purchase_order_number", e.target.value)}
         />
-      </div>
 
-      <div className="mb-2">
-        <label>Conditions de paiement</label>
-        <select
-          value={data.payment_terms || '30_df'}
-          onChange={e => handleChange("payment_terms", e.target.value)}
-          className="form-control"
-        >
-          {paymentTermsOptions.map(option => (
-            <option key={option.value} value={option.value}>{option.label}</option>
-          ))}
-        </select>
-      </div>
+        <SelectField
+          label="Conditions de paiement"
+          value={data.payment_terms || "30_df"}
+          onChange={(val) => handleChange("payment_terms", val)}
+          options={paymentTermsOptions}
+        />
+      </FormSection>
+
+      <InputField
+        id="supply_date"
+        name="supply_date"
+        type="date"
+        label="Date de livraison"
+        value={data.supply_date || ""}
+        onChange={(e) => handleChange("supply_date", e.target.value)}
+      />
     </div>
   );
 }

@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 
-export default function InputField({
-  id,
-  name,
+export default function SelectField({
   label,
-  type = 'text',
   value,
   onChange,
   onBlur,
+  options = [],
   required = false,
   error,
   submitted = false,
@@ -15,28 +13,30 @@ export default function InputField({
 }) {
   const [touched, setTouched] = useState(false);
 
-  const handleBlur = (e) => {
+  const handleBlur = () => {
     setTouched(true);
-    onBlur?.(e);
+    onBlur?.(value);
   };
 
   const showError = (required && touched && !value) || (required && submitted && !value) || error;
 
   return (
     <div className="mb-3">
-      <label htmlFor={id} className="form-label">
+      <label className="form-label">
         {label}{required && ' *'}
       </label>
-      <input
-        type={type}
-        id={id}
-        name={name}
+      <select
         className="form-control"
-        value={value}
-        onChange={onChange}
+        value={value || ''}
+        onChange={(e) => onChange?.(e.target.value)}
         onBlur={handleBlur}
         {...props}
-      />
+      >
+        <option value="">-- Sélectionner --</option>
+        {options.map(opt => (
+          <option key={opt.value} value={opt.value}>{opt.label}</option>
+        ))}
+      </select>
       {showError && <small className="text-danger">{typeof showError === 'string' ? showError : 'Ce champ est obligatoire'}</small>}
     </div>
   );
