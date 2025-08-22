@@ -52,7 +52,6 @@ COMMENT ON COLUMN invoicing.invoices.client_legal_name IS 'Raison sociale de l''
 COMMENT ON COLUMN invoicing.invoices.subtotal IS 'Montant HT total';
 COMMENT ON COLUMN invoicing.invoices.total_taxes IS 'Montant total TVA';
 COMMENT ON COLUMN invoicing.invoices.total IS 'Montant TTC total';
-COMMENT ON COLUMN invoicing.invoices.recovery_fee IS 'Indemnité forfaitaire de recouvrement';
 COMMENT ON COLUMN invoicing.invoices.status IS 'Statut (draft, final, canceled)';
 COMMENT ON COLUMN invoicing.invoices.created_at IS 'Date de création';
 COMMENT ON COLUMN invoicing.invoices.updated_at IS 'Date de mise à jour';

@@ -16,6 +16,7 @@ export default function NewInvoice() {
     try {
       await invoiceService.createInvoice(formData);
       setSuccessMessage("Facture créée avec succès ! 🎉");
+      window.scrollTo({ top: 0, behavior: "smooth" });
 
       setTimeout(() => {
         setSuccessMessage('');

@@ -15,17 +15,17 @@ export default function InvoicesList() {
   }, []);
 
   const columns = [
-    { name: 'Référence facture', selector: row => row.invoice_number, sortable: true },
-    { name: 'Date émission', selector: row => formatDate(row.issue_date), sortable: true },
-    { name: 'N° Contrat', selector: row => row.contract_number, sortable: true },
-    { name: 'N° Commande', selector: row => row.purchase_order_number, sortable: true },
+    { name: 'Référence', selector: row => row.invoice_number, sortable: true },
+    { name: 'Emise le', selector: row => formatDate(row.issue_date), sortable: true },
+    { name: 'Contrat', selector: row => row.contract_number, sortable: true },
+    { name: 'Commande', selector: row => row.purchase_order_number, sortable: true },
     { name: 'Vendeur', selector: row => row.seller_legal_name, sortable: true },
     { name: 'Client', selector: row => row.client_legal_name, sortable: true },
-    { name: 'Montant HT', selector: row => formatCurrency(row.subtotal), sortable: true, style: { textAlign: 'right' } },
-    { name: 'Montant TVA', selector: row => formatCurrency(row.total_taxes), sortable: true, style: { textAlign: 'right' } },
-    { name: 'Montant TTC', selector: row => formatCurrency(row.total), sortable: true, style: { textAlign: 'right' } },
+    { name: 'HT', selector: row => formatCurrency(row.subtotal), sortable: true, style: { textAlign: 'right' } },
+    { name: 'TVA', selector: row => formatCurrency(row.total_taxes), sortable: true, style: { textAlign: 'right' } },
+    { name: 'TTC', selector: row => formatCurrency(row.total), sortable: true, style: { textAlign: 'right' } },
     {
-      name: 'Conditions paiement',
+      name: 'Paiement',
       selector: row => row.payment_terms,
       sortable: true,
       cell: row => (
