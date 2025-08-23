@@ -5,6 +5,7 @@ import InvoiceLines from "./InvoiceLines";
 import TaxBases from "./TaxBases";
 import SupportingDocs from "./SupportingDocs";
 import { createInvoice } from "../../services/invoices";
+import { validateInvoiceField } from "../../utils/validators/invoice";
 
 export default function InvoiceForm() {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ export default function InvoiceForm() {
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
 
+  // Calculs des totaux
   const { subtotal, totalTaxes, total, linesWithTotals, taxesSummary } = useMemo(() => {
     let st = 0, tt = 0;
     const taxesMap = {};
@@ -53,42 +55,63 @@ export default function InvoiceForm() {
     };
   }, [invoiceData.lines]);
 
-  const handleChange = (section, value) => setInvoiceData(prev => ({ ...prev, [section]: value }));
+  // Modifications header / lignes / taxes / attachments
+  const handleChange = (section, value) => {
+    const newData = { ...invoiceData, [section]: value };
+    setInvoiceData(newData);
 
-  const validate = () => {
-    const errs = {};
-    const issueDate = invoiceData.header.issue_date;
-    const fiscalYear = invoiceData.header.fiscal_year;
-
-    if (!issueDate) errs.issue_date = "Date d'émission obligatoire";
-    else {
-      const issueYear = new Date(issueDate).getFullYear();
-      if (!fiscalYear || fiscalYear < issueYear - 1 || fiscalYear > issueYear + 1) {
-        errs.fiscal_year = `Exercice fiscal doit être entre ${issueYear - 1} et ${issueYear + 1}`;
-      }
+    // Validation à la modification pour le header
+    if (section === "header") {
+      const newErrors = { ...errors };
+      Object.keys(value).forEach(f => {
+        const err = validateInvoiceField(f, value[f], value);
+        if (err) newErrors[f] = err;
+        else delete newErrors[f];
+      });
+      setErrors(newErrors);
     }
+  };
 
-    const mainCount = invoiceData.attachments.filter(a => a.attachment_type === 'main').length;
-    if (mainCount !== 1) errs.attachments = "La facture doit avoir un justificatif principal";
+  // Validation globale
+  const validateAll = () => {
+    const headerFields = ["invoice_number","issue_date","fiscal_year","seller_id","client_id"];
+    const headerErrors = {};
+    headerFields.forEach(f => {
+      const err = validateInvoiceField(f, invoiceData.header[f], invoiceData.header);
+      if (err) headerErrors[f] = err;
+    });
 
-    return errs;
+    setErrors(headerErrors);
+    return headerErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitted(true); // <-- Indique au Header qu’on a soumis
 
-    const newErrors = validate();
-    setErrors(newErrors);
+    const headerErrors = validateAll();
 
-    if (Object.keys(newErrors).length > 0) {
-      // Si erreur justificatif principal → popup
-      if (newErrors.attachments) {
-        alert(newErrors.attachments);
-      }
+    // Vérifier lignes de facture
+    if (!invoiceData.lines || invoiceData.lines.length === 0) {
+      alert("Vous devez ajouter au moins une ligne de facture !");
       return;
     }
 
+    // Vérifier justificatif principal
+    const mainCount = invoiceData.attachments.filter(a => a.attachment_type === 'main').length;
+    if (mainCount !== 1) {
+      alert("La facture doit avoir un justificatif principal");
+      return;
+    }
+
+    // Bloquer création si erreurs header
+    if (Object.keys(headerErrors).length > 0) {
+      alert("Certains champs obligatoires sont manquants !");
+      window.scrollTo({ top: 0, behavior: "smooth" }); 
+      return;
+    }
+
+    // Soumission
     try {
       const formData = new FormData();
       formData.append(
@@ -121,8 +144,9 @@ export default function InvoiceForm() {
         data={invoiceData.header}
         onChange={val => handleChange("header", val)}
         errors={errors}
-        submitted={submitted}
+        submitted={submitted} // <-- Permet d'afficher les erreurs après submit
       />
+
       <InvoiceLines data={linesWithTotals} onChange={val => handleChange("lines", val)} />
       <TaxBases data={invoiceData.taxes.length ? invoiceData.taxes : taxesSummary} onChange={val => handleChange("taxes", val)} />
       <SupportingDocs

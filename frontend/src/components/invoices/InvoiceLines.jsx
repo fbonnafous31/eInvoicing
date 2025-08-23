@@ -29,8 +29,8 @@ export default function InvoiceLines({ data, onChange }) {
         discount: 0,
         line_net: 0,
         line_tax: 0,
-        line_total: 0
-      }
+        line_total: 0,
+      },
     ]);
 
   const removeLine = (index) => onChange(data.filter((_, i) => i !== index));
@@ -41,108 +41,90 @@ export default function InvoiceLines({ data, onChange }) {
 
       {data.map((line, index) => (
         <div key={index} className="mb-3 border rounded p-3">
-          {/* Ligne alignée verticalement */}
-          <div className="d-flex gap-3 align-items-center" style={{ flexWrap: "nowrap" }}>
-            <div className="flex-grow-1">
-              <InputField
-                id={`description_${index}`}
-                name="description"
-                label="Description"
-                value={line.description}
-                onChange={(e) => handleLineChange(index, "description", e.target.value)}
-                required
-              />
-            </div>
+          <div className="d-grid" style={{ gridTemplateColumns: "2fr 0.8fr 1fr 0.8fr 0.8fr 1fr 1fr 1fr 60px", gap: "0.5rem" }}>
+            <InputField
+              id={`description_${index}`}
+              name="description"
+              label="Description"
+              value={line.description}
+              onChange={(e) => handleLineChange(index, "description", e.target.value)}
+              required
+            />
 
-            <div style={{ width: "100px" }}>
-              <InputField
-                id={`quantity_${index}`}
-                name="quantity"
-                type="number"
-                label="Quantité"
-                value={line.quantity}
-                onChange={(e) => handleLineChange(index, "quantity", e.target.value)}
-                required
-              />
-            </div>
+            <InputField
+              id={`quantity_${index}`}
+              name="quantity"
+              type="number"
+              label="Quantité"
+              value={line.quantity}
+              onChange={(e) => handleLineChange(index, "quantity", e.target.value)}
+              required
+            />
 
-            <div style={{ width: "150px" }}>
-              <InputField
-                id={`unit_price_${index}`}
-                name="unit_price"
-                type="number"
-                label="Prix unitaire (€)"
-                value={line.unit_price}
-                onChange={(e) => handleLineChange(index, "unit_price", e.target.value)}
-                required
-              />
-            </div>
+            <InputField
+              id={`unit_price_${index}`}
+              name="unit_price"
+              type="number"
+              label="Prix unitaire (€)"
+              value={line.unit_price}
+              onChange={(e) => handleLineChange(index, "unit_price", e.target.value)}
+              required
+            />
 
-            <div style={{ width: "100px" }}>
-              <InputField
-                id={`vat_rate_${index}`}
-                name="vat_rate"
-                type="number"
-                label="TVA (%)"
-                value={line.vat_rate}
-                onChange={(e) => handleLineChange(index, "vat_rate", e.target.value)}
-                required
-              />
-            </div>
+            <InputField
+              id={`vat_rate_${index}`}
+              name="vat_rate"
+              type="number"
+              label="TVA (%)"
+              value={line.vat_rate}
+              onChange={(e) => handleLineChange(index, "vat_rate", e.target.value)}
+              required
+            />
 
-            <div style={{ width: "120px" }}>
-              <InputField
-                id={`discount_${index}`}
-                name="discount"
-                type="number"
-                label="Remise (€)"
-                value={line.discount}
-                onChange={(e) => handleLineChange(index, "discount", e.target.value)}
-              />
-            </div>
+            <InputField
+              id={`discount_${index}`}
+              name="discount"
+              type="number"
+              label="Remise (€)"
+              value={line.discount}
+              onChange={(e) => handleLineChange(index, "discount", e.target.value)}
+            />
 
-            <div style={{ width: "120px" }}>
-              <InputField
-                id={`line_net_${index}`}
-                name="line_net"
-                type="number"
-                label="HT"
-                value={line.line_net?.toFixed(2) || 0}
-                readOnly
-              />
-            </div>
+            <InputField
+              id={`line_net_${index}`}
+              name="line_net"
+              type="number"
+              label="HT"
+              value={line.line_net?.toFixed(2) || 0}
+              readOnly
+            />
 
-            <div style={{ width: "120px" }}>
-              <InputField
-                id={`line_tax_${index}`}
-                name="line_tax"
-                type="number"
-                label="TVA"
-                value={line.line_tax?.toFixed(2) || 0}
-                readOnly
-              />
-            </div>
+            <InputField
+              id={`line_tax_${index}`}
+              name="line_tax"
+              type="number"
+              label="TVA"
+              value={line.line_tax?.toFixed(2) || 0}
+              readOnly
+            />
 
-            <div style={{ width: "120px" }}>
-              <InputField
-                id={`line_total_${index}`}
-                name="line_total"
-                type="number"
-                label="TTC"
-                value={line.line_total?.toFixed(2) || 0}
-                readOnly
-              />
-            </div>
+            <InputField
+              id={`line_total_${index}`}
+              name="line_total"
+              type="number"
+              label="TTC"
+              value={line.line_total?.toFixed(2) || 0}
+              readOnly
+            />
 
-            {/* Bouton centré */}
-            <div style={{ width: "40px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <div className="d-flex flex-column align-items-center">
+              <label className="invisible">Action</label>
               <button
                 type="button"
                 className="btn btn-danger"
                 onClick={() => removeLine(index)}
-                style={{ height: "38px" }} // identique aux inputs
               >
-                -
+                🗑️
               </button>
             </div>
           </div>
