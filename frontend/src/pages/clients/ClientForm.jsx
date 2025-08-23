@@ -1,4 +1,3 @@
-// frontend/src/pages/clients/ClientForm.jsx
 import React from 'react';
 import countries from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
@@ -17,35 +16,38 @@ export default function ClientForm({ onSubmit, disabled = false, initialData = {
   const {
     formData,
     errors,
+    touched,
     siretExists,
     openSections,
     toggleSection,
     handleChange,
-    setErrors
+    handleBlur,
+    setErrors,
+    setTouched
   } = useClientForm(initialData);
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Nettoyage SIRET pour validation
-    const cleanedSiret = (formData.siret || '').toString().replace(/\D/g, '');
+    // On marque tous les champs comme "touchés" pour afficher les erreurs
+    const allFields = Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {});
+    setTouched(allFields);
 
-    // Validation centralisée
+    const cleanedSiret = (formData.siret || '').toString().replace(/\D/g, '');
     const newErrors = validateClient({ ...formData, siret: cleanedSiret });
 
-    // Vérification SIRET déjà existant (base de données)
     if (siretExists) newErrors.siret = 'Ce SIRET est déjà utilisé';
-
     setErrors(newErrors);
 
     // Ouvrir les sections avec erreurs
     Object.keys(openSections).forEach(section => {
-      const hasError = sectionHasError(section, newErrors);
-      if (hasError !== openSections[section]) toggleSection(section);
+      if (sectionHasError(section, newErrors) && !openSections[section]) {
+        toggleSection(section);
+      }
     });
 
     // Envoi si pas d'erreurs
-    if (Object.keys(newErrors).length === 0) {
+    if (Object.keys(newErrors).length === 0 && onSubmit) {
       const payload = {
         ...formData,
         is_company: !!formData.is_company,
@@ -59,7 +61,7 @@ export default function ClientForm({ onSubmit, disabled = false, initialData = {
             : formData.vat_number?.trim() || null
           : null,
       };
-      if (onSubmit) onSubmit(payload);
+      onSubmit(payload);
     }
   };
 
@@ -85,7 +87,9 @@ export default function ClientForm({ onSubmit, disabled = false, initialData = {
               <Component
                 formData={formData}
                 errors={errors}
+                touched={touched}
                 handleChange={handleChange}
+                handleBlur={handleBlur}
                 disabled={disabled}
                 countryCodes={key === 'address' ? countryCodes : undefined}
               />
@@ -109,7 +113,7 @@ export default function ClientForm({ onSubmit, disabled = false, initialData = {
 function sectionHasError(section, errors) {
   const mapping = {
     legal: ['legal_name', 'siret', 'legal_identifier', 'firstname', 'lastname'],
-    contact: ['email', 'phone_number'],
+    contact: ['email', 'phone'],
     address: ['address', 'city', 'postal_code', 'country_code'],
     finances: ['vat_number']
   };

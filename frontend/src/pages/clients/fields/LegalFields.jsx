@@ -1,6 +1,9 @@
 import React from 'react';
+import InputField from '../../../components/form/InputField';
 
-export default function LegalFields({ formData, errors, handleChange, disabled }) {
+export default function LegalFields({ formData, errors, touched, handleChange, handleBlur, disabled }) {
+  const handleFieldChange = (field) => (val) => handleChange(field, val);
+
   return (
     <>
       {/* Type de client */}
@@ -13,7 +16,7 @@ export default function LegalFields({ formData, errors, handleChange, disabled }
             name="is_company"
             value="true"
             checked={formData.is_company === true}
-            onChange={e => handleChange({ target: { name: 'is_company', value: e.target.value === 'true' } })}
+            onChange={e => handleChange('is_company', e.target.value === 'true')}
             disabled={disabled}
             className="form-check-input"
           />
@@ -26,7 +29,7 @@ export default function LegalFields({ formData, errors, handleChange, disabled }
             name="is_company"
             value="false"
             checked={formData.is_company === false}
-            onChange={e => handleChange({ target: { name: 'is_company', value: e.target.value === 'true' } })}
+            onChange={e => handleChange('is_company', e.target.value === 'true')}
             disabled={disabled}
             className="form-check-input"
           />
@@ -37,67 +40,59 @@ export default function LegalFields({ formData, errors, handleChange, disabled }
       {formData.is_company ? (
         <>
           {/* Nom légal */}
-          <div className="mb-3">
-            <label htmlFor="legal_name" className="form-label">Nom légal *</label>
-            <input
-              type="text"
-              id="legal_name"
-              name="legal_name"
-              className={`form-control ${errors.legal_name ? 'is-invalid' : ''}`}
-              disabled={disabled}
-              value={formData.legal_name ?? ''}
-              onChange={handleChange}
-            />
-            {errors.legal_name && <div className="invalid-feedback">{errors.legal_name}</div>}
-          </div>
+          <InputField
+            id="legal_name"
+            name="legal_name"
+            label="Nom légal *"
+            value={formData.legal_name}
+            onChange={handleFieldChange('legal_name')}
+            onBlur={() => handleBlur('legal_name')}
+            touched={touched.legal_name}
+            disabled={disabled}
+            error={errors.legal_name}
+          />
 
           {/* SIRET uniquement si FR */}
           {formData.country_code === 'FR' && (
-            <div className="mb-3">
-              <label htmlFor="siret" className="form-label">SIRET *</label>
-              <input
-                type="text"
-                id="siret"
-                name="siret"
-                className={`form-control ${errors.siret ? 'is-invalid' : ''}`}
-                disabled={disabled}
-                value={formData.siret ?? ''}
-                onChange={handleChange}
-              />
-              {errors.siret && <div className="invalid-feedback">{errors.siret}</div>}
-            </div>
+            <InputField
+              id="siret"
+              name="siret"
+              label="SIRET *"
+              value={formData.siret}
+              onChange={handleFieldChange('siret')}
+              onBlur={() => handleBlur('siret')}
+              touched={touched.siret}
+              disabled={disabled}
+              error={errors.siret}
+            />
           )}
         </>
       ) : (
         <>
           {/* Particulier */}
-          <div className="mb-3">
-            <label htmlFor="firstname" className="form-label">Prénom *</label>
-            <input
-              type="text"
-              id="firstname"
-              name="firstname"
-              className={`form-control ${errors.firstname ? 'is-invalid' : ''}`}
-              disabled={disabled}
-              value={formData.firstname ?? ''}
-              onChange={handleChange}
-            />
-            {errors.firstname && <div className="invalid-feedback">{errors.firstname}</div>}
-          </div>
+          <InputField
+            id="firstname"
+            name="firstname"
+            label="Prénom *"
+            value={formData.firstname}
+            onChange={handleFieldChange('firstname')}
+            onBlur={() => handleBlur('firstname')}
+            touched={touched.firstname}
+            disabled={disabled}
+            error={errors.firstname}
+          />
 
-          <div className="mb-3">
-            <label htmlFor="lastname" className="form-label">Nom *</label>
-            <input
-              type="text"
-              id="lastname"
-              name="lastname"
-              className={`form-control ${errors.lastname ? 'is-invalid' : ''}`}
-              disabled={disabled}
-              value={formData.lastname ?? ''}
-              onChange={handleChange}
-            />
-            {errors.lastname && <div className="invalid-feedback">{errors.lastname}</div>}
-          </div>
+          <InputField
+            id="lastname"
+            name="lastname"
+            label="Nom *"
+            value={formData.lastname}
+            onChange={handleFieldChange('lastname')}
+            onBlur={() => handleBlur('lastname')}
+            touched={touched.lastname}
+            disabled={disabled}
+            error={errors.lastname}
+          />
         </>
       )}
     </>

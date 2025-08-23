@@ -17,6 +17,7 @@ export default function NewClient() {
       await createClient(formData); // <-- appel au service
 
       setSuccessMessage("Client créé avec succès ! 🎉");
+      window.scrollTo({ top: 0, behavior: "smooth" }); 
 
       setTimeout(() => {
         setSuccessMessage('');

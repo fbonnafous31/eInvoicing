@@ -1,38 +1,35 @@
 import React from 'react';
+import InputField from '../../../components/form/InputField';
 
-export default function ContactFields({ formData, errors, handleChange, disabled }) {
+export default function ContactFields({ formData, errors, touched, handleChange, handleBlur, disabled }) {
+  const handleFieldChange = (field) => (val) => handleChange(field, val);
+
   return (
     <>
-      {/* Email */}
-      <div className="mb-3">
-        <label htmlFor="email" className="form-label">Email</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-          disabled={disabled}
-          value={formData.email ?? ''}
-          onChange={handleChange}
-        />
-        {errors.email && <div className="invalid-feedback">{errors.email}</div>}
-      </div>
+      <InputField
+        id="email"
+        name="email"
+        label="Email *"
+        type="email"
+        value={formData.email}
+        onChange={handleFieldChange('email')}
+        onBlur={() => handleBlur('email')}
+        touched={touched.email}
+        disabled={disabled}
+        error={errors.email}
+      />
 
-      {/* Téléphone */}
-      <div className="mb-3">
-        <label htmlFor="phone" className="form-label">Téléphone</label>
-        <input
-          type="text"
-          id="phone"
-          name="phone"
-          className={`form-control ${errors.phone ? 'is-invalid' : ''}`}
-          maxLength={30}
-          disabled={disabled}
-          value={formData.phone ?? ''}
-          onChange={handleChange}
-        />
-        {errors.phone && <div className="invalid-feedback">{errors.phone}</div>}
-      </div>
+      <InputField
+        id="phone"
+        name="phone"
+        label="Téléphone"
+        value={formData.phone}
+        onChange={handleFieldChange('phone')}
+        onBlur={() => handleBlur('phone')}
+        touched={touched.phone}
+        disabled={disabled}
+        error={errors.phone}
+      />
     </>
   );
 }
