@@ -1,7 +1,8 @@
 import InputField from "../form/InputField";
 
 export default function InvoiceLines({ data, onChange }) {
-  const handleLineChange = (index, field, value) => {
+  const handleLineChange = (index, field, eOrValue) => {
+    const value = eOrValue?.target ? eOrValue.target.value : eOrValue; // <-- fix ici
     const newLines = [...data];
     newLines[index][field] = value;
 
@@ -41,13 +42,20 @@ export default function InvoiceLines({ data, onChange }) {
 
       {data.map((line, index) => (
         <div key={index} className="mb-3 border rounded p-3">
-          <div className="d-grid" style={{ gridTemplateColumns: "2fr 0.8fr 1fr 0.8fr 0.8fr 1fr 1fr 1fr 60px", gap: "0.5rem" }}>
+          <div
+            className="d-grid"
+            style={{
+              gridTemplateColumns:
+                "2fr 0.8fr 1fr 0.8fr 0.8fr 1fr 1fr 1fr 60px",
+              gap: "0.5rem",
+            }}
+          >
             <InputField
               id={`description_${index}`}
               name="description"
               label="Description"
               value={line.description}
-              onChange={(e) => handleLineChange(index, "description", e.target.value)}
+              onChange={(val) => handleLineChange(index, "description", val)}
               required
             />
 
@@ -57,7 +65,7 @@ export default function InvoiceLines({ data, onChange }) {
               type="number"
               label="Quantité"
               value={line.quantity}
-              onChange={(e) => handleLineChange(index, "quantity", e.target.value)}
+              onChange={(val) => handleLineChange(index, "quantity", val)}
               required
             />
 
@@ -67,7 +75,7 @@ export default function InvoiceLines({ data, onChange }) {
               type="number"
               label="Prix unitaire (€)"
               value={line.unit_price}
-              onChange={(e) => handleLineChange(index, "unit_price", e.target.value)}
+              onChange={(val) => handleLineChange(index, "unit_price", val)}
               required
             />
 
@@ -77,7 +85,7 @@ export default function InvoiceLines({ data, onChange }) {
               type="number"
               label="TVA (%)"
               value={line.vat_rate}
-              onChange={(e) => handleLineChange(index, "vat_rate", e.target.value)}
+              onChange={(val) => handleLineChange(index, "vat_rate", val)}
               required
             />
 
@@ -87,7 +95,7 @@ export default function InvoiceLines({ data, onChange }) {
               type="number"
               label="Remise (€)"
               value={line.discount}
-              onChange={(e) => handleLineChange(index, "discount", e.target.value)}
+              onChange={(val) => handleLineChange(index, "discount", val)}
             />
 
             <InputField
