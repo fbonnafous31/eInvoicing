@@ -17,22 +17,27 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
   const {
     formData,
     errors,
-    siretExists,
+    touched,
     openSections,
     toggleSection,
     handleChange,
-    setErrors
+    handleBlur,
+    setErrors,
+    setTouched,
+    siretExists
   } = useSellerForm(initialData);
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const cleanedSiret = (formData.legal_identifier || '').toString().replace(/\D/g, '');
+    // Marquer tous les champs comme touchés pour déclencher les erreurs
+    const allFieldsTouched = Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {});
+    setTouched(allFieldsTouched);
 
+    const cleanedSiret = (formData.legal_identifier || '').toString().replace(/\D/g, '');
     const newErrors = validateSeller({ ...formData, legal_identifier: cleanedSiret });
 
     if (siretExists) newErrors.legal_identifier = 'Ce SIRET est déjà utilisé';
-
     setErrors(newErrors);
 
     // Ouvrir les sections contenant des erreurs
@@ -42,12 +47,13 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
       }
     });
 
-    if (Object.keys(newErrors).length === 0) {
+    // Submit si pas d’erreurs
+    if (Object.keys(newErrors).length === 0 && onSubmit) {
       const payload = {
         ...formData,
         legal_identifier: formData.country_code === 'FR' ? cleanedSiret : formData.vat_number?.trim() || null
       };
-      if (onSubmit) onSubmit(payload);
+      onSubmit(payload);
     }
   };
 
@@ -65,18 +71,25 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
 
         return (
           <div className="mb-3" key={key}>
-            <button type="button" className="btn btn-link p-0 mb-2" onClick={() => toggleSection(key)}>
+            <button
+              type="button"
+              className="btn btn-link p-0 mb-2"
+              onClick={() => toggleSection(key)}
+            >
               {label} {openSections[key] ? '▲' : '▼'} {hasError && '⚠️'}
             </button>
-            {openSections[key] && (
+
+            {openSections[key] &&
               React.createElement(component, {
                 formData,
                 errors,
+                touched,
                 handleChange,
+                handleBlur,
                 disabled,
                 countryCodes: key === 'address' ? countryCodes : undefined
               })
-            )}
+            }
           </div>
         );
       })}
@@ -95,10 +108,10 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
 // ---------------------
 function sectionHasError(section, errors) {
   const mapping = {
-    legal: ['legal_name', 'legal_identifier'],
+    legal: ['legal_name', 'legal_identifier', 'company_type'],
     contact: ['contact_email', 'phone_number'],
     address: ['address', 'city', 'postal_code', 'country_code'],
-    finances: ['vat_number']
+    finances: ['vat_number', 'registration_info', 'share_capital', 'iban', 'bic']
   };
 
   return Object.keys(errors).some(key => mapping[section]?.includes(key));

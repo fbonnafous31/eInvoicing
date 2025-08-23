@@ -1,43 +1,44 @@
-import React, { useState } from 'react';
+import React from "react";
 
 export default function InputField({
   id,
   name,
   label,
-  type = 'text',
+  type = "text",
   value,
   onChange,
   onBlur,
+  touched,   // ✅ vient du hook
   required = false,
   error,
   submitted = false,
   ...props
 }) {
-  const [touched, setTouched] = useState(false);
-
-  const handleBlur = (e) => {
-    setTouched(true);
-    onBlur?.(e);
-  };
-
-  const showError = (required && touched && !value) || (required && submitted && !value) || error;
+  const hasError =
+    (required && touched && !value) ||  // utilise le touched du hook
+    (required && submitted && !value) ||
+    Boolean(error);
 
   return (
     <div className="mb-3">
-      <label htmlFor={id} className="form-label">
-        {label}{required && ' *'}
+      <label htmlFor={id || name} className="form-label">
+        {label} {required && "*"}
       </label>
       <input
         type={type}
-        id={id}
+        id={id || name}
         name={name}
-        className="form-control"
-        value={value}
-        onChange={onChange}
-        onBlur={handleBlur}
+        className={`form-control ${hasError ? "is-invalid" : ""}`}
+        value={value || ""}
+        onChange={(e) => onChange?.(e.target.value)}  
+        onBlur={() => onBlur?.(name)}   // appelle handleBlur(field) du hook
         {...props}
       />
-      {showError && <small className="text-danger">{typeof showError === 'string' ? showError : 'Ce champ est obligatoire'}</small>}
+      {hasError && (
+        <small className="text-danger">
+          {error || "Ce champ est obligatoire"}
+        </small>
+      )}
     </div>
   );
 }

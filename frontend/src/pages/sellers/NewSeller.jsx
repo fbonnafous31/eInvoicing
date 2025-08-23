@@ -17,6 +17,7 @@ export default function NewSeller() {
       await createSeller(formData); // <-- utilisation du service
 
       setSuccessMessage("Vendeur créé avec succès ! 🎉");
+      window.scrollTo({ top: 0, behavior: "smooth" }); 
 
       setTimeout(() => {
         setSuccessMessage('');
