@@ -1,68 +1,61 @@
 import React from 'react';
+import InputField from '../../../components/form/InputField';
+import TextAreaField from '../../../components/form/TextAreaField';
+import SelectField from '../../../components/form/SelectField';
 
-export default function AddressFields({ formData, errors, handleChange, disabled, countryCodes }) {
+export default function AddressFields({ formData, errors, touched, handleChange, handleBlur, disabled, countryCodes }) {
+  const handleFieldChange = (field) => (val) => handleChange(field, val);
+
   return (
     <>
-      <div className="mb-3">
-        <label htmlFor="address" className="form-label">Adresse</label>
-        <textarea
-          id="address"
-          name="address"
-          className={`form-control ${errors.address ? 'is-invalid' : ''}`}
-          rows="2"
-          disabled={disabled}
-          value={formData.address ?? ''}
-          onChange={handleChange}
-        />
-        {errors.address && <div className="invalid-feedback">{errors.address}</div>}
-      </div>
+      <TextAreaField
+        id="address"
+        name="address"
+        label="Adresse *"
+        value={formData.address}
+        onChange={handleFieldChange('address')}
+        onBlur={() => handleBlur('address')}
+        touched={touched.address}
+        disabled={disabled}
+        error={errors.address}
+      />
 
-      <div className="row mb-3">
-        <div className="col-md-4">
-          <label htmlFor="city" className="form-label">Ville</label>
-          <input
-            type="text"
-            id="city"
-            name="city"
-            className={`form-control ${errors.city ? 'is-invalid' : ''}`}
-            disabled={disabled}
-            value={formData.city ?? ''}
-            onChange={handleChange}
-          />
-          {errors.city && <div className="invalid-feedback">{errors.city}</div>}
-        </div>
+      <InputField
+        id="city"
+        name="city"
+        label="Ville *"
+        value={formData.city}
+        onChange={handleFieldChange('city')}
+        onBlur={() => handleBlur('city')}
+        touched={touched.city}
+        disabled={disabled}
+        error={errors.city}
+      />
 
-        <div className="col-md-4">
-          <label htmlFor="postal_code" className="form-label">Code postal</label>
-          <input
-            type="text"
-            id="postal_code"
-            name="postal_code"
-            className={`form-control ${errors.postal_code ? 'is-invalid' : ''}`}
-            disabled={disabled}
-            value={formData.postal_code ?? ''}
-            onChange={handleChange}
-          />
-          {errors.postal_code && <div className="invalid-feedback">{errors.postal_code}</div>}
-        </div>
+      <InputField
+        id="postal_code"
+        name="postal_code"
+        label="Code postal *"
+        value={formData.postal_code}
+        onChange={handleFieldChange('postal_code')}
+        onBlur={() => handleBlur('postal_code')}
+        touched={touched.postal_code}
+        disabled={disabled}
+        error={errors.postal_code}
+      />
 
-        <div className="col-md-4">
-          <label htmlFor="country_code" className="form-label">Pays</label>
-          <select
-            id="country_code"
-            name="country_code"
-            className={`form-select ${errors.country_code ? 'is-invalid' : ''}`}
-            disabled={disabled}
-            value={formData.country_code ?? ''}
-            onChange={handleChange}
-          >
-            {countryCodes.map(({ code, name }) => (
-              <option key={code} value={code}>{code} - {name}</option>
-            ))}
-          </select>
-          {errors.country_code && <div className="invalid-feedback">{errors.country_code}</div>}
-        </div>
-      </div>
+      <SelectField
+        id="country_code"
+        name="country_code"
+        label="Pays *"
+        value={formData.country_code}
+        onChange={handleFieldChange('country_code')}
+        onBlur={() => handleBlur('country_code')}
+        touched={touched.country_code}
+        options={countryCodes.map(c => ({ value: c.code, label: `${c.code} - ${c.name}` }))}
+        disabled={disabled}
+        error={errors.country_code}
+      />
     </>
   );
 }
