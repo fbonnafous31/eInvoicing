@@ -56,6 +56,15 @@
 
 
 ## 📌 Prochaines étapes
+- Harmoniser l'ensemble des formulaires avec les composants génériques (`InputField`, `TextAreaField`, `FormSection` et `SelectField`)
+- Créer un bloc Client au niveau du formulaire de création de facture permettant de stocker les données clients 
+  - Workflow
+    - Rechercher client dans la table client, compléter informations si nécessaire et mise à jour des données client dans la table client 
+    - Le client n'existe pas saisie manuelle des informations et création du client dans la table client
+  - Règles de gestion
+    - Le client est un particulier => Nom, prénom, adresse sont obligatoires
+    - Le client est une entreprise domiciliée en France => SIRET et adresse sont obligatoires
+    - Le client est une entreprise non domiciliée en France => TVA intracommunautaire et adresse sont obligatoires
 
 
 ## Architecture projet
@@ -109,6 +118,7 @@ project/
 │   ├── form
 │   │   ├── FormSection.jsx
 │   │   ├── InputField.jsx
+│   │   ├── SelectField.jsx
 │   │   └── TextAreaField.jsx
 │   ├── invoices
 │   │   ├── InvoiceForm.jsx
@@ -129,6 +139,8 @@ project/
 │   │   └── useClients.js
 │   ├── common
 │   │   └── datatableStyles.js
+│   ├── invoices
+│   │   └── invoiceColumns.jsx
 │   └── sellers
 │       ├── sellerColumns.jsx
 │       ├── useSellerForm.js
@@ -163,5 +175,7 @@ project/
     └── validators
         ├── client.js
         ├── contact.js
+        ├── invoice.js
         ├── seller.js
         └── siret.js
+

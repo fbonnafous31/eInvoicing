@@ -1,8 +1,11 @@
 import React from 'react';
 import InputField from '../../../components/form/InputField';
+import SelectField from '../../../components/form/SelectField';
 import companyTypes from '../../../constants/companyTypes';
 
-export default function LegalFields({ formData, errors, handleChange, disabled }) {
+export default function LegalFields({ formData, errors, handleChange, handleBlur, touched, disabled }) {
+  const handleFieldChange = (field) => (val) => handleChange(field, val);
+
   return (
     <>
       <InputField
@@ -10,30 +13,36 @@ export default function LegalFields({ formData, errors, handleChange, disabled }
         name="legal_name"
         label="Nom légal *"
         value={formData.legal_name}
-        onChange={handleChange}
+        onChange={handleFieldChange('legal_name')}
+        onBlur={handleBlur}
+        touched={touched.legal_name}
         disabled={disabled}
         error={errors.legal_name}
       />
+
       <InputField
         id="legal_identifier"
         name="legal_identifier"
         label="Identifiant légal *"
         value={formData.legal_identifier}
-        onChange={handleChange}
+        onChange={handleFieldChange('legal_identifier')}
+        onBlur={handleBlur}
+        touched={touched.legal_identifier}
         disabled={disabled}
         error={errors.legal_identifier}
       />
-      <select
-        className="form-select mb-3"
+
+      <SelectField
+        label="Type de société *"
         name="company_type"
         value={formData.company_type}
+        onChange={handleFieldChange('company_type')}
+        onBlur={handleBlur}
+        touched={touched.company_type}
+        options={companyTypes}
         disabled={disabled}
-        onChange={handleChange}
-      >
-        {companyTypes.map(c => (
-          <option key={c.value} value={c.value}>{c.label}</option>
-        ))}
-      </select>
+        error={errors.company_type}
+      />
     </>
   );
 }

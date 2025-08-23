@@ -22,6 +22,7 @@ export default function useSellerForm(initialData = {}) {
   });
 
   const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({}); // ✅ champs touchés
   const [openSections, setOpenSections] = useState({
     legal: true,
     contact: true,
@@ -29,26 +30,36 @@ export default function useSellerForm(initialData = {}) {
     finances: true,
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    const updatedForm = { ...formData, [name]: value };
+  const handleChange = (field, value) => {
+    const updatedForm = { ...formData, [field]: value };
     setFormData(updatedForm);
 
-    // Validation immédiate
-    setErrors(validateSeller(updatedForm));
+    const fieldError = validateSeller(updatedForm, field);
+    setErrors(prev => ({ ...prev, [field]: fieldError[field] }));
+  };
+
+  const handleBlur = (field) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+
+    const fieldError = validateSeller(formData, field);
+    setErrors(prev => ({ ...prev, [field]: fieldError[field] }));
   };
 
   const toggleSection = (key) => {
     setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
+  // ✅ IMPORTANT : exposer setTouched pour pouvoir l’utiliser au submit
   return {
     formData,
     setFormData,
     errors,
     setErrors,
+    touched,
+    setTouched, // ← ajouté
+    handleChange,
+    handleBlur,
     openSections,
     toggleSection,
-    handleChange,
   };
 }

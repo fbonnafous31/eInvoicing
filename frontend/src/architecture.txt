@@ -13,6 +13,7 @@
 │   ├── form
 │   │   ├── FormSection.jsx
 │   │   ├── InputField.jsx
+│   │   ├── SelectField.jsx
 │   │   └── TextAreaField.jsx
 │   ├── invoices
 │   │   ├── InvoiceForm.jsx
@@ -33,6 +34,8 @@
 │   │   └── useClients.js
 │   ├── common
 │   │   └── datatableStyles.js
+│   ├── invoices
+│   │   └── invoiceColumns.jsx
 │   └── sellers
 │       ├── sellerColumns.jsx
 │       ├── useSellerForm.js
@@ -67,7 +70,8 @@
     └── validators
         ├── client.js
         ├── contact.js
+        ├── invoice.js
         ├── seller.js
         └── siret.js
 
-21 directories, 50 files
+22 directories, 53 files
