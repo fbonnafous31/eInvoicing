@@ -7,7 +7,7 @@ import { validateInvoiceField } from "../../utils/validators/invoice";
 import { fetchSellers } from "../../services/sellers";
 import { fetchClients } from "../../services/clients";
 
-export default function InvoiceHeader({ data, onChange, submitted }) {
+export default function InvoiceHeader({ data, onChange, submitted, errors = {} }) {
   const [sellers, setSellers] = useState([]);
   const [clients, setClients] = useState([]);
   const [fieldErrors, setFieldErrors] = useState({});
@@ -49,14 +49,19 @@ export default function InvoiceHeader({ data, onChange, submitted }) {
     validateField(field, value);
   };
 
-  const getError = (field) => (touchedFields[field] || submitted) && fieldErrors[field];
+  const getError = (field) => {
+    const currentErrors = submitted ? errors : fieldErrors;
+    return (touchedFields[field] || submitted) && currentErrors[field];
+  };
 
   const toggleSection = (key) => {
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Helper pour savoir si une section contient des erreurs
-  const sectionHasError = (fields) => fields.some((f) => fieldErrors[f]);
+  const sectionHasError = (fields) => {
+    const currentErrors = submitted ? errors : fieldErrors;
+    return fields.some((f) => currentErrors[f]);
+  };
 
   const issueYear = data.issue_date ? new Date(data.issue_date).getFullYear() : new Date().getFullYear();
   const fiscalYearValue = data.fiscal_year || issueYear;
@@ -142,7 +147,7 @@ export default function InvoiceHeader({ data, onChange, submitted }) {
         <InputField
           id="contract_number"
           name="contract_number"
-          label="Numéro de contrat"
+          label="Numéro de marché"
           value={data.contract_number || ""}
           onChange={(e) => handleChange("contract_number", e.target.value)}
           maxLength={20}

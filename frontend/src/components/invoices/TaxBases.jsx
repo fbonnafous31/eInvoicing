@@ -58,7 +58,7 @@ export default function TaxBases({ data, onChange }) {
             style={{ flex: 2 }}
             readOnly 
           />
-          <button type="button" className="btn btn-danger" onClick={() => removeTax(index)}>−</button>
+          <button type="button" className="btn btn-danger" onClick={() => removeTax(index)}>🗑️</button>
         </div>
       ))}
 
