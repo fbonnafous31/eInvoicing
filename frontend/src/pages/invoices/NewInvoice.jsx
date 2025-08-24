@@ -13,8 +13,12 @@ export default function NewInvoice() {
   const handleCreateInvoice = async (formData) => {
     setIsSubmitting(true);
     setErrorMessage('');
+    setSuccessMessage('');
+
     try {
       await invoiceService.createInvoice(formData);
+
+      // Succès
       setSuccessMessage("Facture créée avec succès ! 🎉");
       window.scrollTo({ top: 0, behavior: "smooth" });
 
@@ -22,8 +26,19 @@ export default function NewInvoice() {
         setSuccessMessage('');
         navigate('/invoices');
       }, 2000);
+
     } catch (error) {
-      setErrorMessage(error.message);
+      // Récupération du message renvoyé par le backend
+      let backendMessage = "Erreur lors de la création de la facture";
+
+      if (error.response?.data?.error) {
+        backendMessage = error.response.data.error;
+      } else if (error.message) {
+        backendMessage = error.message;
+      }
+
+      setErrorMessage(backendMessage);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setIsSubmitting(false);
     }
@@ -37,17 +52,13 @@ export default function NewInvoice() {
 
   return (
     <div className="container mt-4">
-      {/* H1 invisible pour SEO/accessibilité */}
       <h1 className="visually-hidden">Créer une nouvelle facture</h1>
 
-      {/* Breadcrumb */}
       <Breadcrumb items={breadcrumbItems} />
 
-      {/* Messages */}
       {successMessage && <div className="alert alert-success">{successMessage}</div>}
       {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
 
-      {/* Formulaire */}
       <InvoiceForm onSubmit={handleCreateInvoice} disabled={isSubmitting} />
     </div>
   );

@@ -7,7 +7,7 @@ import SupportingDocs from "./SupportingDocs";
 import { createInvoice } from "../../services/invoices";
 import { validateInvoiceField } from "../../utils/validators/invoice";
 
-export default function InvoiceForm() {
+export default function InvoiceForm({ onSubmit, disabled }) {
   const navigate = useNavigate();
   const [invoiceData, setInvoiceData] = useState({
     header: {},
@@ -18,6 +18,7 @@ export default function InvoiceForm() {
   const [successMessage, setSuccessMessage] = useState("");
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Calculs des totaux
   const { subtotal, totalTaxes, total, linesWithTotals, taxesSummary } = useMemo(() => {
@@ -60,7 +61,6 @@ export default function InvoiceForm() {
     const newData = { ...invoiceData, [section]: value };
     setInvoiceData(newData);
 
-    // Validation à la modification pour le header
     if (section === "header") {
       const newErrors = { ...errors };
       Object.keys(value).forEach(f => {
@@ -80,38 +80,36 @@ export default function InvoiceForm() {
       const err = validateInvoiceField(f, invoiceData.header[f], invoiceData.header);
       if (err) headerErrors[f] = err;
     });
-
     setErrors(headerErrors);
     return headerErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true); // <-- Indique au Header qu’on a soumis
+    setSubmitted(true);
+    setErrorMessage("");
 
     const headerErrors = validateAll();
 
-    // Vérifier lignes de facture
     if (!invoiceData.lines || invoiceData.lines.length === 0) {
-      alert("Vous devez ajouter au moins une ligne de facture !");
+      setErrorMessage("Vous devez ajouter au moins une ligne de facture !");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
-    // Vérifier justificatif principal
     const mainCount = invoiceData.attachments.filter(a => a.attachment_type === 'main').length;
     if (mainCount !== 1) {
-      alert("La facture doit avoir un justificatif principal");
+      setErrorMessage("La facture doit avoir un justificatif principal");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
-    // Bloquer création si erreurs header
     if (Object.keys(headerErrors).length > 0) {
-      alert("Certains champs obligatoires sont manquants !");
-      window.scrollTo({ top: 0, behavior: "smooth" }); 
+      setErrorMessage("Certains champs obligatoires sont manquants !");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
-    // Soumission
     try {
       const formData = new FormData();
       formData.append(
@@ -126,25 +124,33 @@ export default function InvoiceForm() {
         JSON.stringify(invoiceData.attachments.map(att => ({ attachment_type: att.attachment_type })))
       );
 
-      await createInvoice(formData);
-
-      setSuccessMessage("Facture créée avec succès ! 🎉");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      setTimeout(() => { setSuccessMessage(""); navigate("/invoices"); }, 2000);
+      // Appel au service ou callback parent
+      if (onSubmit) {
+        await onSubmit(formData);
+      } else {
+        await createInvoice(formData);
+        setSuccessMessage("Facture créée avec succès ! 🎉");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        setTimeout(() => { setSuccessMessage(""); navigate("/invoices"); }, 2000);
+      }
     } catch (err) {
-      alert(err.message || "Erreur lors de la création de la facture");
+      // On récupère le message backend friendly
+      const msg = err.message || "Erreur lors de la création de la facture";
+      setErrorMessage(msg);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   return (
     <form onSubmit={handleSubmit}>
       {successMessage && <div className="alert alert-success">{successMessage}</div>}
+      {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
 
       <InvoiceHeader
         data={invoiceData.header}
         onChange={val => handleChange("header", val)}
         errors={errors}
-        submitted={submitted} // <-- Permet d'afficher les erreurs après submit
+        submitted={submitted}
       />
 
       <InvoiceLines data={linesWithTotals} onChange={val => handleChange("lines", val)} />
@@ -163,7 +169,7 @@ export default function InvoiceForm() {
       </div>
 
       <div className="d-flex justify-content-end mt-3 mb-3 me-3">
-        <button type="submit" className="btn btn-primary">Créer la facture</button>
+        <button type="submit" className="btn btn-primary" disabled={disabled}>Créer la facture</button>
       </div>
     </form>
   );

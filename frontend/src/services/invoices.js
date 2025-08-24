@@ -32,13 +32,15 @@ export async function fetchInvoice(id) {
 export async function createInvoice(formData) {
   const response = await fetch(API_BASE, {
     method: "POST",
-    body: formData, // formData pour inclure fichiers et JSON
+    body: formData,
   });
 
   if (!response.ok) {
+    // Essayer de récupérer le message spécifique renvoyé par le backend
     const data = await response.json().catch(() => ({}));
-    throw new Error(data.message || "Erreur lors de la création de la facture");
+    throw new Error(data.error || data.message || "Erreur lors de la création de la facture");
   }
+
   return response.json();
 }
 
@@ -55,8 +57,9 @@ export async function updateInvoice(id, formData) {
 
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
-    throw new Error(data.message || "Erreur lors de la mise à jour de la facture");
+    throw new Error(data.error || data.message || "Erreur lors de la mise à jour de la facture");
   }
+
   return response.json();
 }
 
@@ -66,9 +69,11 @@ export async function updateInvoice(id, formData) {
  */
 export async function deleteInvoice(id) {
   const response = await fetch(`${API_BASE}/${id}`, { method: "DELETE" });
+
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
-    throw new Error(data.message || "Erreur lors de la suppression de la facture");
+    throw new Error(data.error || data.message || "Erreur lors de la suppression de la facture");
   }
+
   return response.json();
 }
