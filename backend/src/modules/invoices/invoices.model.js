@@ -60,7 +60,7 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
   try {
     await client.query('BEGIN');
 
-    // --- S'assurer que seller_legal_name et client_legal_name ---
+    // --- Remplir seller_legal_name ---
     if (invoice.seller_id && !invoice.seller_legal_name) {
       const sellerRes = await client.query(
         'SELECT legal_name FROM invoicing.sellers WHERE id = $1',
@@ -69,34 +69,53 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
       invoice.seller_legal_name = sellerRes.rows[0]?.legal_name || null;
     }
 
-    if (invoice.client_id && !invoice.client_legal_name) {
+    // --- Remplir les infos client depuis client_id ---
+    if (invoice.client_id) {
       const clientRes = await client.query(
-        'SELECT legal_name FROM invoicing.clients WHERE id = $1',
+        `SELECT legal_name, first_name, last_name, siret, vat_number, address, type
+         FROM invoicing.clients WHERE id = $1`,
         [invoice.client_id]
       );
-      invoice.client_legal_name = clientRes.rows[0]?.legal_name || null;
+      const c = clientRes.rows[0];
+      invoice.client_legal_name = c.legal_name;
+      invoice.client_first_name = c.first_name;
+      invoice.client_last_name = c.last_name;
+      invoice.client_siret = c.siret;
+      invoice.client_vat_number = c.vat_number;
+      invoice.client_address = c.address;
+      invoice.client_type = c.type;
     }
 
-    // --- Valider invoice_number ---
-    if (!invoice.invoice_number) {
-      throw new Error('invoice_number obligatoire');
-    }
+    // --- Validation invoice_number ---
+    if (!invoice.invoice_number) throw new Error('invoice_number obligatoire');
     invoice.invoice_number = invoice.invoice_number.trim().slice(0, 20);
 
-    // --- Calcul / validation fiscal_year ---
-    if (!invoice.fiscal_year) {
-      invoice.fiscal_year = new Date(invoice.issue_date).getFullYear();
-    }
-
+    // --- Validation fiscal_year ---
+    if (!invoice.fiscal_year) invoice.fiscal_year = new Date(invoice.issue_date).getFullYear();
     const issueYear = new Date(invoice.issue_date).getFullYear();
     const fy = invoice.fiscal_year;
-    if (fy < issueYear - 1 || fy > issueYear + 1) {
-      throw new Error(
-        `Exercice fiscal invalide : ${fy} pour une date d'émission ${invoice.issue_date}`
-      );
+    if (fy < issueYear - 1 || fy > issueYear + 1)
+      throw new Error(`Exercice fiscal invalide : ${fy} pour une date d'émission ${invoice.issue_date}`);
+
+    // --- Validation des informations client selon type ---
+    switch(invoice.client_type) {
+      case 'individual':
+        if (!invoice.client_first_name || !invoice.client_last_name || !invoice.client_address)
+          throw new Error('Informations client manquantes pour un particulier');
+        break;
+      case 'company_fr':
+        if (!invoice.client_legal_name || !invoice.client_siret || !invoice.client_address)
+          throw new Error('Informations client manquantes pour une entreprise française');
+        break;
+      case 'company_eu':
+        if (!invoice.client_legal_name || !invoice.client_vat_number || !invoice.client_address)
+          throw new Error('Informations client manquantes pour une entreprise UE');
+        break;
+      default:
+        throw new Error('Type de client inconnu');
     }
 
-    // --- Vérifier unicité seller_id + fiscal_year + invoice_number ---
+    // --- Vérification unicité seller + fiscal_year + invoice_number ---
     const existing = await client.query(
       `SELECT id 
        FROM invoicing.invoices 
@@ -109,13 +128,11 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
       );
     }
 
-    // --- Vérification des attachments ---
+    // --- Vérification attachments ---
     const mainAttachments = attachments.filter(a => a.attachment_type === 'main');
-    if (mainAttachments.length !== 1) {
-      throw new Error('Une facture doit avoir un justificatif principal.');
-    }
+    if (mainAttachments.length !== 1) throw new Error('Une facture doit avoir un justificatif principal.');
 
-    // --- Supprimer id pour éviter doublons ---
+    // --- Préparer insertion invoice ---
     const invoiceDataToInsert = { ...invoice };
     delete invoiceDataToInsert.id;
 
@@ -130,7 +147,7 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
     const invoiceResult = await client.query(insertInvoiceQuery, invoiceValues);
     const invoiceId = invoiceResult.rows[0].id;
 
-    // --- Lignes ---
+    // --- Insertion lignes ---
     for (const line of lines) {
       const cols = Object.keys(line).join(', ');
       const vals = Object.values(line);
@@ -141,7 +158,7 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
       );
     }
 
-    // --- Taxes ---
+    // --- Insertion taxes ---
     for (const tax of taxes) {
       const cols = Object.keys(tax).join(', ');
       const vals = Object.values(tax);
@@ -152,7 +169,7 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
       );
     }
 
-    // --- Attachments ---
+    // --- Insertion attachments ---
     for (const att of attachments) {
       const cols = Object.keys(att).join(', ');
       const vals = Object.values(att);

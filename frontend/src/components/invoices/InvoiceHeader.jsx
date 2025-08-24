@@ -1,29 +1,25 @@
+// frontend/src/components/invoices/InvoiceHeader.jsx
 import React, { useEffect, useState } from "react";
 import { paymentTermsOptions } from "../../constants/paymentTerms";
 import InputField from "../form/InputField";
 import SelectField from "../form/SelectField";
 import FormSection from "../form/FormSection";
+import InvoiceClient from "./InvoiceClient"; 
 import { validateInvoiceField } from "../../utils/validators/invoice";
 import { fetchSellers } from "../../services/sellers";
-import { fetchClients } from "../../services/clients";
 
 export default function InvoiceHeader({ data, onChange, submitted, errors = {} }) {
   const [sellers, setSellers] = useState([]);
-  const [clients, setClients] = useState([]);
   const [fieldErrors, setFieldErrors] = useState({});
   const [touchedFields, setTouchedFields] = useState({});
   const [openSections, setOpenSections] = useState({ info: true, contract: true });
 
-  // Récupération des vendeurs et clients
+  // Récupération des vendeurs
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [sellersData, clientsData] = await Promise.all([
-          fetchSellers(),
-          fetchClients(),
-        ]);
+        const sellersData = await fetchSellers();
         setSellers(sellersData);
-        setClients(clientsData);
       } catch (err) {
         console.error(err);
       }
@@ -31,41 +27,27 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
     fetchData();
   }, []);
 
-  // Validation d'un champ
   const validateField = (field, value) => {
     const error = validateInvoiceField(field, value, data);
     setFieldErrors(prev => ({ ...prev, [field]: error }));
   };
 
-  // Changement de valeur d'un champ
   const handleChange = (field, value) => {
     const newData = { ...data, [field]: value };
-
-    // Complétion automatique fiscal_year si issue_date modifiée
     if (field === "issue_date") {
       newData.fiscal_year = new Date(value).getFullYear();
     }
-
     onChange(newData);
-
-    // Validation instantanée
     validateField(field, value);
-
-    // Marquer le champ comme touché
-    if (!touchedFields[field]) {
-      setTouchedFields(prev => ({ ...prev, [field]: true }));
-    }
+    if (!touchedFields[field]) setTouchedFields(prev => ({ ...prev, [field]: true }));
   };
 
-  // Blur d'un champ
   const handleBlur = (field) => {
     setTouchedFields(prev => ({ ...prev, [field]: true }));
     validateField(field, data[field]);
   };
 
-  // Récupérer l'erreur actuelle pour un champ
   const getError = (field) => {
-    // Utilise errors du submit si soumis, sinon fieldErrors du champ
     const currentErrors = submitted ? errors : fieldErrors;
     return (touchedFields[field] || submitted) && currentErrors[field];
   };
@@ -81,6 +63,23 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
 
   const issueYear = data.issue_date ? new Date(data.issue_date).getFullYear() : new Date().getFullYear();
   const fiscalYearValue = data.fiscal_year || issueYear;
+
+  // Préparer l'objet client complet pour InvoiceClient
+  const clientValue = data.client_id ? {
+    id: data.client_id,
+    type: data.client_type,
+    firstName: data.client_firstName,
+    lastName: data.client_lastName,
+    legal_name: data.client_legal_name,
+    siret: data.client_siret,
+    vatNumber: data.client_vatNumber,
+    address: data.client_address,
+    city: data.client_city,
+    postal_code: data.client_postal_code,
+    country_code: data.client_country_code,
+    email: data.client_email,
+    phone: data.client_phone
+  } : null;
 
   return (
     <div className="card p-3 mb-3">
@@ -134,17 +133,67 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
           value={data.seller_id}
           onChange={val => handleChange("seller_id", val)}
           onBlur={() => handleBlur("seller_id")}
-          options={sellers.map(s => ({ value: s.id, label: s.legal_name }))}
+          options={sellers.map(s => ({ value: s.id, label: s.legal_name || "Vendeur" }))}
           error={getError("seller_id")}
           required
         />
 
-        <SelectField
-          label="Client"
-          value={data.client_id}
-          onChange={val => handleChange("client_id", val)}
-          onBlur={() => handleBlur("client_id")}
-          options={clients.map(c => ({ value: c.id, label: c.legal_name }))}
+        {/* Composant client intelligent */}
+        <InvoiceClient
+          value={clientValue}
+          onChange={(client) => {
+            if (!client) {
+              handleChange("client_id", null);
+              handleChange("client_firstName", "");
+              handleChange("client_lastName", "");
+              handleChange("client_legal_name", "");
+              handleChange("client_siret", "");
+              handleChange("client_vatNumber", "");
+              handleChange("client_address", "");
+              handleChange("client_city", "");
+              handleChange("client_postal_code", "");
+              handleChange("client_country_code", "");
+              handleChange("client_email", "");
+              handleChange("client_phone", "");
+              handleChange("client_type", "");
+              return;
+            }
+
+            handleChange("client_id", client.id);
+            handleChange("client_address", client.address || "");
+            handleChange("client_city", client.city || "");
+            handleChange("client_postal_code", client.postal_code || "");
+            handleChange("client_country_code", client.country_code || "FR");
+            handleChange("client_email", client.email || "");
+            handleChange("client_phone", client.phone || "");
+            handleChange("client_type", client.type || "");
+
+            switch (client.type) {
+              case "individual":
+                handleChange("client_firstName", client.firstName || "");
+                handleChange("client_lastName", client.lastName || "");
+                handleChange("client_legal_name", "");
+                handleChange("client_siret", "");
+                handleChange("client_vatNumber", "");
+                break;
+              case "company_fr":
+                handleChange("client_legal_name", client.legal_name || "");
+                handleChange("client_siret", client.siret || "");
+                handleChange("client_firstName", "");
+                handleChange("client_lastName", "");
+                handleChange("client_vatNumber", "");
+                break;
+              case "company_eu":
+                handleChange("client_legal_name", client.legal_name || "");
+                handleChange("client_vatNumber", client.vatNumber || "");
+                handleChange("client_firstName", "");
+                handleChange("client_lastName", "");
+                handleChange("client_siret", "");
+                break;
+              default:
+                break;
+            }
+          }}
           error={getError("client_id")}
           required
         />
