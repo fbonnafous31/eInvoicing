@@ -29,7 +29,7 @@ export default function InputField({
         id={id || name}
         name={name}
         className={`form-control ${hasError ? "is-invalid" : ""}`}
-        value={value || ""}
+        value={value ?? ""}
         onChange={(e) => onChange?.(e.target.value)}  
         onBlur={() => onBlur?.(name)}   // appelle handleBlur(field) du hook
         {...props}

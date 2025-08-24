@@ -1,8 +1,13 @@
+import { useState } from "react";
 import InputField from "../form/InputField";
+import { validateInvoiceLine } from "../../utils/validators/invoice";
 
 export default function InvoiceLines({ data, onChange }) {
+  const [errors, setErrors] = useState([]); // tableau d'erreurs par ligne
+  const [touched, setTouched] = useState([]); // champs déjà visités
+
   const handleLineChange = (index, field, eOrValue) => {
-    const value = eOrValue?.target ? eOrValue.target.value : eOrValue; // <-- fix ici
+    const value = eOrValue?.target ? eOrValue.target.value : eOrValue;
     const newLines = [...data];
     newLines[index][field] = value;
 
@@ -17,9 +22,32 @@ export default function InvoiceLines({ data, onChange }) {
     newLines[index].line_total = newLines[index].line_net + newLines[index].line_tax;
 
     onChange(newLines);
+
+    // validation immédiate du champ si déjà touché
+    if (touched[index]?.[field]) {
+      runValidation(index, newLines[index]);
+    }
   };
 
-  const addLine = () =>
+  const handleBlur = (index, field) => {
+    setTouched((prev) => {
+      const newTouched = [...prev];
+      newTouched[index] = { ...newTouched[index], [field]: true };
+      return newTouched;
+    });
+    runValidation(index, data[index]);
+  };
+
+  const runValidation = (index, line) => {
+    const lineErrors = validateInvoiceLine(line);
+    setErrors((prev) => {
+      const newErrors = [...prev];
+      newErrors[index] = lineErrors;
+      return newErrors;
+    });
+  };
+
+  const addLine = () => {
     onChange([
       ...data,
       {
@@ -33,8 +61,15 @@ export default function InvoiceLines({ data, onChange }) {
         line_total: 0,
       },
     ]);
+    setErrors([...errors, {}]);
+    setTouched([...touched, {}]);
+  };
 
-  const removeLine = (index) => onChange(data.filter((_, i) => i !== index));
+  const removeLine = (index) => {
+    onChange(data.filter((_, i) => i !== index));
+    setErrors(errors.filter((_, i) => i !== index));
+    setTouched(touched.filter((_, i) => i !== index));
+  };
 
   return (
     <div className="card p-3 mb-3">
@@ -56,6 +91,8 @@ export default function InvoiceLines({ data, onChange }) {
               label="Description"
               value={line.description}
               onChange={(val) => handleLineChange(index, "description", val)}
+              onBlur={() => handleBlur(index, "description")}
+              error={touched[index]?.description && errors[index]?.description}
               required
             />
 
@@ -66,6 +103,8 @@ export default function InvoiceLines({ data, onChange }) {
               label="Quantité"
               value={line.quantity}
               onChange={(val) => handleLineChange(index, "quantity", val)}
+              onBlur={() => handleBlur(index, "quantity")}
+              error={touched[index]?.quantity && errors[index]?.quantity}
               required
             />
 
@@ -76,6 +115,8 @@ export default function InvoiceLines({ data, onChange }) {
               label="Prix unitaire (€)"
               value={line.unit_price}
               onChange={(val) => handleLineChange(index, "unit_price", val)}
+              onBlur={() => handleBlur(index, "unit_price")}
+              error={touched[index]?.unit_price && errors[index]?.unit_price}
               required
             />
 
@@ -86,6 +127,8 @@ export default function InvoiceLines({ data, onChange }) {
               label="TVA (%)"
               value={line.vat_rate}
               onChange={(val) => handleLineChange(index, "vat_rate", val)}
+              onBlur={() => handleBlur(index, "vat_rate")}
+              error={touched[index]?.vat_rate && errors[index]?.vat_rate}
               required
             />
 
@@ -96,6 +139,8 @@ export default function InvoiceLines({ data, onChange }) {
               label="Remise (€)"
               value={line.discount}
               onChange={(val) => handleLineChange(index, "discount", val)}
+              onBlur={() => handleBlur(index, "discount")}
+              error={touched[index]?.discount && errors[index]?.discount}
             />
 
             <InputField
