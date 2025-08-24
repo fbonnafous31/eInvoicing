@@ -42,7 +42,7 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
     const newData = { ...data, [field]: value };
 
     // Complétion automatique fiscal_year si issue_date modifiée
-    if (field === "issue_date" && (!data.fiscal_year || data.fiscal_year === "")) {
+    if (field === "issue_date") {
       newData.fiscal_year = new Date(value).getFullYear();
     }
 

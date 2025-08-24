@@ -111,6 +111,18 @@ export default function InvoiceForm({ onSubmit, disabled }) {
       return;
     }
 
+    // Vérification champs obligatoires des lignes
+    const lineErrors = invoiceData.lines.filter(
+      (line) =>
+        !line.description || !line.quantity || !line.unit_price
+    );
+
+    if (lineErrors.length > 0) {
+      setErrorMessage("Chaque ligne doit avoir une description, une quantité et un prix unitaire !");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
     // Vérification justificatif principal
     const mainCount = invoiceData.attachments.filter(a => a.attachment_type === 'main').length;
     if (mainCount !== 1) {
