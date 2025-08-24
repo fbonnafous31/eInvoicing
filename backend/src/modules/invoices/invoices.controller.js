@@ -1,6 +1,34 @@
 const InvoicesService = require('./invoices.service');
 
 /**
+ * Validation des données client selon le type
+ */
+function validateInvoiceClient(client) {
+  const errors = {};
+  if (!client) return errors;
+
+  switch (client.client_type) {
+    case 'individual':
+      if (!client.client_first_name) errors.client_first_name = 'Prénom requis';
+      if (!client.client_last_name) errors.client_last_name = 'Nom requis';
+      if (!client.address) errors.address = 'Adresse requise';
+      break;
+    case 'company_fr':
+      if (!client.client_legal_name) errors.client_legal_name = 'Raison sociale requise';
+      if (!client.client_siret) errors.client_siret = 'SIRET requis';
+      if (!client.address) errors.address = 'Adresse requise';
+      break;
+    case 'company_eu':
+      if (!client.client_legal_name) errors.client_legal_name = 'Raison sociale requise';
+      if (!client.client_vat_number) errors.client_vat_number = 'TVA intracommunautaire requise';
+      if (!client.address) errors.address = 'Adresse requise';
+      break;
+  }
+
+  return errors;
+}
+
+/**
  * Liste toutes les factures
  */
 async function listInvoices(req, res) {
@@ -32,6 +60,7 @@ async function getInvoice(req, res) {
  */
 async function createInvoice(req, res, next) {
   try {
+    // --- Gestion des justificatifs ---
     let attachmentsMeta = [];
     try {
       attachmentsMeta = JSON.parse(req.body.attachments_meta || '[]');
@@ -43,17 +72,24 @@ async function createInvoice(req, res, next) {
       attachment_type: attachmentsMeta[i]?.attachment_type || 'additional'
     }));
 
-    // --- Validation principale des justificatifs ---
+    // Vérifie qu'il y a exactement un justificatif principal
     const mainCount = attachments.filter(f => f.attachment_type === 'main').length;
     if (mainCount !== 1) {
       return res.status(400).json({ message: "Une facture doit avoir un justificatif principal." });
     }
 
-    // Récupération des autres données
+    // --- Récupération des données ---
     const invoiceData = JSON.parse(req.body.invoice || '{}');
     const lines = JSON.parse(req.body.lines || '[]');
     const taxes = JSON.parse(req.body.taxes || '[]');
 
+    // --- Validation côté backend du client ---
+    const clientErrors = validateInvoiceClient(invoiceData);
+    if (Object.keys(clientErrors).length > 0) {
+      return res.status(400).json({ message: 'Erreur client', errors: clientErrors });
+    }
+
+    // --- Création de la facture ---
     const newInvoice = await InvoicesService.createInvoice({
       invoice: invoiceData,
       lines,
@@ -66,7 +102,7 @@ async function createInvoice(req, res, next) {
   } catch (err) {
     console.error(err);
 
-    // Cas métier géré localement
+    // Cas métier connus
     if (err.message.includes("déjà utilisé")) {
       return res.status(409).json({ message: err.message });
     }

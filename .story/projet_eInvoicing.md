@@ -56,7 +56,6 @@
 
 
 ## 📌 Prochaines étapes
-- Harmoniser l'ensemble des formulaires avec les composants génériques (`InputField`, `TextAreaField`, `FormSection` et `SelectField`)
 - Créer un bloc Client au niveau du formulaire de création de facture permettant de stocker les données clients 
   - Workflow
     - Rechercher client dans la table client, compléter informations si nécessaire et mise à jour des données client dans la table client 
