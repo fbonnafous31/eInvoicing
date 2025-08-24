@@ -21,7 +21,7 @@ export default function InvoiceForm({ onSubmit, disabled }) {
   const [errorMessage, setErrorMessage] = useState("");
   const [headerTouched, setHeaderTouched] = useState({});
 
-  const headerFields = ["invoice_number","issue_date","fiscal_year","seller_id","client_id"];
+  const headerFields = ["invoice_number","issue_date","fiscal_year","seller_id"];
 
   // Calcul des totaux
   const { subtotal, totalTaxes, total, linesWithTotals, taxesSummary } = useMemo(() => {

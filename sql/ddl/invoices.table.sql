@@ -29,6 +29,10 @@ CREATE TABLE invoicing.invoices (
 	client_last_name varchar(255) NULL, -- Nom du client (si particulier)
 	client_siret varchar(20) NULL, -- Numéro SIRET (si entreprise FR)
 	client_vat_number varchar(50) NULL, -- Numéro TVA intracommunautaire (si entreprise UE)
+	client_address text NULL, -- Adresse complète du client au moment de la facture
+	client_city varchar(100) NULL, -- Ville du client au moment de la facture
+	client_postal_code varchar(20) NULL, -- Code postal du client au moment de la facture
+	client_country_code bpchar(2) NULL, -- Code pays ISO 3166-1 alpha-2 du client au moment de la facture
 	CONSTRAINT chk_fiscal_year_range CHECK (((fiscal_year >= 2000) AND (fiscal_year <= 2100))),
 	CONSTRAINT chk_fiscal_year_reasonable CHECK (((fiscal_year >= ((EXTRACT(year FROM issue_date))::integer - 1)) AND (fiscal_year <= ((EXTRACT(year FROM issue_date))::integer + 1)))),
 	CONSTRAINT invoices_pkey PRIMARY KEY (id)
@@ -61,9 +65,13 @@ COMMENT ON COLUMN invoicing.invoices.client_first_name IS 'Prénom du client (si
 COMMENT ON COLUMN invoicing.invoices.client_last_name IS 'Nom du client (si particulier)';
 COMMENT ON COLUMN invoicing.invoices.client_siret IS 'Numéro SIRET (si entreprise FR)';
 COMMENT ON COLUMN invoicing.invoices.client_vat_number IS 'Numéro TVA intracommunautaire (si entreprise UE)';
+COMMENT ON COLUMN invoicing.invoices.client_address IS 'Adresse complète du client au moment de la facture';
+COMMENT ON COLUMN invoicing.invoices.client_city IS 'Ville du client au moment de la facture';
+COMMENT ON COLUMN invoicing.invoices.client_postal_code IS 'Code postal du client au moment de la facture';
+COMMENT ON COLUMN invoicing.invoices.client_country_code IS 'Code pays ISO 3166-1 alpha-2 du client au moment de la facture';
 
 
 -- invoicing.invoices foreign keys
 
-ALTER TABLE invoicing.invoices ADD CONSTRAINT invoices_client_id_fkey FOREIGN KEY (client_id) REFERENCES invoicing.clients(id);
+ALTER TABLE invoicing.invoices ADD CONSTRAINT invoices_client_id_fkey FOREIGN KEY (client_id) REFERENCES invoicing.clients(id) ON DELETE SET NULL;
 ALTER TABLE invoicing.invoices ADD CONSTRAINT invoices_seller_id_fkey FOREIGN KEY (seller_id) REFERENCES invoicing.sellers(id);
