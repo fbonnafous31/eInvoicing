@@ -72,7 +72,7 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
     lastName: data.client_lastName,
     legal_name: data.client_legal_name,
     siret: data.client_siret,
-    vatNumber: data.client_vatNumber,
+    vatNumber: data.client_vat_number,
     address: data.client_address,
     city: data.client_city,
     postal_code: data.client_postal_code,
@@ -148,7 +148,7 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
               handleChange("client_lastName", "");
               handleChange("client_legal_name", "");
               handleChange("client_siret", "");
-              handleChange("client_vatNumber", "");
+              handleChange("client_vat_number", "");
               handleChange("client_address", "");
               handleChange("client_city", "");
               handleChange("client_postal_code", "");
@@ -174,18 +174,18 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
                 handleChange("client_lastName", client.lastName || "");
                 handleChange("client_legal_name", "");
                 handleChange("client_siret", "");
-                handleChange("client_vatNumber", "");
+                handleChange("client_vat_number", "");
                 break;
               case "company_fr":
                 handleChange("client_legal_name", client.legal_name || "");
                 handleChange("client_siret", client.siret || "");
                 handleChange("client_firstName", "");
                 handleChange("client_lastName", "");
-                handleChange("client_vatNumber", "");
+                handleChange("client_vat_number", "");
                 break;
               case "company_eu":
                 handleChange("client_legal_name", client.legal_name || "");
-                handleChange("client_vatNumber", client.vatNumber || "");
+                handleChange("client_vat_number", client.vatNumber || "");
                 handleChange("client_firstName", "");
                 handleChange("client_lastName", "");
                 handleChange("client_siret", "");
@@ -195,7 +195,6 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
             }
           }}
           error={getError("client_id")}
-          required
         />
       </FormSection>
 

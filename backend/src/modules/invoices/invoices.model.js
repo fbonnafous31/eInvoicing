@@ -97,22 +97,36 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
     if (fy < issueYear - 1 || fy > issueYear + 1)
       throw new Error(`Exercice fiscal invalide : ${fy} pour une date d'émission ${invoice.issue_date}`);
 
-    // --- Validation des informations client selon type ---
-    switch(invoice.client_type) {
-      case 'individual':
-        if (!invoice.client_first_name || !invoice.client_last_name || !invoice.client_address)
-          throw new Error('Informations client manquantes pour un particulier');
-        break;
-      case 'company_fr':
-        if (!invoice.client_legal_name || !invoice.client_siret || !invoice.client_address)
-          throw new Error('Informations client manquantes pour une entreprise française');
-        break;
-      case 'company_eu':
-        if (!invoice.client_legal_name || !invoice.client_vat_number || !invoice.client_address)
-          throw new Error('Informations client manquantes pour une entreprise UE');
-        break;
-      default:
-        throw new Error('Type de client inconnu');
+    // --- Validation des informations client ---
+    if (invoice.client_id) {
+      const rules = {
+        individual: [
+          ["client_first_name", "Prénom manquant"],
+          ["client_last_name", "Nom manquant"],
+          ["client_address", "Adresse manquante"],
+        ],
+        company_fr: [
+          ["client_legal_name", "Raison sociale manquante"],
+          ["client_siret", "SIRET manquant"],
+          ["client_address", "Adresse manquante"],
+        ],
+        company_eu: [
+          ["client_legal_name", "Raison sociale manquante"],
+          ["client_vat_number", "Numéro de TVA intracom manquant"],
+          ["client_address", "Adresse manquante"],
+        ],
+      };
+
+      const validations = rules[invoice.client_type];
+      if (!validations) {
+        throw new Error("Type de client inconnu");
+      }
+
+      for (const [field, message] of validations) {
+        if (!invoice[field]) {
+          throw new Error(`Informations client manquantes : ${message}`);
+        }
+      }
     }
 
     // --- Vérification unicité seller + fiscal_year + invoice_number ---
@@ -132,18 +146,36 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
     const mainAttachments = attachments.filter(a => a.attachment_type === 'main');
     if (mainAttachments.length !== 1) throw new Error('Une facture doit avoir un justificatif principal.');
 
-    // --- Préparer insertion invoice ---
-    const invoiceDataToInsert = { ...invoice };
-    delete invoiceDataToInsert.id;
+    // --- Préparer insertion invoice (Solution B : colonnes explicites) ---
+    const invoiceColumns = [
+      "invoice_number",
+      "issue_date",
+      "fiscal_year",
+      "seller_id",
+      "seller_legal_name",
+      "client_id",
+      "client_type",
+      "client_first_name",
+      "client_last_name",
+      "client_legal_name",
+      "client_siret",
+      "client_vat_number",
+      "client_address",
+      "client_city",
+      "client_postal_code",
+      "client_country_code",
+      "client_email",
+      "client_phone"
+    ];
 
-    const invoiceColumns = Object.keys(invoiceDataToInsert).join(', ');
-    const invoiceValues = Object.values(invoiceDataToInsert);
-    const invoicePlaceholders = invoiceValues.map((_, i) => `$${i + 1}`).join(', ');
+    const invoiceValues = invoiceColumns.map(col => invoice[col] || null);
+    const placeholders = invoiceColumns.map((_, i) => `$${i + 1}`).join(", ");
 
     const insertInvoiceQuery = `
-      INSERT INTO invoicing.invoices (${invoiceColumns})
-      VALUES (${invoicePlaceholders})
+      INSERT INTO invoicing.invoices (${invoiceColumns.join(", ")})
+      VALUES (${placeholders})
       RETURNING *`;
+
     const invoiceResult = await client.query(insertInvoiceQuery, invoiceValues);
     const invoiceId = invoiceResult.rows[0].id;
 
@@ -151,9 +183,9 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
     for (const line of lines) {
       const cols = Object.keys(line).join(', ');
       const vals = Object.values(line);
-      const placeholders = vals.map((_, i) => `$${i + 1}`).join(', ');
+      const placeholdersLine = vals.map((_, i) => `$${i + 1}`).join(', ');
       await client.query(
-        `INSERT INTO invoicing.invoice_lines (${cols}, invoice_id) VALUES (${placeholders}, $${vals.length + 1})`,
+        `INSERT INTO invoicing.invoice_lines (${cols}, invoice_id) VALUES (${placeholdersLine}, $${vals.length + 1})`,
         [...vals, invoiceId]
       );
     }
@@ -162,9 +194,9 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
     for (const tax of taxes) {
       const cols = Object.keys(tax).join(', ');
       const vals = Object.values(tax);
-      const placeholders = vals.map((_, i) => `$${i + 1}`).join(', ');
+      const placeholdersTax = vals.map((_, i) => `$${i + 1}`).join(', ');
       await client.query(
-        `INSERT INTO invoicing.invoice_taxes (${cols}, invoice_id) VALUES (${placeholders}, $${vals.length + 1})`,
+        `INSERT INTO invoicing.invoice_taxes (${cols}, invoice_id) VALUES (${placeholdersTax}, $${vals.length + 1})`,
         [...vals, invoiceId]
       );
     }
@@ -173,15 +205,16 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
     for (const att of attachments) {
       const cols = Object.keys(att).join(', ');
       const vals = Object.values(att);
-      const placeholders = vals.map((_, i) => `$${i + 1}`).join(', ');
+      const placeholdersAtt = vals.map((_, i) => `$${i + 1}`).join(', ');
       await client.query(
-        `INSERT INTO invoicing.invoice_attachments (${cols}, invoice_id) VALUES (${placeholders}, $${vals.length + 1})`,
+        `INSERT INTO invoicing.invoice_attachments (${cols}, invoice_id) VALUES (${placeholdersAtt}, $${vals.length + 1})`,
         [...vals, invoiceId]
       );
     }
 
     await client.query('COMMIT');
     return await getInvoiceById(invoiceId);
+
   } catch (err) {
     await client.query('ROLLBACK');
     throw err;
@@ -189,6 +222,7 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
     client.release();
   }
 }
+
 
 /**
  * Supprime une facture par ID

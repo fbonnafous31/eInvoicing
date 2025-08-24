@@ -61,3 +61,27 @@ export function validateInvoiceLine(line = {}) {
 
   return errors; // objet vide {} si pas d'erreurs
 }
+
+export function validateClientData(field, data) {
+  switch (field) {
+    case "firstName":
+      if (data.type === "individual" && !data.firstName) return "Prénom obligatoire";
+      break;
+    case "lastName":
+      if (data.type === "individual" && !data.lastName) return "Nom obligatoire";
+      break;
+    case "address":
+      if ((data.type === "individual" || data.type === "company_fr" || data.type === "company_eu") && !data.address)
+        return "Adresse obligatoire";
+      break;
+    case "siret":
+      if (data.type === "company_fr" && !data.siret) return "SIRET obligatoire";
+      break;
+    case "vatNumber":
+      if (data.type === "company_eu" && !data.vatNumber) return "TVA intracommunautaire obligatoire";
+      break;
+    default:
+      return "";
+  }
+  return "";
+}

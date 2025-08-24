@@ -1,10 +1,9 @@
-// frontend/src/components/invoices/InvoiceClient.jsx
 import { useEffect, useState, useCallback } from "react";
 import InputField from "../form/InputField";
 import SelectField from "../form/SelectField";
 import Select from "react-select";
 import { fetchClients, createClient, updateClient } from "../../services/clients";
-import { validateClient } from "../../utils/validators/client";
+import { validateClientData } from "../../utils/validators/invoice";
 
 const clientTypeOptions = [
   { value: "individual", label: "Particulier" },
@@ -20,9 +19,39 @@ const determineClientType = (client) => {
 
 export default function InvoiceClient({ value, onChange, error }) {
   const [clients, setClients] = useState([]);
-  const [selectedClient, setSelectedClient] = useState(null);
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
+
+  const propagate = useCallback(
+    (data) => {
+      if (!data) {
+        onChange(null);
+        return;
+      }
+
+      // Pour les individus, mettre à jour legal_name automatiquement
+      if (data.type === "individual") {
+        data.legal_name = `${data.firstName || ""} ${data.lastName || ""}`.trim();
+      }
+
+      onChange({
+        id: data?.id || null,
+        type: data?.type || null,
+        firstName: data?.firstName || "",
+        lastName: data?.lastName || "",
+        legal_name: data?.legal_name || "",
+        siret: data?.siret || "",
+        client_vat_number: data?.vatNumber || "",
+        address: data?.address || "",
+        city: data?.city || "",
+        postal_code: data?.postal_code || "",
+        country_code: data?.country_code || "",
+        email: data?.email || "",
+        phone: data?.phone || "",
+      });
+    },
+    [onChange]
+  );
 
   // Charger tous les clients
   useEffect(() => {
@@ -33,78 +62,84 @@ export default function InvoiceClient({ value, onChange, error }) {
       .catch(console.error);
   }, []);
 
-  // Propagation stable
-  const propagate = useCallback(
-    (client) => {
-      onChange({
-        id: client?.id || null,
-        type: client?.type || null,
-        firstName: client?.firstName || "",
-        lastName: client?.lastName || "",
-        legal_name: client?.legal_name || "",
-        siret: client?.siret || "",
-        vatNumber: client?.vatNumber || "",
-        address: client?.address || "",
-        city: client?.city || "",
-        postal_code: client?.postal_code || "",
-        country_code: client?.country_code || "",
-        email: client?.email || "",
-        phone: client?.phone || "",
-      });
-    },
-    [onChange]
-  );
-
-  // Préselection depuis le parent
+  // Pré-remplissage si value vient du parent
   useEffect(() => {
     if (!value || clients.length === 0) return;
 
     const client = clients.find((c) => c.id === value.id || c.id === value);
-    if (client) setSelectedClient(client);
-  }, [value, clients]);
+    if (!client) return;
 
-  // Mettre à jour formData quand selectedClient change
-  useEffect(() => {
-    if (!selectedClient) return;
-
-    const type = determineClientType(selectedClient);
-    const newFormData = {
-      ...selectedClient,
-      type,
-      firstName: selectedClient.firstname || "",
-      lastName: selectedClient.lastname || "",
-      legal_name: selectedClient.legal_name || "",
-      siret: selectedClient.siret || "",
-      vatNumber: selectedClient.vat_number || "",
-      address: selectedClient.address || "",
-      city: selectedClient.city || "",
-      postal_code: selectedClient.postal_code || "",
-      country_code: selectedClient.country_code || "",
-      email: selectedClient.email || "",
-      phone: selectedClient.phone || "",
-    };
-
-    const isDifferent = JSON.stringify(newFormData) !== JSON.stringify(formData);
-    if (isDifferent) {
-      setFormData(newFormData);
-      propagate(newFormData);
-    }
-  }, [selectedClient, propagate, formData]);
+    setFormData((prev) => {
+      if (Object.keys(prev).length === 0) {
+        const data = {
+          ...client,
+          type: determineClientType(client),
+          firstName: client.firstname || "",
+          lastName: client.lastname || "",
+          legal_name: client.legal_name || "",
+          siret: client.siret || "",
+          vatNumber: client.client_vat_number || "",
+          address: client.address || "",
+          city: client.city || "",
+          postal_code: client.postal_code || "",
+          country_code: client.country_code || "",
+          email: client.email || "",
+          phone: client.phone || "",
+        };
+        propagate(data);
+        return data;
+      }
+      return prev;
+    });
+  }, [value, clients, propagate]);
 
   const handleSelect = (id) => {
+    if (!id) {
+      setFormData({});
+      propagate(null);
+      return;
+    }
+
     const client = clients.find((c) => c.id === id);
-    setSelectedClient(client || null);
+    if (!client) return;
+
+    const data = {
+      ...client,
+      type: determineClientType(client),
+      firstName: client.firstname || "",
+      lastName: client.lastname || "",
+      legal_name: client.legal_name || "",
+      siret: client.siret || "",
+      vatNumber: client.client_vat_number || "",
+      address: client.address || "",
+      city: client.city || "",
+      postal_code: client.postal_code || "",
+      country_code: client.country_code || "",
+      email: client.email || "",
+      phone: client.phone || "",
+    };
+
+    setFormData(data);
+    propagate(data);
   };
 
   const handleChangeField = (field, val) => {
     const updated = { ...formData, [field]: val };
+
+    // Si c'est un individu, mettre à jour legal_name
+    if (updated.type === "individual" && (field === "firstName" || field === "lastName")) {
+      updated.legal_name = `${updated.firstName || ""} ${updated.lastName || ""}`.trim();
+    }
+
     setFormData(updated);
     propagate(updated);
+
+    const fieldError = validateClientData(field, updated);
+    setErrors((prev) => ({ ...prev, [field]: fieldError }));
   };
 
   const handleSave = async () => {
-    console.log("handleSave called", formData)
-    const validationErrors = validateClient(formData);
+    const validationErrors = validateClientData(formData);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
@@ -121,7 +156,6 @@ export default function InvoiceClient({ value, onChange, error }) {
         );
       }
 
-      setSelectedClient(saved);
       setFormData(saved);
       propagate(saved);
       setErrors({});
@@ -133,19 +167,12 @@ export default function InvoiceClient({ value, onChange, error }) {
 
   return (
     <div className="mb-3">
-      <label htmlFor="clientSelect" className="form-label">
-        Client *
-      </label>
+      <label htmlFor="clientSelect" className="form-label">Client</label>
       <Select
         inputId="clientSelect"
         value={
-          selectedClient
-            ? {
-                value: selectedClient.id,
-                label:
-                  selectedClient.legal_name ||
-                  `${selectedClient.firstname || ""} ${selectedClient.lastname || ""}`,
-              }
+          formData.id
+            ? { value: formData.id, label: formData.legal_name || `${formData.firstName} ${formData.lastName}` }
             : null
         }
         onChange={(option) => handleSelect(option?.value)}
@@ -170,6 +197,12 @@ export default function InvoiceClient({ value, onChange, error }) {
         {formData.type === "individual" && (
           <>
             <InputField
+              label="Nom complet"
+              value={`${formData.firstName || ""} ${formData.lastName || ""}`.trim()}
+              onChange={() => {}}
+              disabled
+            />
+            <InputField
               label="Prénom"
               value={formData.firstName || ""}
               onChange={(val) => handleChangeField("firstName", val)}
@@ -184,6 +217,16 @@ export default function InvoiceClient({ value, onChange, error }) {
               required
             />
           </>
+        )}
+
+        {(formData.type === "company_fr" || formData.type === "company_eu") && (
+          <InputField
+            label="Raison sociale"
+            value={formData.legal_name || ""}
+            onChange={(val) => handleChangeField("legal_name", val)}
+            error={errors.legal_name}
+            required
+          />
         )}
 
         {formData.type === "company_fr" && (
@@ -239,11 +282,7 @@ export default function InvoiceClient({ value, onChange, error }) {
           onChange={(val) => handleChangeField("phone", val)}
         />
 
-        <button
-          type="button"
-          className="btn btn-sm btn-primary mt-2"
-          onClick={handleSave}
-        >
+        <button type="button" className="btn btn-sm btn-primary mt-2" onClick={handleSave}>
           Enregistrer ce client
         </button>
       </div>
