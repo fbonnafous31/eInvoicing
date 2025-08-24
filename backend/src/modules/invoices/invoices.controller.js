@@ -30,7 +30,7 @@ async function getInvoice(req, res) {
 /**
  * Crée une facture avec lignes, taxes et justificatifs uploadés
  */
-async function createInvoice(req, res) {
+async function createInvoice(req, res, next) {
   try {
     let attachmentsMeta = [];
     try {
@@ -62,9 +62,11 @@ async function createInvoice(req, res) {
     });
 
     res.status(201).json(newInvoice);
+
   } catch (err) {
     console.error(err);
 
+    // Cas métier géré localement
     if (err.message.includes("déjà utilisé")) {
       return res.status(409).json({ message: err.message });
     }
@@ -72,7 +74,8 @@ async function createInvoice(req, res) {
       return res.status(400).json({ message: err.message });
     }
 
-    res.status(500).json({ message: err.message || 'Erreur interne serveur' });
+    // Tout le reste → middleware global
+    next(err);
   }
 }
 
