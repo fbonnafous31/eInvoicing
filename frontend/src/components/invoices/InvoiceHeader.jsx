@@ -31,41 +31,52 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
     fetchData();
   }, []);
 
+  // Validation d'un champ
   const validateField = (field, value) => {
     const error = validateInvoiceField(field, value, data);
-    setFieldErrors((prev) => ({ ...prev, [field]: error }));
+    setFieldErrors(prev => ({ ...prev, [field]: error }));
   };
 
+  // Changement de valeur d'un champ
   const handleChange = (field, value) => {
     const newData = { ...data, [field]: value };
 
-    // Si date d'émission et exercice fiscal vide, on complète fiscal_year
+    // Complétion automatique fiscal_year si issue_date modifiée
     if (field === "issue_date" && (!data.fiscal_year || data.fiscal_year === "")) {
       newData.fiscal_year = new Date(value).getFullYear();
     }
 
     onChange(newData);
+
+    // Validation instantanée
     validateField(field, value);
+
+    // Marquer le champ comme touché
+    if (!touchedFields[field]) {
+      setTouchedFields(prev => ({ ...prev, [field]: true }));
+    }
   };
 
+  // Blur d'un champ
   const handleBlur = (field) => {
-    const value = data[field]; // valeur actuelle depuis data
-    setTouchedFields((prev) => ({ ...prev, [field]: true }));
-    validateField(field, value);
+    setTouchedFields(prev => ({ ...prev, [field]: true }));
+    validateField(field, data[field]);
   };
 
+  // Récupérer l'erreur actuelle pour un champ
   const getError = (field) => {
+    // Utilise errors du submit si soumis, sinon fieldErrors du champ
     const currentErrors = submitted ? errors : fieldErrors;
     return (touchedFields[field] || submitted) && currentErrors[field];
   };
 
   const toggleSection = (key) => {
-    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+    setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
   const sectionHasError = (fields) => {
     const currentErrors = submitted ? errors : fieldErrors;
-    return fields.some((f) => currentErrors[f]);
+    return fields.some(f => currentErrors[f]);
   };
 
   const issueYear = data.issue_date ? new Date(data.issue_date).getFullYear() : new Date().getFullYear();
@@ -88,8 +99,8 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
           id="invoice_number"
           label="Référence facture"
           value={data.invoice_number || ""}
-          onChange={(val) => handleChange("invoice_number", val)}
-          onBlur={(field) => handleBlur(field)}
+          onChange={val => handleChange("invoice_number", val)}
+          onBlur={() => handleBlur("invoice_number")}
           error={getError("invoice_number")}
           required
         />
@@ -99,8 +110,8 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
           type="date"
           label="Date émission"
           value={data.issue_date || ""}
-          onChange={(val) => handleChange("issue_date", val)}
-          onBlur={(field) => handleBlur(field)}
+          onChange={val => handleChange("issue_date", val)}
+          onBlur={() => handleBlur("issue_date")}
           error={getError("issue_date")}
           required
         />
@@ -110,8 +121,8 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
           type="number"
           label="Exercice fiscal"
           value={fiscalYearValue}
-          onChange={(val) => handleChange("fiscal_year", +val)}
-          onBlur={(field) => handleBlur(field)}
+          onChange={val => handleChange("fiscal_year", +val)}
+          onBlur={() => handleBlur("fiscal_year")}
           error={getError("fiscal_year")}
           required
           min={issueYear - 1}
@@ -121,9 +132,9 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
         <SelectField
           label="Vendeur"
           value={data.seller_id}
-          onChange={(val) => handleChange("seller_id", val)}
+          onChange={val => handleChange("seller_id", val)}
           onBlur={() => handleBlur("seller_id")}
-          options={sellers.map((s) => ({ value: s.id, label: s.legal_name }))}
+          options={sellers.map(s => ({ value: s.id, label: s.legal_name }))}
           error={getError("seller_id")}
           required
         />
@@ -131,9 +142,9 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
         <SelectField
           label="Client"
           value={data.client_id}
-          onChange={(val) => handleChange("client_id", val)}
+          onChange={val => handleChange("client_id", val)}
           onBlur={() => handleBlur("client_id")}
-          options={clients.map((c) => ({ value: c.id, label: c.legal_name }))}
+          options={clients.map(c => ({ value: c.id, label: c.legal_name }))}
           error={getError("client_id")}
           required
         />
@@ -151,8 +162,8 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
           id="contract_number"
           label="Numéro de marché"
           value={data.contract_number || ""}
-          onChange={(val) => handleChange("contract_number", val)}
-          onBlur={(field) => handleBlur(field)}
+          onChange={val => handleChange("contract_number", val)}
+          onBlur={() => handleBlur("contract_number")}
           error={getError("contract_number")}
         />
 
@@ -160,15 +171,15 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
           id="purchase_order_number"
           label="Numéro de commande"
           value={data.purchase_order_number || ""}
-          onChange={(val) => handleChange("purchase_order_number", val)}
-          onBlur={(field) => handleBlur(field)}
+          onChange={val => handleChange("purchase_order_number", val)}
+          onBlur={() => handleBlur("purchase_order_number")}
           error={getError("purchase_order_number")}
         />
 
         <SelectField
           label="Conditions de paiement"
           value={data.payment_terms || "30_df"}
-          onChange={(val) => handleChange("payment_terms", val)}
+          onChange={val => handleChange("payment_terms", val)}
           onBlur={() => handleBlur("payment_terms")}
           options={paymentTermsOptions}
         />
@@ -180,8 +191,8 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
         type="date"
         label="Date de livraison"
         value={data.supply_date || ""}
-        onChange={(val) => handleChange("supply_date", val)}
-        onBlur={(field) => handleBlur(field)}
+        onChange={val => handleChange("supply_date", val)}
+        onBlur={() => handleBlur("supply_date")}
         error={getError("supply_date")}
       />
     </div>

@@ -19,8 +19,11 @@ export default function InvoiceForm({ onSubmit, disabled }) {
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [headerTouched, setHeaderTouched] = useState({});
 
-  // Calculs des totaux
+  const headerFields = ["invoice_number","issue_date","fiscal_year","seller_id","client_id"];
+
+  // Calcul des totaux
   const { subtotal, totalTaxes, total, linesWithTotals, taxesSummary } = useMemo(() => {
     let st = 0, tt = 0;
     const taxesMap = {};
@@ -56,14 +59,15 @@ export default function InvoiceForm({ onSubmit, disabled }) {
     };
   }, [invoiceData.lines]);
 
-  // Modifications header / lignes / taxes / attachments
+  // Modification des sections
   const handleChange = (section, value) => {
     const newData = { ...invoiceData, [section]: value };
     setInvoiceData(newData);
 
     if (section === "header") {
+      // Validation instantanée champ par champ
       const newErrors = { ...errors };
-      Object.keys(value).forEach(f => {
+      headerFields.forEach(f => {
         const err = validateInvoiceField(f, value[f], value);
         if (err) newErrors[f] = err;
         else delete newErrors[f];
@@ -74,7 +78,6 @@ export default function InvoiceForm({ onSubmit, disabled }) {
 
   // Validation globale
   const validateAll = () => {
-    const headerFields = ["invoice_number","issue_date","fiscal_year","seller_id","client_id"];
     const headerErrors = {};
     headerFields.forEach(f => {
       const err = validateInvoiceField(f, invoiceData.header[f], invoiceData.header);
@@ -89,23 +92,29 @@ export default function InvoiceForm({ onSubmit, disabled }) {
     setSubmitted(true);
     setErrorMessage("");
 
+    // Validation globale header
     const headerErrors = validateAll();
 
+    // Marquer tous les champs header comme touchés pour afficher erreurs
+    setHeaderTouched(headerFields.reduce((acc, f) => ({ ...acc, [f]: true }), {}));
+
+    if (Object.keys(headerErrors).length > 0) {
+      setErrorMessage("Certains champs obligatoires sont manquants !");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    // Vérification lignes
     if (!invoiceData.lines || invoiceData.lines.length === 0) {
       setErrorMessage("Vous devez ajouter au moins une ligne de facture !");
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
+    // Vérification justificatif principal
     const mainCount = invoiceData.attachments.filter(a => a.attachment_type === 'main').length;
     if (mainCount !== 1) {
       setErrorMessage("La facture doit avoir un justificatif principal");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-
-    if (Object.keys(headerErrors).length > 0) {
-      setErrorMessage("Certains champs obligatoires sont manquants !");
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
@@ -124,7 +133,6 @@ export default function InvoiceForm({ onSubmit, disabled }) {
         JSON.stringify(invoiceData.attachments.map(att => ({ attachment_type: att.attachment_type })))
       );
 
-      // Appel au service ou callback parent
       if (onSubmit) {
         await onSubmit(formData);
       } else {
@@ -134,7 +142,6 @@ export default function InvoiceForm({ onSubmit, disabled }) {
         setTimeout(() => { setSuccessMessage(""); navigate("/invoices"); }, 2000);
       }
     } catch (err) {
-      // On récupère le message backend friendly
       const msg = err.message || "Erreur lors de la création de la facture";
       setErrorMessage(msg);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -149,8 +156,10 @@ export default function InvoiceForm({ onSubmit, disabled }) {
       <InvoiceHeader
         data={invoiceData.header}
         onChange={val => handleChange("header", val)}
-        errors={errors}
         submitted={submitted}
+        errors={errors}                   // Passer les erreurs
+        touchedFields={headerTouched}     // Passer touched
+        setTouchedFields={setHeaderTouched}
       />
 
       <InvoiceLines data={linesWithTotals} onChange={val => handleChange("lines", val)} />
