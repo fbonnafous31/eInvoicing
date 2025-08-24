@@ -26,3 +26,38 @@ export function validateInvoiceField(field, value, data = {}) {
 
   return error; // undefined si pas d'erreur
 }
+
+/**
+ * Valide une ligne de facture
+ * @param {Object} line - La ligne de facture { description, quantity, unit_price, discount, vat_rate }
+ * @returns {Object} - Un objet avec les erreurs par champ
+ */
+export function validateInvoiceLine(line = {}) {
+  const errors = {};
+
+  if (!line.description || line.description.trim() === "") {
+    errors.description = "Ce champ est obligatoire";
+  }
+
+  if (line.quantity === undefined || line.quantity === null || line.quantity === "") {
+    errors.quantity = "Quantité obligatoire";
+  } else if (isNaN(line.quantity) || parseFloat(line.quantity) <= 0) {
+    errors.quantity = "Quantité invalide";
+  }
+
+  if (line.unit_price === undefined || line.unit_price === null || line.unit_price === "") {
+    errors.unit_price = "Prix unitaire obligatoire";
+  } else if (isNaN(line.unit_price) || parseFloat(line.unit_price) < 0) {
+    errors.unit_price = "Prix unitaire invalide";
+  }
+
+  if (line.discount !== undefined && (isNaN(line.discount) || parseFloat(line.discount) < 0)) {
+    errors.discount = "Remise invalide";
+  }
+
+  if (line.vat_rate !== undefined && (isNaN(line.vat_rate) || parseFloat(line.vat_rate) < 0)) {
+    errors.vat_rate = "Taux TVA invalide";
+  }
+
+  return errors; // objet vide {} si pas d'erreurs
+}
