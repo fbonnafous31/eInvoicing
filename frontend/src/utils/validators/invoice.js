@@ -65,25 +65,35 @@ export function validateInvoiceLine(line = {}) {
 export function validateClientData(field, data) {
   switch (field) {
     case "client_first_name":
-      if (data.client_type === "individual" && !data.client_first_name) return "Prénom obligatoire";
+      if (data.client_type === "individual" && !data.client_first_name?.trim())
+        return "Prénom obligatoire";
       break;
     case "client_last_name":
-      if (data.client_type === "individual" && !data.client_last_name) return "Nom obligatoire";
+      if (data.client_type === "individual" && !data.client_last_name?.trim())
+        return "Nom obligatoire";
       break;
     case "client_address":
       if (
         ["individual", "company_fr", "company_eu"].includes(data.client_type) &&
-        !data.client_address
-      ) return "Adresse obligatoire";
+        !data.client_address?.trim()
+      )
+        return "Adresse obligatoire";
       break;
     case "client_siret":
-      if (data.client_type === "company_fr" && !data.client_siret) return "SIRET obligatoire";
+      if (data.client_type === "company_fr" && !data.client_siret?.trim())
+        return "SIRET obligatoire";
       break;
     case "client_vat_number":
-      if (data.client_type === "company_eu" && !data.client_vat_number) return "TVA intracommunautaire obligatoire";
+      if (data.client_type === "company_eu" && !data.client_vat_number?.trim())
+        return "TVA intracommunautaire obligatoire";
+      break;
+    case "client_legal_name":
+      if (["company_fr", "company_eu"].includes(data.client_type) && !data.client_legal_name?.trim())
+        return "Raison sociale obligatoire";
       break;
     default:
       return "";
   }
   return "";
 }
+
