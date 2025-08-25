@@ -30,6 +30,7 @@ export async function fetchInvoice(id) {
  * @param {FormData} formData
  */
 export async function createInvoice(formData) {
+  console.log("Payload invoice envoyé au backend :", formData);
   const response = await fetch(API_BASE, {
     method: "POST",
     body: formData,

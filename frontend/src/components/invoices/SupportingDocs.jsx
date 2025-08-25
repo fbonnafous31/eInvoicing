@@ -1,24 +1,21 @@
 import React, { useEffect } from 'react';
 
 export default function SupportingDocs({ data, onChange }) {
-  // Séparer principal et additionnels pour l'affichage
   const mainAttachment = data.find(a => a.attachment_type === 'main');
   const additionalAttachments = data.filter(a => a.attachment_type === 'additional');
 
-  // Logger les fichiers additionnels à chaque modification
+  // Log pour debug
   useEffect(() => {
-    console.log("additionalAttachments array:", additionalAttachments);
-  }, [additionalAttachments]);
+    console.log("Current attachments array:", data);
+  }, [data]);
 
-  // Ajout / remplacement du justificatif principal
   const handleMainChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Toujours ajouter file_name pour uniformiser
     const newFile = {
       file_name: file.name,
-      raw_file: file, // stocker l'objet File réel pour upload
+      raw_file: file,
       attachment_type: 'main'
     };
 
@@ -26,25 +23,28 @@ export default function SupportingDocs({ data, onChange }) {
       ...data.filter(a => a.attachment_type !== 'main'),
       newFile
     ];
+
+    console.log("Adding main attachment:", newFile);
     onChange(newData);
   };
 
-  // Ajout de fichiers additionnels
   const handleAdditionalChange = (e) => {
     const files = Array.from(e.target.files).map(f => ({
       file_name: f.name,
       raw_file: f,
       attachment_type: 'additional'
     }));
+
+    console.log("Adding additional attachments:", files);
     onChange([...data, ...files]);
   };
 
-  // Suppression
   const removeFile = (index, type) => {
     const filtered = data.filter((_, i) => {
       if (type === 'main') return data[i].attachment_type !== 'main';
       return i !== index;
     });
+    console.log(`Removing ${type} file at index ${index}`);
     onChange(filtered);
   };
 
@@ -52,7 +52,6 @@ export default function SupportingDocs({ data, onChange }) {
     <div className="card p-3 mb-3">
       <h5>Justificatifs</h5>
 
-      {/* Justificatif principal */}
       <div className="mb-3">
         <label>Justificatif principal *</label>
         <input
@@ -74,7 +73,6 @@ export default function SupportingDocs({ data, onChange }) {
         )}
       </div>
 
-      {/* Justificatifs additionnels */}
       <div className="mb-3">
         <label>Justificatifs additionnels</label>
         <input

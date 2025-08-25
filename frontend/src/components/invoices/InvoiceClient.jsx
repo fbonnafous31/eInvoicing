@@ -21,6 +21,7 @@ export default function InvoiceClient({ value, onChange, error }) {
   const [clients, setClients] = useState([]);
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
+  const [touchedFields, setTouchedFields] = useState({});
 
   const propagate = useCallback(
     (data) => {
@@ -29,31 +30,31 @@ export default function InvoiceClient({ value, onChange, error }) {
         return;
       }
 
-      // Pour les individus, mettre à jour legal_name automatiquement
+      // Pour les individus, mettre à jour le nom légal
       if (data.type === "individual") {
-        data.legal_name = `${data.firstName || ""} ${data.lastName || ""}`.trim();
+        data.legal_name = `${data.firstname || ""} ${data.lastname || ""}`.trim();
       }
 
+      // Mapping exact attendu par InvoiceHeader
       onChange({
-        id: data?.id || null,
-        type: data?.type || null,
-        firstName: data?.firstName || "",
-        lastName: data?.lastName || "",
-        legal_name: data?.legal_name || "",
-        siret: data?.siret || "",
-        client_vat_number: data?.vatNumber || "",
-        address: data?.address || "",
-        city: data?.city || "",
-        postal_code: data?.postal_code || "",
-        country_code: data?.country_code || "",
-        email: data?.email || "",
-        phone: data?.phone || "",
+        client_id: data.id || null,
+        client_type: data.type || null,
+        client_first_name: data.firstname || "",
+        client_last_name: data.lastname || "",
+        client_legal_name: data.legal_name || "",
+        client_siret: data.siret || "",
+        client_vat_number: data.vat_number || "",
+        client_address: data.address || "",
+        client_city: data.city || "",
+        client_postal_code: data.postal_code || "",
+        client_country_code: data.country_code || "",
+        client_email: data.email || "",
+        client_phone: data.phone || "",
       });
     },
     [onChange]
   );
 
-  // Charger tous les clients
   useEffect(() => {
     fetchClients()
       .then((data) =>
@@ -62,7 +63,6 @@ export default function InvoiceClient({ value, onChange, error }) {
       .catch(console.error);
   }, []);
 
-  // Pré-remplissage si value vient du parent
   useEffect(() => {
     if (!value || clients.length === 0) return;
 
@@ -74,11 +74,11 @@ export default function InvoiceClient({ value, onChange, error }) {
         const data = {
           ...client,
           type: determineClientType(client),
-          firstName: client.firstname || "",
-          lastName: client.lastname || "",
+          firstname: client.firstname || "",
+          lastname: client.lastname || "",
           legal_name: client.legal_name || "",
           siret: client.siret || "",
-          vatNumber: client.client_vat_number || "",
+          vat_number: client.vat_number || "",
           address: client.address || "",
           city: client.city || "",
           postal_code: client.postal_code || "",
@@ -106,11 +106,11 @@ export default function InvoiceClient({ value, onChange, error }) {
     const data = {
       ...client,
       type: determineClientType(client),
-      firstName: client.firstname || "",
-      lastName: client.lastname || "",
+      firstname: client.firstname || "",
+      lastname: client.lastname || "",
       legal_name: client.legal_name || "",
       siret: client.siret || "",
-      vatNumber: client.client_vat_number || "",
+      vat_number: client.vat_number || "",
       address: client.address || "",
       city: client.city || "",
       postal_code: client.postal_code || "",
@@ -125,24 +125,48 @@ export default function InvoiceClient({ value, onChange, error }) {
 
   const handleChangeField = (field, val) => {
     const updated = { ...formData, [field]: val };
-
-    // Si c'est un individu, mettre à jour legal_name
-    if (updated.type === "individual" && (field === "firstName" || field === "lastName")) {
-      updated.legal_name = `${updated.firstName || ""} ${updated.lastName || ""}`.trim();
+    if (updated.type === "individual") {
+      updated.legal_name = `${updated.firstname || ""} ${updated.lastname || ""}`.trim();
     }
 
     setFormData(updated);
-    propagate(updated);
-
     const fieldError = validateClientData(field, updated);
-    setErrors((prev) => ({ ...prev, [field]: fieldError }));
+    setErrors(prev => ({ ...prev, [field]: fieldError }));
+    setTouchedFields(prev => ({ ...prev, [field]: true }));
+    propagate(updated);
+  };
+
+  const handleBlurField = (field) => {
+    setTouchedFields(prev => ({ ...prev, [field]: true }));
+    const fieldError = validateClientData(field, formData);
+    setErrors(prev => ({ ...prev, [field]: fieldError }));
   };
 
   const handleSave = async () => {
-    const validationErrors = validateClientData(formData);
+    const requiredFields = [
+      "client_first_name",
+      "client_last_name",
+      "legal_name",
+      "client_siret",
+      "client_vat_number",
+      "client_address"
+    ];
+    const validationErrors = {};
+
+    requiredFields.forEach(f => {
+      const e = validateClientData(f, formData);
+      if (e) validationErrors[f] = e;
+    });
+
+    // Marquer tous les champs requis comme touchés
+    setTouchedFields(prev => ({
+      ...prev,
+      ...requiredFields.reduce((acc, f) => ({ ...acc, [f]: true }), {})
+    }));
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
-      return;
+      return; // Bloque le submit si des erreurs
     }
 
     try {
@@ -151,7 +175,7 @@ export default function InvoiceClient({ value, onChange, error }) {
         saved = await updateClient(formData.id, formData);
       } else {
         saved = await createClient(formData);
-        setClients((prev) =>
+        setClients(prev =>
           [...prev, saved].sort((a, b) => (a.legal_name || "").localeCompare(b.legal_name || ""))
         );
       }
@@ -159,26 +183,30 @@ export default function InvoiceClient({ value, onChange, error }) {
       setFormData(saved);
       propagate(saved);
       setErrors({});
+      setTouchedFields({});
     } catch (err) {
       console.error(err);
       alert("Erreur lors de l'enregistrement du client.");
     }
   };
 
+  const selectValue = clients
+    .map(c => ({
+      value: c.id,
+      label: c.legal_name || `${c.firstname || ""} ${c.lastname || ""}`
+    }))
+    .find(o => o.value === formData.id) || null;
+
   return (
     <div className="mb-3">
       <label htmlFor="clientSelect" className="form-label">Client</label>
       <Select
         inputId="clientSelect"
-        value={
-          formData.id
-            ? { value: formData.id, label: formData.legal_name || `${formData.firstName} ${formData.lastName}` }
-            : null
-        }
+        value={selectValue}
         onChange={(option) => handleSelect(option?.value)}
-        options={clients.map((c) => ({
+        options={clients.map(c => ({
           value: c.id,
-          label: c.legal_name || `${c.firstname || ""} ${c.lastname || ""}`,
+          label: c.legal_name || `${c.firstname || ""} ${c.lastname || ""}`
         }))}
         isClearable
         isSearchable
@@ -190,6 +218,7 @@ export default function InvoiceClient({ value, onChange, error }) {
           label="Type de client"
           value={formData.type || ""}
           onChange={(val) => handleChangeField("type", val)}
+          onBlur={() => handleBlurField("type")}
           options={clientTypeOptions}
           required
         />
@@ -198,22 +227,26 @@ export default function InvoiceClient({ value, onChange, error }) {
           <>
             <InputField
               label="Nom complet"
-              value={`${formData.firstName || ""} ${formData.lastName || ""}`.trim()}
+              value={`${formData.firstname || ""} ${formData.lastname || ""}`.trim()}
               onChange={() => {}}
               disabled
             />
             <InputField
               label="Prénom"
-              value={formData.firstName || ""}
-              onChange={(val) => handleChangeField("firstName", val)}
-              error={errors.firstName}
+              value={formData.firstname || ""}
+              onChange={(val) => handleChangeField("firstname", val)}
+              onBlur={() => handleBlurField("firstname")}
+              error={errors.firstname}
+              touched={touchedFields.firstname}
               required
             />
             <InputField
               label="Nom"
-              value={formData.lastName || ""}
-              onChange={(val) => handleChangeField("lastName", val)}
-              error={errors.lastName}
+              value={formData.lastname || ""}
+              onChange={(val) => handleChangeField("lastname", val)}
+              onBlur={() => handleBlurField("lastname")}
+              error={errors.lastname}
+              touched={touchedFields.lastname}
               required
             />
           </>
@@ -224,7 +257,9 @@ export default function InvoiceClient({ value, onChange, error }) {
             label="Raison sociale"
             value={formData.legal_name || ""}
             onChange={(val) => handleChangeField("legal_name", val)}
+            onBlur={() => handleBlurField("legal_name")}
             error={errors.legal_name}
+            touched={touchedFields.legal_name}
             required
           />
         )}
@@ -234,7 +269,9 @@ export default function InvoiceClient({ value, onChange, error }) {
             label="SIRET"
             value={formData.siret || ""}
             onChange={(val) => handleChangeField("siret", val)}
+            onBlur={() => handleBlurField("siret")}
             error={errors.siret}
+            touched={touchedFields.siret}
             required
           />
         )}
@@ -242,9 +279,11 @@ export default function InvoiceClient({ value, onChange, error }) {
         {formData.type === "company_eu" && (
           <InputField
             label="TVA intracommunautaire"
-            value={formData.vatNumber || ""}
-            onChange={(val) => handleChangeField("vatNumber", val)}
-            error={errors.vatNumber}
+            value={formData.vat_number || ""}
+            onChange={(val) => handleChangeField("vat_number", val)}
+            onBlur={() => handleBlurField("vat_number")}
+            error={errors.vat_number}
+            touched={touchedFields.vat_number}
             required
           />
         )}
@@ -253,7 +292,9 @@ export default function InvoiceClient({ value, onChange, error }) {
           label="Adresse"
           value={formData.address || ""}
           onChange={(val) => handleChangeField("address", val)}
+          onBlur={() => handleBlurField("address")}
           error={errors.address}
+          touched={touchedFields.address}
           required
         />
         <InputField
@@ -272,7 +313,7 @@ export default function InvoiceClient({ value, onChange, error }) {
           onChange={(val) => handleChangeField("country_code", val)}
         />
         <InputField
-          label="Email"
+          label="eMail"
           value={formData.email || ""}
           onChange={(val) => handleChangeField("email", val)}
         />

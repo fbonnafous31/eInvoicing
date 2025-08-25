@@ -11,17 +11,17 @@ function validateInvoiceClient(client) {
     case 'individual':
       if (!client.client_first_name) errors.client_first_name = 'Prénom requis';
       if (!client.client_last_name) errors.client_last_name = 'Nom requis';
-      if (!client.address) errors.address = 'Adresse requise';
+      if (!client.client_address) errors.client_address = 'Adresse requise';
       break;
     case 'company_fr':
       if (!client.client_legal_name) errors.client_legal_name = 'Raison sociale requise';
       if (!client.client_siret) errors.client_siret = 'SIRET requis';
-      if (!client.address) errors.address = 'Adresse requise';
+      if (!client.client_address) errors.client_address = 'Adresse requise';
       break;
     case 'company_eu':
       if (!client.client_legal_name) errors.client_legal_name = 'Raison sociale requise';
       if (!client.client_vat_number) errors.client_vat_number = 'TVA intracommunautaire requise';
-      if (!client.address) errors.address = 'Adresse requise';
+      if (!client.client_address) errors.client_address = 'Adresse requise';
       break;
   }
 
@@ -60,6 +60,12 @@ async function getInvoice(req, res) {
  */
 async function createInvoice(req, res, next) {
   try {
+    console.log("req.files:", req.files);
+    console.log("req.body.attachments_meta:", req.body.attachments_meta);
+    console.log("req.body.invoice:", req.body.invoice);
+    console.log("req.body.lines:", req.body.lines);
+    console.log("req.body.taxes:", req.body.taxes);
+
     // --- Gestion des justificatifs ---
     let attachmentsMeta = [];
     try {
@@ -72,7 +78,6 @@ async function createInvoice(req, res, next) {
       attachment_type: attachmentsMeta[i]?.attachment_type || 'additional'
     }));
 
-    // Vérifie qu'il y a exactement un justificatif principal
     const mainCount = attachments.filter(f => f.attachment_type === 'main').length;
     if (mainCount !== 1) {
       return res.status(400).json({ message: "Une facture doit avoir un justificatif principal." });
@@ -83,10 +88,10 @@ async function createInvoice(req, res, next) {
     const lines = JSON.parse(req.body.lines || '[]');
     const taxes = JSON.parse(req.body.taxes || '[]');
 
-    // --- Validation côté backend du client ---
+    // --- Validation client ---
     const clientErrors = validateInvoiceClient(invoiceData);
     if (Object.keys(clientErrors).length > 0) {
-      return res.status(400).json({ message: 'Erreur client', errors: clientErrors });
+      return res.status(400).json({ message: "Erreur sur les données client", errors: clientErrors });
     }
 
     // --- Création de la facture ---
@@ -102,7 +107,6 @@ async function createInvoice(req, res, next) {
   } catch (err) {
     console.error(err);
 
-    // Cas métier connus
     if (err.message.includes("déjà utilisé")) {
       return res.status(409).json({ message: err.message });
     }
@@ -110,7 +114,6 @@ async function createInvoice(req, res, next) {
       return res.status(400).json({ message: err.message });
     }
 
-    // Tout le reste → middleware global
     next(err);
   }
 }

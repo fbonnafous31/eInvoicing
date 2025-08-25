@@ -64,21 +64,20 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
   const issueYear = data.issue_date ? new Date(data.issue_date).getFullYear() : new Date().getFullYear();
   const fiscalYearValue = data.fiscal_year || issueYear;
 
-  // Préparer l'objet client complet pour InvoiceClient
   const clientValue = data.client_id ? {
     id: data.client_id,
     type: data.client_type,
-    firstName: data.client_firstName,
-    lastName: data.client_lastName,
-    legal_name: data.client_legal_name,
-    siret: data.client_siret,
-    vatNumber: data.client_vat_number,
-    address: data.client_address,
-    city: data.client_city,
-    postal_code: data.client_postal_code,
-    country_code: data.client_country_code,
-    email: data.client_email,
-    phone: data.client_phone
+    client_first_name: data.client_first_name,
+    client_last_name: data.client_last_name,
+    client_legal_name: data.client_legal_name,
+    client_siret: data.client_siret,
+    client_vat_number: data.client_vat_number,
+    client_address: data.client_address,
+    client_city: data.client_city,
+    client_postal_code: data.client_postal_code,
+    client_country_code: data.client_country_code,
+    client_email: data.client_email,
+    client_phone: data.client_phone
   } : null;
 
   return (
@@ -143,59 +142,50 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
           value={clientValue}
           onChange={(client) => {
             if (!client) {
-              handleChange("client_id", null);
-              handleChange("client_firstName", "");
-              handleChange("client_lastName", "");
-              handleChange("client_legal_name", "");
-              handleChange("client_siret", "");
-              handleChange("client_vat_number", "");
-              handleChange("client_address", "");
-              handleChange("client_city", "");
-              handleChange("client_postal_code", "");
-              handleChange("client_country_code", "");
-              handleChange("client_email", "");
-              handleChange("client_phone", "");
-              handleChange("client_type", "");
+              const emptyClient = {
+                client_id: null,
+                client_type: "",
+                client_first_name: "",
+                client_last_name: "",
+                client_legal_name: "",
+                client_siret: "",
+                client_vat_number: "",
+                client_address: "",
+                client_city: "",
+                client_postal_code: "",
+                client_country_code: "",
+                client_email: "",
+                client_phone: ""
+              };
+              onChange({ ...data, ...emptyClient });
               return;
             }
 
-            handleChange("client_id", client.id);
-            handleChange("client_address", client.address || "");
-            handleChange("client_city", client.city || "");
-            handleChange("client_postal_code", client.postal_code || "");
-            handleChange("client_country_code", client.country_code || "FR");
-            handleChange("client_email", client.email || "");
-            handleChange("client_phone", client.phone || "");
-            handleChange("client_type", client.type || "");
+            const newClientData = {
+              client_id: client.id,
+              client_type: client.type,
+              client_first_name: client.client_first_name || "",
+              client_last_name: client.client_last_name || "",
+              client_legal_name:
+                client.client_legal_name ||
+                (client.type === "individual"
+                  ? `${client.client_first_name || ""} ${client.client_last_name || ""}`.trim()
+                  : "Entreprise inconnue"),
+              client_siret: client.client_siret || "",
+              client_vat_number: client.client_vat_number || "",
+              client_address: client.client_address || "",
+              client_city: client.client_city || "",
+              client_postal_code: client.client_postal_code || "",
+              client_country_code: client.client_country_code || "FR",
+              client_email: client.client_email || "",
+              client_phone: client.client_phone || ""
+            };
 
-            switch (client.type) {
-              case "individual":
-                handleChange("client_firstName", client.firstName || "");
-                handleChange("client_lastName", client.lastName || "");
-                handleChange("client_legal_name", "");
-                handleChange("client_siret", "");
-                handleChange("client_vat_number", "");
-                break;
-              case "company_fr":
-                handleChange("client_legal_name", client.legal_name || "");
-                handleChange("client_siret", client.siret || "");
-                handleChange("client_firstName", "");
-                handleChange("client_lastName", "");
-                handleChange("client_vat_number", "");
-                break;
-              case "company_eu":
-                handleChange("client_legal_name", client.legal_name || "");
-                handleChange("client_vat_number", client.vatNumber || "");
-                handleChange("client_firstName", "");
-                handleChange("client_lastName", "");
-                handleChange("client_siret", "");
-                break;
-              default:
-                break;
-            }
+            onChange({ ...data, ...newClientData });
           }}
           error={getError("client_id")}
         />
+
       </FormSection>
 
       {/* Section Informations contractuelles */}
