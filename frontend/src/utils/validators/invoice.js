@@ -64,21 +64,23 @@ export function validateInvoiceLine(line = {}) {
 
 export function validateClientData(field, data) {
   switch (field) {
-    case "firstName":
-      if (data.type === "individual" && !data.firstName) return "Prénom obligatoire";
+    case "client_first_name":
+      if (data.client_type === "individual" && !data.client_first_name) return "Prénom obligatoire";
       break;
-    case "lastName":
-      if (data.type === "individual" && !data.lastName) return "Nom obligatoire";
+    case "client_last_name":
+      if (data.client_type === "individual" && !data.client_last_name) return "Nom obligatoire";
       break;
-    case "address":
-      if ((data.type === "individual" || data.type === "company_fr" || data.type === "company_eu") && !data.address)
-        return "Adresse obligatoire";
+    case "client_address":
+      if (
+        ["individual", "company_fr", "company_eu"].includes(data.client_type) &&
+        !data.client_address
+      ) return "Adresse obligatoire";
       break;
-    case "siret":
-      if (data.type === "company_fr" && !data.siret) return "SIRET obligatoire";
+    case "client_siret":
+      if (data.client_type === "company_fr" && !data.client_siret) return "SIRET obligatoire";
       break;
-    case "vatNumber":
-      if (data.type === "company_eu" && !data.vatNumber) return "TVA intracommunautaire obligatoire";
+    case "client_vat_number":
+      if (data.client_type === "company_eu" && !data.client_vat_number) return "TVA intracommunautaire obligatoire";
       break;
     default:
       return "";

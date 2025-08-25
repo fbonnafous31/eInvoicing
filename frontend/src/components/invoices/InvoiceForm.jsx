@@ -5,7 +5,8 @@ import InvoiceLines from "./InvoiceLines";
 import TaxBases from "./TaxBases";
 import SupportingDocs from "./SupportingDocs";
 import { createInvoice } from "../../services/invoices";
-import { validateInvoiceField } from "../../utils/validators/invoice";
+import { validateInvoiceField, validateClientData} from "../../utils/validators/invoice";
+
 
 export default function InvoiceForm({ onSubmit, disabled }) {
   const navigate = useNavigate();
@@ -59,16 +60,25 @@ export default function InvoiceForm({ onSubmit, disabled }) {
     };
   }, [invoiceData.lines]);
 
-  // Modification des sections
   const handleChange = (section, value) => {
-    const newData = { ...invoiceData, [section]: value };
-    setInvoiceData(newData);
+    let newData;
 
     if (section === "header") {
-      // Validation instantanée champ par champ
+      newData = { ...invoiceData, header: { ...invoiceData.header, ...value } };
+    } else if (section === "attachments") {
+      newData = { ...invoiceData, attachments: value };
+    } else {
+      newData = { ...invoiceData, [section]: value };
+    }
+
+    setInvoiceData(newData);
+    console.log(`handleChange -> new ${section}:`, newData[section]);
+
+    // Validation header si nécessaire
+    if (section === "header") {
       const newErrors = { ...errors };
       headerFields.forEach(f => {
-        const err = validateInvoiceField(f, value[f], value);
+        const err = validateInvoiceField(f, newData.header[f], newData.header);
         if (err) newErrors[f] = err;
         else delete newErrors[f];
       });
@@ -94,12 +104,31 @@ export default function InvoiceForm({ onSubmit, disabled }) {
 
     // Validation globale header
     const headerErrors = validateAll();
-
-    // Marquer tous les champs header comme touchés pour afficher erreurs
     setHeaderTouched(headerFields.reduce((acc, f) => ({ ...acc, [f]: true }), {}));
 
     if (Object.keys(headerErrors).length > 0) {
       setErrorMessage("Certains champs obligatoires sont manquants !");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    const clientErrors = {};
+    const clientFields = [
+      "client_first_name",
+      "client_last_name",
+      "client_address",
+      "client_siret",
+      "client_vat_number"
+    ];
+
+    clientFields.forEach(f => {
+      const err = validateClientData(f, invoiceData.header); 
+      if (err) clientErrors[f] = err;
+    });
+
+    if (Object.keys(clientErrors).length > 0) {
+      setErrorMessage("Certains champs client sont obligatoires !");
+      setErrors(prev => ({ ...prev, ...clientErrors }));
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
@@ -111,12 +140,9 @@ export default function InvoiceForm({ onSubmit, disabled }) {
       return;
     }
 
-    // Vérification champs obligatoires des lignes
     const lineErrors = invoiceData.lines.filter(
-      (line) =>
-        !line.description || !line.quantity || !line.unit_price
+      line => !line.description || !line.quantity || !line.unit_price
     );
-
     if (lineErrors.length > 0) {
       setErrorMessage("Chaque ligne doit avoir une description, une quantité et un prix unitaire !");
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -133,18 +159,54 @@ export default function InvoiceForm({ onSubmit, disabled }) {
 
     try {
       const formData = new FormData();
-      formData.append(
-        "invoice",
-        JSON.stringify({ ...invoiceData.header, subtotal, total_taxes: totalTaxes, total })
-      );
+      const { header } = invoiceData;
+
+      // Invoice data JSON
+      formData.append("invoice", JSON.stringify({
+        invoice_number: header.invoice_number,
+        issue_date: header.issue_date,
+        fiscal_year: header.fiscal_year,
+        seller_id: header.seller_id,
+        client_id: header.client_id,
+        client_type: header.client_type,
+        client_first_name: header.client_first_name,
+        client_last_name: header.client_last_name,
+        client_legal_name: header.client_legal_name || "Entreprise inconnue", 
+        client_siret: header.client_siret,
+        client_vat_number: header.client_vat_number,
+        client_address: header.client_address,
+        client_city: header.client_city,
+        client_postal_code: header.client_postal_code,
+        client_country_code: header.client_country_code,
+        client_email: header.client_email,
+        client_phone: header.client_phone,
+        subtotal,
+        total_taxes: totalTaxes,
+        total
+      }));
+
       formData.append("lines", JSON.stringify(linesWithTotals));
       formData.append("taxes", JSON.stringify(invoiceData.taxes.length ? invoiceData.taxes : taxesSummary));
-      invoiceData.attachments.forEach(att => formData.append("attachments", att.raw_file));
-      formData.append(
-        "attachments_meta",
-        JSON.stringify(invoiceData.attachments.map(att => ({ attachment_type: att.attachment_type })))
-      );
 
+      // Ajout des fichiers à FormData
+      invoiceData.attachments.forEach((att) => {
+        if (att.raw_file instanceof File) {
+          formData.append("attachments", att.raw_file);
+        }
+      });
+
+      // **Ajout des métadonnées une seule fois**
+      formData.append("attachments_meta", JSON.stringify(
+        invoiceData.attachments.map(att => ({ attachment_type: att.attachment_type }))
+      ));
+
+      // Log final pour debug
+      console.log("Final FormData keys and files:");
+      for (let pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+
+      // Envoi
       if (onSubmit) {
         await onSubmit(formData);
       } else {
@@ -153,6 +215,7 @@ export default function InvoiceForm({ onSubmit, disabled }) {
         window.scrollTo({ top: 0, behavior: "smooth" });
         setTimeout(() => { setSuccessMessage(""); navigate("/invoices"); }, 2000);
       }
+
     } catch (err) {
       const msg = err.message || "Erreur lors de la création de la facture";
       setErrorMessage(msg);
@@ -178,9 +241,13 @@ export default function InvoiceForm({ onSubmit, disabled }) {
       <TaxBases data={invoiceData.taxes.length ? invoiceData.taxes : taxesSummary} onChange={val => handleChange("taxes", val)} />
       <SupportingDocs
         data={invoiceData.attachments}
-        onChange={val => handleChange("attachments", val)}
+        onChange={(val) => {
+          console.log("Updating attachments:", val);
+          handleChange("attachments", val);
+        }}
         allowPrincipal
       />
+
 
       <div className="card p-3 mb-3">
         <h5>Récapitulatif</h5>
