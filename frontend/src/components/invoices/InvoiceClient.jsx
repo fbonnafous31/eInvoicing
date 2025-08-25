@@ -2,8 +2,18 @@ import { useEffect, useState, useCallback } from "react";
 import InputField from "../form/InputField";
 import SelectField from "../form/SelectField";
 import Select from "react-select";
-import { fetchClients, createClient, updateClient } from "../../services/clients";
+import { fetchClients } from "../../services/clients";
 import { validateClientData } from "../../utils/validators/invoice";
+import { validateOptionalEmail } from "../../utils/validators/email";
+import { isValidSiret } from "../../utils/validators/siret";
+import { validatePhoneNumber } from "../../utils/validators/phone_number";
+import { isValidPostalCode } from "../../utils/validators/postal_code";
+
+import countries from "i18n-iso-countries";
+import enLocale from "i18n-iso-countries/langs/en.json";
+countries.registerLocale(enLocale);
+const countryCodes = Object.entries(countries.getNames("en")).map(([code, name]) => ({ code, name }));
+
 
 const clientTypeOptions = [
   { value: "individual", label: "Particulier" },
@@ -142,53 +152,6 @@ export default function InvoiceClient({ value, onChange, error }) {
     setErrors(prev => ({ ...prev, [field]: fieldError }));
   };
 
-  const handleSave = async () => {
-    const requiredFields = [
-      "client_first_name",
-      "client_last_name",
-      "legal_name",
-      "client_siret",
-      "client_vat_number",
-      "client_address"
-    ];
-    const validationErrors = {};
-
-    requiredFields.forEach(f => {
-      const e = validateClientData(f, formData);
-      if (e) validationErrors[f] = e;
-    });
-
-    // Marquer tous les champs requis comme touchés
-    setTouchedFields(prev => ({
-      ...prev,
-      ...requiredFields.reduce((acc, f) => ({ ...acc, [f]: true }), {})
-    }));
-
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return; // Bloque le submit si des erreurs
-    }
-
-    try {
-      let saved;
-      if (formData.id) {
-        saved = await updateClient(formData.id, formData);
-      } else {
-        saved = await createClient(formData);
-        setClients(prev =>
-          [...prev, saved].sort((a, b) => (a.legal_name || "").localeCompare(b.legal_name || ""))
-        );
-      }
-
-      setFormData(saved);
-      propagate(saved);
-      setErrors({});
-      setTouchedFields({});
-    } catch (err) {
-      console.error(err);
-      alert("Erreur lors de l'enregistrement du client.");
-    }
-  };
 
   const selectValue = clients
     .map(c => ({
@@ -199,7 +162,6 @@ export default function InvoiceClient({ value, onChange, error }) {
 
   return (
     <div className="mb-3">
-      <label htmlFor="clientSelect" className="form-label">Client</label>
       <Select
         inputId="clientSelect"
         value={selectValue}
@@ -268,8 +230,20 @@ export default function InvoiceClient({ value, onChange, error }) {
           <InputField
             label="SIRET"
             value={formData.siret || ""}
-            onChange={(val) => handleChangeField("siret", val)}
-            onBlur={() => handleBlurField("siret")}
+            onChange={(val) => {
+              handleChangeField("siret", val);
+              let error = "";
+              if (!val) error = "Le SIRET est obligatoire";
+              else if (!isValidSiret(val)) error = "SIRET invalide";
+              setErrors(prev => ({ ...prev, siret: error }));
+            }}
+            onBlur={() => {
+              handleBlurField("siret");
+              let error = "";
+              if (!formData.siret) error = "Le SIRET est obligatoire";
+              else if (!isValidSiret(formData.siret)) error = "SIRET invalide";
+              setErrors(prev => ({ ...prev, siret: error }));
+            }}
             error={errors.siret}
             touched={touchedFields.siret}
             required
@@ -288,44 +262,80 @@ export default function InvoiceClient({ value, onChange, error }) {
           />
         )}
 
-        <InputField
-          label="Adresse"
-          value={formData.address || ""}
-          onChange={(val) => handleChangeField("address", val)}
-          onBlur={() => handleBlurField("address")}
-          error={errors.address}
-          touched={touchedFields.address}
-          required
-        />
+          <InputField
+            label="Adresse"
+            value={formData.address || ""}
+            onChange={(val) => handleChangeField("address", val)}
+            onBlur={() => handleBlurField("address")}
+            error={errors.address}
+            touched={touchedFields.address}
+            required
+          />
+          <InputField
+            label="Code postal"
+            value={formData.postal_code || ""}
+            onChange={(val) => {
+              handleChangeField("postal_code", val);
+              const error = isValidPostalCode(val) ? "" : "Code postal invalide";
+              setErrors(prev => ({ ...prev, postal_code: error }));
+            }}
+            onBlur={() => {
+              handleBlurField("postal_code");
+              const error = isValidPostalCode(formData.postal_code) ? "" : "Code postal invalide";
+              setErrors(prev => ({ ...prev, postal_code: error }));
+            }}
+            error={errors.postal_code}
+            touched={touchedFields.postal_code}
+          />
+      
         <InputField
           label="Ville"
           value={formData.city || ""}
           onChange={(val) => handleChangeField("city", val)}
         />
-        <InputField
-          label="Code postal"
-          value={formData.postal_code || ""}
-          onChange={(val) => handleChangeField("postal_code", val)}
-        />
-        <InputField
+        <SelectField
           label="Pays"
+          name="country_code"
           value={formData.country_code || ""}
           onChange={(val) => handleChangeField("country_code", val)}
+          onBlur={() => handleBlurField("country_code")}
+          touched={touchedFields.country_code}
+          options={countryCodes.map(c => ({ value: c.code, label: `${c.code} - ${c.name}` }))}
+          error={errors.country_code}
         />
+        
         <InputField
-          label="eMail"
+          label="Email"
           value={formData.email || ""}
-          onChange={(val) => handleChangeField("email", val)}
-        />
+          onChange={(val) => {
+            handleChangeField("email", val);
+            const error = validateOptionalEmail(val);
+            setErrors(prev => ({ ...prev, email: error }));
+          }}
+          onBlur={() => {
+            handleBlurField("email");
+            const error = validateOptionalEmail(formData.email);
+            setErrors(prev => ({ ...prev, email: error }));
+          }}
+          error={errors.email}
+          touched={touchedFields.email}
+        />  
         <InputField
           label="Téléphone"
           value={formData.phone || ""}
-          onChange={(val) => handleChangeField("phone", val)}
+          onChange={(val) => {
+            handleChangeField("phone", val);
+            const error = validatePhoneNumber(val);
+            setErrors(prev => ({ ...prev, phone: error }));
+          }}
+          onBlur={() => {
+            handleBlurField("phone");
+            const error = validatePhoneNumber(formData.phone);
+            setErrors(prev => ({ ...prev, phone: error }));
+          }}
+          error={errors.phone}
+          touched={touchedFields.phone}
         />
-
-        <button type="button" className="btn btn-sm btn-primary mt-2" onClick={handleSave}>
-          Enregistrer ce client
-        </button>
       </div>
 
       {error && <div className="text-danger mt-1">{error}</div>}
