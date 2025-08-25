@@ -1,0 +1,41 @@
+.
+├── architecture.txt
+├── config
+│   └── db.js
+├── middlewares
+│   ├── errorHandler.js
+│   └── upload.js
+├── modules
+│   ├── clients
+│   │   ├── clients.controller.js
+│   │   ├── clients.model.js
+│   │   ├── clients.route.js
+│   │   └── clients.service.js
+│   ├── invoices
+│   │   ├── invoiceClient.model.js
+│   │   ├── invoiceClient.service.js
+│   │   ├── invoices.controller.js
+│   │   ├── invoices.model.js
+│   │   ├── invoices.route.js
+│   │   └── invoices.service.js
+│   └── sellers
+│       ├── sellers.controller.js
+│       ├── sellers.model.js
+│       ├── sellers.route.js
+│       └── sellers.service.js
+├── uploads
+│   └── invoices
+│       ├── 1756127177317-526525854-journal_jour1.md
+│       ├── 1756127186591-478373446-journal_jour1.txt
+│       ├── 1756127337252-305782476-journal_jour1.txt
+│       ├── 1756127472797-141564309-journal_jour1.txt
+│       ├── 1756127551135-597481841-journal_jour1.txt
+│       ├── 1756127559897-788704927-README.md
+│       ├── 1756127614915-489878556-README.md
+│       ├── 1756133584750-717867752-journal_jour1.md
+│       ├── 1756133762670-459714911-journal_jour1.md
+│       ├── 1756133889849-459074303-journal_jour1.md
+│       └── 1756134094053-969910281-journal_jour1.md
+└── utils
+
+10 directories, 29 files

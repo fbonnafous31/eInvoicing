@@ -1,30 +1,28 @@
 import React, { useEffect } from 'react';
 
 export default function SupportingDocs({ data, onChange }) {
-  const mainAttachment = data.find(a => a.attachment_type === 'main');
-  const additionalAttachments = data.filter(a => a.attachment_type === 'additional');
 
-  // Log pour debug
+  // Logs pour debug
   useEffect(() => {
     console.log("Current attachments array:", data);
   }, [data]);
+
+  const mainAttachment = data.find(a => a.attachment_type === 'main');
+  const additionalAttachments = data.filter(a => a.attachment_type === 'additional');
 
   const handleMainChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const newFile = {
+    const mainFile = {
       file_name: file.name,
       raw_file: file,
       attachment_type: 'main'
     };
 
-    const newData = [
-      ...data.filter(a => a.attachment_type !== 'main'),
-      newFile
-    ];
-
-    console.log("Adding main attachment:", newFile);
+    // Toujours mettre le fichier principal en première position
+    const newData = [mainFile, ...data.filter(a => a.attachment_type !== 'main')];
+    console.log("Adding main attachment:", mainFile);
     onChange(newData);
   };
 
@@ -40,12 +38,19 @@ export default function SupportingDocs({ data, onChange }) {
   };
 
   const removeFile = (index, type) => {
-    const filtered = data.filter((_, i) => {
-      if (type === 'main') return data[i].attachment_type !== 'main';
-      return i !== index;
-    });
+    let newData;
+    if (type === 'main') {
+      newData = data.filter(a => a.attachment_type !== 'main');
+    } else {
+      // Supprime le i-ème fichier additionnel
+      let count = -1;
+      newData = data.filter(a => {
+        if (a.attachment_type === 'additional') count++;
+        return !(type === 'additional' && count === index);
+      });
+    }
     console.log(`Removing ${type} file at index ${index}`);
-    onChange(filtered);
+    onChange(newData);
   };
 
   return (
@@ -54,19 +59,11 @@ export default function SupportingDocs({ data, onChange }) {
 
       <div className="mb-3">
         <label>Justificatif principal *</label>
-        <input
-          type="file"
-          onChange={handleMainChange}
-          className="form-control"
-        />
+        <input type="file" onChange={handleMainChange} className="form-control" />
         {mainAttachment && (
           <div className="mt-1 d-flex justify-content-between align-items-center">
             <span>{mainAttachment.file_name}</span>
-            <button
-              type="button"
-              className="btn btn-sm btn-danger"
-              onClick={() => removeFile(0, 'main')}
-            >
+            <button type="button" className="btn btn-sm btn-danger" onClick={() => removeFile(0, 'main')}>
               Supprimer
             </button>
           </div>
@@ -75,21 +72,12 @@ export default function SupportingDocs({ data, onChange }) {
 
       <div className="mb-3">
         <label>Justificatifs additionnels</label>
-        <input
-          type="file"
-          multiple
-          onChange={handleAdditionalChange}
-          className="form-control mb-2"
-        />
+        <input type="file" multiple onChange={handleAdditionalChange} className="form-control mb-2" />
         <ul>
           {additionalAttachments.map((file, index) => (
             <li key={index} className="d-flex justify-content-between align-items-center">
               <span>{file.file_name || "Nom non disponible"}</span>
-              <button
-                type="button"
-                className="btn btn-sm btn-danger"
-                onClick={() => removeFile(index, 'additional')}
-              >
+              <button type="button" className="btn btn-sm btn-danger" onClick={() => removeFile(index, 'additional')}>
                 Supprimer
               </button>
             </li>

@@ -4,7 +4,6 @@ import { paymentTermsOptions } from "../../constants/paymentTerms";
 import InputField from "../form/InputField";
 import SelectField from "../form/SelectField";
 import FormSection from "../form/FormSection";
-import InvoiceClient from "./InvoiceClient"; 
 import { validateInvoiceField } from "../../utils/validators/invoice";
 import { fetchSellers } from "../../services/sellers";
 
@@ -64,22 +63,6 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
   const issueYear = data.issue_date ? new Date(data.issue_date).getFullYear() : new Date().getFullYear();
   const fiscalYearValue = data.fiscal_year || issueYear;
 
-  const clientValue = data.client_id ? {
-    id: data.client_id,
-    type: data.client_type,
-    client_first_name: data.client_first_name,
-    client_last_name: data.client_last_name,
-    client_legal_name: data.client_legal_name,
-    client_siret: data.client_siret,
-    client_vat_number: data.client_vat_number,
-    client_address: data.client_address,
-    client_city: data.client_city,
-    client_postal_code: data.client_postal_code,
-    client_country_code: data.client_country_code,
-    client_email: data.client_email,
-    client_phone: data.client_phone
-  } : null;
-
   return (
     <div className="card p-3 mb-3">
       <h5>Facture</h5>
@@ -136,56 +119,6 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
           error={getError("seller_id")}
           required
         />
-
-        {/* Composant client intelligent */}
-        <InvoiceClient
-          value={clientValue}
-          onChange={(client) => {
-            if (!client) {
-              const emptyClient = {
-                client_id: null,
-                client_type: "",
-                client_first_name: "",
-                client_last_name: "",
-                client_legal_name: "",
-                client_siret: "",
-                client_vat_number: "",
-                client_address: "",
-                client_city: "",
-                client_postal_code: "",
-                client_country_code: "",
-                client_email: "",
-                client_phone: ""
-              };
-              onChange({ ...data, ...emptyClient });
-              return;
-            }
-
-            const newClientData = {
-              client_id: client.id,
-              client_type: client.type,
-              client_first_name: client.client_first_name || "",
-              client_last_name: client.client_last_name || "",
-              client_legal_name:
-                client.client_legal_name ||
-                (client.type === "individual"
-                  ? `${client.client_first_name || ""} ${client.client_last_name || ""}`.trim()
-                  : "Entreprise inconnue"),
-              client_siret: client.client_siret || "",
-              client_vat_number: client.client_vat_number || "",
-              client_address: client.client_address || "",
-              client_city: client.client_city || "",
-              client_postal_code: client.client_postal_code || "",
-              client_country_code: client.client_country_code || "FR",
-              client_email: client.client_email || "",
-              client_phone: client.client_phone || ""
-            };
-
-            onChange({ ...data, ...newClientData });
-          }}
-          error={getError("client_id")}
-        />
-
       </FormSection>
 
       {/* Section Informations contractuelles */}
