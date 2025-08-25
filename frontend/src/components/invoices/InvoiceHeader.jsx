@@ -70,7 +70,7 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
 
       {/* Section Infos facture */}
       <FormSection
-        title="Infos facture"
+        title="Informations facture"
         sectionKey="info"
         openSections={openSections}
         toggleSection={toggleSection}
