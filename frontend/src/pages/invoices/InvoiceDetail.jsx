@@ -13,7 +13,10 @@ export default function InvoiceDetail() {
 
   useEffect(() => {
     fetchInvoice(id)
-      .then(data => setInvoice(data))
+      .then(data => {
+        console.log("Fetched invoice:", data); 
+        setInvoice(data);
+      })
       .catch(console.error);
   }, [id]);
 
@@ -97,6 +100,7 @@ export default function InvoiceDetail() {
         onSubmit={handleUpdate}
         disabled={!isEditing}
         initialData={{
+          status: invoice.status,
           header: {
             invoice_number: invoice.invoice_number,
             issue_date: invoice.issue_date,

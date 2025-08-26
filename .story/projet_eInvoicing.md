@@ -36,7 +36,7 @@
 - **CRUD Clients** :  
   création, lecture (liste et fiche détail), modification, suppression.    
 - **CRUD Factures** :  
-  liste       
+  liste, lecture (liste et fiche détail).           
 - **Formulaires complets et validations** :  
   - tous les champs nécessaires  
   - validations frontend et backend  
@@ -56,14 +56,8 @@
 
 
 ## 📌 Prochaines étapes
-- Créer un bloc Client au niveau du formulaire de création de facture permettant de stocker les données clients 
-  - Workflow
-    - Rechercher client dans la table client, compléter informations si nécessaire et mise à jour des données client dans la table client 
-    - Le client n'existe pas saisie manuelle des informations et création du client dans la table client
-  - Règles de gestion
-    - Le client est un particulier => Nom, prénom, adresse sont obligatoires
-    - Le client est une entreprise domiciliée en France => SIRET et adresse sont obligatoires
-    - Le client est une entreprise non domiciliée en France => TVA intracommunautaire et adresse sont obligatoires
+- Permettre la modification et la suppression d'une facture
+- Seulement si la facture est dans un état brouillond (draft)
 
 
 ## Architecture projet
@@ -100,6 +94,34 @@ project/
 ├── docs/
 ├── scripts/
 └── README.md
+
+## Architecture backend
+.
+├── architecture.txt
+├── config
+│   └── db.js
+├── middlewares
+│   ├── errorHandler.js
+│   └── upload.js
+├── modules
+│   ├── clients
+│   │   ├── clients.controller.js
+│   │   ├── clients.model.js
+│   │   ├── clients.route.js
+│   │   └── clients.service.js
+│   ├── invoices
+│   │   ├── invoiceClient.model.js
+│   │   ├── invoiceClient.service.js
+│   │   ├── invoices.controller.js
+│   │   ├── invoices.model.js
+│   │   ├── invoices.route.js
+│   │   └── invoices.service.js
+│   └── sellers
+│       ├── sellers.controller.js
+│       ├── sellers.model.js
+│       ├── sellers.route.js
+│       └── sellers.service.js
+└── utils
 
 ## Architecture frontend
 .
@@ -177,4 +199,3 @@ project/
         ├── invoice.js
         ├── seller.js
         └── siret.js
-
