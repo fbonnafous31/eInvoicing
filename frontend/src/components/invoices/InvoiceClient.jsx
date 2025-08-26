@@ -23,11 +23,21 @@ const clientTypeOptions = [
 
 const determineClientType = (client) => {
   if (!client) return null;
-  if (!client.is_company) return "individual";
-  return client.country_code === "FR" ? "company_fr" : "company_eu";
+
+  if (client.client_vat_number) {
+    // si c'est 14 chiffres -> SIRET français
+    if (/^\d{14}$/.test(client.client_vat_number)) return "company_fr";
+    return "company_eu";
+  }
+
+  if (client.client_siret) return "company_fr"; 
+  if (client.client_first_name && client.client_last_name) return "individual";
+
+  return null;
 };
 
 export default function InvoiceClient({ value, onChange, error }) {
+  console.log("InvoiceClient data prop:", value);
   const [clients, setClients] = useState([]);
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
@@ -73,35 +83,26 @@ export default function InvoiceClient({ value, onChange, error }) {
       .catch(console.error);
   }, []);
 
+  // 1. Initialize formData from value once when value changes
   useEffect(() => {
-    if (!value || clients.length === 0) return;
+    if (!value) return;
 
-    const client = clients.find((c) => c.id === value.id || c.id === value);
-    if (!client) return;
-
-    setFormData((prev) => {
-      if (Object.keys(prev).length === 0) {
-        const data = {
-          ...client,
-          type: determineClientType(client),
-          firstname: client.firstname || "",
-          lastname: client.lastname || "",
-          legal_name: client.legal_name || "",
-          siret: client.siret || "",
-          vat_number: client.vat_number || "",
-          address: client.address || "",
-          city: client.city || "",
-          postal_code: client.postal_code || "",
-          country_code: client.country_code || "",
-          email: client.email || "",
-          phone: client.phone || "",
-        };
-        propagate(data);
-        return data;
-      }
-      return prev;
+    setFormData({
+      id: value.client_id || null,
+      type: value.client_type || determineClientType(value),
+      firstname: value.client_first_name || "",
+      lastname: value.client_last_name || "",
+      legal_name: value.client_legal_name || "",
+      siret: value.client_siret || "",
+      vat_number: value.client_vat_number || "",
+      address: value.client_address || "",
+      city: value.client_city || "",
+      postal_code: value.client_postal_code || "",
+      country_code: value.client_country_code || "FR",
+      email: value.client_email || "",
+      phone: value.client_phone || "",
     });
-  }, [value, clients, propagate]);
+  }, [value]);
 
   const handleSelect = (id) => {
     if (!id) {

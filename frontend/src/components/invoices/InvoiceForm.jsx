@@ -1,5 +1,5 @@
 // frontend/src/components/invoices/InvoiceForm.jsx
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import InvoiceHeader from "./InvoiceHeader";
 import InvoiceClient from "./InvoiceClient";
@@ -10,7 +10,7 @@ import FormSection from "../form/FormSection";
 import { createInvoice } from "../../services/invoices";
 import { validateInvoiceField, validateClientData } from "../../utils/validators/invoice";
 
-export default function InvoiceForm({ onSubmit, disabled }) {
+export default function InvoiceForm({ onSubmit, disabled, initialData, onDelete = () => {} }) {
   const navigate = useNavigate();
   const [invoiceData, setInvoiceData] = useState({
     header: {},
@@ -19,12 +19,37 @@ export default function InvoiceForm({ onSubmit, disabled }) {
     taxes: [],
     attachments: [],
   });
+  const [isEditing, setIsEditing] = useState(!initialData); 
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [headerTouched, setHeaderTouched] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
+  useEffect(() => {
+    console.log("InvoiceForm received initialData:", initialData);
+    if (initialData) {
+      // On force les montants à être des nombres
+      const safeData = {
+        ...initialData,
+        lines: (initialData.lines || []).map(line => ({
+          ...line,
+          quantity: Number(line.quantity || 0),
+          unit_price: Number(line.unit_price || 0),
+          discount: Number(line.discount || 0),
+          vat_rate: Number(line.vat_rate || 0),
+        })),
+        taxes: (initialData.taxes || []).map(tax => ({
+          ...tax,
+          base_amount: Number(tax.base_amount || 0),
+          tax_amount: Number(tax.tax_amount || 0),
+          vat_rate: Number(tax.vat_rate || 0),
+        }))
+      };
+      setInvoiceData(safeData);
+    }
+  }, [initialData]);
+  
   const headerFields = ["invoice_number", "issue_date", "fiscal_year", "seller_id"];
 
   // Calcul des totaux et TVA
@@ -231,6 +256,7 @@ export default function InvoiceForm({ onSubmit, disabled }) {
       <InvoiceHeader
         data={invoiceData.header}
         onChange={val => handleChange("header", val)}
+        disabled={disabled}
         submitted={submitted}
         errors={errors}
         touchedFields={headerTouched}
@@ -252,8 +278,10 @@ export default function InvoiceForm({ onSubmit, disabled }) {
         ])}
       >
         <InvoiceClient
+          value={invoiceData.client}
           data={invoiceData.client}
           onChange={val => handleChange("client", val)}
+          disabled={disabled}
           submitted={submitted}
           errors={errors}
         />
@@ -262,16 +290,19 @@ export default function InvoiceForm({ onSubmit, disabled }) {
       <InvoiceLines
         data={linesWithTotals}
         onChange={val => handleChange("lines", val)}
+        disabled={disabled}
       />
 
       <TaxBases
         data={invoiceData.taxes.length ? invoiceData.taxes : taxesSummary}
         onChange={val => handleChange("taxes", val)}
+        disabled={disabled}
       />
 
       <SupportingDocs
         data={invoiceData.attachments}
         onChange={val => handleChange("attachments", val)}
+        disabled={disabled}
         allowPrincipal
       />
 
@@ -282,10 +313,32 @@ export default function InvoiceForm({ onSubmit, disabled }) {
         <p>Total TTC : {total.toFixed(2)} €</p>
       </div>
 
-      <div className="d-flex justify-content-end mt-3 mb-3 me-3">
-        <button type="submit" className="btn btn-primary" disabled={disabled}>
-          Créer la facture
-        </button>
+      <div className="mt-4 mb-5 d-flex justify-content-end gap-2">
+        {initialData ? (
+          <>
+            {isEditing ? (
+              <button className="btn btn-secondary" onClick={() => setIsEditing(false)}>
+                Annuler
+              </button>
+            ) : (
+              <button className="btn btn-primary" onClick={() => setIsEditing(true)}>
+                ✏️ Modifier
+              </button>
+            )}
+            <button className="btn btn-danger" onClick={onDelete}>
+              Supprimer
+            </button>
+            {isEditing && (
+              <button type="submit" className="btn btn-success">
+                Mettre à jour
+              </button>
+            )}
+          </>
+        ) : (
+          <button type="submit" className="btn btn-primary">
+            Créer la facture
+          </button>
+        )}
       </div>
     </form>
   );
