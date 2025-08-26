@@ -2,7 +2,7 @@ import { useState } from "react";
 import InputField from "../form/InputField";
 import { validateInvoiceLine } from "../../utils/validators/invoice";
 
-export default function InvoiceLines({ data, onChange }) {
+export default function InvoiceLines({ data, onChange, disabled }) {
   const [errors, setErrors] = useState([]); // tableau d'erreurs par ligne
   const [touched, setTouched] = useState([]); // champs déjà visités
 
@@ -94,6 +94,7 @@ export default function InvoiceLines({ data, onChange }) {
               onBlur={() => handleBlur(index, "description")}
               error={touched[index]?.description && errors[index]?.description}
               required
+              disabled={disabled} 
             />
 
             <InputField
@@ -106,6 +107,7 @@ export default function InvoiceLines({ data, onChange }) {
               onBlur={() => handleBlur(index, "quantity")}
               error={touched[index]?.quantity && errors[index]?.quantity}
               required
+              disabled={disabled} 
             />
 
             <InputField
@@ -118,6 +120,7 @@ export default function InvoiceLines({ data, onChange }) {
               onBlur={() => handleBlur(index, "unit_price")}
               error={touched[index]?.unit_price && errors[index]?.unit_price}
               required
+              disabled={disabled} 
             />
 
             <InputField
@@ -130,6 +133,7 @@ export default function InvoiceLines({ data, onChange }) {
               onBlur={() => handleBlur(index, "vat_rate")}
               error={touched[index]?.vat_rate && errors[index]?.vat_rate}
               required
+              disabled={disabled} 
             />
 
             <InputField
@@ -141,6 +145,7 @@ export default function InvoiceLines({ data, onChange }) {
               onChange={(val) => handleLineChange(index, "discount", val)}
               onBlur={() => handleBlur(index, "discount")}
               error={touched[index]?.discount && errors[index]?.discount}
+              disabled={disabled} 
             />
 
             <InputField
@@ -150,6 +155,7 @@ export default function InvoiceLines({ data, onChange }) {
               label="HT"
               value={line.line_net?.toFixed(2) || 0}
               readOnly
+              disabled={disabled} 
             />
 
             <InputField
@@ -159,6 +165,7 @@ export default function InvoiceLines({ data, onChange }) {
               label="TVA"
               value={line.line_tax?.toFixed(2) || 0}
               readOnly
+              disabled={disabled} 
             />
 
             <InputField
@@ -168,6 +175,7 @@ export default function InvoiceLines({ data, onChange }) {
               label="TTC"
               value={line.line_total?.toFixed(2) || 0}
               readOnly
+              disabled={disabled} 
             />
 
             <div className="d-flex flex-column align-items-center">
@@ -176,6 +184,7 @@ export default function InvoiceLines({ data, onChange }) {
                 type="button"
                 className="btn btn-danger"
                 onClick={() => removeLine(index)}
+                disabled={disabled} 
               >
                 🗑️
               </button>
@@ -184,7 +193,7 @@ export default function InvoiceLines({ data, onChange }) {
         </div>
       ))}
 
-      <button type="button" className="btn btn-secondary mt-2" onClick={addLine}>
+      <button type="button" className="btn btn-secondary mt-2" onClick={addLine} disabled={disabled} >
         Ajouter une ligne
       </button>
     </div>

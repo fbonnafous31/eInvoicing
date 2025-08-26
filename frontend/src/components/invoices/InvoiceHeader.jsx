@@ -7,7 +7,7 @@ import FormSection from "../form/FormSection";
 import { validateInvoiceField } from "../../utils/validators/invoice";
 import { fetchSellers } from "../../services/sellers";
 
-export default function InvoiceHeader({ data, onChange, submitted, errors = {} }) {
+export default function InvoiceHeader({ data, onChange, submitted, errors = {}, disabled }) {
   const [sellers, setSellers] = useState([]);
   const [fieldErrors, setFieldErrors] = useState({});
   const [touchedFields, setTouchedFields] = useState({});
@@ -84,6 +84,7 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
           onBlur={() => handleBlur("invoice_number")}
           error={getError("invoice_number")}
           required
+          disabled={disabled} 
         />
 
         <InputField
@@ -95,6 +96,7 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
           onBlur={() => handleBlur("issue_date")}
           error={getError("issue_date")}
           required
+          disabled={disabled} 
         />
 
         <InputField
@@ -106,6 +108,7 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
           onBlur={() => handleBlur("fiscal_year")}
           error={getError("fiscal_year")}
           required
+          disabled={disabled} 
           min={issueYear - 1}
           max={issueYear + 1}
         />
@@ -118,6 +121,7 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
           options={sellers.map(s => ({ value: s.id, label: s.legal_name || "Vendeur" }))}
           error={getError("seller_id")}
           required
+          disabled={disabled} 
         />
       </FormSection>
 
@@ -136,6 +140,7 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
           onChange={val => handleChange("contract_number", val)}
           onBlur={() => handleBlur("contract_number")}
           error={getError("contract_number")}
+          disabled={disabled} 
         />
 
         <InputField
@@ -145,6 +150,7 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
           onChange={val => handleChange("purchase_order_number", val)}
           onBlur={() => handleBlur("purchase_order_number")}
           error={getError("purchase_order_number")}
+          disabled={disabled} 
         />
 
         <SelectField
@@ -153,6 +159,7 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
           onChange={val => handleChange("payment_terms", val)}
           onBlur={() => handleBlur("payment_terms")}
           options={paymentTermsOptions}
+          disabled={disabled} 
         />
       </FormSection>
 
@@ -165,6 +172,7 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {} }
         onChange={val => handleChange("supply_date", val)}
         onBlur={() => handleBlur("supply_date")}
         error={getError("supply_date")}
+        disabled={disabled} 
       />
     </div>
   );

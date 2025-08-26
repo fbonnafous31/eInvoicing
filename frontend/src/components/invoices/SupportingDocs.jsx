@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-export default function SupportingDocs({ data, onChange }) {
+export default function SupportingDocs({ data, onChange, disabled }) {
 
   // Logs pour debug
   useEffect(() => {
@@ -59,11 +59,11 @@ export default function SupportingDocs({ data, onChange }) {
 
       <div className="mb-3">
         <label>Justificatif principal *</label>
-        <input type="file" onChange={handleMainChange} className="form-control" />
+        <input type="file" onChange={handleMainChange} className="form-control" disabled={disabled} />
         {mainAttachment && (
           <div className="mt-1 d-flex justify-content-between align-items-center">
             <span>{mainAttachment.file_name}</span>
-            <button type="button" className="btn btn-sm btn-danger" onClick={() => removeFile(0, 'main')}>
+            <button type="button" className="btn btn-sm btn-danger" disabled={disabled} onClick={() => removeFile(0, 'main')}>
               Supprimer
             </button>
           </div>
@@ -72,12 +72,12 @@ export default function SupportingDocs({ data, onChange }) {
 
       <div className="mb-3">
         <label>Justificatifs additionnels</label>
-        <input type="file" multiple onChange={handleAdditionalChange} className="form-control mb-2" />
+        <input type="file" multiple onChange={handleAdditionalChange} className="form-control mb-2" disabled={disabled} />
         <ul>
           {additionalAttachments.map((file, index) => (
             <li key={index} className="d-flex justify-content-between align-items-center">
               <span>{file.file_name || "Nom non disponible"}</span>
-              <button type="button" className="btn btn-sm btn-danger" onClick={() => removeFile(index, 'additional')}>
+              <button type="button" className="btn btn-sm btn-danger" disabled={disabled} onClick={() => removeFile(index, 'additional')}>
                 Supprimer
               </button>
             </li>

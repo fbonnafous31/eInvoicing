@@ -80,38 +80,6 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
     if (fy < issueYear - 1 || fy > issueYear + 1)
       throw new Error(`Exercice fiscal invalide : ${fy} pour une date d'émission ${invoice.issue_date}`);
 
-    // --- Validation des informations client ---
-    if (invoice.client_id) {
-      const rules = {
-        individual: [
-          ["client_first_name", "Prénom manquant"],
-          ["client_last_name", "Nom manquant"],
-          ["client_address", "Adresse manquante"],
-        ],
-        company_fr: [
-          ["client_legal_name", "Raison sociale manquante"],
-          ["client_siret", "SIRET manquant"],
-          ["client_address", "Adresse manquante"],
-        ],
-        company_eu: [
-          ["client_legal_name", "Raison sociale manquante"],
-          ["client_vat_number", "Numéro de TVA intracom manquant"],
-          ["client_address", "Adresse manquante"],
-        ],
-      };
-
-      const validations = rules[invoice.client_type];
-      if (!validations) {
-        throw new Error("Type de client inconnu");
-      }
-
-      for (const [field, message] of validations) {
-        if (!invoice[field]) {
-          throw new Error(`Informations client manquantes : ${message}`);
-        }
-      }
-    }
-
     // --- Vérification unicité seller + fiscal_year + invoice_number ---
     const existing = await client.query(
       `SELECT id 
@@ -193,7 +161,6 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
   }
 }
 
-
 /**
  * Supprime une facture par ID
  */
@@ -202,9 +169,119 @@ async function deleteInvoice(id) {
   return result.rows[0] || null;
 }
 
+/**
+ * Met à jour une facture principale
+ */
+async function updateInvoice(id, invoiceData) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    const invoiceColumns = [
+      "invoice_number",
+      "issue_date",
+      "fiscal_year",
+      "seller_id",
+      "seller_legal_name",
+      "client_id"
+    ];
+
+    const updates = invoiceColumns
+      .filter(col => invoiceData[col] !== undefined)
+      .map((col, i) => `${col} = $${i + 1}`);
+
+    const values = invoiceColumns
+      .filter(col => invoiceData[col] !== undefined)
+      .map(col => invoiceData[col]);
+
+    if (updates.length > 0) {
+      const query = `UPDATE invoicing.invoices SET ${updates.join(', ')} WHERE id = $${updates.length + 1}`;
+      await client.query(query, [...values, id]);
+    }
+
+    await client.query('COMMIT');
+    return await getInvoiceById(id);
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Met à jour les lignes d'une facture
+ */
+async function updateLines(invoiceId, lines) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    for (const line of lines) {
+      const cols = Object.keys(line);
+      const vals = Object.values(line);
+      const setStr = cols.map((col, i) => `${col} = $${i + 1}`).join(', ');
+      await client.query(`UPDATE invoicing.invoice_lines SET ${setStr} WHERE id = $${cols.length + 1}`, [...vals, line.id]);
+    }
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Met à jour les taxes d'une facture
+ */
+async function updateTaxes(invoiceId, taxes) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    for (const tax of taxes) {
+      const cols = Object.keys(tax);
+      const vals = Object.values(tax);
+      const setStr = cols.map((col, i) => `${col} = $${i + 1}`).join(', ');
+      await client.query(`UPDATE invoicing.invoice_taxes SET ${setStr} WHERE id = $${cols.length + 1}`, [...vals, tax.id]);
+    }
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Met à jour les attachments d'une facture
+ */
+async function updateAttachments(invoiceId, attachments) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    for (const att of attachments) {
+      const cols = Object.keys(att);
+      const vals = Object.values(att);
+      const setStr = cols.map((col, i) => `${col} = $${i + 1}`).join(', ');
+      await client.query(`UPDATE invoicing.invoice_attachments SET ${setStr} WHERE id = $${cols.length + 1}`, [...vals, att.id]);
+    }
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 module.exports = {
   getAllInvoices,
   getInvoiceById,
   createInvoice,
-  deleteInvoice
+  deleteInvoice,
+  updateInvoice,
+  updateLines,
+  updateTaxes,
+  updateAttachments
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function TaxBases({ data, onChange }) {
+export default function TaxBases({ data, onChange, disabled }) {
   const handleTaxChange = (index, e) => {
     const newTaxes = [...data];
     newTaxes[index][e.target.name] = e.target.value;
@@ -40,6 +40,7 @@ export default function TaxBases({ data, onChange }) {
             onChange={e => handleTaxChange(index, e)} 
             className="form-control" 
             style={{ flex: 2 }}
+            disabled={disabled} 
           />
           <input 
             type="number" 
@@ -49,6 +50,7 @@ export default function TaxBases({ data, onChange }) {
             onChange={e => handleTaxChange(index, e)} 
             className="form-control" 
             style={{ flex: 2 }}
+            disabled={disabled} 
           />
           <input 
             type="number" 
@@ -57,12 +59,13 @@ export default function TaxBases({ data, onChange }) {
             className="form-control" 
             style={{ flex: 2 }}
             readOnly 
+            disabled={disabled} 
           />
-          <button type="button" className="btn btn-danger" onClick={() => removeTax(index)}>🗑️</button>
+          <button type="button" className="btn btn-danger" onClick={() => removeTax(index)} disabled={disabled} >🗑️</button>
         </div>
       ))}
 
-      <button type="button" className="btn btn-secondary mt-2" onClick={addTax}>Ajouter une assiette</button>
+      <button type="button" className="btn btn-secondary mt-2" onClick={addTax} disabled={disabled} >Ajouter une assiette</button>
     </div>
   );
 }
