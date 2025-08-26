@@ -10,7 +10,7 @@ import FormSection from "../form/FormSection";
 import { createInvoice } from "../../services/invoices";
 import { validateInvoiceField, validateClientData } from "../../utils/validators/invoice";
 
-export default function InvoiceForm({ onSubmit, disabled, initialData, onDelete = () => {} }) {
+export default function InvoiceForm({ onSubmit, initialData, onDelete = () => {} }) {
   const navigate = useNavigate();
   const [invoiceData, setInvoiceData] = useState({
     header: {},
@@ -19,7 +19,7 @@ export default function InvoiceForm({ onSubmit, disabled, initialData, onDelete 
     taxes: [],
     attachments: [],
   });
-  const [isEditing, setIsEditing] = useState(!initialData); 
+  const [isEditing, setIsEditing] = useState(false);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [headerTouched, setHeaderTouched] = useState({});
@@ -214,7 +214,21 @@ export default function InvoiceForm({ onSubmit, disabled, initialData, onDelete 
       console.log("Payload FormData ready:", formData);
 
       if (onSubmit) {
-        await onSubmit(formData);
+        await onSubmit({
+          invoice: {
+            invoice_number: invoiceData.header.invoice_number,
+            issue_date: invoiceData.header.issue_date,
+            fiscal_year: invoiceData.header.fiscal_year,
+            seller_id: invoiceData.header.seller_id,
+            subtotal,
+            total_taxes: totalTaxes,
+            total
+          },
+          client: invoiceData.client,
+          lines: linesWithTotals,
+          taxes: invoiceData.taxes.length ? invoiceData.taxes : taxesSummary,
+          attachments: invoiceData.attachments  // ✅ assure-toi que c’est bien un tableau
+        });
       } else {
         await createInvoice(formData);
         setSuccessMessage("Facture créée avec succès ! 🎉");
@@ -250,8 +264,8 @@ export default function InvoiceForm({ onSubmit, disabled, initialData, onDelete 
 
   const isDraft = useMemo(() => {
     const status = initialData?.status;
-    if (!status) return false; // pas de statut -> on désactive les boutons
-    return status.toString().trim().toLowerCase() === 'draft';
+    if (!status) return false;
+    return status.toString().trim().toLowerCase() === "draft";
   }, [initialData]);
 
   return (
@@ -262,7 +276,7 @@ export default function InvoiceForm({ onSubmit, disabled, initialData, onDelete 
       <InvoiceHeader
         data={invoiceData.header}
         onChange={val => handleChange("header", val)}
-        disabled={disabled}
+        disabled={!isEditing}
         submitted={submitted}
         errors={errors}
         touchedFields={headerTouched}
@@ -287,7 +301,7 @@ export default function InvoiceForm({ onSubmit, disabled, initialData, onDelete 
           value={invoiceData.client}
           data={invoiceData.client}
           onChange={val => handleChange("client", val)}
-          disabled={disabled}
+          disabled={!isEditing}
           submitted={submitted}
           errors={errors}
         />
@@ -296,19 +310,19 @@ export default function InvoiceForm({ onSubmit, disabled, initialData, onDelete 
       <InvoiceLines
         data={linesWithTotals}
         onChange={val => handleChange("lines", val)}
-        disabled={disabled}
+        disabled={!isEditing}
       />
 
       <TaxBases
         data={invoiceData.taxes.length ? invoiceData.taxes : taxesSummary}
         onChange={val => handleChange("taxes", val)}
-        disabled={disabled}
+        disabled={!isEditing}
       />
 
       <SupportingDocs
         data={invoiceData.attachments}
         onChange={val => handleChange("attachments", val)}
-        disabled={disabled}
+        disabled={!isEditing}
         allowPrincipal
       />
 
@@ -322,32 +336,44 @@ export default function InvoiceForm({ onSubmit, disabled, initialData, onDelete 
       <div className="mt-4 mb-5 d-flex justify-content-end gap-2">
         {initialData ? (
           <>
-            {isEditing ? (
-              <button className="btn btn-secondary" onClick={() => setIsEditing(false)}>
-                Annuler
-              </button>
-            ) : (
-              <button
-                className="btn btn-primary"
-                onClick={() => setIsEditing(true)}
-                disabled={!isDraft}
-              >
-                ✏️ Modifier
-              </button>
-            )}
+            {isDraft && ( // boutons visibles seulement si la facture est un brouillon
+              <>
+                {!isEditing ? (
+                  <>
+                    {/* Mode lecture */}
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      ✏️ Modifier
+                    </button>
 
-            <button
-              className="btn btn-danger"
-              onClick={onDelete}
-              disabled={!isDraft}
-            >
-              Supprimer
-            </button>
+                    <button
+                      type="button"
+                      className="btn btn-danger"
+                      onClick={onDelete}
+                    >
+                      Supprimer
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {/* Mode édition */}
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => setIsEditing(false)}
+                    >
+                      Annuler
+                    </button>
 
-            {isEditing && (
-              <button type="submit" className="btn btn-success">
-                Mettre à jour
-              </button>
+                    <button type="submit" className="btn btn-success">
+                      Enregistrer
+                    </button>
+                  </>
+                )}
+              </>
             )}
           </>
         ) : (

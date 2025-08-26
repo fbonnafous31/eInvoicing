@@ -38,7 +38,8 @@ export async function createInvoice(formData) {
 export async function updateInvoice(id, { invoice, client, lines, taxes, attachments }) {
   const formData = new FormData();
 
-  attachments?.forEach(file => formData.append('files', file));
+  console.log("Attachments being sent:", attachments);
+  attachments?.forEach(file => formData.append('attachments', file.raw_file));
 
   const attachmentsMeta = attachments?.map(a => ({
     attachment_type: a.attachment_type || 'additional'

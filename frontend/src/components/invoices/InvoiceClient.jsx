@@ -36,7 +36,7 @@ const determineClientType = (client) => {
   return null;
 };
 
-export default function InvoiceClient({ value, onChange, error }) {
+export default function InvoiceClient({ value, onChange, error, disabled }) {
   console.log("InvoiceClient data prop:", value);
   const [clients, setClients] = useState([]);
   const [formData, setFormData] = useState({});
@@ -174,6 +174,7 @@ export default function InvoiceClient({ value, onChange, error }) {
         isClearable
         isSearchable
         placeholder="Rechercher un client..."
+        isDisabled={disabled} 
       />
 
       <div className="border p-2 mt-2 rounded bg-light">
@@ -184,6 +185,7 @@ export default function InvoiceClient({ value, onChange, error }) {
           onBlur={() => handleBlurField("type")}
           options={clientTypeOptions}
           required
+          disabled={disabled} 
         />
 
         {formData.type === "individual" && (
@@ -192,7 +194,7 @@ export default function InvoiceClient({ value, onChange, error }) {
               label="Nom complet"
               value={`${formData.firstname || ""} ${formData.lastname || ""}`.trim()}
               onChange={() => {}}
-              disabled
+              disabled={disabled}               
             />
             <InputField
               label="Prénom"
@@ -202,6 +204,7 @@ export default function InvoiceClient({ value, onChange, error }) {
               error={errors.firstname}
               touched={touchedFields.firstname}
               required
+              disabled={disabled} 
             />
             <InputField
               label="Nom"
@@ -211,6 +214,7 @@ export default function InvoiceClient({ value, onChange, error }) {
               error={errors.lastname}
               touched={touchedFields.lastname}
               required
+              disabled={disabled} 
             />
           </>
         )}
@@ -224,6 +228,7 @@ export default function InvoiceClient({ value, onChange, error }) {
             error={errors.legal_name}
             touched={touchedFields.legal_name}
             required
+            disabled={disabled} 
           />
         )}
 
@@ -248,6 +253,7 @@ export default function InvoiceClient({ value, onChange, error }) {
             error={errors.siret}
             touched={touchedFields.siret}
             required
+            disabled={disabled} 
           />
         )}
 
@@ -260,6 +266,7 @@ export default function InvoiceClient({ value, onChange, error }) {
             error={errors.vat_number}
             touched={touchedFields.vat_number}
             required
+            disabled={disabled} 
           />
         )}
 
@@ -271,6 +278,7 @@ export default function InvoiceClient({ value, onChange, error }) {
             error={errors.address}
             touched={touchedFields.address}
             required
+            disabled={disabled} 
           />
           <InputField
             label="Code postal"
@@ -287,12 +295,14 @@ export default function InvoiceClient({ value, onChange, error }) {
             }}
             error={errors.postal_code}
             touched={touchedFields.postal_code}
+            disabled={disabled} 
           />
       
         <InputField
           label="Ville"
           value={formData.city || ""}
           onChange={(val) => handleChangeField("city", val)}
+          disabled={disabled} 
         />
         <SelectField
           label="Pays"
@@ -303,6 +313,7 @@ export default function InvoiceClient({ value, onChange, error }) {
           touched={touchedFields.country_code}
           options={countryCodes.map(c => ({ value: c.code, label: `${c.code} - ${c.name}` }))}
           error={errors.country_code}
+          disabled={disabled} 
         />        
         <InputField
           label="Email"
@@ -319,6 +330,7 @@ export default function InvoiceClient({ value, onChange, error }) {
           }}
           error={errors.email}
           touched={touchedFields.email}
+          disabled={disabled} 
         />  
         <InputField
           label="Téléphone"
@@ -335,6 +347,7 @@ export default function InvoiceClient({ value, onChange, error }) {
           }}
           error={errors.phone}
           touched={touchedFields.phone}
+          disabled={disabled} 
         />
       </div>
 

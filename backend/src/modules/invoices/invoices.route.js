@@ -17,6 +17,18 @@ router.post(
   ]),
   InvoicesController.createInvoice
 );
+router.put(
+  '/:id',
+  upload.fields([
+    { name: 'attachments', maxCount: 10 },
+    { name: 'invoice', maxCount: 1 },
+    { name: 'client', maxCount: 1 },
+    { name: 'lines', maxCount: 1 },
+    { name: 'taxes', maxCount: 1 },
+    { name: 'attachments_meta', maxCount: 1 }
+  ]),
+  InvoicesController.updateInvoice
+);
 router.delete('/:id', InvoicesController.deleteInvoice);
 
 module.exports = router;

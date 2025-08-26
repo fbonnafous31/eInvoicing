@@ -22,6 +22,7 @@ export default function InvoiceDetail() {
 
   const handleUpdate = async (formData) => {
     try {
+      console.log("handleUpdate called with:", formData);
       const updated = await updateInvoice(id, formData);
       setInvoice(updated);
       setIsEditing(false);
@@ -99,6 +100,7 @@ export default function InvoiceDetail() {
       <InvoiceForm
         onSubmit={handleUpdate}
         disabled={!isEditing}
+        setIsEditing={setIsEditing}
         initialData={{
           status: invoice.status,
           header: {
