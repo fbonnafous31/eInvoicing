@@ -69,23 +69,6 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
       invoice.seller_legal_name = sellerRes.rows[0]?.legal_name || null;
     }
 
-    // --- Remplir les infos client depuis client_id ---
-    if (invoice.client_id) {
-      const clientRes = await client.query(
-        `SELECT legal_name, first_name, last_name, siret, vat_number, address, type
-         FROM invoicing.clients WHERE id = $1`,
-        [invoice.client_id]
-      );
-      const c = clientRes.rows[0];
-      invoice.client_legal_name = c.legal_name;
-      invoice.client_first_name = c.first_name;
-      invoice.client_last_name = c.last_name;
-      invoice.client_siret = c.siret;
-      invoice.client_vat_number = c.vat_number;
-      invoice.client_address = c.address;
-      invoice.client_type = c.type;
-    }
-
     // --- Validation invoice_number ---
     if (!invoice.invoice_number) throw new Error('invoice_number obligatoire');
     invoice.invoice_number = invoice.invoice_number.trim().slice(0, 20);
@@ -146,26 +129,13 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
     const mainAttachments = attachments.filter(a => a.attachment_type === 'main');
     if (mainAttachments.length !== 1) throw new Error('Une facture doit avoir un justificatif principal.');
 
-    // --- Préparer insertion invoice (Solution B : colonnes explicites) ---
     const invoiceColumns = [
       "invoice_number",
       "issue_date",
       "fiscal_year",
       "seller_id",
       "seller_legal_name",
-      "client_id",
-      "client_type",
-      "client_first_name",
-      "client_last_name",
-      "client_legal_name",
-      "client_siret",
-      "client_vat_number",
-      "client_address",
-      "client_city",
-      "client_postal_code",
-      "client_country_code",
-      "client_email",
-      "client_phone"
+      "client_id"
     ];
 
     const invoiceValues = invoiceColumns.map(col => invoice[col] || null);
