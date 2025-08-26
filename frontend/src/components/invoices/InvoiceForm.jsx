@@ -248,6 +248,12 @@ export default function InvoiceForm({ onSubmit, disabled, initialData, onDelete 
     return fields.some(f => currentErrors[f]);
   };
 
+  const isDraft = useMemo(() => {
+    const status = initialData?.status;
+    if (!status) return false; // pas de statut -> on désactive les boutons
+    return status.toString().trim().toLowerCase() === 'draft';
+  }, [initialData]);
+
   return (
     <form onSubmit={handleSubmit}>
       {successMessage && <div className="alert alert-success">{successMessage}</div>}
@@ -321,13 +327,23 @@ export default function InvoiceForm({ onSubmit, disabled, initialData, onDelete 
                 Annuler
               </button>
             ) : (
-              <button className="btn btn-primary" onClick={() => setIsEditing(true)}>
+              <button
+                className="btn btn-primary"
+                onClick={() => setIsEditing(true)}
+                disabled={!isDraft}
+              >
                 ✏️ Modifier
               </button>
             )}
-            <button className="btn btn-danger" onClick={onDelete}>
+
+            <button
+              className="btn btn-danger"
+              onClick={onDelete}
+              disabled={!isDraft}
+            >
               Supprimer
             </button>
+
             {isEditing && (
               <button type="submit" className="btn btn-success">
                 Mettre à jour
