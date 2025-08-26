@@ -296,14 +296,13 @@ export default function InvoiceClient({ value, onChange, error }) {
         <SelectField
           label="Pays"
           name="country_code"
-          value={formData.country_code || ""}
+          value={formData.country_code || "FR"}
           onChange={(val) => handleChangeField("country_code", val)}
           onBlur={() => handleBlurField("country_code")}
           touched={touchedFields.country_code}
           options={countryCodes.map(c => ({ value: c.code, label: `${c.code} - ${c.name}` }))}
           error={errors.country_code}
-        />
-        
+        />        
         <InputField
           label="Email"
           value={formData.email || ""}
