@@ -22,22 +22,28 @@ const clientTypeOptions = [
 ];
 
 const determineClientType = (client) => {
-  if (!client) return null;
+    if (!client) return null;
 
-  if (client.client_vat_number) {
-    // si c'est 14 chiffres -> SIRET français
-    if (/^\d{14}$/.test(client.client_vat_number)) return "company_fr";
-    return "company_eu";
-  }
+    // Gère les objets avec ou sans préfixe "client_"
+    const siret = client.siret || client.client_siret;
+    const vat_number = client.vat_number || client.client_vat_number;
+    const firstname = client.firstname || client.client_first_name;
+    const lastname = client.lastname || client.client_last_name;
 
-  if (client.client_siret) return "company_fr"; 
-  if (client.client_first_name && client.client_last_name) return "individual";
+    if (vat_number) {
+        // La logique originale vérifiait un format SIRET dans le champ TVA.
+        // On la conserve pour ne pas introduire de régression, mais une validation de TVA européenne serait plus juste.
+        if (/^\d{14}$/.test(vat_number)) return "company_fr";
+        return "company_eu";
+    }
 
-  return null;
+    if (siret) return "company_fr";
+    if (firstname && lastname) return "individual";
+
+    return null;
 };
 
 export default function InvoiceClient({ value, onChange, error, disabled }) {
-  console.log("InvoiceClient data prop:", value);
   const [clients, setClients] = useState([]);
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
@@ -83,25 +89,29 @@ export default function InvoiceClient({ value, onChange, error, disabled }) {
       .catch(console.error);
   }, []);
 
-  // 1. Initialize formData from value once when value changes
   useEffect(() => {
-    if (!value) return;
-
-    setFormData({
-      id: value.client_id || null,
-      type: value.client_type || determineClientType(value),
-      firstname: value.client_first_name || "",
-      lastname: value.client_last_name || "",
-      legal_name: value.client_legal_name || "",
-      siret: value.client_siret || "",
-      vat_number: value.client_vat_number || "",
-      address: value.client_address || "",
-      city: value.client_city || "",
-      postal_code: value.client_postal_code || "",
-      country_code: value.client_country_code || "FR",
-      email: value.client_email || "",
-      phone: value.client_phone || "",
-    });
+    // Cet effet synchronise l'état interne `formData` avec la prop `value` venant du parent.
+    // Il est crucial pour charger les données initiales de la facture.
+    if (value && Object.keys(value).length > 0) {
+      setFormData({
+        id: value.client_id || null,
+        type: value.client_type || determineClientType(value),
+        firstname: value.client_first_name || "",
+        lastname: value.client_last_name || "",
+        legal_name: value.client_legal_name || "",
+        siret: value.client_siret || "",
+        vat_number: value.client_vat_number || "",
+        address: value.client_address || "",
+        city: value.client_city || "",
+        postal_code: value.client_postal_code || "",
+        country_code: value.client_country_code || "FR",
+        email: value.client_email || "",
+        phone: value.client_phone || "",
+      });
+    } else {
+      // Si la prop `value` est vide ou nulle, on s'assure de vider aussi l'état interne.
+      setFormData({});
+    }
   }, [value]);
 
   const handleSelect = (id) => {
@@ -139,10 +149,8 @@ export default function InvoiceClient({ value, onChange, error, disabled }) {
     if (updated.type === "individual") {
       updated.legal_name = `${updated.firstname || ""} ${updated.lastname || ""}`.trim();
     }
-
     setFormData(updated);
-    const fieldError = validateClientData(field, updated);
-    setErrors(prev => ({ ...prev, [field]: fieldError }));
+    setErrors(prev => ({ ...prev, [field]: validateClientData(field, updated) }));
     setTouchedFields(prev => ({ ...prev, [field]: true }));
     propagate(updated);
   };

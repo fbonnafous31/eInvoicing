@@ -291,7 +291,6 @@ export default function InvoiceForm({ onSubmit, initialData, onDelete = () => {}
       >
         <InvoiceClient
           value={invoiceData.client}
-          data={invoiceData.client}
           onChange={val => handleChange("client", val)}
           disabled={!isEditing}
           submitted={submitted}

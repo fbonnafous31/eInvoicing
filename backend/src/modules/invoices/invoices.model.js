@@ -32,22 +32,28 @@ async function getAllInvoices() {
  * Récupère une facture par son ID
  */
 async function getInvoiceById(id) {
+  // 1. Récupère la facture principale
   const invoiceResult = await pool.query('SELECT * FROM invoicing.invoices WHERE id = $1', [id]);
   if (invoiceResult.rows.length === 0) return null;
-
   const invoice = invoiceResult.rows[0];
 
-  const [linesResult, taxesResult, attachmentsResult] = await Promise.all([
+  // 2. Récupère les lignes, taxes, attachments
+  const [linesResult, taxesResult, attachmentsResult, clientResult] = await Promise.all([
     pool.query('SELECT * FROM invoicing.invoice_lines WHERE invoice_id = $1', [id]),
     pool.query('SELECT * FROM invoicing.invoice_taxes WHERE invoice_id = $1', [id]),
-    pool.query('SELECT * FROM invoicing.invoice_attachments WHERE invoice_id = $1', [id])
+    pool.query('SELECT * FROM invoicing.invoice_attachments WHERE invoice_id = $1', [id]),
+    pool.query('SELECT * FROM invoicing.invoice_client WHERE invoice_id = $1', [id])
   ]);
+
+  // 3. Prépare l'objet client
+  const client = clientResult.rows[0] || null;
 
   return {
     ...invoice,
     lines: linesResult.rows,
     taxes: taxesResult.rows,
-    attachments: attachmentsResult.rows
+    attachments: attachmentsResult.rows,
+    client: client
   };
 }
 
