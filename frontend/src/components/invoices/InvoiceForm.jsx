@@ -19,7 +19,7 @@ export default function InvoiceForm({ onSubmit, initialData, onDelete = () => {}
     taxes: [],
     attachments: [],
   });
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(!initialData);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [headerTouched, setHeaderTouched] = useState({});
@@ -211,25 +211,13 @@ export default function InvoiceForm({ onSubmit, initialData, onDelete = () => {}
       formData.append("lines", JSON.stringify(linesWithTotals));
       formData.append("taxes", JSON.stringify(invoiceData.taxes.length ? invoiceData.taxes : taxesSummary));
 
+      for (var pair of formData.entries()) {
+        console.log(pair[0]+ ', ' + pair[1]);
+      }
+
       console.log("Payload FormData ready:", formData);
 
       if (onSubmit) {
-        await onSubmit({
-          invoice: {
-            invoice_number: invoiceData.header.invoice_number,
-            issue_date: invoiceData.header.issue_date,
-            fiscal_year: invoiceData.header.fiscal_year,
-            seller_id: invoiceData.header.seller_id,
-            subtotal,
-            total_taxes: totalTaxes,
-            total
-          },
-          client: invoiceData.client,
-          lines: linesWithTotals,
-          taxes: invoiceData.taxes.length ? invoiceData.taxes : taxesSummary,
-          attachments: invoiceData.attachments  // ✅ assure-toi que c’est bien un tableau
-        });
-      } else {
         await createInvoice(formData);
         setSuccessMessage("Facture créée avec succès ! 🎉");
         window.scrollTo({ top: 0, behavior: "smooth" });
