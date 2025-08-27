@@ -39,6 +39,8 @@ async function createInvoice(req, res, next) {
     const lines = req.body.lines ? JSON.parse(req.body.lines) : null;
     const taxes = req.body.taxes ? JSON.parse(req.body.taxes) : null;
     const attachmentsMeta = req.body.attachments_meta ? JSON.parse(req.body.attachments_meta) : [];
+    console.log("Parsed client data:", req.body.client);
+    const client = req.body.client ? JSON.parse(req.body.client) : null;
 
     const attachments = (req.files.attachments || []).map((file, i) => ({
       file_name: file.originalname,
@@ -57,8 +59,10 @@ async function createInvoice(req, res, next) {
       return res.status(400).json({ message: "Une facture doit avoir un justificatif principal." });
     }
 
+    console.log("Creating invoice with data:", { invoice: invoiceData, client, lines, taxes, attachments });
     const newInvoice = await InvoicesService.createInvoice({
       invoice: invoiceData,
+      client: client,
       lines,
       taxes,
       attachments

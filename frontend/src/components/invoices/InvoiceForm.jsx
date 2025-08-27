@@ -13,7 +13,11 @@ import { validateInvoiceField, validateClientData } from "../../utils/validators
 export default function InvoiceForm({ onSubmit, initialData, onDelete = () => {} }) {
   const navigate = useNavigate();
   const [invoiceData, setInvoiceData] = useState({
-    header: {},
+    header: {
+      // Initialiser la date d'émission à aujourd'hui et l'année fiscale correspondante
+      issue_date: new Date().toISOString().split("T")[0],
+      fiscal_year: new Date().getFullYear(),
+    },
     client: {},
     lines: [],
     taxes: [],
