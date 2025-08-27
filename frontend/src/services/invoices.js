@@ -21,7 +21,6 @@ export async function fetchInvoice(id) {
 
 /**
  * Crée une nouvelle facture
- * @param {Object} params - { invoice, client, lines, taxes, attachments }
  */
 export async function createInvoice(formData) {
   console.log("Data being sent to createInvoice:", formData);
@@ -36,22 +35,8 @@ export async function createInvoice(formData) {
 /**
  * Met à jour une facture existante
  */
-export async function updateInvoice(id, { invoice, client, lines, taxes, attachments }) {
-  const formData = new FormData();
-
-  console.log("Attachments being sent:", attachments);
-  attachments?.forEach(file => formData.append('attachments', file.raw_file));
-
-  const attachmentsMeta = attachments?.map(a => ({
-    attachment_type: a.attachment_type || 'additional'
-  })) || [];
-  formData.append('attachments_meta', JSON.stringify(attachmentsMeta));
-
-  formData.append('invoice', JSON.stringify(invoice));
-  formData.append('client', JSON.stringify(client));
-  formData.append('lines', JSON.stringify(lines || []));
-  formData.append('taxes', JSON.stringify(taxes || []));
-
+export async function updateInvoice(id, formData) {
+  // Le FormData est déjà construit par InvoiceForm.jsx, il suffit de l'envoyer.
   const response = await fetch(`${API_BASE}/${id}`, { method: "PUT", body: formData });
 
   if (!response.ok) {

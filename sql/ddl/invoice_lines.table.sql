@@ -4,7 +4,19 @@
 
 -- DROP TABLE invoicing.invoice_lines;
 
-CREATE TABLE invoicing.invoice_lines ( id serial4 NOT NULL, invoice_id int4 NOT NULL, description text NOT NULL, quantity numeric(12, 2) NOT NULL, unit_price numeric(14, 2) NOT NULL, vat_rate numeric(5, 2) NOT NULL, discount numeric(14, 2) DEFAULT 0 NULL, line_net numeric(14, 2) NULL, line_tax numeric(14, 2) NULL, line_total numeric(14, 2) NULL, CONSTRAINT invoice_lines_pkey PRIMARY KEY (id));
+CREATE TABLE invoicing.invoice_lines (
+	id serial4 NOT NULL, -- Identifiant unique de la ligne
+	invoice_id int4 NOT NULL, -- Référence vers la facture
+	description text NOT NULL, -- Description de la ligne
+	quantity numeric(12, 2) NOT NULL, -- Quantité
+	unit_price numeric(14, 2) NOT NULL, -- Prix unitaire HT
+	vat_rate numeric(5, 2) NOT NULL, -- Taux TVA en pourcentage
+	discount numeric(14, 2) DEFAULT 0 NULL, -- Remise éventuelle
+	line_net numeric(14, 2) NULL, -- Montant HT après remise
+	line_tax numeric(14, 2) NULL, -- Montant TVA ligne
+	line_total numeric(14, 2) NULL, -- Montant TTC ligne
+	CONSTRAINT invoice_lines_pkey PRIMARY KEY (id)
+);
 
 -- Column comments
 

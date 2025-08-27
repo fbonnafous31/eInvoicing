@@ -1,37 +1,42 @@
--- invoicing.invoice_lines definition
+-- invoicing.invoice_client definition
 
 -- Drop table
 
--- DROP TABLE invoicing.invoice_lines;
+-- DROP TABLE invoicing.invoice_client;
 
-CREATE TABLE invoicing.invoice_lines (
-	id serial4 NOT NULL, -- Identifiant unique de la ligne
-	invoice_id int4 NOT NULL, -- Référence vers la facture
-	description text NOT NULL, -- Description de la ligne
-	quantity numeric(12, 2) NOT NULL, -- Quantité
-	unit_price numeric(14, 2) NOT NULL, -- Prix unitaire HT
-	vat_rate numeric(5, 2) NOT NULL, -- Taux TVA en pourcentage
-	discount numeric(14, 2) DEFAULT 0 NULL, -- Remise éventuelle
-	line_net numeric(14, 2) NULL, -- Montant HT après remise
-	line_tax numeric(14, 2) NULL, -- Montant TVA ligne
-	line_total numeric(14, 2) NULL, -- Montant TTC ligne
-	CONSTRAINT invoice_lines_pkey PRIMARY KEY (id)
+CREATE TABLE invoicing.invoice_client (
+	id serial4 NOT NULL,
+	invoice_id int4 NOT NULL,
+	legal_name varchar(255) NOT NULL, -- Raison sociale ou nom/prénom du client au moment de la facture
+	legal_identifier_type varchar(50) NOT NULL, -- Type d'identifiant (SIRET, TVA intra, Nom)
+	legal_identifier varchar(50) NOT NULL -- Identifiant du client (SIRET, TVA intra ou nom complet),
+	address text NULL, -- Adresse du client
+	city varchar(100) NULL, -- Ville du client
+	postal_code varchar(20) NULL, -- Code postal du client
+	country_code bpchar(2) NULL, -- Code pays ISO 3166-1 alpha-2
+	created_at timestamp DEFAULT now() NULL,
+	CONSTRAINT invoice_client_invoice_id_key UNIQUE (invoice_id),
+	CONSTRAINT invoice_client_pkey PRIMARY KEY (id)
 );
 
 -- Column comments
 
-COMMENT ON COLUMN invoicing.invoice_lines.id IS 'Identifiant unique de la ligne';
-COMMENT ON COLUMN invoicing.invoice_lines.invoice_id IS 'Référence vers la facture';
-COMMENT ON COLUMN invoicing.invoice_lines.description IS 'Description de la ligne';
-COMMENT ON COLUMN invoicing.invoice_lines.quantity IS 'Quantité';
-COMMENT ON COLUMN invoicing.invoice_lines.unit_price IS 'Prix unitaire HT';
-COMMENT ON COLUMN invoicing.invoice_lines.vat_rate IS 'Taux TVA en pourcentage';
-COMMENT ON COLUMN invoicing.invoice_lines.discount IS 'Remise éventuelle';
-COMMENT ON COLUMN invoicing.invoice_lines.line_net IS 'Montant HT après remise';
-COMMENT ON COLUMN invoicing.invoice_lines.line_tax IS 'Montant TVA ligne';
-COMMENT ON COLUMN invoicing.invoice_lines.line_total IS 'Montant TTC ligne';
+COMMENT ON COLUMN invoicing.invoice_client.legal_name IS 'Raison sociale ou nom/prénom du client au moment de la facture';
+COMMENT ON COLUMN invoicing.invoice_client.legal_identifier_type IS 'Type d''identifiant (SIRET, TVA intra, Nom)';
+COMMENT ON COLUMN invoicing.invoice_client.legal_identifier IS 'Identifiant du client (SIRET, TVA intra ou nom complet)';
+COMMENT ON COLUMN invoicing.invoice_client.address IS 'Adresse du client';
+COMMENT ON COLUMN invoicing.invoice_client.city IS 'Ville du client';
+COMMENT ON COLUMN invoicing.invoice_client.postal_code IS 'Code postal du client';
+COMMENT ON COLUMN invoicing.invoice_client.country_code IS 'Code pays ISO 3166-1 alpha-2';
+
+-- Table Triggers
+
+create trigger invoice_client_sync_client before
+insert
+    on
+    invoicing.invoice_client for each row execute function sync_client_from_invoice_client();
 
 
--- invoicing.invoice_lines foreign keys
+-- invoicing.invoice_client foreign keys
 
-ALTER TABLE invoicing.invoice_lines ADD CONSTRAINT invoice_lines_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES invoicing.invoices(id) ON DELETE CASCADE;
+ALTER TABLE invoicing.invoice_client ADD CONSTRAINT invoice_client_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES invoicing.invoices(id) ON DELETE CASCADE;

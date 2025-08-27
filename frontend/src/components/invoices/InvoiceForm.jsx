@@ -7,10 +7,10 @@ import InvoiceLines from "./InvoiceLines";
 import TaxBases from "./TaxBases";
 import SupportingDocs from "./SupportingDocs";
 import FormSection from "../form/FormSection";
-import { createInvoice } from "../../services/invoices";
+import { createInvoice, updateInvoice } from "../../services/invoices";
 import { validateInvoiceField, validateClientData } from "../../utils/validators/invoice";
 
-export default function InvoiceForm({ onSubmit, initialData, onDelete = () => {} }) {
+export default function InvoiceForm({ initialData, onDelete = () => {} }) {
   const navigate = useNavigate();
   const [invoiceData, setInvoiceData] = useState({
     header: {
@@ -190,15 +190,24 @@ export default function InvoiceForm({ onSubmit, initialData, onDelete = () => {}
       // Création FormData
       const formData = new FormData();
 
-      // fichiers
-      invoiceData.attachments.forEach(file => {
+      const newAttachments = invoiceData.attachments.filter(a => a.raw_file);
+
+      // 1. Fichiers à uploader (uniquement les nouveaux)
+      newAttachments.forEach(file => {
         formData.append("attachments", file.raw_file);
       });
 
-      // méta
-      formData.append("attachments_meta", JSON.stringify(invoiceData.attachments.map(a => ({
+      // 2. Métadonnées pour les nouveaux fichiers, pour que le backend puisse les associer
+      const newAttachmentsMeta = newAttachments.map(a => ({
         attachment_type: a.attachment_type
-      }))));
+      }));
+      formData.append("attachments_meta", JSON.stringify(newAttachmentsMeta));
+
+      // 3. Pour la mise à jour, on envoie aussi les métadonnées des fichiers existants à conserver
+      if (initialData) {
+        const existingAttachments = invoiceData.attachments.filter(a => !a.raw_file);
+        formData.append("existing_attachments", JSON.stringify(existingAttachments));
+      }
 
       // autres données
       formData.append("invoice", JSON.stringify({
@@ -214,22 +223,30 @@ export default function InvoiceForm({ onSubmit, initialData, onDelete = () => {}
       formData.append("client", JSON.stringify(invoiceData.client));
       formData.append("lines", JSON.stringify(linesWithTotals));
       formData.append("taxes", JSON.stringify(invoiceData.taxes.length ? invoiceData.taxes : taxesSummary));
-
-      for (var pair of formData.entries()) {
-        console.log(pair[0]+ ', ' + pair[1]);
-      }
-
       console.log("Payload FormData ready:", formData);
 
-      if (onSubmit) {
+      if (initialData) {
+        // C'est une mise à jour
+        if (isDraft) {
+          await updateInvoice(initialData.id, formData);
+          setSuccessMessage("Facture mise à jour avec succès ! 🎉");
+        } else {
+          // Ce cas ne devrait pas être possible via l'UI, mais c'est une sécurité
+          setErrorMessage("Impossible de modifier une facture qui n'est pas un brouillon.");
+          return;
+        }
+      } else {
+        // C'est une création
         await createInvoice(formData);
         setSuccessMessage("Facture créée avec succès ! 🎉");
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        setTimeout(() => {
-          setSuccessMessage("");
-          navigate("/invoices");
-        }, 2000);
       }
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      setTimeout(() => {
+        setSuccessMessage("");
+        navigate("/invoices");
+      }, 2000);
+
     } catch (err) {
       setErrorMessage(err.message || "Erreur lors de la création de la facture");
       window.scrollTo({ top: 0, behavior: "smooth" });

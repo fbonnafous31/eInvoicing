@@ -30,18 +30,16 @@ async function createInvoice(data) {
  * Met à jour une facture complète
  */
 async function updateInvoice(id, data) {
-  const { invoice, lines, taxes, attachments } = data;
+  const { invoice, client, lines, taxes, attachments } = data;
 
-  // 1. Met à jour la facture principale
-  const updatedInvoice = await InvoicesModel.updateInvoice(id, invoice);
-
-  // 2. Met à jour les lignes, taxes et attachments si nécessaire
-  if (lines) await InvoicesModel.updateLines(id, lines);
-  if (taxes) await InvoicesModel.updateTaxes(id, taxes);
-  if (attachments) await InvoicesModel.updateAttachments(id, attachments);
-
-  // 3. Retourne l’état complet
-  return await getInvoice(id);
+  // Le modèle gère maintenant la mise à jour complète dans une seule transaction
+  return await InvoicesModel.updateInvoice(id, {
+    invoice,
+    client,
+    lines,
+    taxes,
+    attachments,
+  });
 }
 
 async function deleteInvoice(id) {
