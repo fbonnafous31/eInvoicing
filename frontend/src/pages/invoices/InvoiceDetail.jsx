@@ -14,7 +14,7 @@ export default function InvoiceDetail() {
   useEffect(() => {
     fetchInvoice(id)
       .then(data => {
-        console.log("Fetched invoice:", data); 
+        console.log("Fetched invoice:", data);
         setInvoice(data);
       })
       .catch(console.error);
@@ -36,56 +36,36 @@ export default function InvoiceDetail() {
 
   if (!invoice) return <p>Chargement...</p>;
 
-    const mapClientForForm = (client) => {
-    if (!client) return {};
+  console.log("Fetched invoice:", invoice); 
+  const mapClientForForm = (invoiceData) => {
+    if (!invoiceData || !invoiceData.client) return {};
 
-    switch (client.legal_identifier_type) {
-        case "NAME": { // particulier
-        const [firstName, ...rest] = client.legal_identifier
-            ? client.legal_identifier.split(" ")
-            : ["", ""];
-        return {
-            client_first_name: firstName,
-            client_last_name: rest.join(" "),
-            client_address: client.address || "",
-            client_legal_name: client.legal_name || "",
-            client_vat_number: "",
-            client_siret: "",
-        };
-        }
-        case "SIRET": // entreprise FR
-        return {
-            client_first_name: "",
-            client_last_name: "",
-            client_address: client.address || "",
-            client_legal_name: client.legal_name || "",
-            client_vat_number: "",
-            client_siret: client.legal_identifier || "",
-        };
-        case "VAT": // entreprise étrangère
-        return {
-            client_first_name: "",
-            client_last_name: "",
-            client_address: client.address || "",
-            client_legal_name: client.legal_name || "",
-            client_vat_number: client.legal_identifier || "",
-            client_siret: "",
-        };
-        default:
-        return {};
-    }
+    const c = invoiceData.client;
+
+    return {
+      client_id: c.id || null,
+      client_legal_name: c.legal_name || "",
+      client_address: c.address || "",
+      client_city: c.city || "",
+      client_postal_code: c.postal_code || "",
+      client_country_code: c.country_code || "FR",
+      client_email: c.email || "",
+      client_phone: c.phone || "",
+      client_first_name: c.first_name || "",
+      client_last_name: c.last_name || "",
+      client_siret: c.legal_identifier_type === "SIRET" ? c.legal_identifier : "",
+      client_vat_number: c.legal_identifier_type === "VAT" ? c.legal_identifier : "",
+      client_type: c.legal_identifier_type === "Nom" ? "individual" : c.legal_identifier_type === "SIRET" ? "company_fr" : "company_eu",
     };
+  };
 
-  const mappedClient = mapClientForForm(invoice.client);
+  const mappedClient = mapClientForForm(invoice);
 
   const breadcrumbItems = [
     { label: "Accueil", path: "/" },
     { label: "Factures", path: "/invoices" },
     { label: invoice.invoice_number || "Détail", path: `/invoices/${id}` },
   ];
-
-  console.log("Invoice fetched:", invoice);
-  console.log("Mapped client:", mappedClient);
 
   return (
     <div className="container mt-4">
