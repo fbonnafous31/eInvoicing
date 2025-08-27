@@ -6,6 +6,7 @@ import SelectField from "../form/SelectField";
 import FormSection from "../form/FormSection";
 import { validateInvoiceField } from "../../utils/validators/invoice";
 import { fetchSellers } from "../../services/sellers";
+import { validateIssueDate } from "../../utils/validators/issueDate";
 
 export default function InvoiceHeader({ data, onChange, submitted, errors = {}, disabled }) {
   const [sellers, setSellers] = useState([]);
@@ -27,7 +28,12 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
   }, []);
 
   const validateField = (field, value) => {
-    const error = validateInvoiceField(field, value, data);
+    let error = null;
+    if (field === "issue_date") {
+      error = validateIssueDate(value);
+    } else {
+      error = validateInvoiceField(field, value, data);
+    }
     setFieldErrors(prev => ({ ...prev, [field]: error }));
   };
 

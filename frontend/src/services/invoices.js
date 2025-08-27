@@ -24,6 +24,7 @@ export async function fetchInvoice(id) {
  * @param {Object} params - { invoice, client, lines, taxes, attachments }
  */
 export async function createInvoice(formData) {
+  console.log("Data being sent to createInvoice:", formData);
   const response = await fetch(API_BASE, { method: "POST", body: formData });
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));

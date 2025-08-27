@@ -54,15 +54,15 @@ async function getInvoiceById(id) {
 /**
  * Crée une facture avec lignes, taxes et justificatifs
  */
-async function createInvoice({ invoice, lines = [], taxes = [], attachments = [] }) {
-  const client = await pool.connect();
+async function createInvoice({ invoice, client, lines = [], taxes = [], attachments = [] }) {
+  const conn = await pool.connect();
 
   try {
-    await client.query('BEGIN');
+    await conn.query('BEGIN');
 
     // --- Remplir seller_legal_name ---
     if (invoice.seller_id && !invoice.seller_legal_name) {
-      const sellerRes = await client.query(
+      const sellerRes = await conn.query(
         'SELECT legal_name FROM invoicing.sellers WHERE id = $1',
         [invoice.seller_id]
       );
@@ -81,22 +81,20 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
       throw new Error(`Exercice fiscal invalide : ${fy} pour une date d'émission ${invoice.issue_date}`);
 
     // --- Vérification unicité seller + fiscal_year + invoice_number ---
-    const existing = await client.query(
+    const existing = await conn.query(
       `SELECT id 
        FROM invoicing.invoices 
        WHERE seller_id = $1 AND fiscal_year = $2 AND invoice_number = $3`,
       [invoice.seller_id, invoice.fiscal_year, invoice.invoice_number]
     );
-    if (existing.rows.length > 0) {
-      throw new Error(
-        `Une facture avec le même numéro ${invoice.invoice_number} pour ce vendeur et cet exercice existe déjà`
-      );
-    }
+    if (existing.rows.length > 0)
+      throw new Error(`Une facture avec le même numéro ${invoice.invoice_number} pour ce vendeur et cet exercice existe déjà`);
 
     // --- Vérification attachments ---
     const mainAttachments = attachments.filter(a => a.attachment_type === 'main');
     if (mainAttachments.length !== 1) throw new Error('Une facture doit avoir un justificatif principal.');
 
+    // --- Insertion facture ---
     const invoiceColumns = [
       "invoice_number",
       "issue_date",
@@ -105,59 +103,72 @@ async function createInvoice({ invoice, lines = [], taxes = [], attachments = []
       "seller_legal_name",
       "client_id"
     ];
-
     const invoiceValues = invoiceColumns.map(col => invoice[col] || null);
     const placeholders = invoiceColumns.map((_, i) => `$${i + 1}`).join(", ");
+    const invoiceRes = await conn.query(
+      `INSERT INTO invoicing.invoices (${invoiceColumns.join(", ")}) VALUES (${placeholders}) RETURNING *`,
+      invoiceValues
+    );
+    const invoiceId = invoiceRes.rows[0].id;
 
-    const insertInvoiceQuery = `
-      INSERT INTO invoicing.invoices (${invoiceColumns.join(", ")})
-      VALUES (${placeholders})
-      RETURNING *`;
-
-    const invoiceResult = await client.query(insertInvoiceQuery, invoiceValues);
-    const invoiceId = invoiceResult.rows[0].id;
-
-    // --- Insertion lignes ---
-    for (const line of lines) {
-      const cols = Object.keys(line).join(', ');
-      const vals = Object.values(line);
-      const placeholdersLine = vals.map((_, i) => `$${i + 1}`).join(', ');
-      await client.query(
-        `INSERT INTO invoicing.invoice_lines (${cols}, invoice_id) VALUES (${placeholdersLine}, $${vals.length + 1})`,
-        [...vals, invoiceId]
+    // --- Insertion client ---
+    if (client) {
+      await conn.query(
+        `INSERT INTO invoicing.invoice_client 
+        (invoice_id, legal_name, legal_identifier_type, legal_identifier, address, city, postal_code, country_code)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+        [
+          invoiceId,
+          client.client_legal_name || `${client.client_first_name || ''} ${client.client_last_name || ''}`.trim(),
+          client.client_siret ? 'SIRET' : client.client_vat_number ? 'VAT' : 'NAME',
+          client.client_siret || client.client_vat_number || `${client.client_first_name || ''} ${client.client_last_name || ''}`.trim(),
+          client.client_address || null,
+          client.client_city || null,
+          client.client_postal_code || null,
+          client.client_country_code || null
+        ]
       );
     }
 
-    // --- Insertion taxes ---
-    for (const tax of taxes) {
-      const cols = Object.keys(tax).join(', ');
-      const vals = Object.values(tax);
-      const placeholdersTax = vals.map((_, i) => `$${i + 1}`).join(', ');
-      await client.query(
-        `INSERT INTO invoicing.invoice_taxes (${cols}, invoice_id) VALUES (${placeholdersTax}, $${vals.length + 1})`,
-        [...vals, invoiceId]
-      );
-    }
+    // --- Insertion lignes, taxes, attachments en parallèle ---
+    await Promise.all([
+      ...lines.map(line => {
+        const cols = Object.keys(line).join(', ');
+        const vals = Object.values(line);
+        const placeholdersLine = vals.map((_, i) => `$${i + 1}`).join(', ');
+        return conn.query(
+          `INSERT INTO invoicing.invoice_lines (${cols}, invoice_id) VALUES (${placeholdersLine}, $${vals.length + 1})`,
+          [...vals, invoiceId]
+        );
+      }),
+      ...taxes.map(tax => {
+        const cols = Object.keys(tax).join(', ');
+        const vals = Object.values(tax);
+        const placeholdersTax = vals.map((_, i) => `$${i + 1}`).join(', ');
+        return conn.query(
+          `INSERT INTO invoicing.invoice_taxes (${cols}, invoice_id) VALUES (${placeholdersTax}, $${vals.length + 1})`,
+          [...vals, invoiceId]
+        );
+      }),
+      ...attachments.map(att => {
+        const cols = Object.keys(att).join(', ');
+        const vals = Object.values(att);
+        const placeholdersAtt = vals.map((_, i) => `$${i + 1}`).join(', ');
+        return conn.query(
+          `INSERT INTO invoicing.invoice_attachments (${cols}, invoice_id) VALUES (${placeholdersAtt}, $${vals.length + 1})`,
+          [...vals, invoiceId]
+        );
+      })
+    ]);
 
-    // --- Insertion attachments ---
-    for (const att of attachments) {
-      const cols = Object.keys(att).join(', ');
-      const vals = Object.values(att);
-      const placeholdersAtt = vals.map((_, i) => `$${i + 1}`).join(', ');
-      await client.query(
-        `INSERT INTO invoicing.invoice_attachments (${cols}, invoice_id) VALUES (${placeholdersAtt}, $${vals.length + 1})`,
-        [...vals, invoiceId]
-      );
-    }
-
-    await client.query('COMMIT');
+    await conn.query('COMMIT');
     return await getInvoiceById(invoiceId);
 
   } catch (err) {
-    await client.query('ROLLBACK');
+    await conn.query('ROLLBACK');
     throw err;
   } finally {
-    client.release();
+    conn.release();
   }
 }
 

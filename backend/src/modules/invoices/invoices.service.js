@@ -13,10 +13,11 @@ async function getInvoice(id) {
  * Crée une facture avec ses lignes, taxes et justificatifs
  */
 async function createInvoice(data) {
-  const { invoice, lines, taxes, attachments } = data;
+  const { invoice, client, lines, taxes, attachments } = data;
 
   const createdInvoice = await InvoicesModel.createInvoice({
     invoice,
+    client,
     lines,
     taxes,
     attachments,
