@@ -97,22 +97,79 @@ async function deleteInvoice(req, res) {
  */
 async function updateInvoice(req, res, next) {
   try {
-    const invoiceData = req.body.invoice ? JSON.parse(req.body.invoice) : null;
-    const lines = req.body.lines ? JSON.parse(req.body.lines) : null;
-    const taxes = req.body.taxes ? JSON.parse(req.body.taxes) : null;
-    const attachmentsMeta = req.body.attachments_meta ? JSON.parse(req.body.attachments_meta) : [];
+    // 🚨 Debug logs
+    console.log("=== UpdateInvoice called with id ===", req.params.id);
+    console.log("=== Raw body received ===", req.body);
+    console.log("=== Files received ===", req.files);
 
-    const attachments = (req.files.attachments || []).map((file, i) => ({
+    // Parser les champs JSON en toute sécurité
+    let invoiceData = null;
+    let client = null;
+    let lines = [];
+    let taxes = [];
+    let attachmentsMeta = [];
+    let existingAttachments = [];
+
+    try { if (req.body.invoice) invoiceData = JSON.parse(req.body.invoice); } 
+    catch(e) { 
+      console.error("❌ Failed to parse invoice:", req.body.invoice);
+      return res.status(400).json({ message: "Invoice data is not valid JSON" }); 
+    }
+
+    try { if (req.body.client) client = JSON.parse(req.body.client); } 
+    catch(e) { 
+      console.error("❌ Failed to parse client:", req.body.client);
+      return res.status(400).json({ message: "Client data is not valid JSON" }); 
+    }
+
+    try { if (req.body.lines) lines = JSON.parse(req.body.lines); } 
+    catch(e) { 
+      console.error("❌ Failed to parse lines:", req.body.lines);
+      return res.status(400).json({ message: "Lines data is not valid JSON" }); 
+    }
+
+    try { if (req.body.taxes) taxes = JSON.parse(req.body.taxes); } 
+    catch(e) { 
+      console.error("❌ Failed to parse taxes:", req.body.taxes);
+      return res.status(400).json({ message: "Taxes data is not valid JSON" }); 
+    }
+
+    try { if (req.body.attachments_meta) attachmentsMeta = JSON.parse(req.body.attachments_meta); } 
+    catch(e) { 
+      console.error("❌ Failed to parse attachments_meta:", req.body.attachments_meta);
+      return res.status(400).json({ message: "Attachments meta is not valid JSON" }); 
+    }
+
+    try { if (req.body.existing_attachments) existingAttachments = JSON.parse(req.body.existing_attachments); } 
+    catch(e) { 
+      console.error("❌ Failed to parse existing_attachments:", req.body.existing_attachments);
+      return res.status(400).json({ message: "Existing attachments is not valid JSON" }); 
+    }
+
+    // Construire la liste complète des attachments
+    const newAttachments = (req.files?.attachments || []).map((file, i) => ({
       file_name: file.originalname,
       file_path: file.path,
-      attachment_type: attachmentsMeta[i]?.attachment_type || 'additional'
+      attachment_type: attachmentsMeta[i]?.attachment_type || "additional"
     }));
+
+    const allAttachments = [...existingAttachments, ...newAttachments];
+
+    console.log("=== Final parsed data before service call ===", {
+      id: req.params.id,
+      invoice: invoiceData,
+      client,
+      lines,
+      taxes,
+      attachments: allAttachments
+    });
 
     const updatedInvoice = await InvoicesService.updateInvoice(req.params.id, {
       invoice: invoiceData,
+      client,
       lines,
       taxes,
-      attachments
+      attachments: allAttachments
     });
 
     res.status(200).json(updatedInvoice);
@@ -122,6 +179,7 @@ async function updateInvoice(req, res, next) {
     next(err);
   }
 }
+
 
 module.exports = {
   listInvoices,

@@ -43,7 +43,7 @@ export default function InvoiceDetail() {
     const c = invoiceData.client;
 
     return {
-      client_id: c.id || null,
+      client_id: invoiceData.client_id || null, 
       client_legal_name: c.legal_name || "",
       client_address: c.address || "",
       client_city: c.city || "",
@@ -79,15 +79,20 @@ export default function InvoiceDetail() {
 
       <InvoiceForm
         onSubmit={handleUpdate}
-        disabled={!isEditing}
+        disabled={isEditing}
         setIsEditing={setIsEditing}
         initialData={{
+          id: invoice.id,
           status: invoice.status,
           header: {
             invoice_number: invoice.invoice_number,
-            issue_date: invoice.issue_date,
+            issue_date: invoice.issue_date ? new Date(invoice.issue_date).toISOString().split('T')[0] : '',
+            supply_date: invoice.supply_date ? new Date(invoice.supply_date).toISOString().split('T')[0] : '',
             fiscal_year: invoice.fiscal_year,
             seller_id: invoice.seller_id,
+            contract_number: invoice.contract_number,
+            purchase_order_number: invoice.purchase_order_number,
+            payment_terms: invoice.payment_terms,
           },
           client: mappedClient,
           lines: invoice.lines || [],

@@ -187,108 +187,105 @@ async function deleteInvoice(id) {
 }
 
 /**
- * Met à jour une facture principale
+ * Met à jour une facture complète (facture, client, lignes, taxes, attachments)
+ * dans une seule transaction.
  */
-async function updateInvoice(id, invoiceData) {
-  const client = await pool.connect();
+async function updateInvoice(id, { invoice, client, lines, taxes, attachments }) {
+  const conn = await pool.connect();
   try {
-    await client.query('BEGIN');
+    await conn.query('BEGIN');
 
-    const invoiceColumns = [
-      "invoice_number",
-      "issue_date",
-      "fiscal_year",
-      "seller_id",
-      "seller_legal_name",
-      "client_id"
-    ];
+    // 1. Mettre à jour la facture principale
+    if (invoice) {
+      const invoiceColumns = [
+        "invoice_number", "issue_date", "fiscal_year", "seller_id",
+        "subtotal", "total_taxes", "total"
+      ];
+      const updates = invoiceColumns
+        .filter(col => invoice[col] !== undefined)
+        .map((col, i) => `${col} = $${i + 2}`);
+      const values = invoiceColumns
+        .filter(col => invoice[col] !== undefined)
+        .map(col => invoice[col]);
 
-    const updates = invoiceColumns
-      .filter(col => invoiceData[col] !== undefined)
-      .map((col, i) => `${col} = $${i + 1}`);
-
-    const values = invoiceColumns
-      .filter(col => invoiceData[col] !== undefined)
-      .map(col => invoiceData[col]);
-
-    if (updates.length > 0) {
-      const query = `UPDATE invoicing.invoices SET ${updates.join(', ')} WHERE id = $${updates.length + 1}`;
-      await client.query(query, [...values, id]);
+      if (updates.length > 0) {
+        const query = `UPDATE invoicing.invoices SET ${updates.join(', ')} WHERE id = $1`;
+        await conn.query(query, [id, ...values]);
+      }
     }
 
-    await client.query('COMMIT');
+    // 2. Mettre à jour le client de la facture
+    if (client) {
+      if (client.client_id) {
+        await conn.query('UPDATE invoicing.invoices SET client_id = $1 WHERE id = $2', [client.client_id, id]);
+      }
+
+      const clientExistsResult = await conn.query('SELECT id FROM invoicing.invoice_client WHERE invoice_id = $1', [id]);
+      
+      const legal_name = client.client_legal_name || `${client.client_first_name || ''} ${client.client_last_name || ''}`.trim();
+      const legal_identifier_type = client.client_siret ? 'SIRET' : client.client_vat_number ? 'VAT' : 'NAME';
+      const legal_identifier = client.client_siret || client.client_vat_number || legal_name;
+
+      if (clientExistsResult.rows.length > 0) {
+        await conn.query(
+          `UPDATE invoicing.invoice_client 
+           SET legal_name = $2, legal_identifier_type = $3, legal_identifier = $4, address = $5, city = $6, postal_code = $7, country_code = $8
+           WHERE invoice_id = $1`,
+          [id, legal_name, legal_identifier_type, legal_identifier, client.client_address, client.client_city, client.client_postal_code, client.client_country_code]
+        );
+      } else if (legal_name) { // n'insère que si on a des données client
+        await conn.query(
+          `INSERT INTO invoicing.invoice_client (invoice_id, legal_name, legal_identifier_type, legal_identifier, address, city, postal_code, country_code)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+          [id, legal_name, legal_identifier_type, legal_identifier, client.client_address, client.client_city, client.client_postal_code, client.client_country_code]
+        );
+      }
+    }
+
+    // 3. Mettre à jour les lignes, taxes, attachments (stratégie: tout supprimer puis réinsérer)
+    await conn.query('DELETE FROM invoicing.invoice_lines WHERE invoice_id = $1', [id]);
+    if (lines && lines.length > 0) {
+      for (const line of lines) {
+        // On exclut id ET invoice_id des données de la ligne pour éviter la duplication
+        const { id: lineId, invoice_id, ...lineData } = line;
+        const cols = Object.keys(lineData).join(', ');
+        const vals = Object.values(lineData);
+        const placeholdersLine = vals.map((_, i) => `$${i + 1}`).join(', ');
+        await conn.query(`INSERT INTO invoicing.invoice_lines (${cols}, invoice_id) VALUES (${placeholdersLine}, $${vals.length + 1})`, [...vals, id]);
+      }
+    }
+
+    await conn.query('DELETE FROM invoicing.invoice_taxes WHERE invoice_id = $1', [id]);
+    if (taxes && taxes.length > 0) {
+      for (const tax of taxes) {
+        // On exclut id ET invoice_id des données de la taxe
+        const { id: taxId, invoice_id, ...taxData } = tax;
+        const cols = Object.keys(taxData).join(', ');
+        const vals = Object.values(taxData);
+        const placeholdersTax = vals.map((_, i) => `$${i + 1}`).join(', ');
+        await conn.query(`INSERT INTO invoicing.invoice_taxes (${cols}, invoice_id) VALUES (${placeholdersTax}, $${vals.length + 1})`, [...vals, id]);
+      }
+    }
+
+    await conn.query('DELETE FROM invoicing.invoice_attachments WHERE invoice_id = $1', [id]);
+    if (attachments && attachments.length > 0) {
+      for (const att of attachments) {
+        // On exclut id ET invoice_id des données du justificatif
+        const { id: attId, invoice_id, ...attData } = att;
+        const cols = Object.keys(attData).join(', ');
+        const vals = Object.values(attData);
+        const placeholdersAtt = vals.map((_, i) => `$${i + 1}`).join(', ');
+        await conn.query(`INSERT INTO invoicing.invoice_attachments (${cols}, invoice_id) VALUES (${placeholdersAtt}, $${vals.length + 1})`, [...vals, id]);
+      }
+    }
+
+    await conn.query('COMMIT');
     return await getInvoiceById(id);
   } catch (err) {
-    await client.query('ROLLBACK');
+    await conn.query('ROLLBACK');
     throw err;
   } finally {
-    client.release();
-  }
-}
-
-/**
- * Met à jour les lignes d'une facture
- */
-async function updateLines(invoiceId, lines) {
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-    for (const line of lines) {
-      const cols = Object.keys(line);
-      const vals = Object.values(line);
-      const setStr = cols.map((col, i) => `${col} = $${i + 1}`).join(', ');
-      await client.query(`UPDATE invoicing.invoice_lines SET ${setStr} WHERE id = $${cols.length + 1}`, [...vals, line.id]);
-    }
-    await client.query('COMMIT');
-  } catch (err) {
-    await client.query('ROLLBACK');
-    throw err;
-  } finally {
-    client.release();
-  }
-}
-
-/**
- * Met à jour les taxes d'une facture
- */
-async function updateTaxes(invoiceId, taxes) {
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-    for (const tax of taxes) {
-      const cols = Object.keys(tax);
-      const vals = Object.values(tax);
-      const setStr = cols.map((col, i) => `${col} = $${i + 1}`).join(', ');
-      await client.query(`UPDATE invoicing.invoice_taxes SET ${setStr} WHERE id = $${cols.length + 1}`, [...vals, tax.id]);
-    }
-    await client.query('COMMIT');
-  } catch (err) {
-    await client.query('ROLLBACK');
-    throw err;
-  } finally {
-    client.release();
-  }
-}
-
-/**
- * Met à jour les attachments d'une facture
- */
-async function updateAttachments(invoiceId, attachments) {
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-    for (const att of attachments) {
-      const cols = Object.keys(att);
-      const vals = Object.values(att);
-      const setStr = cols.map((col, i) => `${col} = $${i + 1}`).join(', ');
-      await client.query(`UPDATE invoicing.invoice_attachments SET ${setStr} WHERE id = $${cols.length + 1}`, [...vals, att.id]);
-    }
-    await client.query('COMMIT');
-  } catch (err) {
-    await client.query('ROLLBACK');
-    throw err;
-  } finally {
-    client.release();
+    conn.release();
   }
 }
 
@@ -297,8 +294,5 @@ module.exports = {
   getInvoiceById,
   createInvoice,
   deleteInvoice,
-  updateInvoice,
-  updateLines,
-  updateTaxes,
-  updateAttachments
+  updateInvoice
 };
