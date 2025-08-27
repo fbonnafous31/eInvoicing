@@ -32,9 +32,12 @@ async function getInvoice(req, res) {
  */
 async function createInvoice(req, res, next) {
   try {
-    const invoiceData = req.body.invoice ? JSON.parse(req.body.invoice) : {};
-    const lines = req.body.lines ? JSON.parse(req.body.lines) : [];
-    const taxes = req.body.taxes ? JSON.parse(req.body.taxes) : [];
+    console.log("req.body:", req.body);
+    console.log("req.files:", req.files);
+
+    const invoiceData = req.body.invoice ? JSON.parse(req.body.invoice) : null;
+    const lines = req.body.lines ? JSON.parse(req.body.lines) : null;
+    const taxes = req.body.taxes ? JSON.parse(req.body.taxes) : null;
     const attachmentsMeta = req.body.attachments_meta ? JSON.parse(req.body.attachments_meta) : [];
 
     const attachments = (req.files.attachments || []).map((file, i) => ({
@@ -45,6 +48,12 @@ async function createInvoice(req, res, next) {
 
     const mainCount = attachments.filter(f => f.attachment_type === 'main').length;
     if (mainCount !== 1) {
+      // Vérification que invoiceData existe
+      if (!invoiceData) {
+        return res.status(400).json({ message: "Invoice data is missing." });
+      }
+
+
       return res.status(400).json({ message: "Une facture doit avoir un justificatif principal." });
     }
 
@@ -84,9 +93,9 @@ async function deleteInvoice(req, res) {
  */
 async function updateInvoice(req, res, next) {
   try {
-    const invoiceData = req.body.invoice ? JSON.parse(req.body.invoice) : {};
-    const lines = req.body.lines ? JSON.parse(req.body.lines) : [];
-    const taxes = req.body.taxes ? JSON.parse(req.body.taxes) : [];
+    const invoiceData = req.body.invoice ? JSON.parse(req.body.invoice) : null;
+    const lines = req.body.lines ? JSON.parse(req.body.lines) : null;
+    const taxes = req.body.taxes ? JSON.parse(req.body.taxes) : null;
     const attachmentsMeta = req.body.attachments_meta ? JSON.parse(req.body.attachments_meta) : [];
 
     const attachments = (req.files.attachments || []).map((file, i) => ({
