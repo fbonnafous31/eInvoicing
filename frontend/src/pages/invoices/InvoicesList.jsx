@@ -6,6 +6,7 @@ import AuditPanel from '../../components/common/AuditPanel';
 import { datatableStyles } from '../../modules/common/datatableStyles';
 import * as invoiceService from '../../services/invoices';
 import useInvoiceColumns from '../../modules/invoices/invoiceColumns';
+import { FR } from '../../constants/translations';
 
 export default function InvoicesList() {
   const [invoices, setInvoices] = useState([]);
@@ -26,11 +27,14 @@ export default function InvoicesList() {
   }, []);
 
   // Filtre texte identique aux autres listes
+  const getStatusLabel = status => FR.status[status] || status;
   const filteredItems = invoices.filter(item =>
-    Object.values(item).some(
-      val => val && val.toString().toLowerCase().includes(filterText.toLowerCase())
-    )
+    Object.entries(item).some(([key, val]) => {
+      if (key === 'status') val = getStatusLabel(val);  // traduit le status
+      return val && val.toString().toLowerCase().includes(filterText.toLowerCase());
+    })
   );
+  
 
   const breadcrumbItems = [
     { label: 'Accueil', path: '/' },

@@ -2,11 +2,10 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import EllipsisCell from '../../components/common/EllipsisCell';
 import { formatCurrency, formatDate } from '../../utils/formatters/formatters';
+import { FR } from '../../constants/translations';
 
 export default function useInvoiceColumns() {
   const navigate = useNavigate();
-
-  const RightCell = ({ value }) => <div style={{ textAlign: 'right' }}>{value}</div>;
 
   return [
     {   
@@ -27,7 +26,7 @@ export default function useInvoiceColumns() {
       name: 'Référence',
       selector: row => row.invoice_number || '',
       sortable: true,
-      width: '150px', // géré par la lib
+      width: '150px', 
       cell: row => <EllipsisCell value={row.invoice_number || ''} maxWidth="150px" />
     },
     {
@@ -37,51 +36,63 @@ export default function useInvoiceColumns() {
       width: '100px',
     },
     {
-      name: 'Marché',
+      name: 'Contrat',
       selector: row => row.contract_number || '',
       sortable: true,
+      width: '120px',
       cell: row => <EllipsisCell value={row.contract_number || ''} style={{ minWidth: '120px' }} />
     },
     {
       name: 'Commande',
       selector: row => row.purchase_order_number || '',
       sortable: true,
+      width: '120px',
       cell: row => <EllipsisCell value={row.purchase_order_number || ''} style={{ minWidth: '120px' }} />
     },
     {
       name: 'Vendeur',
       selector: row => row.seller_legal_name || '',
       sortable: true,
+      width: '140px',
       cell: row => <EllipsisCell value={row.seller_legal_name || ''} style={{ minWidth: '150px' }} />
     },
     {
       name: 'Client',
       selector: row => row.client_legal_name || '',
       sortable: true,
+      width: '140px',
       cell: row => <EllipsisCell value={row.client_legal_name || ''} style={{ minWidth: '150px' }} />
     },
     {
       name: 'HT',
-      selector: row => row.subtotal != null ? formatCurrency(row.subtotal) : '',
+      selector: row => row.subtotal,
       sortable: true,
-      cell: row => <RightCell value={row.subtotal != null ? formatCurrency(row.subtotal) : ''} />
-    },
+      style: { justifyContent: 'flex-end', textAlign: 'right' },
+      format: row => formatCurrency(row.subtotal)
+    },    
     {
       name: 'TVA',
-      selector: row => row.total_taxes != null ? formatCurrency(row.total_taxes) : '',
+      selector: row => row.total_taxes,
       sortable: true,
-      cell: row => <RightCell value={row.total_taxes != null ? formatCurrency(row.total_taxes) : ''} />
+      style: { justifyContent: 'flex-end', textAlign: 'right' },
+      format: row => formatCurrency(row.total_taxes)
     },
     {
       name: 'TTC',
-      selector: row => row.total != null ? formatCurrency(row.total) : '',
+      selector: row => row.total,
       sortable: true,
-      cell: row => <RightCell value={row.total != null ? formatCurrency(row.total) : ''} />
-    },
+      style: { justifyContent: 'flex-end', textAlign: 'right' },
+      format: row => formatCurrency(row.total)
+    },    
     {
       name: 'Statut',
       selector: row => row.status || '',
       sortable: true,
+      cell: row => (
+        <div style={{ textAlign: 'center' }}>
+          {FR.status[row.status] || row.status}
+        </div>
+      )
     },
     {
       name: 'Créé le',
