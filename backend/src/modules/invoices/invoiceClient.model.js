@@ -8,8 +8,8 @@ const InvoiceClientModel = {
   create: async function(invoiceId, data) {
     const query = `
       INSERT INTO invoicing.invoice_client 
-        (invoice_id, legal_name, legal_identifier_type, legal_identifier, address, city, postal_code, country_code)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        (invoice_id, legal_name, legal_identifier_type, legal_identifier, address, city, postal_code, country_code, email, phone)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING *;
     `;
 
@@ -22,6 +22,8 @@ const InvoiceClientModel = {
       data.city || null,
       data.postal_code || null,
       data.country_code || null,
+      data.email || null,
+      data.phone || null,
     ];
 
     const result = await pool.query(query, values);

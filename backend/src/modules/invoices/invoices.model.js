@@ -11,17 +11,19 @@ async function getAllInvoices() {
   const invoices = [];
 
   for (const invoice of invoicesResult.rows) {
-    const [linesResult, taxesResult, attachmentsResult] = await Promise.all([
+    const [linesResult, taxesResult, attachmentsResult, clientResult] = await Promise.all([
       pool.query('SELECT * FROM invoicing.invoice_lines WHERE invoice_id = $1', [invoice.id]),
       pool.query('SELECT * FROM invoicing.invoice_taxes WHERE invoice_id = $1', [invoice.id]),
-      pool.query('SELECT * FROM invoicing.invoice_attachments WHERE invoice_id = $1', [invoice.id])
+      pool.query('SELECT * FROM invoicing.invoice_attachments WHERE invoice_id = $1', [invoice.id]),
+      pool.query('SELECT legal_name FROM invoicing.invoice_client WHERE invoice_id = $1', [invoice.id])
     ]);
 
     invoices.push({
       ...invoice,
       lines: linesResult.rows,
       taxes: taxesResult.rows,
-      attachments: attachmentsResult.rows
+      attachments: attachmentsResult.rows,
+      client_legal_name: clientResult.rows[0]?.legal_name || '' // ici le champ attendu par ta table
     });
   }
 
@@ -124,8 +126,8 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
     if (client) {
       await conn.query(
         `INSERT INTO invoicing.invoice_client 
-        (invoice_id, legal_name, legal_identifier_type, legal_identifier, address, city, postal_code, country_code)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+          (invoice_id, legal_name, legal_identifier_type, legal_identifier, address, city, postal_code, country_code, email, phone)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
         [
           invoiceId,
           client.client_legal_name || `${client.client_first_name || ''} ${client.client_last_name || ''}`.trim(),
@@ -134,10 +136,13 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
           client.client_address || null,
           client.client_city || null,
           client.client_postal_code || null,
-          client.client_country_code || null
+          client.client_country_code || null,
+          client.client_email || null,
+          client.client_phone || null
         ]
       );
     }
+
 
     // --- Insertion lignes, taxes, attachments en parallèle ---
     await Promise.all([
@@ -240,18 +245,48 @@ async function updateInvoice(id, { invoice, client, lines, taxes, attachments })
       if (clientExistsResult.rows.length > 0) {
         await conn.query(
           `UPDATE invoicing.invoice_client 
-           SET legal_name = $2, legal_identifier_type = $3, legal_identifier = $4, address = $5, city = $6, postal_code = $7, country_code = $8
-           WHERE invoice_id = $1`,
-          [id, legal_name, legal_identifier_type, legal_identifier, client.client_address, client.client_city, client.client_postal_code, client.client_country_code]
+          SET legal_name = $2,
+              legal_identifier_type = $3,
+              legal_identifier = $4,
+              address = $5,
+              city = $6,
+              postal_code = $7,
+              country_code = $8,
+              email = $9,
+              phone = $10
+          WHERE invoice_id = $1`,
+          [
+            id,
+            legal_name,
+            legal_identifier_type,
+            legal_identifier,
+            client.client_address,
+            client.client_city,
+            client.client_postal_code,
+            client.client_country_code,
+            client.client_email || null,
+            client.client_phone || null
+          ]
         );
       } else if (legal_name) { // n'insère que si on a des données client
         await conn.query(
-          `INSERT INTO invoicing.invoice_client (invoice_id, legal_name, legal_identifier_type, legal_identifier, address, city, postal_code, country_code)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-          [id, legal_name, legal_identifier_type, legal_identifier, client.client_address, client.client_city, client.client_postal_code, client.client_country_code]
+          `INSERT INTO invoicing.invoice_client 
+            (invoice_id, legal_name, legal_identifier_type, legal_identifier, address, city, postal_code, country_code, email, phone)
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+          [
+            id,
+            legal_name,
+            legal_identifier_type,
+            legal_identifier,
+            client.client_address,
+            client.client_city,
+            client.client_postal_code,
+            client.client_country_code,
+            client.client_email || null,
+            client.client_phone || null
+          ]
         );
       }
-    }
 
     // 3. Mettre à jour les lignes, taxes, attachments (stratégie: tout supprimer puis réinsérer)
     await conn.query('DELETE FROM invoicing.invoice_lines WHERE invoice_id = $1', [id]);
@@ -292,6 +327,7 @@ async function updateInvoice(id, { invoice, client, lines, taxes, attachments })
 
     await conn.query('COMMIT');
     return await getInvoiceById(id);
+    }
   } catch (err) {
     await conn.query('ROLLBACK');
     throw err;
