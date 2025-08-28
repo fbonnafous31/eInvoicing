@@ -1,6 +1,7 @@
 // frontend/src/modules/clients/useClientForm.js
 import { useState } from 'react';
 import { validateClient } from '../../utils/validators/client';
+import { checkSiret } from '../../services/clients';
 
 export default function useClientForm(initialData = {}) {
   const [formData, setFormData] = useState({
@@ -34,24 +35,22 @@ export default function useClientForm(initialData = {}) {
   const checkSiretAPI = async (siret) => {
     if (!siret || siret.length !== 14) {
       setSiretExists(false);
-      setErrors(prev => ({ ...prev, siret: undefined }));
+      setErrors(prev => ({
+        ...prev,
+        siret: siret ? undefined : prev.siret
+      }));
       return;
     }
 
     try {
-      const res = await fetch(`/api/clients/check-siret/${siret}`);
+      const result = await checkSiret(siret);
 
-      if (!res.ok) {
-        const text = await res.text();
-        console.error('Erreur API SIRET:', res.status, text);
-        setSiretExists(false);
-        setErrors(prev => ({ ...prev, siret: 'Impossible de vérifier le SIRET' }));
-        return;
-      }
+      setSiretExists(result.exists);
 
-      const data = await res.json();
-      setSiretExists(data.exists);
-      setErrors(prev => ({ ...prev, siret: data.exists ? 'Ce SIRET est déjà utilisé' : undefined }));
+      setErrors(prev => ({
+        ...prev,
+        siret: result.exists ? 'Ce SIRET est déjà utilisé' : undefined
+      }));
     } catch (err) {
       console.error('Erreur fetch SIRET:', err);
       setSiretExists(false);
@@ -87,7 +86,10 @@ export default function useClientForm(initialData = {}) {
 
       // Validation immédiate pour le champ
       const fieldError = validateClient(updated, field);
-      setErrors(prevErrors => ({ ...prevErrors, [field]: fieldError[field] }));
+      setErrors(prevErrors => {
+        const apiMsg = field === 'siret' && siretExists ? 'Ce SIRET est déjà utilisé' : undefined;
+        return { ...prevErrors, [field]: apiMsg || fieldError[field] };
+      });
 
       return updated;
     });
@@ -96,7 +98,10 @@ export default function useClientForm(initialData = {}) {
   const handleBlur = (field) => {
     setTouched(prev => ({ ...prev, [field]: true }));
     const fieldError = validateClient(formData, field);
-    setErrors(prevErrors => ({ ...prevErrors, [field]: fieldError[field] }));
+    setErrors(prevErrors => {
+      const apiMsg = field === 'siret' && siretExists ? 'Ce SIRET est déjà utilisé' : undefined;
+      return { ...prevErrors, [field]: apiMsg || fieldError[field] };
+    });
   };
 
   const toggleSection = (section) => {

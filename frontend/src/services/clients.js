@@ -58,3 +58,17 @@ export async function deleteClient(id) {
   if (!res.ok) throw new Error("Erreur lors de la suppression du client");
   return true;
 }
+
+/**
+ * Vérifie si un SIRET existe déjà
+ * @param {string} siret
+ */
+export async function checkSiret(siret) {
+  const res = await fetch(`${API_BASE}/check-siret/${siret}`);
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Erreur API SIRET: ${res.status} - ${text}`);
+  }
+  return res.json(); // { exists: true/false }
+}
+

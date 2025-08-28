@@ -59,7 +59,6 @@ async function createInvoice(req, res, next) {
       return res.status(400).json({ message: "Une facture doit avoir un justificatif principal." });
     }
 
-    console.log("Creating invoice with data:", { invoice: invoiceData, client, lines, taxes, attachments });
     const newInvoice = await InvoicesService.createInvoice({
       invoice: invoiceData,
       client: client,

@@ -9,7 +9,7 @@ export default function AddressFields({ formData, errors, touched, handleChange,
       <TextAreaField
         id="address"
         name="address"
-        label="Adresse *"
+        label="Adresse"
         value={formData.address}
         onChange={handleFieldChange('address')}
         onBlur={() => handleBlur('address')}
@@ -21,7 +21,7 @@ export default function AddressFields({ formData, errors, touched, handleChange,
       <InputField
         id="city"
         name="city"
-        label="Ville *"
+        label="Ville"
         value={formData.city}
         onChange={handleFieldChange('city')}
         onBlur={() => handleBlur('city')}
@@ -33,7 +33,7 @@ export default function AddressFields({ formData, errors, touched, handleChange,
       <InputField
         id="postal_code"
         name="postal_code"
-        label="Code postal *"
+        label="Code postal"
         value={formData.postal_code}
         onChange={handleFieldChange('postal_code')}
         onBlur={() => handleBlur('postal_code')}
@@ -45,7 +45,7 @@ export default function AddressFields({ formData, errors, touched, handleChange,
       <SelectField
         id="country_code"
         name="country_code"
-        label="Pays *"
+        label="Pays"
         value={formData.country_code}
         onChange={handleFieldChange('country_code')}
         onBlur={() => handleBlur('country_code')}

@@ -18,6 +18,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {} }) {
       // Initialiser la date d'émission à aujourd'hui et l'année fiscale correspondante
       issue_date: new Date().toISOString().split("T")[0],
       fiscal_year: new Date().getFullYear(),
+      payment_terms: "30_df",
     },
     client: {},
     lines: [],

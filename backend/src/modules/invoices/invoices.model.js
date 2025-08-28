@@ -111,11 +111,15 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
       "seller_legal_name",
       "contract_number",
       "purchase_order_number",
+      "supply_date",
       "payment_terms",      
       "client_id"
     ];
     const invoiceValues = invoiceColumns.map(col => invoice[col] || null);
     const placeholders = invoiceColumns.map((_, i) => `$${i + 1}`).join(", ");
+
+    console.log("Invoice ready to insert:", invoice);
+    console.log("Values:", invoiceValues);
     const invoiceRes = await conn.query(
       `INSERT INTO invoicing.invoices (${invoiceColumns.join(", ")}) VALUES (${placeholders}) RETURNING *`,
       invoiceValues
