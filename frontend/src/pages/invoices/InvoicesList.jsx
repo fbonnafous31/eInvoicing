@@ -19,7 +19,6 @@ export default function InvoicesList() {
   useEffect(() => {
   invoiceService.fetchInvoices()
     .then(data => {
-      console.log('invoices fetch:', data);
       setInvoices(data);
     })
   .catch(console.error);

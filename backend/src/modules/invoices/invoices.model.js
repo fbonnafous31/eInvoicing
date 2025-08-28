@@ -217,9 +217,7 @@ async function updateInvoice(id, { invoice, client, lines, taxes, attachments })
         "contract_number",
         "purchase_order_number",
         "payment_terms",
-        "subtotal",
-        "total_taxes",
-        "total"
+        "supply_date",
       ];
       const updates = invoiceColumns
         .filter(col => invoice[col] !== undefined)
