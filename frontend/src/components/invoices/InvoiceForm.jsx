@@ -64,10 +64,10 @@ export default function InvoiceForm({ initialData, onDelete = () => {} }) {
     const taxesMap = {};
 
     const newLines = invoiceData.lines.map(line => {
-      const quantity = parseFloat(line.quantity) || 0;
-      const unit_price = parseFloat(line.unit_price) || 0;
-      const discount = parseFloat(line.discount) || 0;
-      const vat_rate = parseFloat(line.vat_rate) || 0;
+      const quantity = Number(line.quantity) || 0;
+      const unit_price = Number(line.unit_price) || 0;
+      const discount = Number(line.discount) || 0;
+      const vat_rate = Number(line.vat_rate) || 0; 
 
       const line_net = quantity * unit_price - discount;
       const line_tax = (line_net * vat_rate) / 100;
@@ -82,7 +82,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {} }) {
         taxesMap[vat_rate].tax_amount += line_tax;
       }
 
-      return { ...line, line_net, line_tax, line_total };
+      return { ...line, quantity, unit_price, discount, vat_rate, line_net, line_tax, line_total };
     });
 
     return {
@@ -326,7 +326,8 @@ export default function InvoiceForm({ initialData, onDelete = () => {} }) {
       />
 
       <TaxBases
-        data={invoiceData.taxes.length ? invoiceData.taxes : taxesSummary}
+        data={taxesSummary}
+        // data={invoiceData.taxes.length ? invoiceData.taxes : taxesSummary}
         onChange={val => handleChange("taxes", val)}
         disabled={!isEditing}
       />
