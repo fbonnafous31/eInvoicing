@@ -1,5 +1,5 @@
 import React from 'react';
-import InputField from '../../../components/form/InputField';
+import { InputField } from '@/components/form';
 
 export default function ContactFields({ formData, errors, handleChange, handleBlur, touched, disabled }) {
   // helper pour ne pas répéter la syntaxe handleChange('field', val)

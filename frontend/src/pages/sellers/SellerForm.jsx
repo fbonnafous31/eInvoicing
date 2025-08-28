@@ -9,6 +9,7 @@ import AddressFields from './fields/AddressFields';
 import FinanceFields from './fields/FinanceFields';
 import useSellerForm from '../../modules/sellers/useSellerForm';
 import { validateSeller } from '../../utils/validators/seller';
+import SaveButton from '@/components/ui/buttons/SaveButton';
 
 countries.registerLocale(enLocale);
 const countryCodes = Object.entries(countries.getNames("en")).map(([code, name]) => ({ code, name }));
@@ -96,7 +97,7 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
 
       {!disabled && (
         <div className="text-end mt-3">
-          <button type="submit" className="btn btn-primary">Enregistrer</button>
+          <SaveButton />
         </div>
       )}
     </form>

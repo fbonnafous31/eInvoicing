@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import SellerForm from './SellerForm';
-import Breadcrumb from '../../components/Breadcrumb';
+import Breadcrumb from '../../components/layout/Breadcrumb';
 import { fetchSeller, updateSeller, deleteSeller } from '../../services/sellers';
 import { EditButton, CancelButton, DeleteButton } from '@/components/ui/buttons';
 

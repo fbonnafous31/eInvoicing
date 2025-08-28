@@ -9,7 +9,7 @@ import SupportingDocs from "./SupportingDocs";
 import FormSection from "../form/FormSection";
 import { createInvoice, updateInvoice } from "../../services/invoices";
 import { validateInvoiceField, validateClientData } from "../../utils/validators/invoice";
-import { EditButton, CancelButton, DeleteButton } from '@/components/ui/buttons';
+import { EditButton, CancelButton, DeleteButton, SaveButton } from '@/components/ui/buttons';
 
 export default function InvoiceForm({ initialData, onDelete = () => {} }) {
   const navigate = useNavigate();
@@ -361,10 +361,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {} }) {
                   <>
                     {/* Mode édition */}
                     <CancelButton onClick={() => setIsEditing(false)} />
-
-                    <button type="submit" className="btn btn-success">
-                      Enregistrer
-                    </button>
+                    <SaveButton />
                   </>
                 )}
               </>

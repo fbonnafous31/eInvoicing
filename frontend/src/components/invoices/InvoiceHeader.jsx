@@ -1,11 +1,9 @@
 // frontend/src/components/invoices/InvoiceHeader.jsx
 import React, { useEffect, useState } from "react";
 import { paymentTermsOptions } from "../../constants/paymentTerms";
-import InputField from "../form/InputField";
-import SelectField from "../form/SelectField";
-import FormSection from "../form/FormSection";
-import { validateInvoiceField } from "../../utils/validators/invoice";
+import { FormSection, InputField, SelectField } from '@/components/form';
 import { fetchSellers } from "../../services/sellers";
+import { validateInvoiceField } from "../../utils/validators/invoice";
 import { validateIssueDate } from "../../utils/validators/issueDate";
 
 export default function InvoiceHeader({ data, onChange, submitted, errors = {}, disabled }) {

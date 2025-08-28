@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import NavBar from './components/NavBar';
+import NavBar from './components/layout/NavBar';
 import routes from './AppRoutes';
 
 // Layout centralisé inline

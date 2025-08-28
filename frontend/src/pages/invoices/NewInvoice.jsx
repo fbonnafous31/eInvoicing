@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import InvoiceForm from "../../components/invoices/InvoiceForm";
-import Breadcrumb from '../../components/Breadcrumb';
+import Breadcrumb from '../../components/layout/Breadcrumb';
 import * as invoiceService from '../../services/invoices';
 
 export default function NewInvoice() {
