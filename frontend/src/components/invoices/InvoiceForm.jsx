@@ -215,6 +215,10 @@ export default function InvoiceForm({ initialData, onDelete = () => {} }) {
         issue_date: invoiceData.header.issue_date,
         fiscal_year: invoiceData.header.fiscal_year,
         seller_id: invoiceData.header.seller_id,
+        contract_number: invoiceData.header.contract_number || null,
+        purchase_order_number: invoiceData.header.purchase_order_number || null,
+        payment_terms: invoiceData.header.payment_terms || null,
+        client_id: invoiceData.client.client_id || null,
         subtotal,
         total_taxes: totalTaxes,
         total

@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import Breadcrumb from "../../components/Breadcrumb";
 import InvoiceForm from "../../components/invoices/InvoiceForm";
 import { fetchInvoice, updateInvoice } from "../../services/invoices";
+import { fetchClient } from "../../services/clients"; 
 
 export default function InvoiceDetail() {
   const { id } = useParams();
@@ -13,16 +14,24 @@ export default function InvoiceDetail() {
 
   useEffect(() => {
     fetchInvoice(id)
-      .then(data => {
-        console.log("Fetched invoice:", data);
-        setInvoice(data);
+      .then(async data => {
+        if (data.client_id) {
+          try {
+            const clientData = await fetchClient(data.client_id);
+            setInvoice({ ...data, client: clientData });
+          } catch (err) {
+            console.error("Erreur fetch client:", err);
+            setInvoice(data); 
+          }
+        } else {
+          setInvoice(data);
+        }
       })
       .catch(console.error);
   }, [id]);
 
   const handleUpdate = async (formData) => {
     try {
-      console.log("handleUpdate called with:", formData);
       const updated = await updateInvoice(id, formData);
       setInvoice(updated);
       setIsEditing(false);
@@ -36,14 +45,11 @@ export default function InvoiceDetail() {
 
   if (!invoice) return <p>Chargement...</p>;
 
-  console.log("Fetched invoice:", invoice); 
   const mapClientForForm = (invoiceData) => {
-    if (!invoiceData || !invoiceData.client) return {};
-
-    const c = invoiceData.client;
+    const c = invoiceData.client || {};
 
     return {
-      client_id: invoiceData.client_id || null, 
+      client_id: invoiceData.client_id || null,
       client_legal_name: c.legal_name || "",
       client_address: c.address || "",
       client_city: c.city || "",
@@ -51,11 +57,10 @@ export default function InvoiceDetail() {
       client_country_code: c.country_code || "FR",
       client_email: c.email || "",
       client_phone: c.phone || "",
-      client_first_name: c.first_name || "",
-      client_last_name: c.last_name || "",
-      client_siret: c.legal_identifier_type === "SIRET" ? c.legal_identifier : "",
-      client_vat_number: c.legal_identifier_type === "VAT" ? c.legal_identifier : "",
-      client_type: c.legal_identifier_type === "Nom" ? "individual" : c.legal_identifier_type === "SIRET" ? "company_fr" : "company_eu",
+      client_first_name: c.firstname || "",
+      client_last_name: c.lastname || "",
+      client_siret: c.legal_identifier_type === "SIRET" ? c.legal_identifier : c.siret || "",
+      client_vat_number: c.legal_identifier_type === "VAT" ? c.legal_identifier : c.vat_number || "",
     };
   };
 
@@ -86,8 +91,8 @@ export default function InvoiceDetail() {
           status: invoice.status,
           header: {
             invoice_number: invoice.invoice_number,
-            issue_date: invoice.issue_date ? new Date(invoice.issue_date).toISOString().split('T')[0] : '',
-            supply_date: invoice.supply_date ? new Date(invoice.supply_date).toISOString().split('T')[0] : '',
+            issue_date: invoice.issue_date,
+            supply_date: invoice.supply_date,
             fiscal_year: invoice.fiscal_year,
             seller_id: invoice.seller_id,
             contract_number: invoice.contract_number,
