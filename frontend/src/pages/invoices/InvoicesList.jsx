@@ -16,9 +16,13 @@ export default function InvoicesList() {
 
   // Récupération des factures
   useEffect(() => {
-    invoiceService.fetchInvoices()
-      .then(data => setInvoices(data))
-      .catch(console.error);
+  invoiceService.fetchInvoices()
+    .then(data => {
+      console.log('invoices fetch:', data);
+      setInvoices(data);
+    })
+  .catch(console.error);
+
   }, []);
 
   // Filtre texte identique aux autres listes

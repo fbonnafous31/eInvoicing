@@ -219,9 +219,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {} }) {
         purchase_order_number: invoiceData.header.purchase_order_number || null,
         payment_terms: invoiceData.header.payment_terms || null,
         client_id: invoiceData.client.client_id || null,
-        subtotal,
-        total_taxes: totalTaxes,
-        total
+        supply_date: invoiceData.header.supply_date || null
       }));
 
       formData.append("client", JSON.stringify(invoiceData.client));
