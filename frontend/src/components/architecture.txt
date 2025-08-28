@@ -1,0 +1,25 @@
+.
+├── architecture.txt
+├── Breadcrumb.jsx
+├── common
+│   ├── AuditPanel.jsx
+│   └── EllipsisCell.jsx
+├── form
+│   ├── FormSection.jsx
+│   ├── InputField.jsx
+│   ├── SelectField.jsx
+│   └── TextAreaField.jsx
+├── invoices
+│   ├── InvoiceClient.jsx
+│   ├── InvoiceForm.jsx
+│   ├── InvoiceHeader.jsx
+│   ├── InvoiceLines.jsx
+│   ├── SupportingDocs.jsx
+│   └── TaxBases.jsx
+├── NavBar.jsx
+└── ui
+    └── buttons
+        ├── EditButton.jsx
+        └── index.js
+
+6 directories, 17 files

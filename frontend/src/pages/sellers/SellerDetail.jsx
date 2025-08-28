@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import SellerForm from './SellerForm';
 import Breadcrumb from '../../components/Breadcrumb';
 import { fetchSeller, updateSeller, deleteSeller } from '../../services/sellers';
+import { EditButton, CancelButton, DeleteButton } from '@/components/ui/buttons';
 
 export default function SellerDetail() {
   const { id } = useParams();
@@ -89,17 +90,13 @@ export default function SellerDetail() {
 
       <div className="mt-3 d-flex justify-content-end gap-2">
         {isEditing ? (
-          <button className="btn btn-success" onClick={() => setIsEditing(false)}>
-            Annuler
-          </button>
+          <CancelButton onClick={() => setIsEditing(false)} />
         ) : (
-          <button className="btn btn-primary" onClick={() => setIsEditing(true)}>
-            ✏️ Modifier
-          </button>
+          <EditButton onClick={() => setIsEditing(true)}>
+            Modifier
+          </EditButton>
         )}
-        <button className="btn btn-danger ms-2" onClick={handleDelete}>
-          Supprimer
-        </button>
+        <DeleteButton onClick={handleDelete} />
       </div>
     </div>
   );

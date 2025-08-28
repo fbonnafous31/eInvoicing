@@ -16,15 +16,19 @@
 │   │   ├── SelectField.jsx
 │   │   └── TextAreaField.jsx
 │   ├── invoices
+│   │   ├── InvoiceClient.jsx
 │   │   ├── InvoiceForm.jsx
 │   │   ├── InvoiceHeader.jsx
 │   │   ├── InvoiceLines.jsx
 │   │   ├── SupportingDocs.jsx
 │   │   └── TaxBases.jsx
-│   └── NavBar.jsx
+│   ├── NavBar.jsx
+│   └── ui
+│       └── buttons
 ├── constants
 │   ├── companyTypes.js
-│   └── paymentTerms.js
+│   ├── paymentTerms.js
+│   └── translations.js
 ├── index.css
 ├── main.jsx
 ├── modules
@@ -49,6 +53,7 @@
 │   │   ├── fields
 │   │   └── NewClient.jsx
 │   ├── invoices
+│   │   ├── InvoiceDetail.jsx
 │   │   ├── InvoicesList.jsx
 │   │   └── NewInvoice.jsx
 │   ├── NotFound.jsx
@@ -70,8 +75,12 @@
     └── validators
         ├── client.js
         ├── contact.js
+        ├── email.js
         ├── invoice.js
+        ├── issueDate.js
+        ├── phone_number.js
+        ├── postal_code.js
         ├── seller.js
         └── siret.js
 
-22 directories, 53 files
+24 directories, 60 files
