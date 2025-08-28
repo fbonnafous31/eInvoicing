@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ClientForm from '../clients/ClientForm';
-import Breadcrumb from '../../components/Breadcrumb';
-import { createClient } from '../../services/clients'; // <-- import du service
+import Breadcrumb from '../../components/layout/Breadcrumb';
+import { createClient } from '../../services/clients'; 
 
 export default function NewClient() {
   const navigate = useNavigate();

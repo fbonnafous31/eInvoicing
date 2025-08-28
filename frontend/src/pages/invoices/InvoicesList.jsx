@@ -1,7 +1,7 @@
 // frontend/src/pages/invoices/InvoicesList.jsx
 import React, { useEffect, useState } from 'react';
 import DataTable from 'react-data-table-component';
-import Breadcrumb from '../../components/Breadcrumb';
+import Breadcrumb from '../../components/layout/Breadcrumb';
 import AuditPanel from '../../components/common/AuditPanel';
 import { datatableStyles } from '../../modules/common/datatableStyles';
 import * as invoiceService from '../../services/invoices';

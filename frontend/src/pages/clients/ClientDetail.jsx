@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import ClientForm from './ClientForm';
 import { useParams, useNavigate } from 'react-router-dom';
-import Breadcrumb from '../../components/Breadcrumb';
+import Breadcrumb from '../../components/layout/Breadcrumb';
 import { fetchClient, updateClient, deleteClient } from '../../services/clients';
 import { EditButton, CancelButton, DeleteButton } from '@/components/ui/buttons';
 

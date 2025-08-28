@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import InputField from "../form/InputField";
-import SelectField from "../form/SelectField";
+import { InputField, SelectField } from '@/components/form';
 import Select from "react-select";
 import { fetchClients } from "../../services/clients";
 import { validateClientData } from "../../utils/validators/invoice";

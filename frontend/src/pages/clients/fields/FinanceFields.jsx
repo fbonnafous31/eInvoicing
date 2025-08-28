@@ -1,5 +1,5 @@
 import React from 'react';
-import InputField from '../../../components/form/InputField';
+import { InputField } from '@/components/form';
 
 export default function FinanceFields({ formData, errors, touched, handleChange, handleBlur, disabled }) {
   const handleFieldChange = (field) => (val) => handleChange(field, val);

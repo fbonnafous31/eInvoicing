@@ -1,7 +1,7 @@
 // frontend/src/pages/invoices/InvoiceDetail.jsx
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import Breadcrumb from "../../components/Breadcrumb";
+import Breadcrumb from "../../components/layout/Breadcrumb";
 import InvoiceForm from "../../components/invoices/InvoiceForm";
 import { fetchInvoice, updateInvoice } from "../../services/invoices";
 import { fetchClient } from "../../services/clients"; 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import DataTable from 'react-data-table-component';
-import Breadcrumb from '../../components/Breadcrumb';
+import Breadcrumb from '../../components/layout/Breadcrumb';
 import useSellers from '../../modules/sellers/useSellers';
 import useSellerColumns from '../../modules/sellers/sellerColumns';
 import { datatableStyles } from '../../modules/common/datatableStyles'; // <== correction

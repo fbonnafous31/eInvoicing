@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SellerForm from '../sellers/SellerForm';
-import Breadcrumb from '../../components/Breadcrumb';
+import Breadcrumb from '../../components/layout/Breadcrumb';
 import { createSeller } from '../../services/sellers'; // <-- import du service
 
 export default function NewSeller() {

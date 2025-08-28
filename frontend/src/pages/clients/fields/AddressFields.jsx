@@ -1,7 +1,5 @@
 import React from 'react';
-import InputField from '../../../components/form/InputField';
-import TextAreaField from '../../../components/form/TextAreaField';
-import SelectField from '../../../components/form/SelectField';
+import { InputField, SelectField, TextAreaField } from '@/components/form';
 
 export default function AddressFields({ formData, errors, touched, handleChange, handleBlur, disabled, countryCodes }) {
   const handleFieldChange = (field) => (val) => handleChange(field, val);

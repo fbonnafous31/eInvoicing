@@ -1,6 +1,5 @@
 import React from 'react';
-import InputField from '../../../components/form/InputField';
-import SelectField from '../../../components/form/SelectField';
+import { InputField, SelectField } from '@/components/form';
 import companyTypes from '../../../constants/companyTypes';
 
 export default function LegalFields({ formData, errors, handleChange, handleBlur, touched, disabled }) {

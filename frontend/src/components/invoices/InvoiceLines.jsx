@@ -1,6 +1,7 @@
 import { useState } from "react";
-import InputField from "../form/InputField";
+import { InputField } from '@/components/form';
 import { validateInvoiceLine } from "../../utils/validators/invoice";
+import { SmallDeleteButton } from '@/components/ui/buttons';
 
 export default function InvoiceLines({ data, onChange, disabled }) {
   const [errors, setErrors] = useState([]); // tableau d'erreurs par ligne
@@ -178,17 +179,16 @@ export default function InvoiceLines({ data, onChange, disabled }) {
               disabled={disabled} 
             />
 
-            <div className="d-flex flex-column align-items-center">
-              <label className="invisible">Action</label>
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={() => removeLine(index)}
-                disabled={disabled} 
-              >
-                🗑️
-              </button>
-            </div>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                paddingTop: '1rem' // ajuste la valeur selon ton rendu
+              }}
+            >
+              <SmallDeleteButton onClick={() => removeLine(index)} disabled={disabled} />
+            </div>    
           </div>
         </div>
       ))}

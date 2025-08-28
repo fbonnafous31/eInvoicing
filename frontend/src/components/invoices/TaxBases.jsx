@@ -1,4 +1,5 @@
 import React from 'react';
+import { SmallDeleteButton } from '@/components/ui/buttons';
 
 export default function TaxBases({ data, onChange, disabled }) {
   const handleTaxChange = (index, e) => {
@@ -61,7 +62,16 @@ export default function TaxBases({ data, onChange, disabled }) {
             readOnly 
             disabled={disabled} 
           />
-          <button type="button" className="btn btn-danger" onClick={() => removeTax(index)} disabled={disabled} >🗑️</button>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100%' // prend toute la hauteur de la cellule
+            }}
+          >
+            <SmallDeleteButton onClick={() => removeTax(index)} disabled={disabled} />
+          </div>
         </div>
       ))}
 

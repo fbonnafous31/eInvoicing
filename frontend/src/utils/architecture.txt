@@ -1,8 +1,16 @@
 .
 ├── architecture.txt
-├── formatters.js
-├── siret.js
-├── validators
-└── validators.js
+├── formatters
+│   └── formatters.js
+└── validators
+    ├── client.js
+    ├── contact.js
+    ├── email.js
+    ├── invoice.js
+    ├── issueDate.js
+    ├── phone_number.js
+    ├── postal_code.js
+    ├── seller.js
+    └── siret.js
 
-2 directories, 4 files
+3 directories, 11 files
