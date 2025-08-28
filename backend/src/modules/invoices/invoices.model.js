@@ -107,6 +107,9 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
       "fiscal_year",
       "seller_id",
       "seller_legal_name",
+      "contract_number",
+      "purchase_order_number",
+      "payment_terms",      
       "client_id"
     ];
     const invoiceValues = invoiceColumns.map(col => invoice[col] || null);
@@ -198,8 +201,16 @@ async function updateInvoice(id, { invoice, client, lines, taxes, attachments })
     // 1. Mettre à jour la facture principale
     if (invoice) {
       const invoiceColumns = [
-        "invoice_number", "issue_date", "fiscal_year", "seller_id",
-        "subtotal", "total_taxes", "total"
+        "invoice_number",
+        "issue_date",
+        "fiscal_year",
+        "seller_id",
+        "contract_number",
+        "purchase_order_number",
+        "payment_terms",
+        "subtotal",
+        "total_taxes",
+        "total"
       ];
       const updates = invoiceColumns
         .filter(col => invoice[col] !== undefined)
