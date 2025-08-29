@@ -83,7 +83,9 @@ async function createInvoice(req, res, next) {
 async function deleteInvoice(req, res) {
   try {
     const deleted = await InvoicesService.deleteInvoice(req.params.id);
-    if (!deleted) return res.status(404).json({ message: 'Facture non trouvée' });
+    if (!deleted) {
+      return res.status(400).json({ message: 'Facture non trouvée ou non en draft' });
+    }
     res.status(204).send();
   } catch (err) {
     console.error(err);

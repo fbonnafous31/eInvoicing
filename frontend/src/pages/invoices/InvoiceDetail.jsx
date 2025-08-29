@@ -5,12 +5,15 @@ import Breadcrumb from "../../components/layout/Breadcrumb";
 import InvoiceForm from "../../components/invoices/InvoiceForm";
 import { fetchInvoice, updateInvoice } from "../../services/invoices";
 import { fetchClient } from "../../services/clients"; 
+import { deleteInvoice } from '../../services/invoices';
+import { useNavigate } from 'react-router-dom';
 
 export default function InvoiceDetail() {
   const { id } = useParams();
   const [invoice, setInvoice] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchInvoice(id)
@@ -40,6 +43,18 @@ export default function InvoiceDetail() {
     } catch (err) {
       console.error(err);
       alert("Erreur lors de la mise à jour de la facture");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm("Voulez-vous vraiment supprimer cette facture ?")) return;
+
+    try {
+      await deleteInvoice(id);
+      alert("Facture supprimée avec succès !");
+      navigate("/invoices"); // redirection vers la liste
+    } catch (err) {
+      alert(err.message);
     }
   };
 
@@ -84,6 +99,7 @@ export default function InvoiceDetail() {
 
       <InvoiceForm
         onSubmit={handleUpdate}
+        onDelete={handleDelete}
         disabled={isEditing}
         setIsEditing={setIsEditing}
         initialData={{

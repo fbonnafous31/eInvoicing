@@ -209,6 +209,13 @@ COMMENT ON COLUMN invoicing.invoices.created_at IS 'Date de création';
 COMMENT ON COLUMN invoicing.invoices.updated_at IS 'Date de mise à jour';
 COMMENT ON COLUMN invoicing.invoices.fiscal_year IS 'Année fiscale (année de l''émission de la facture)';
 
+-- Table Triggers
+
+create trigger prevent_delete_non_draft_trigger before
+delete
+    on
+    invoicing.invoices for each row execute function prevent_delete_non_draft();
+
 
 -- invoicing.invoice_attachments definition
 
@@ -223,6 +230,7 @@ CREATE TABLE invoicing.invoice_attachments (
 	file_path text NOT NULL,
 	attachment_type text NOT NULL,
 	uploaded_at timestamp DEFAULT now() NULL,
+	stored_name varchar(255) NOT NULL,
 	CONSTRAINT invoice_attachments_pkey PRIMARY KEY (id),
 	CONSTRAINT invoice_attachments_type_check CHECK ((attachment_type = ANY (ARRAY[('main'::character varying)::text, ('additional'::character varying)::text]))),
 	CONSTRAINT invoice_attachments_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES invoicing.invoices(id) ON DELETE CASCADE
@@ -246,6 +254,8 @@ CREATE TABLE invoicing.invoice_client (
 	postal_code varchar(20) NULL, -- Code postal du client
 	country_code bpchar(2) NULL, -- Code pays ISO 3166-1 alpha-2
 	created_at timestamp DEFAULT now() NULL,
+	email varchar(255) NULL,
+	phone varchar(50) NULL,
 	CONSTRAINT invoice_client_invoice_id_key UNIQUE (invoice_id),
 	CONSTRAINT invoice_client_pkey PRIMARY KEY (id),
 	CONSTRAINT invoice_client_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES invoicing.invoices(id) ON DELETE CASCADE
@@ -263,10 +273,14 @@ COMMENT ON COLUMN invoicing.invoice_client.country_code IS 'Code pays ISO 3166-1
 
 -- Table Triggers
 
-create trigger invoice_client_sync_client before
+create trigger invoice_client_sync_client_insert before
 insert
     on
-    invoicing.invoice_client for each row execute function sync_client_from_invoice_client();
+    invoicing.invoice_client for each row execute function upsert_client_from_invoice();
+create trigger invoice_client_sync_client_update before
+update
+    on
+    invoicing.invoice_client for each row execute function upsert_client_from_invoice();
 
 
 -- invoicing.invoice_lines definition
@@ -343,6 +357,21 @@ COMMENT ON COLUMN invoicing.invoice_taxes.base_amount IS 'Base HT (assiette)';
 COMMENT ON COLUMN invoicing.invoice_taxes.tax_amount IS 'Montant TVA';
 
 
+
+-- DROP FUNCTION invoicing.prevent_delete_non_draft();
+
+CREATE OR REPLACE FUNCTION invoicing.prevent_delete_non_draft()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  IF OLD.status != 'draft' THEN
+    RAISE EXCEPTION 'Impossible de supprimer une facture non brouillon';
+  END IF;
+  RETURN OLD;
+END;
+$function$
+;
 
 -- DROP FUNCTION invoicing.sync_client_from_invoice_client();
 
@@ -470,18 +499,18 @@ DECLARE
     existing_client_id INT;
 BEGIN
     -- Cherche le client existant par SIRET si FR, ou par legal_identifier sinon
-    IF NEW.invoice_client.legal_identifier_type = 'SIRET' THEN
+    IF NEW.legal_identifier_type = 'SIRET' THEN
         SELECT id INTO existing_client_id
         FROM invoicing.clients
-        WHERE siret = NEW.invoice_client.legal_identifier
+        WHERE siret = NEW.legal_identifier
           AND country_code = 'FR'
           AND is_company = TRUE;
     ELSE
         SELECT id INTO existing_client_id
         FROM invoicing.clients
-        WHERE (legal_name = NEW.invoice_client.legal_name OR
-               (firstname || ' ' || lastname) = NEW.invoice_client.legal_name)
-          LIMIT 1;
+        WHERE (legal_name = NEW.legal_name OR
+               (firstname || ' ' || lastname) = NEW.legal_name)
+        LIMIT 1;
     END IF;
 
     IF existing_client_id IS NULL THEN
@@ -502,42 +531,41 @@ BEGIN
             phone
         )
         VALUES (
-            NEW.invoice_client.legal_name,
-            NEW.invoice_client.legal_identifier,
-            CASE WHEN NEW.invoice_client.legal_identifier_type = 'SIRET' THEN NEW.invoice_client.legal_identifier ELSE NULL END,
-            CASE WHEN NEW.invoice_client.legal_identifier_type = 'VAT' THEN NEW.invoice_client.legal_identifier ELSE NULL END,
-            NEW.invoice_client.address,
-            NEW.invoice_client.city,
-            NEW.invoice_client.postal_code,
-            NEW.invoice_client.country_code,
-            CASE WHEN NEW.invoice_client.legal_identifier_type = 'Nom' THEN split_part(NEW.invoice_client.legal_name, ' ', 1) ELSE NULL END,
-            CASE WHEN NEW.invoice_client.legal_identifier_type = 'Nom' THEN split_part(NEW.invoice_client.legal_name, ' ', 2) ELSE NULL END,
-            CASE WHEN NEW.invoice_client.legal_identifier_type = 'SIRET' OR NEW.invoice_client.legal_identifier_type = 'VAT' THEN TRUE ELSE FALSE END,
-            NEW.invoice_client.email,
-            NEW.invoice_client.phone
+            NEW.legal_name,
+            NEW.legal_identifier,
+            CASE WHEN NEW.legal_identifier_type = 'SIRET' THEN NEW.legal_identifier ELSE NULL END,
+            CASE WHEN NEW.legal_identifier_type = 'VAT' THEN NEW.legal_identifier ELSE NULL END,
+            NEW.address,
+            NEW.city,
+            NEW.postal_code,
+            NEW.country_code,
+            CASE WHEN NEW.legal_identifier_type = 'Nom' THEN split_part(NEW.legal_name, ' ', 1) ELSE NULL END,
+            CASE WHEN NEW.legal_identifier_type = 'Nom' THEN split_part(NEW.legal_name, ' ', 2) ELSE NULL END,
+            CASE WHEN NEW.legal_identifier_type = 'SIRET' OR NEW.legal_identifier_type = 'VAT' THEN TRUE ELSE FALSE END,
+            NEW.email,
+            NEW.phone
         )
         RETURNING id INTO existing_client_id;
     ELSE
         -- Client existe → mise à jour
         UPDATE invoicing.clients
         SET
-            legal_name = NEW.invoice_client.legal_name,
-            siret = CASE WHEN NEW.invoice_client.legal_identifier_type = 'SIRET' THEN NEW.invoice_client.legal_identifier ELSE siret END,
-            vat_number = CASE WHEN NEW.invoice_client.legal_identifier_type = 'VAT' THEN NEW.invoice_client.legal_identifier ELSE vat_number END,
-            address = NEW.invoice_client.address,
-            city = NEW.invoice_client.city,
-            postal_code = NEW.invoice_client.postal_code,
-            country_code = NEW.invoice_client.country_code,
-            firstname = CASE WHEN NEW.invoice_client.legal_identifier_type = 'Nom' THEN split_part(NEW.invoice_client.legal_name, ' ', 1) ELSE firstname END,
-            lastname = CASE WHEN NEW.invoice_client.legal_identifier_type = 'Nom' THEN split_part(NEW.invoice_client.legal_name, ' ', 2) ELSE lastname END,
-            email = NEW.invoice_client.email,       -- <<< ajout
-            phone = NEW.invoice_client.phone,              
+            legal_name = NEW.legal_name,
+            siret = CASE WHEN NEW.legal_identifier_type = 'SIRET' THEN NEW.legal_identifier ELSE siret END,
+            vat_number = CASE WHEN NEW.legal_identifier_type = 'VAT' THEN NEW.legal_identifier ELSE vat_number END,
+            address = NEW.address,
+            city = NEW.city,
+            postal_code = NEW.postal_code,
+            country_code = NEW.country_code,
+            firstname = CASE WHEN NEW.legal_identifier_type = 'Nom' THEN split_part(NEW.legal_name, ' ', 1) ELSE firstname END,
+            lastname = CASE WHEN NEW.legal_identifier_type = 'Nom' THEN split_part(NEW.legal_name, ' ', 2) ELSE lastname END,
+            email = NEW.email,
+            phone = NEW.phone,
             updated_at = now()
         WHERE id = existing_client_id;
     END IF;
 
-    -- Rattacher l’ID client à la facture
-    NEW.client_id = existing_client_id;
+    -- On ne modifie pas NEW.client_id ici
 
     RETURN NEW;
 END;
