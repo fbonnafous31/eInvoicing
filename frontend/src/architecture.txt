@@ -4,14 +4,17 @@
 ├── AppRoutes.jsx
 ├── architecture.txt
 ├── assets
-│   └── react.svg
+│   ├── pdf.worker.mjs
+│   ├── react.svg
+│   └── sample-invoice.pdf
 ├── components
-│   ├── Breadcrumb.jsx
+│   ├── architecture.txt
 │   ├── common
 │   │   ├── AuditPanel.jsx
 │   │   └── EllipsisCell.jsx
 │   ├── form
 │   │   ├── FormSection.jsx
+│   │   ├── index.js
 │   │   ├── InputField.jsx
 │   │   ├── SelectField.jsx
 │   │   └── TextAreaField.jsx
@@ -20,9 +23,13 @@
 │   │   ├── InvoiceForm.jsx
 │   │   ├── InvoiceHeader.jsx
 │   │   ├── InvoiceLines.jsx
+│   │   ├── PdfViewer.jsx
 │   │   ├── SupportingDocs.jsx
-│   │   └── TaxBases.jsx
-│   ├── NavBar.jsx
+│   │   ├── TaxBases.jsx
+│   │   └── TestPdfViewer.jsx
+│   ├── layout
+│   │   ├── Breadcrumb.jsx
+│   │   └── NavBar.jsx
 │   └── ui
 │       └── buttons
 ├── constants
@@ -83,4 +90,4 @@
         ├── seller.js
         └── siret.js
 
-24 directories, 60 files
+25 directories, 66 files
