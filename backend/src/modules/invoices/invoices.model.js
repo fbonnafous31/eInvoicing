@@ -217,18 +217,24 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
 }
 
 /**
- * Supprime une facture par ID
+ * Supprime une facture uniquement si elle est en draft
  */
 async function deleteInvoice(id) {
-  const result = await pool.query('DELETE FROM invoicing.invoices WHERE id = $1 RETURNING *', [id]);
+  const result = await pool.query(
+    `DELETE FROM invoicing.invoices
+     WHERE id = $1 AND status = 'draft'
+     RETURNING *`,
+    [id]
+  );
   return result.rows[0] || null;
 }
+
 
 /**
  * Met à jour une facture complète (facture, client, lignes, taxes, attachments)
  * dans une seule transaction.
  */
-async function updateInvoice(id, { invoice, client, lines, taxes, attachments }) {
+async function updateInvoice(id, { invoice, client, lines, taxes, newAttachments, existingAttachments }) {
   const conn = await pool.connect();
   try {
     await conn.query('BEGIN');
@@ -341,41 +347,42 @@ async function updateInvoice(id, { invoice, client, lines, taxes, attachments })
       }
     }
 
-    await conn.query('DELETE FROM invoicing.invoice_attachments WHERE invoice_id = $1', [id]);
-    if (attachments && attachments.length > 0) {
-      for (const att of attachments) {
-        const { id: attId, invoice_id, stored_name, ...attDataClean } = att; // on enlève stored_name
+    // --- Attachments ---
+    const currentAttachments = await conn.query('SELECT id, file_path FROM invoicing.invoice_attachments WHERE invoice_id = $1', [id]);
+    const existingIdsToKeep = new Set((existingAttachments || []).map(a => a.id));
 
-        const tempStoredName = `${Date.now()}-${Math.floor(Math.random()*1e9)}-${att.file_name}`;
-        const cols = Object.keys(attDataClean).join(', ') + ', stored_name';
-        const vals = [...Object.values(attDataClean), tempStoredName];
-        const placeholdersAtt = vals.map((_, i) => `$${i + 1}`).join(', ');
+    // Supprimer les anciens attachments qui ne sont plus dans la liste
+    for (const dbAtt of currentAttachments.rows) {
+      if (!existingIdsToKeep.has(dbAtt.id)) {
+        await conn.query('DELETE FROM invoicing.invoice_attachments WHERE id = $1', [dbAtt.id]);
+        if (dbAtt.file_path) {
+          try {
+            await fs.promises.unlink(dbAtt.file_path);
+          } catch (unlinkErr) {
+            if (unlinkErr.code !== 'ENOENT') {
+              console.error(`Échec de la suppression de l'ancien justificatif: ${dbAtt.file_path}`, unlinkErr);
+            }
+          }
+        }
+      }
+    }
 
+    // Ajouter les nouveaux attachments
+    if (newAttachments && newAttachments.length > 0) {
+      for (const att of newAttachments) {
         const result = await conn.query(
-          `INSERT INTO invoicing.invoice_attachments (${cols}, invoice_id) VALUES (${placeholdersAtt}, $${vals.length + 1}) RETURNING id`,
-          [...vals, id]
+          `INSERT INTO invoicing.invoice_attachments (invoice_id, file_name, file_path, attachment_type) VALUES ($1, $2, $3, $4) RETURNING id`,
+          [id, att.file_name, att.file_path, att.attachment_type]
         );
-
         const attachmentId = result.rows[0].id;
 
         const finalName = `${id}_${attachmentId}_${att.file_name.replace(/\s+/g, '_')}`;
         const uploadDir = path.join(__dirname, '../../uploads/invoices');
         const finalPath = path.join(uploadDir, finalName);
 
-        try {
-          await fs.promises.rename(att.file_path, finalPath);
+        await fs.promises.rename(att.file_path, finalPath);
 
-          if (fs.existsSync(att.file_path)) {
-            await fs.promises.unlink(att.file_path);
-          }
-        } catch (err) {
-          if (err.code !== 'ENOENT') throw err; // relance si ce n’est pas “fichier non trouvé”
-        }
-
-        await conn.query(
-          `UPDATE invoicing.invoice_attachments SET stored_name = $1, file_path = $2 WHERE id = $3`,
-          [finalName, finalPath, attachmentId]
-        );  
+        await conn.query(`UPDATE invoicing.invoice_attachments SET stored_name = $1, file_path = $2 WHERE id = $3`, [finalName, finalPath, attachmentId]);
       }
     }
 
