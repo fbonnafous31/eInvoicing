@@ -11,7 +11,8 @@ import { createInvoice, updateInvoice } from "../../services/invoices";
 import { validateInvoiceField, validateClientData } from "../../utils/validators/invoice";
 import { EditButton, CancelButton, DeleteButton, SaveButton } from '@/components/ui/buttons';
 
-export default function InvoiceForm({ initialData, onDelete = () => {} }) {
+export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly = false }) {
+
   const navigate = useNavigate();
   const [invoiceData, setInvoiceData] = useState({
     header: {
@@ -25,7 +26,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {} }) {
     taxes: [],
     attachments: [],
   });
-  const [isEditing, setIsEditing] = useState(!initialData);
+  const [isEditing, setIsEditing] = useState(!initialData && !readOnly);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [headerTouched, setHeaderTouched] = useState({});
@@ -259,8 +260,8 @@ export default function InvoiceForm({ initialData, onDelete = () => {} }) {
 
   const [openSections, setOpenSections] = useState({
     header: true,
-    client: Object.keys(invoiceData.client).length === 0, // ouvre par défaut si client vide
-    contract: false,
+    client: true,
+    contract: true,
     lines: true,
     taxes: true,
     attachments: true
@@ -322,12 +323,14 @@ export default function InvoiceForm({ initialData, onDelete = () => {} }) {
       <InvoiceLines
         data={linesWithTotals}
         onChange={val => handleChange("lines", val)}
+        hideLabelsInView={readOnly}
         disabled={!isEditing}
       />
 
       <TaxBases
         data={taxesSummary}
         onChange={val => handleChange("taxes", val)}
+        hideLabelsInView={readOnly}
         disabled={!isEditing}
       />
 
@@ -335,6 +338,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {} }) {
         data={invoiceData.attachments}
         onChange={val => handleChange("attachments", val)}
         disabled={!isEditing}
+        hideLabelsInView={readOnly}
         allowPrincipal
       />
 
@@ -346,34 +350,31 @@ export default function InvoiceForm({ initialData, onDelete = () => {} }) {
       </div>
 
       <div className="mt-4 mb-5 d-flex justify-content-end gap-2">
-        {initialData ? (
+        {!readOnly && (
           <>
-            {isDraft && ( // boutons visibles seulement si la facture est un brouillon
+            {initialData ? (
               <>
-                {!isEditing ? (
-                  <>
-                    {/* Mode lecture */}
-                    <EditButton onClick={() => setIsEditing(true)}>
-                      Modifier
-                    </EditButton>
-                    <DeleteButton onClick={onDelete} />
-                  </>
-                ) : (
-                  <>
-                    {/* Mode édition */}
-                    <CancelButton onClick={() => setIsEditing(false)} />
-                    <SaveButton />
-                  </>
+                {isDraft && (
+                  !isEditing ? (
+                    <>
+                      <EditButton onClick={() => setIsEditing(true)}>Modifier</EditButton>
+                      <DeleteButton onClick={onDelete} />
+                    </>
+                  ) : (
+                    <>
+                      <CancelButton onClick={() => setIsEditing(false)} />
+                      <SaveButton />
+                    </>
+                  )
                 )}
               </>
+            ) : (
+              <button type="submit" className="btn btn-primary">Créer la facture</button>
             )}
           </>
-        ) : (
-          <button type="submit" className="btn btn-primary">
-            Créer la facture
-          </button>
         )}
       </div>
+
     </form>
   );
 }

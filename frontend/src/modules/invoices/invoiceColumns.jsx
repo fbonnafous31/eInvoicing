@@ -8,6 +8,21 @@ export default function useInvoiceColumns() {
   const navigate = useNavigate();
 
   return [
+    {
+      cell: row => (
+        <button
+          className="btn btn-sm"
+          onClick={() => {
+            if (row?.id) navigate(`/invoices/${row.id}/view`);
+          }}
+          title="Consulter la facture"
+        >
+          👁️
+        </button>
+      ),
+      ignoreRowClick: true,
+      width: '50px',
+    },    
     {   
       cell: row => (
         <button

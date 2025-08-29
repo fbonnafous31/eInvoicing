@@ -8,22 +8,25 @@ export default function InputField({
   value,
   onChange,
   onBlur,
-  touched,   // ✅ vient du hook
+  touched,   
   required = false,
   error,
   submitted = false,
+  hideLabel = false,
   ...props
 }) {
   const hasError =
-    (required && touched && !value) ||  // utilise le touched du hook
+    (required && touched && !value) ||  
     (required && submitted && !value) ||
     Boolean(error);
 
   return (
     <div className="mb-3">
-      <label htmlFor={id || name} className="form-label">
-        {label} {required && "*"}
-      </label>
+      {!hideLabel && (
+        <label htmlFor={id || name} className="form-label">
+          {label} {required && "*"}
+        </label>
+      )}
       <input
         type={type}
         id={id || name}
@@ -31,7 +34,7 @@ export default function InputField({
         className={`form-control ${hasError ? "is-invalid" : ""}`}
         value={value ?? ""}
         onChange={(e) => onChange?.(e.target.value)}  
-        onBlur={() => onBlur?.(name)}   // appelle handleBlur(field) du hook
+        onBlur={() => onBlur?.(name)}   
         {...props}
       />
       {hasError && (

@@ -8,7 +8,7 @@ function Layout({ children, fluid = false }) {
   return (
     <>
       <NavBar />
-      <main className={fluid ? "container-fluid mt-4" : "container mt-4"}>
+      <main className={fluid ? "container-fluid mt-4 px-0" : "container mt-4"}>
         {children}
       </main>
     </>
@@ -19,13 +19,18 @@ function App() {
   return (
     <Router>
       <Routes>
-        {routes.map(({ path, element }) => (
-          <Route
-            key={path}
-            path={path}
-            element={<Layout>{element}</Layout>}
-          />
-        ))}
+        {routes.map(({ path, element }) => {
+          // On détecte si le composant doit être full width
+          const isFullWidth = element.type.name === "InvoiceView";
+
+          return (
+            <Route
+              key={path}
+              path={path}
+              element={<Layout fluid={isFullWidth}>{element}</Layout>}
+            />
+          );
+        })}
       </Routes>
     </Router>
   );

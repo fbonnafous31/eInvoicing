@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { SmallDeleteButton } from '@/components/ui/buttons';
 
-export default function SupportingDocs({ data, onChange, disabled }) {
+export default function SupportingDocs({ data, onChange, disabled, hideLabelsInView }) {
 
   // Logs pour debug
   useEffect(() => {
@@ -64,7 +64,9 @@ export default function SupportingDocs({ data, onChange, disabled }) {
         {mainAttachment && (
           <div className="mt-1 d-flex justify-content-between align-items-center">
             <span>{mainAttachment.file_name}</span>
-            <SmallDeleteButton onClick={() => removeFile(0, 'main')} disabled={disabled} />               
+            {!hideLabelsInView && (
+              <SmallDeleteButton onClick={() => removeFile(0, 'main')} disabled={disabled} />               
+            )}
           </div>
         )}
       </div>
@@ -76,7 +78,9 @@ export default function SupportingDocs({ data, onChange, disabled }) {
           {additionalAttachments.map((file, index) => (
             <li key={index} className="d-flex justify-content-between align-items-center mb-2">
               <span>{file.file_name || "Nom non disponible"}</span>
-              <SmallDeleteButton onClick={() => removeFile(index, 'additional')} disabled={disabled} />
+              {!hideLabelsInView && (
+                <SmallDeleteButton onClick={() => removeFile(index, 'additional')} disabled={disabled} />
+              )}
             </li>
           ))}
         </ul>
