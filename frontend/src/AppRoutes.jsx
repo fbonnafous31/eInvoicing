@@ -10,6 +10,7 @@ import ClientDetail from './pages/clients/ClientDetail';
 import InvoicesList from './pages/invoices/InvoicesList';
 import NewInvoice from './pages/invoices/NewInvoice';
 import InvoiceDetail from './pages/invoices/InvoiceDetail';
+import TestPdfViewer from './components/invoices/TestPdfViewer'; 
 
 import NotFound from './pages/NotFound';
 
@@ -28,6 +29,9 @@ const routes = [
   { path: '/invoices', element: <InvoicesList /> },
   { path: '/invoices/new', element: <NewInvoice /> },
   { path: '/invoices/:id', element: <InvoiceDetail /> },
+
+  // Test PDFViewer
+  { path: '/test-pdf', element: <TestPdfViewer /> },
 
   // 404
   { path: '*', element: <NotFound /> },
