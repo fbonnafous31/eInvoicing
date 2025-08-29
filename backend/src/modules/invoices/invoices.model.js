@@ -1,4 +1,6 @@
 const pool = require('../../config/db');
+const path = require('path');
+const fs = require('fs');
 
 /**
  * Récupère toutes les factures avec leurs lignes, taxes et justificatifs
@@ -148,7 +150,7 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
     }
 
 
-    // --- Insertion lignes, taxes, attachments en parallèle ---
+    // --- Insertion lignes, taxes, attachments ---
     await Promise.all([
       ...lines.map(line => {
         const cols = Object.keys(line).join(', ');
@@ -168,16 +170,40 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
           [...vals, invoiceId]
         );
       }),
-      ...attachments.map(att => {
-        const cols = Object.keys(att).join(', ');
-        const vals = Object.values(att);
+      ...attachments.map(async (att) => {
+        // 1️⃣ Générer un nom final unique basé sur invoiceId + attachmentId (id temporaire)
+        // Pour récupérer un id avant l'insert, on peut faire un INSERT "RETURNING id" avec un nom temporaire très simple
+        const tempName = 'temp'; // juste pour pouvoir insérer et récupérer l'id
+        const cols = Object.keys(att).join(', ') + ', stored_name';
+        const vals = [...Object.values(att), tempName];
         const placeholdersAtt = vals.map((_, i) => `$${i + 1}`).join(', ');
-        return conn.query(
-          `INSERT INTO invoicing.invoice_attachments (${cols}, invoice_id) VALUES (${placeholdersAtt}, $${vals.length + 1})`,
+
+        const result = await conn.query(
+          `INSERT INTO invoicing.invoice_attachments (${cols}, invoice_id) VALUES (${placeholdersAtt}, $${vals.length + 1}) RETURNING id`,
           [...vals, invoiceId]
         );
+
+        const attachmentId = result.rows[0].id;
+
+        // 2️⃣ Nom final simple et unique
+        const finalName = `${invoiceId}_${attachmentId}_${att.file_name.replace(/\s+/g, '_')}`;
+        const uploadDir = path.join(__dirname, '../../uploads/invoices');
+        const finalPath = path.join(uploadDir, finalName);
+
+        // 3️⃣ Renommer le fichier sur le disque
+        await fs.promises.rename(att.file_path, finalPath);
+
+        // 4️⃣ Mettre à jour DB avec le nom final
+        await conn.query(
+          `UPDATE invoicing.invoice_attachments SET stored_name = $1, file_path = $2 WHERE id = $3`,
+          [finalName, finalPath, attachmentId]
+        );
+        // 5️⃣ Supprimer le fichier temporaire si jamais il reste (sécurité)
+        if (fs.existsSync(att.file_path)) {
+          await fs.promises.unlink(att.file_path);
+        }    
       })
-    ]);
+    ]);    
 
     await conn.query('COMMIT');
     return await getInvoiceById(invoiceId);
@@ -318,12 +344,38 @@ async function updateInvoice(id, { invoice, client, lines, taxes, attachments })
     await conn.query('DELETE FROM invoicing.invoice_attachments WHERE invoice_id = $1', [id]);
     if (attachments && attachments.length > 0) {
       for (const att of attachments) {
-        // On exclut id ET invoice_id des données du justificatif
-        const { id: attId, invoice_id, ...attData } = att;
-        const cols = Object.keys(attData).join(', ');
-        const vals = Object.values(attData);
+        const { id: attId, invoice_id, stored_name, ...attDataClean } = att; // on enlève stored_name
+
+        const tempStoredName = `${Date.now()}-${Math.floor(Math.random()*1e9)}-${att.file_name}`;
+        const cols = Object.keys(attDataClean).join(', ') + ', stored_name';
+        const vals = [...Object.values(attDataClean), tempStoredName];
         const placeholdersAtt = vals.map((_, i) => `$${i + 1}`).join(', ');
-        await conn.query(`INSERT INTO invoicing.invoice_attachments (${cols}, invoice_id) VALUES (${placeholdersAtt}, $${vals.length + 1})`, [...vals, id]);
+
+        const result = await conn.query(
+          `INSERT INTO invoicing.invoice_attachments (${cols}, invoice_id) VALUES (${placeholdersAtt}, $${vals.length + 1}) RETURNING id`,
+          [...vals, id]
+        );
+
+        const attachmentId = result.rows[0].id;
+
+        const finalName = `${id}_${attachmentId}_${att.file_name.replace(/\s+/g, '_')}`;
+        const uploadDir = path.join(__dirname, '../../uploads/invoices');
+        const finalPath = path.join(uploadDir, finalName);
+
+        try {
+          await fs.promises.rename(att.file_path, finalPath);
+
+          if (fs.existsSync(att.file_path)) {
+            await fs.promises.unlink(att.file_path);
+          }
+        } catch (err) {
+          if (err.code !== 'ENOENT') throw err; // relance si ce n’est pas “fichier non trouvé”
+        }
+
+        await conn.query(
+          `UPDATE invoicing.invoice_attachments SET stored_name = $1, file_path = $2 WHERE id = $3`,
+          [finalName, finalPath, attachmentId]
+        );  
       }
     }
 

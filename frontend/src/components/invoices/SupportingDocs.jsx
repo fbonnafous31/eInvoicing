@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { SmallDeleteButton } from '@/components/ui/buttons';
 
 export default function SupportingDocs({ data, onChange, disabled }) {
 
@@ -63,9 +64,7 @@ export default function SupportingDocs({ data, onChange, disabled }) {
         {mainAttachment && (
           <div className="mt-1 d-flex justify-content-between align-items-center">
             <span>{mainAttachment.file_name}</span>
-            <button type="button" className="btn btn-sm btn-danger" disabled={disabled} onClick={() => removeFile(0, 'main')}>
-              Supprimer
-            </button>
+            <SmallDeleteButton onClick={() => removeFile(0, 'main')} disabled={disabled} />               
           </div>
         )}
       </div>
@@ -75,15 +74,14 @@ export default function SupportingDocs({ data, onChange, disabled }) {
         <input type="file" multiple onChange={handleAdditionalChange} className="form-control mb-2" disabled={disabled} />
         <ul>
           {additionalAttachments.map((file, index) => (
-            <li key={index} className="d-flex justify-content-between align-items-center">
+            <li key={index} className="d-flex justify-content-between align-items-center mb-2">
               <span>{file.file_name || "Nom non disponible"}</span>
-              <button type="button" className="btn btn-sm btn-danger" disabled={disabled} onClick={() => removeFile(index, 'additional')}>
-                Supprimer
-              </button>
+              <SmallDeleteButton onClick={() => removeFile(index, 'additional')} disabled={disabled} />
             </li>
           ))}
         </ul>
       </div>
+
     </div>
   );
 }
