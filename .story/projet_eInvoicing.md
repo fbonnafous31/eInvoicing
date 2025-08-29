@@ -56,8 +56,12 @@
 
 
 ## 📌 Prochaines étapes
-- Permettre la modification et la suppression d'une facture
-- Seulement si la facture est dans un état brouillond (draft)
+- Authentification pour le compte vendeur.
+- Visionneuse pour consulter les attachments (PDF, images…).
+- Génération **Factur-X** : PDF/A-3 + XML structuré, conforme à la réglementation.
+- Communication avec un PDP pour gérer le cycle de vie des factures.
+- Génération automatique du justificatif principal PDF.
+- Tout le travail invisible : tests unitaires et d’intégration, logs, monitoring, pipelines CI/CD.
 
 
 ## Architecture projet
