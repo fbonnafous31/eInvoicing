@@ -3,7 +3,7 @@ import { InputField } from '@/components/form';
 import { validateInvoiceLine } from "../../utils/validators/invoice";
 import { SmallDeleteButton } from '@/components/ui/buttons';
 
-export default function InvoiceLines({ data, onChange, disabled }) {
+export default function InvoiceLines({ data, onChange, disabled, hideLabelsInView }) {
   const [errors, setErrors] = useState([]); // tableau d'erreurs par ligne
   const [touched, setTouched] = useState([]); // champs déjà visités
 
@@ -77,7 +77,7 @@ export default function InvoiceLines({ data, onChange, disabled }) {
       <h5 className="mb-3">Lignes de facture</h5>
 
       {data.map((line, index) => (
-        <div key={index} className="mb-3 border rounded p-3">
+        <div key={index} className="mb-3">
           <div
             className="d-grid"
             style={{
@@ -95,6 +95,7 @@ export default function InvoiceLines({ data, onChange, disabled }) {
               onBlur={() => handleBlur(index, "description")}
               error={touched[index]?.description && errors[index]?.description}
               required
+              hideLabel={hideLabelsInView}
               disabled={disabled} 
             />
 
@@ -108,6 +109,7 @@ export default function InvoiceLines({ data, onChange, disabled }) {
               onBlur={() => handleBlur(index, "quantity")}
               error={touched[index]?.quantity && errors[index]?.quantity}
               required
+              hideLabel={hideLabelsInView}
               disabled={disabled} 
             />
 
@@ -121,6 +123,7 @@ export default function InvoiceLines({ data, onChange, disabled }) {
               onBlur={() => handleBlur(index, "unit_price")}
               error={touched[index]?.unit_price && errors[index]?.unit_price}
               required
+              hideLabel={hideLabelsInView}
               disabled={disabled} 
             />
 
@@ -134,6 +137,7 @@ export default function InvoiceLines({ data, onChange, disabled }) {
               onBlur={() => handleBlur(index, "vat_rate")}
               error={touched[index]?.vat_rate && errors[index]?.vat_rate}
               required
+              hideLabel={hideLabelsInView}
               disabled={disabled} 
             />
 
@@ -141,11 +145,12 @@ export default function InvoiceLines({ data, onChange, disabled }) {
               id={`discount_${index}`}
               name="discount"
               type="number"
-              label="Remise (€)"
+              label="Remise (€)"              
               value={line.discount}
               onChange={(val) => handleLineChange(index, "discount", val)}
               onBlur={() => handleBlur(index, "discount")}
               error={touched[index]?.discount && errors[index]?.discount}
+              hideLabel={hideLabelsInView}
               disabled={disabled} 
             />
 
@@ -153,9 +158,10 @@ export default function InvoiceLines({ data, onChange, disabled }) {
               id={`line_net_${index}`}
               name="line_net"
               type="number"
-              label="HT"
+              label="HT"                            
               value={line.line_net?.toFixed(2) || 0}
               readOnly
+              hideLabel={hideLabelsInView}
               disabled={disabled} 
             />
 
@@ -163,9 +169,10 @@ export default function InvoiceLines({ data, onChange, disabled }) {
               id={`line_tax_${index}`}
               name="line_tax"
               type="number"
-              label="TVA"
+              label="TVA"                              
               value={line.line_tax?.toFixed(2) || 0}
               readOnly
+              hideLabel={hideLabelsInView}
               disabled={disabled} 
             />
 
@@ -173,9 +180,10 @@ export default function InvoiceLines({ data, onChange, disabled }) {
               id={`line_total_${index}`}
               name="line_total"
               type="number"
-              label="TTC"
+              label="TTC"                                            
               value={line.line_total?.toFixed(2) || 0}
               readOnly
+              hideLabel={hideLabelsInView}
               disabled={disabled} 
             />
 
@@ -184,18 +192,22 @@ export default function InvoiceLines({ data, onChange, disabled }) {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                paddingTop: '1rem' // ajuste la valeur selon ton rendu
+                paddingTop: '1rem' 
               }}
             >
+            {!hideLabelsInView && (
               <SmallDeleteButton onClick={() => removeLine(index)} disabled={disabled} />
+            )}
             </div>    
           </div>
         </div>
       ))}
 
-      <button type="button" className="btn btn-secondary mt-2" onClick={addLine} disabled={disabled} >
-        Ajouter une ligne
-      </button>
+      {!hideLabelsInView && (
+        <button type="button" className="btn btn-secondary mt-2" onClick={addLine} disabled={disabled} >
+          Ajouter une ligne
+        </button>
+      )}
     </div>
   );
 }
