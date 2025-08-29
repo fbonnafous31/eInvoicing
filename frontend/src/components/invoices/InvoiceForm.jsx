@@ -226,7 +226,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {} }) {
 
       formData.append("client", JSON.stringify(invoiceData.client));
       formData.append("lines", JSON.stringify(linesWithTotals));
-      formData.append("taxes", JSON.stringify(invoiceData.taxes.length ? invoiceData.taxes : taxesSummary));
+      formData.append("taxes", JSON.stringify(taxesSummary));
       console.log("Payload FormData ready:", formData);
 
       if (initialData) {
@@ -327,7 +327,6 @@ export default function InvoiceForm({ initialData, onDelete = () => {} }) {
 
       <TaxBases
         data={taxesSummary}
-        // data={invoiceData.taxes.length ? invoiceData.taxes : taxesSummary}
         onChange={val => handleChange("taxes", val)}
         disabled={!isEditing}
       />
