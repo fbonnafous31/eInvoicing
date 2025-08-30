@@ -57,7 +57,6 @@
 
 ## 📌 Prochaines étapes
 - Authentification pour le compte vendeur.
-- Visionneuse pour consulter les attachments (PDF, images…).
 - Génération **Factur-X** : PDF/A-3 + XML structuré, conforme à la réglementation.
 - Communication avec un PDP pour gérer le cycle de vie des factures.
 - Génération automatique du justificatif principal PDF.
