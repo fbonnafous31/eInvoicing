@@ -24,7 +24,7 @@ export default function ClientsList() {
   ];
 
   return (
-    <div className="container-fluid mt-4">
+    <div className="container-fluid p-5 mt-4">
       <h1 className="visually-hidden">Liste des clients</h1>
 
       <Breadcrumb items={breadcrumbItems} />
