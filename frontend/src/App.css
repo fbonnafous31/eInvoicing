@@ -40,3 +40,10 @@
 .read-the-docs {
   color: #888;
 }
+
+.full-width-page {
+  padding: 20px;  /* padding interne si tu veux */
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+}

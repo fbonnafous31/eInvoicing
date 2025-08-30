@@ -21,7 +21,11 @@ function App() {
       <Routes>
         {routes.map(({ path, element }) => {
           // On détecte si le composant doit être full width
-          const isFullWidth = element.type.name === "InvoiceView";
+          const isFullWidth =
+            element.type.name === "InvoiceView" ||
+            element.type.name === "ClientsList" ||
+            element.type.name === "SellersList" ||
+            element.type.name === "InvoicesList";
 
           return (
             <Route
