@@ -72,6 +72,20 @@ const InvoiceView = () => {
     attachments: invoice.attachments || [],
   };
 
+  // const BACKEND_URL = "http://localhost:3000";
+  const BACKEND_URL = import.meta.env.VITE_API_URL;
+  const getMainAttachmentUrl = (attachments) => {
+    if (!attachments || !attachments.length) return null;
+
+    const mainAttachment = attachments.find(a => a.attachment_type === "main");
+    if (!mainAttachment) return null;
+
+    // URL publique exposée par le backend
+    return `${BACKEND_URL}/uploads/invoices/${mainAttachment.stored_name}`;
+  };
+  console.log("Main attachment URL:", getMainAttachmentUrl(invoice.attachments));
+  const pdfUrl = getMainAttachmentUrl(invoice.attachments);
+
   return (
     <div
       style={{
@@ -98,12 +112,12 @@ const InvoiceView = () => {
       <div
         style={{
           flex: 1,
-          overflowY: "auto",    // scroll si PDF long
+          overflowY: "auto",  
           paddingLeft: "10px",
           borderLeft: "1px solid #ccc"
         }}
       >
-        <PdfViewer fileUrl={`/uploads/${invoice.pdfFilename}`} />
+        <PdfViewer fileUrl={pdfUrl} />
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const errorHandler = require('./src/middlewares/errorHandler');
 
 const app = express();
@@ -15,6 +16,7 @@ const invoicesRoutes = require('./src/modules/invoices/invoices.route');
 app.use('/api/sellers', sellersRoutes);
 app.use('/api/clients', clientsRoutes);
 app.use('/api/invoices', invoicesRoutes);
+app.use('/uploads', express.static(path.join(__dirname, 'src/uploads')));
 
 // Middleware global d'erreurs
 app.use(errorHandler);
