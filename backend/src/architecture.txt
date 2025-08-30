@@ -23,6 +23,11 @@
 │       ├── sellers.model.js
 │       ├── sellers.route.js
 │       └── sellers.service.js
-└── utils
+└── uploads
+    └── invoices
+        ├── 167_1756542598950_modele_de_facture.pdf
+        ├── 167_1756542598952_hs_err_pid4249.log
+        ├── 168_231_modele_de_facture.pdf
+        └── sample-invoice.pdf
 
-10 directories, 49 files
+9 directories, 22 files
