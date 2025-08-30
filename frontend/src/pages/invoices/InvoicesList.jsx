@@ -41,7 +41,7 @@ export default function InvoicesList() {
   ];
 
   return (
-    <div className="container-fluid mt-4">
+    <div className="container-fluid p-0 mt-4">
       {/* H1 invisible pour SEO/accessibilité */}
       <h1 className="visually-hidden">Liste des factures</h1>
 
@@ -60,6 +60,7 @@ export default function InvoicesList() {
 
       {/* DataTable */}
       <DataTable
+        style={{ width: '100%' }}
         columns={columns}
         data={filteredItems}
         pagination

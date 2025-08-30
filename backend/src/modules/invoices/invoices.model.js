@@ -237,10 +237,14 @@ async function deleteInvoice(id) {
 async function updateInvoice(id, { invoice, client, lines, taxes, newAttachments, existingAttachments }) {
   const conn = await pool.connect();
   try {
-    await conn.query('BEGIN');
+    console.log("=== updateInvoice called for id:", id, "===");
 
-    // 1. Mettre à jour la facture principale
+    await conn.query('BEGIN');
+    console.log("Transaction started");
+
+    // --- 1. Update invoice main data ---
     if (invoice) {
+      console.log("Updating invoice main data:", invoice);
       const invoiceColumns = [
         "invoice_number",
         "issue_date",
@@ -260,35 +264,40 @@ async function updateInvoice(id, { invoice, client, lines, taxes, newAttachments
 
       if (updates.length > 0) {
         const query = `UPDATE invoicing.invoices SET ${updates.join(', ')} WHERE id = $1`;
-        await conn.query(query, [id, ...values]);
+        const result = await conn.query(query, [id, ...values]);
+        console.log("Invoice update result:", result.rowCount, "rows affected");
       }
     }
 
-    // 2. Mettre à jour le client de la facture
+    // --- 2. Update invoice client ---
     if (client) {
+      console.log("Updating client data:", client);
+
       if (client.client_id) {
         await conn.query('UPDATE invoicing.invoices SET client_id = $1 WHERE id = $2', [client.client_id, id]);
+        console.log(`Invoice client_id updated to ${client.client_id}`);
       }
 
       const clientExistsResult = await conn.query('SELECT id FROM invoicing.invoice_client WHERE invoice_id = $1', [id]);
-      
+      console.log("Existing client rows:", clientExistsResult.rows.length);
+
       const legal_name = client.client_legal_name || `${client.client_first_name || ''} ${client.client_last_name || ''}`.trim();
       const legal_identifier_type = client.client_siret ? 'SIRET' : client.client_vat_number ? 'VAT' : 'NAME';
       const legal_identifier = client.client_siret || client.client_vat_number || legal_name;
 
       if (clientExistsResult.rows.length > 0) {
-        await conn.query(
+        const result = await conn.query(
           `UPDATE invoicing.invoice_client 
-          SET legal_name = $2,
-              legal_identifier_type = $3,
-              legal_identifier = $4,
-              address = $5,
-              city = $6,
-              postal_code = $7,
-              country_code = $8,
-              email = $9,
-              phone = $10
-          WHERE invoice_id = $1`,
+           SET legal_name = $2,
+               legal_identifier_type = $3,
+               legal_identifier = $4,
+               address = $5,
+               city = $6,
+               postal_code = $7,
+               country_code = $8,
+               email = $9,
+               phone = $10
+           WHERE invoice_id = $1`,
           [
             id,
             legal_name,
@@ -302,11 +311,12 @@ async function updateInvoice(id, { invoice, client, lines, taxes, newAttachments
             client.client_phone || null
           ]
         );
-      } else if (legal_name) { // n'insère que si on a des données client
-        await conn.query(
+        console.log("Client updated, rows affected:", result.rowCount);
+      } else if (legal_name) {
+        const result = await conn.query(
           `INSERT INTO invoicing.invoice_client 
             (invoice_id, legal_name, legal_identifier_type, legal_identifier, address, city, postal_code, country_code, email, phone)
-          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
           [
             id,
             legal_name,
@@ -320,80 +330,153 @@ async function updateInvoice(id, { invoice, client, lines, taxes, newAttachments
             client.client_phone || null
           ]
         );
+        console.log("Client inserted, rows affected:", result.rowCount);
       }
+    }
 
-    // 3. Mettre à jour les lignes, taxes, attachments (stratégie: tout supprimer puis réinsérer)
+    // --- 3. Update invoice lines ---
+    console.log("Deleting existing lines and taxes for invoice", id);
     await conn.query('DELETE FROM invoicing.invoice_lines WHERE invoice_id = $1', [id]);
     if (lines && lines.length > 0) {
+      console.log("Inserting lines:", lines);
       for (const line of lines) {
-        // On exclut id ET invoice_id des données de la ligne pour éviter la duplication
         const { id: lineId, invoice_id, ...lineData } = line;
         const cols = Object.keys(lineData).join(', ');
         const vals = Object.values(lineData);
         const placeholdersLine = vals.map((_, i) => `$${i + 1}`).join(', ');
-        await conn.query(`INSERT INTO invoicing.invoice_lines (${cols}, invoice_id) VALUES (${placeholdersLine}, $${vals.length + 1})`, [...vals, id]);
+        const result = await conn.query(`INSERT INTO invoicing.invoice_lines (${cols}, invoice_id) VALUES (${placeholdersLine}, $${vals.length + 1})`, [...vals, id]);
+        console.log("Inserted line, rowCount:", result.rowCount);
       }
     }
 
     await conn.query('DELETE FROM invoicing.invoice_taxes WHERE invoice_id = $1', [id]);
     if (taxes && taxes.length > 0) {
+      console.log("Inserting taxes:", taxes);
       for (const tax of taxes) {
-        // On exclut id ET invoice_id des données de la taxe
         const { id: taxId, invoice_id, ...taxData } = tax;
         const cols = Object.keys(taxData).join(', ');
         const vals = Object.values(taxData);
         const placeholdersTax = vals.map((_, i) => `$${i + 1}`).join(', ');
-        await conn.query(`INSERT INTO invoicing.invoice_taxes (${cols}, invoice_id) VALUES (${placeholdersTax}, $${vals.length + 1})`, [...vals, id]);
+        const result = await conn.query(`INSERT INTO invoicing.invoice_taxes (${cols}, invoice_id) VALUES (${placeholdersTax}, $${vals.length + 1})`, [...vals, id]);
+        console.log("Inserted tax, rowCount:", result.rowCount);
       }
     }
 
     // --- Attachments ---
-    const currentAttachments = await conn.query('SELECT id, file_path FROM invoicing.invoice_attachments WHERE invoice_id = $1', [id]);
-    const existingIdsToKeep = new Set((existingAttachments || []).map(a => a.id));
+    console.log("📂 Processing attachments...");
 
-    // Supprimer les anciens attachments qui ne sont plus dans la liste
-    for (const dbAtt of currentAttachments.rows) {
-      if (!existingIdsToKeep.has(dbAtt.id)) {
-        await conn.query('DELETE FROM invoicing.invoice_attachments WHERE id = $1', [dbAtt.id]);
-        if (dbAtt.file_path) {
-          try {
-            await fs.promises.unlink(dbAtt.file_path);
-          } catch (unlinkErr) {
-            if (unlinkErr.code !== 'ENOENT') {
-              console.error(`Échec de la suppression de l'ancien justificatif: ${dbAtt.file_path}`, unlinkErr);
-            }
+    // 1️⃣ Récupérer les attachments actuels en DB
+    const { rows: dbAttachments } = await conn.query(
+      `SELECT id, file_name, file_path, stored_name, attachment_type 
+      FROM invoicing.invoice_attachments 
+      WHERE invoice_id = $1`,
+      [id]
+    );
+
+    // 2️⃣ Parser ceux envoyés par le front
+    let existingFromFront = [];
+    if (typeof existingAttachments === "string" && existingAttachments.trim() !== "") {
+      try {
+        existingFromFront = JSON.parse(existingAttachments);
+      } catch (err) {
+        console.error("❌ Invalid JSON in existingAttachments:", existingAttachments, err);
+        existingFromFront = [];
+      }
+    } else if (Array.isArray(existingAttachments)) {
+      existingFromFront = existingAttachments;
+    }
+
+    // Ensemble des IDs que le front veut conserver
+    const keepIds = new Set(existingFromFront.map(a => a.id).filter(Boolean));
+    console.log("✅ Front wants to keep IDs:", [...keepIds]);
+
+    // 3️⃣ Supprimer uniquement de la DB ce que le front n’envoie pas
+    for (const dbAtt of dbAttachments) {
+      if (!keepIds.has(dbAtt.id)) {
+        await conn.query(
+          `DELETE FROM invoicing.invoice_attachments WHERE id = $1`,
+          [dbAtt.id]
+        );
+        console.log("🗑️ Deleted DB attachment:", dbAtt.id);
+        // ⚠️ On ne supprime pas le fichier du serveur
+      }
+    }
+
+    // 4️⃣ Ajouter les nouveaux fichiers uploadés
+    if (newAttachments && newAttachments.length > 0) {
+      for (const att of newAttachments) {
+        console.log("➕ New file to insert:", att.file_name);
+
+        const timestamp = Date.now();
+        const sanitizedName = att.file_name.replace(/\s+/g, "_");
+        const storedName = `${id}_${timestamp}_${sanitizedName}`;
+        const uploadDir = path.join(__dirname, "../../uploads/invoices");
+        const finalPath = path.join(uploadDir, storedName);
+
+        // Vérifier si le fichier source existe avant rename
+        try {
+          await fs.promises.access(att.file_path);
+          await fs.promises.rename(att.file_path, finalPath);
+          console.log("📦 File moved:", finalPath);
+        } catch (err) {
+          if (err.code === "ENOENT") {
+            console.warn(`⚠️ Source file not found, skipping move: ${att.file_path}`);
+          } else {
+            throw err;
           }
+        }
+
+        const attachmentType = att.attachment_type || "additional";
+
+        // Insérer en DB
+        await conn.query(
+          `INSERT INTO invoicing.invoice_attachments
+          (invoice_id, file_name, file_path, stored_name, attachment_type)
+          VALUES ($1, $2, $3, $4, $5)`,
+          [id, att.file_name, finalPath, storedName, attachmentType]
+        );
+
+        console.log("✅ Attachment stored:", { storedName, finalPath, attachmentType });
+      }
+    }
+
+    // --- Nettoyage serveur ---
+    const uploadDir = path.join(__dirname, "../../uploads/invoices");
+
+    // Récupérer les fichiers actuellement en DB pour cette facture
+    const { rows: dbFiles } = await conn.query(
+      `SELECT stored_name FROM invoicing.invoice_attachments WHERE invoice_id = $1`,
+      [id]
+    );
+    const dbFileSet = new Set(dbFiles.map(f => f.stored_name));
+
+    // Lire tous les fichiers sur le serveur pour cette facture
+    const allFiles = await fs.promises.readdir(uploadDir);
+    for (const file of allFiles) {
+      if (file.startsWith(`${id}_`) && !dbFileSet.has(file)) {
+        try {
+          await fs.promises.unlink(path.join(uploadDir, file));
+          console.log("🗑️ Removed server file not in DB:", file);
+        } catch (err) {
+          console.error("❌ Failed to remove file:", file, err);
         }
       }
     }
 
-    // Ajouter les nouveaux attachments
-    if (newAttachments && newAttachments.length > 0) {
-      for (const att of newAttachments) {
-        const result = await conn.query(
-          `INSERT INTO invoicing.invoice_attachments (invoice_id, file_name, file_path, attachment_type) VALUES ($1, $2, $3, $4) RETURNING id`,
-          [id, att.file_name, att.file_path, att.attachment_type]
-        );
-        const attachmentId = result.rows[0].id;
-
-        const finalName = `${id}_${attachmentId}_${att.file_name.replace(/\s+/g, '_')}`;
-        const uploadDir = path.join(__dirname, '../../uploads/invoices');
-        const finalPath = path.join(uploadDir, finalName);
-
-        await fs.promises.rename(att.file_path, finalPath);
-
-        await conn.query(`UPDATE invoicing.invoice_attachments SET stored_name = $1, file_path = $2 WHERE id = $3`, [finalName, finalPath, attachmentId]);
-      }
-    }
-
+    console.log("🎉 Attachments sync finished.");
+    
     await conn.query('COMMIT');
+    console.log("Transaction committed successfully for invoice", id);
+
     return await getInvoiceById(id);
-    }
+
   } catch (err) {
     await conn.query('ROLLBACK');
+    console.error("Transaction rolled back due to error:", err);
     throw err;
   } finally {
     conn.release();
+    console.log("DB connection released");
   }
 }
 
