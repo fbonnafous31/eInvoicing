@@ -60,7 +60,9 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
 
       <div className="mb-3">
         <label>Justificatif principal *</label>
-        <input type="file" onChange={handleMainChange} className="form-control" disabled={disabled} />
+        {!hideLabelsInView && (
+          <input type="file" onChange={handleMainChange} className="form-control" disabled={disabled} />
+        )}
         {mainAttachment && (
           <div className="mt-1 d-flex justify-content-between align-items-center">
             <span>{mainAttachment.file_name}</span>
@@ -73,7 +75,9 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
 
       <div className="mb-3">
         <label>Justificatifs additionnels</label>
-        <input type="file" multiple onChange={handleAdditionalChange} className="form-control mb-2" disabled={disabled} />
+        {!hideLabelsInView && (
+          <input type="file" multiple onChange={handleAdditionalChange} className="form-control mb-2" disabled={disabled} />
+        )}
         <ul>
           {additionalAttachments.map((file, index) => (
             <li key={index} className="d-flex justify-content-between align-items-center mb-2">

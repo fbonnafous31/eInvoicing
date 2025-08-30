@@ -32,15 +32,16 @@ async function createInvoice(data) {
 async function updateInvoice(id, data) {
   const { invoice, client, lines, taxes, attachments } = data;
 
-  // Le modèle gère maintenant la mise à jour complète dans une seule transaction
   return await InvoicesModel.updateInvoice(id, {
     invoice,
     client,
     lines,
     taxes,
-    attachments,
+    newAttachments: attachments,
+    existingAttachments: [] 
   });
 }
+
 
 async function deleteInvoice(id) {
   return await InvoicesModel.deleteInvoice(id);
