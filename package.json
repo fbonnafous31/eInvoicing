@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "eInvoicing est une application web destinée à faciliter la gestion et l’intégration des factures électroniques fournisseurs dans un système ERP. Le projet vise à fournir une interface simple pour saisir les données essentielles des factures, stocker ces informations dans une base PostgreSQL structurée, et permettre la génération de documents standardisés au format XML.",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "vitest"
   },
@@ -24,11 +25,13 @@
     "express": "^5.1.0",
     "iban": "^0.0.14",
     "multer": "^2.0.2",
+    "node-zugferd": "^0.1.1-beta.1",
     "pg": "^8.16.3",
     "prop-types": "^15.8.1",
     "react-bootstrap": "^2.10.10",
     "react-router-dom": "^7.8.0",
-    "react-select": "^5.10.2"
+    "react-select": "^5.10.2",
+    "xmlbuilder2": "^3.1.1"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.7.0",
