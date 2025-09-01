@@ -1,0 +1,1 @@
+xmllint --noout --schema xsd/Factur-X_1.07.3_BASIC.xsd facturx.xml

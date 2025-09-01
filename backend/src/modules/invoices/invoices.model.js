@@ -1,6 +1,7 @@
 const pool = require('../../config/db');
 const path = require('path');
 const fs = require('fs');
+const { getSellerById } = require('../sellers/sellers.model'); // CommonJS
 
 /**
  * Récupère toutes les factures avec leurs lignes, taxes et justificatifs
@@ -36,12 +37,10 @@ async function getAllInvoices() {
  * Récupère une facture par son ID
  */
 async function getInvoiceById(id) {
-  // 1. Récupère la facture principale
   const invoiceResult = await pool.query('SELECT * FROM invoicing.invoices WHERE id = $1', [id]);
   if (invoiceResult.rows.length === 0) return null;
-  const invoice = invoiceResult.rows[0];
+  const invoice = invoiceResult.rows[0];  
 
-  // 2. Récupère les lignes, taxes, attachments
   const [linesResult, taxesResult, attachmentsResult, clientResult] = await Promise.all([
     pool.query('SELECT * FROM invoicing.invoice_lines WHERE invoice_id = $1', [id]),
     pool.query('SELECT * FROM invoicing.invoice_taxes WHERE invoice_id = $1', [id]),
@@ -49,15 +48,20 @@ async function getInvoiceById(id) {
     pool.query('SELECT * FROM invoicing.invoice_client WHERE invoice_id = $1', [id])
   ]);
 
-  // 3. Prépare l'objet client
   const client = clientResult.rows[0] || null;
 
+  let seller = null;
+  if (invoice.seller_id) {
+    seller = await getSellerById(invoice.seller_id);
+  }
+  
   return {
     ...invoice,
     lines: linesResult.rows,
     taxes: taxesResult.rows,
     attachments: attachmentsResult.rows,
-    client: client
+    client,
+    seller
   };
 }
 

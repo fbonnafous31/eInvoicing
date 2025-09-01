@@ -8,6 +8,7 @@ import TaxBases from "./TaxBases";
 import SupportingDocs from "./SupportingDocs";
 import FormSection from "../form/FormSection";
 import { createInvoice, updateInvoice } from "../../services/invoices";
+import { fetchSellers } from '../../services/sellers';
 import { validateInvoiceField, validateClientData } from "../../utils/validators/invoice";
 import { EditButton, CancelButton, DeleteButton, SaveButton } from '@/components/ui/buttons';
 
@@ -24,6 +25,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
     client: {},
     lines: [],
     taxes: [],
+    seller: [],
     attachments: [],
   });
   const [isEditing, setIsEditing] = useState(!initialData && !readOnly);
@@ -34,9 +36,20 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    console.log("InvoiceForm received initialData:", initialData);
-    if (initialData) {
-      // On force les montants à être des nombres
+    const fetchFullInvoiceData = async () => {
+      if (!initialData) return;
+
+      let seller = {};
+      if (initialData.header?.seller_id) {
+        try {
+          seller = await fetchSellers(initialData.header.seller_id);
+        } catch (err) {
+          console.error("Erreur fetch seller:", err);
+        }
+      }
+      console.log("Seller:", seller);
+
+
       const safeData = {
         ...initialData,
         lines: (initialData.lines || []).map(line => ({
@@ -51,11 +64,17 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
           base_amount: Number(tax.base_amount || 0),
           tax_amount: Number(tax.tax_amount || 0),
           vat_rate: Number(tax.vat_rate || 0),
-        }))
+        })),
+        seller,
       };
+
       setInvoiceData(safeData);
-    }
+    };
+
+    fetchFullInvoiceData();
   }, [initialData]);
+
+  console.log("InvoiceForm invoiceData:", invoiceData);
   
   const headerFields = ["invoice_number", "issue_date", "fiscal_year", "seller_id"];
 
