@@ -18,6 +18,9 @@ async function getInvoice(id) {
 async function createInvoice(data) {
   const { invoice, client, lines, taxes, attachments } = data;
 
+  console.log("=== createInvoice called ===");
+
+  // 1️⃣ Création en base
   const createdInvoice = await InvoicesModel.createInvoice({
     invoice,
     client,
@@ -25,9 +28,47 @@ async function createInvoice(data) {
     taxes,
     attachments,
   });
+  console.log("✅ Invoice created, id:", createdInvoice.id);
 
-  return createdInvoice;
+  // 2️⃣ Préparer le client pour le XML
+  const clientForXML = createdInvoice.client ? {
+    legal_name: createdInvoice.client.legal_name || 
+                `${createdInvoice.client.client_legal_name || ''}`.trim(),
+    address: createdInvoice.client.address || createdInvoice.client.client_address,
+    city: createdInvoice.client.city || createdInvoice.client.client_city,
+    postal_code: createdInvoice.client.postal_code || createdInvoice.client.client_postal_code,
+    country_code: createdInvoice.client.country_code || createdInvoice.client.client_country_code,
+    email: createdInvoice.client.email || createdInvoice.client.client_email,
+    phone: createdInvoice.client.phone || createdInvoice.client.client_phone
+  } : {};  
+
+  // 3️⃣ Génération du Factur-X à partir des données créées
+  const xml = generateFacturXXML({
+    header: invoice,
+    seller: createdInvoice.seller,
+    client: clientForXML,
+    lines,
+    taxes,
+    attachments
+  });
+
+  // 4️⃣ Sauvegarde du fichier XML sur disque
+  const facturXPath = path.resolve('src/uploads/factur-x');
+  if (!fs.existsSync(facturXPath)) {
+    fs.mkdirSync(facturXPath, { recursive: true });
+  }
+
+  const xmlPath = path.join(facturXPath, `${createdInvoice.id}-factur-x.xml`);
+  fs.writeFileSync(xmlPath, xml, 'utf-8');
+  console.log("📄 Factur-X saved at:", xmlPath);
+
+  // 5️⃣ Retourner l’objet enrichi
+  return {
+    ...createdInvoice,
+    facturxPath: xmlPath
+  };
 }
+
 
 /**
  * Met à jour une facture complète
@@ -72,12 +113,12 @@ async function updateInvoice(id, data) {
   });
 
   // 4. Sauvegarde du fichier XML sur disque
-  const invoicesDir = path.resolve('uploads/invoices');
+  const invoicesDir = path.resolve('src/uploads/factur-x');
   if (!fs.existsSync(invoicesDir)) {
     fs.mkdirSync(invoicesDir, { recursive: true });
   }
 
-  const xmlPath = path.join(invoicesDir, `${id}.xml`);
+  const xmlPath = path.join(invoicesDir, `${id}-factur-x.xml`);
   fs.writeFileSync(xmlPath, xml, 'utf-8');
 
   // 5. Retourne l’objet enrichi
