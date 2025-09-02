@@ -25,11 +25,13 @@
 │       └── sellers.service.js
 ├── uploads
 │   └── invoices
-│       ├── 167_1756592060142_modele_de_facture.pdf
-│       ├── 167_1756592060143_note_de_credit_fr.pdf
-│       ├── 168_1756590430989_note_de_credit_fr.pdf
+│       ├── 167_add_1756843574491_note_de_credit_fr.pdf
+│       ├── 167_main_1756843574489_modele_de_facture.pdf
+│       ├── 169_add_1756843835016_modele_de_facture.pdf
+│       ├── 169_main_1756843835015_note_de_credit_fr.pdf
 │       └── sample-invoice.pdf
 └── utils
-    └── facturx-generator.js
+    ├── facturx-generator.js
+    └── fileNaming.js
 
-10 directories, 23 files
+10 directories, 25 files
