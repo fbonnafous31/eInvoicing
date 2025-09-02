@@ -45,3 +45,4 @@ node_modules/.vite/
 
 #uploads
 backend/src/uploads/invoices/*
+backend/src/uploads/factur-x/*
