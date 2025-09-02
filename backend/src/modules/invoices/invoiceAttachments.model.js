@@ -1,0 +1,40 @@
+const fs = require("fs");
+const path = require("path");
+const { generateStoredName, getFinalPath } = require("../../utils/fileNaming");
+
+async function saveAttachment(conn, invoiceId, att) {
+  const attachmentType = att.attachment_type || "additional";
+  const storedName = generateStoredName(invoiceId, attachmentType, att.file_name);
+  const finalPath = getFinalPath(storedName);
+
+  // Déplacer le fichier
+  await fs.promises.rename(att.file_path, finalPath);
+
+  // Insérer en DB
+  const result = await conn.query(
+    `INSERT INTO invoicing.invoice_attachments
+      (invoice_id, file_name, file_path, stored_name, attachment_type)
+     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+    [invoiceId, att.file_name, finalPath, storedName, attachmentType]
+  );
+
+  return result.rows[0];
+}
+
+async function cleanupAttachments(conn, invoiceId) {
+  const uploadDir = getFinalPath(""); // juste le dossier
+  const { rows: dbFiles } = await conn.query(
+    `SELECT stored_name FROM invoicing.invoice_attachments WHERE invoice_id = $1`,
+    [invoiceId]
+  );
+  const dbFileSet = new Set(dbFiles.map(f => f.stored_name));
+
+  const allFiles = await fs.promises.readdir(uploadDir);
+  for (const file of allFiles) {
+    if (file.startsWith(`${invoiceId}_`) && !dbFileSet.has(file)) {
+      await fs.promises.unlink(path.join(uploadDir, file));
+    }
+  }
+}
+
+module.exports = { saveAttachment, cleanupAttachments };
