@@ -45,7 +45,8 @@ async function getInvoiceById(id) {
     pool.query('SELECT * FROM invoicing.invoice_lines WHERE invoice_id = $1', [id]),
     pool.query('SELECT * FROM invoicing.invoice_taxes WHERE invoice_id = $1', [id]),
     pool.query('SELECT * FROM invoicing.invoice_attachments WHERE invoice_id = $1', [id]),
-    pool.query('SELECT * FROM invoicing.invoice_client WHERE invoice_id = $1', [id])
+    pool.query('SELECT * FROM invoicing.invoice_client WHERE invoice_id = $1', [id]),
+    invoice.seller_id ? getSellerById(invoice.seller_id) : Promise.resolve(null)
   ]);
 
   const client = clientResult.rows[0] || null;
