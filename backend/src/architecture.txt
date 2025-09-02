@@ -23,11 +23,13 @@
 │       ├── sellers.model.js
 │       ├── sellers.route.js
 │       └── sellers.service.js
-└── uploads
-    └── invoices
-        ├── 167_1756542598950_modele_de_facture.pdf
-        ├── 167_1756542598952_hs_err_pid4249.log
-        ├── 168_231_modele_de_facture.pdf
-        └── sample-invoice.pdf
+├── uploads
+│   └── invoices
+│       ├── 167_1756592060142_modele_de_facture.pdf
+│       ├── 167_1756592060143_note_de_credit_fr.pdf
+│       ├── 168_1756590430989_note_de_credit_fr.pdf
+│       └── sample-invoice.pdf
+└── utils
+    └── facturx-generator.js
 
-9 directories, 22 files
+10 directories, 23 files
