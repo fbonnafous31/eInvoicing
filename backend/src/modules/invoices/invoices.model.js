@@ -177,8 +177,9 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
       }),
       ...attachments.map(async (att) => {
         // 1️⃣ Générer un nom final unique basé sur invoiceId + attachmentId (id temporaire)
-        // Pour récupérer un id avant l'insert, on peut faire un INSERT "RETURNING id" avec un nom temporaire très simple
-        const tempName = 'temp'; // juste pour pouvoir insérer et récupérer l'id
+        const attachmentType = att.attachment_type || "additional";
+        const typePrefix = attachmentType === "main" ? "main" : "add";        
+        const tempName = 'temp'; 
         const cols = Object.keys(att).join(', ') + ', stored_name';
         const vals = [...Object.values(att), tempName];
         const placeholdersAtt = vals.map((_, i) => `$${i + 1}`).join(', ');
@@ -191,7 +192,10 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
         const attachmentId = result.rows[0].id;
 
         // 2️⃣ Nom final simple et unique
-        const finalName = `${invoiceId}_${attachmentId}_${att.file_name.replace(/\s+/g, '_')}`;
+        const timestamp = Date.now();
+        const sanitizedName = att.file_name.replace(/\s+/g, "_");        
+        const finalName = `${invoiceId}_${typePrefix}_${timestamp}_${sanitizedName}`;
+        
         const uploadDir = path.join(__dirname, '../../uploads/invoices');
         const finalPath = path.join(uploadDir, finalName);
 
@@ -414,7 +418,11 @@ async function updateInvoice(id, { invoice, client, lines, taxes, newAttachments
 
         const timestamp = Date.now();
         const sanitizedName = att.file_name.replace(/\s+/g, "_");
-        const storedName = `${id}_${timestamp}_${sanitizedName}`;
+
+        const attachmentType = att.attachment_type || "additional";
+        const typePrefix = attachmentType === "main" ? "main" : "add";
+
+        const storedName = `${id}_${typePrefix}_${timestamp}_${sanitizedName}`;
         const uploadDir = path.join(__dirname, "../../uploads/invoices");
         const finalPath = path.join(uploadDir, storedName);
 
@@ -430,8 +438,6 @@ async function updateInvoice(id, { invoice, client, lines, taxes, newAttachments
             throw err;
           }
         }
-
-        const attachmentType = att.attachment_type || "additional";
 
         // Insérer en DB
         await conn.query(
