@@ -141,9 +141,12 @@ module.exports = {
   createInvoice,
   updateInvoice,
   deleteInvoice,
+<<<<<<< HEAD
   registerGeneratedPdf
 =======
 module.exports = {
   listInvoices
 >>>>>>> 5f08e77 (Jour 13 : liste des factures frontend, helpers et tooltips, stratégie de travail avec ChatGPT)
+=======
+>>>>>>> 523deb4 (feat: ajout et correction des métadatas pour factur-x et PDF A3)
 };
