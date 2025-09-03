@@ -1,4 +1,5 @@
 const InvoicesService = require('./invoices.service');
+const InvoicesAttachmentsModel = require('./invoiceAttachments.model')
 
 /**
  * Liste toutes les factures
@@ -180,7 +181,6 @@ async function updateInvoice(req, res, next) {
     next(err);
   }
 }
-
 
 module.exports = {
   listInvoices,

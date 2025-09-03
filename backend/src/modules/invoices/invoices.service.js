@@ -1,7 +1,8 @@
 // invoices.service.js
-
 const InvoicesModel = require('./invoices.model');
 const { generateFacturXXML } = require('../../utils/facturx-generator');
+const { embedFacturXInPdf } = require('../../utils/pdf-generator');
+const InvoicesAttachmentsModel = require('./invoiceAttachments.model');
 const fs = require('fs');
 const path = require('path');
 
@@ -28,6 +29,12 @@ function saveFacturXXML(id, invoiceData) {
   const xmlPath = path.join(FACTURX_DIR, `${id}-factur-x.xml`);
   fs.writeFileSync(xmlPath, xml, 'utf-8');
   return xmlPath;
+}
+
+async function getMainPdfPath(invoiceId) {
+  const attachment = await InvoicesAttachmentsModel.getAttachment(invoiceId, 'main');
+  if (!attachment) throw new Error(`PDF principal introuvable pour invoice ${invoiceId}`);
+  return path.resolve(attachment.file_path); 
 }
 
 async function listInvoices() {
@@ -87,7 +94,11 @@ async function updateInvoice(id, data) {
     attachments,
   });
 
-  return { ...updatedInvoice, facturxPath: xmlPath };
+  const mainPdfPath = await getMainPdfPath(updatedInvoice.id);
+  const pdfA3Path = await embedFacturXInPdf(mainPdfPath, xmlPath);
+  console.log("📄 PDF/A-3 generated at:", pdfA3Path);
+
+  return { ...updatedInvoice, facturxPath: xmlPath, pdfPath: pdfA3Path };
 }
 
 async function deleteInvoice(id) {
