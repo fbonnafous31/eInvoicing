@@ -1,12 +1,22 @@
 # Logs
+*.log
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+npm-debug.log*
 
-dist
-dist-ssr
-*.local
+# Build outputs
+dist/
+dist-ssr/
+build/
+
+# Node modules
+node_modules/
+
+# Env files
+.env
+db.js
 
 # Editor directories and files
 .vscode/*
@@ -18,31 +28,13 @@ dist-ssr
 *.sln
 *.sw?
 
-# Node modules
-node_modules/
-
-# Env files
-.env
-db.js
-
-# Logs
-logs
-*.log
-npm-debug.log*
-
-# Build outputs
-dist/
-build/
-
 # Vite cache
 node_modules/.vite/
 
 # Mac OS files
 .DS_Store
 
-# VSCode settings
-.vscode/
-
-#uploads
+# Uploads
 backend/src/uploads/invoices/*
 backend/src/uploads/factur-x/*
+backend/src/uploads/pdf-a3/*
