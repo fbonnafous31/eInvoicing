@@ -1,6 +1,10 @@
+// utils/pdf-generator.js
 const fs = require('fs');
 const path = require('path');
 const { PDFDocument } = require('pdf-lib');
+const { generateFilledXmp } = require('./xmp-helper');
+const { injectXmpIntoPdf } = require('./xmp-injector');
+const { execSync } = require('child_process');
 
 const PDF_A3_DIR = path.resolve('src/uploads/pdf-a3');
 
@@ -19,11 +23,13 @@ function ensurePdfDirExists() {
  * @param {string|number} invoiceId - ID de la facture pour nommer le PDF/A-3
  * @returns {string} Chemin du PDF/A-3 généré
  */
+
 async function embedFacturXInPdf(pdfPath, facturxPath, attachments = [], invoiceId) {
+  // Charger PDF principal
   const existingPdfBytes = fs.readFileSync(pdfPath);
   const pdfDoc = await PDFDocument.load(existingPdfBytes);
 
-  // Attacher le XML
+  // Attacher le XML Factur-X
   const xmlBytes = fs.readFileSync(facturxPath);
   await pdfDoc.attach(xmlBytes, `${invoiceId}-factur-x.xml`, {
     mimeType: 'application/xml',
@@ -39,15 +45,36 @@ async function embedFacturXInPdf(pdfPath, facturxPath, attachments = [], invoice
     });
   }
 
-  // Métadonnées
+  // Métadonnées PDF standards (compatibles pdf-lib)
   pdfDoc.setTitle(`Invoice ${invoiceId}`);
   pdfDoc.setSubject('Facture électronique PDF/A-3 avec Factur-X et attachments');
+  pdfDoc.setCreator('eInvoicing');
+  pdfDoc.setProducer('eInvoicing');
 
   // Sauvegarder PDF/A-3
   ensurePdfDirExists();
   const pdfA3Path = path.join(PDF_A3_DIR, `${invoiceId}_pdf-a3.pdf`);
   const pdfBytes = await pdfDoc.save();
   fs.writeFileSync(pdfA3Path, pdfBytes);
+
+  // ✅ Injection XMP avec exiftool (optionnel, non bloquant)
+  try {
+    const xmlFileName = path.basename(facturxPath); // ex: "174-factur-x.xml"
+    const xmpPath = generateFilledXmp({
+      invoiceId,
+      xmlFileName,
+      title: `Invoice ${invoiceId}`,
+    });
+
+    await injectXmpIntoPdf(pdfA3Path, xmpPath);
+
+    // Nettoyer le fichier XMP temporaire
+    try { fs.unlinkSync(xmpPath); } catch (_) {}
+
+    console.log(`✅ XMP injecté dans ${pdfA3Path}`);
+  } catch (err) {
+    console.warn(`⚠️ Impossible d'injecter le XMP (PDF généré quand même): ${err.message}`);
+  }
 
   return pdfA3Path;
 }

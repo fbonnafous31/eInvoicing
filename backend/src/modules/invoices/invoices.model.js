@@ -240,6 +240,11 @@ async function updateInvoice(
 
     // --- 1. Update invoice main data ---
     if (invoice) {
+      // Trim invoice_number if present to ensure data quality
+      if (invoice.invoice_number) {
+        invoice.invoice_number = invoice.invoice_number.trim().slice(0, 20);
+      }
+
       console.log("Updating invoice main data:", invoice);
       const invoiceColumns = [
         "invoice_number",

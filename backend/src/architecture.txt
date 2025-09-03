@@ -30,23 +30,37 @@
 │   │   ├── 170-factur-x.xml
 │   │   ├── 171-factur-x.xml
 │   │   ├── 172-factur-x.xml
-│   │   └── 173-factur-x.xml
-│   └── invoices
-│       ├── 167_add_1756843574491_note_de_credit_fr.pdf
-│       ├── 167_main_1756843574489_modele_de_facture.pdf
-│       ├── 169_add_1756845637883_modele_de_facture.pdf
-│       ├── 169_main_1756845637882_note_de_credit_fr.pdf
-│       ├── 170_add_1756845667656_modele_de_facture.pdf
-│       ├── 170_main_1756845667653_note_de_credit_fr.pdf
-│       ├── 171_add_1756845291632_journal_jour1.txt
-│       ├── 171_add_1756845291634_factur-x.xml
-│       ├── 171_main_1756845291626_journal_jour1.md
-│       ├── 172_main_1756845437964_modele_de_facture.pdf
-│       ├── 173_main_1756845717519_Projet-de-facturation-electronique.pdf
-│       └── sample-invoice.pdf
+│   │   ├── 173-factur-x.xml
+│   │   └── 174-factur-x.xml
+│   ├── invoices
+│   │   ├── 167_add_1756843574491_note_de_credit_fr.pdf
+│   │   ├── 167_main_1756843574489_modele_de_facture.pdf
+│   │   ├── 169_add_1756845637883_modele_de_facture.pdf
+│   │   ├── 169_main_1756845637882_note_de_credit_fr.pdf
+│   │   ├── 170_add_1756845667656_modele_de_facture.pdf
+│   │   ├── 170_main_1756845667653_note_de_credit_fr.pdf
+│   │   ├── 171_add_1756845291632_journal_jour1.txt
+│   │   ├── 171_add_1756845291634_factur-x.xml
+│   │   ├── 171_main_1756845291626_journal_jour1.md
+│   │   ├── 172_add_1756885692691_journal_jour1.md
+│   │   ├── 172_add_1756885692692_prompts.txt
+│   │   ├── 172_add_1756885692693_note_de_credit_fr.pdf
+│   │   ├── 172_main_1756885692689_modele_de_facture.pdf
+│   │   ├── 173_main_1756845717519_Projet-de-facturation-electronique.pdf
+│   │   ├── 174_main_1756908440884_modele_de_facture.pdf
+│   │   └── sample-invoice.pdf
+│   └── pdf-a3
+│       ├── 172_pdf-a3.pdf
+│       └── 174_pdf-a3.pdf
 └── utils
     ├── facturx-generator.js
+    ├── facturx-template.xmp
     ├── fileNaming.js
-    └── pdf-generator.js
+    ├── icc
+    │   ├── Gray.icc
+    │   └── sRGB.icc
+    ├── pdf-generator.js
+    ├── xmp-helper.js
+    └── xmp-injector.js
 
-11 directories, 39 files
+13 directories, 51 files
