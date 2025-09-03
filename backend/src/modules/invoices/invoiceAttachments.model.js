@@ -48,8 +48,27 @@ async function getAttachment(invoiceId, type) {
   return res.rows[0] || null;
 }
 
+async function getAttachmentsByType(invoiceId, type) {
+  const res = await db.query(
+    `SELECT file_name, file_path
+     FROM invoicing.invoice_attachments
+     WHERE invoice_id = $1 AND attachment_type = $2`,
+    [invoiceId, type]
+  );
+  return res.rows; 
+}
+
+async function getAdditionalAttachments(invoiceId) {
+  const attachments = await getAttachmentsByType(invoiceId, 'additional');
+  return attachments.map(att => ({
+    file_path: path.resolve(att.file_path),
+    file_name: att.file_name
+  }));
+}
+
 module.exports = { 
   getAttachment, 
   saveAttachment, 
-  cleanupAttachments 
+  cleanupAttachments,
+  getAdditionalAttachments
 };
