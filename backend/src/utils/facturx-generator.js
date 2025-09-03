@@ -89,10 +89,15 @@ export function generateFacturXXML(invoice) {
       .ele('ram:CityName').txt(seller.city).up()
       .ele('ram:CountryID').txt(seller.country_code).up()
     .up();
+
   if (seller.vat_number) {
     sellerParty.ele('ram:SpecifiedTaxRegistration')
         .ele('ram:ID', { schemeID: 'VA' }).txt(seller.vat_number).up()
-    .up();
+      .up();
+  } else if (seller.legal_identifier) {
+    sellerParty.ele('ram:SpecifiedTaxRegistration')
+        .ele('ram:ID', { schemeID: '0002' }).txt(seller.legal_identifier).up()
+      .up();
   }
 
   // BuyerTradeParty (ordre respecté)

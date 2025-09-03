@@ -52,9 +52,6 @@ export function validateSeller(data) {
   // ---------------------
   // Validation banque
   // ---------------------
-  if (!data.vat_number?.trim()) {
-    errors.vat_number = 'Le numéro de TVA intracommunautaire est obligatoire';
-  }
   if (data.iban && !IBAN.isValid(data.iban)) {
     errors.iban = 'IBAN invalide';
   }
