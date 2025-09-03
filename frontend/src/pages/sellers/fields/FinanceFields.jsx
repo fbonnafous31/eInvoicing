@@ -9,7 +9,7 @@ export default function FinanceFields({ formData, errors, handleChange, handleBl
       <InputField
         id="vat_number"
         name="vat_number"
-        label="Numéro de TVA *"
+        label="Numéro de TVA"
         value={formData.vat_number}
         onChange={handleFieldChange('vat_number')}
         onBlur={handleBlur}
