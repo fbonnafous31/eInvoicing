@@ -1,4 +1,5 @@
 const fs = require("fs");
+const db = require("../../config/db");
 const path = require("path");
 const { generateStoredName, getFinalPath } = require("../../utils/fileNaming");
 
@@ -37,4 +38,18 @@ async function cleanupAttachments(conn, invoiceId) {
   }
 }
 
-module.exports = { saveAttachment, cleanupAttachments };
+async function getAttachment(invoiceId, type) {
+  const res = await db.query(
+    `SELECT file_name, file_path 
+     FROM invoicing.invoice_attachments 
+     WHERE invoice_id = $1 AND attachment_type = $2`,
+    [invoiceId, type]
+  );
+  return res.rows[0] || null;
+}
+
+module.exports = { 
+  getAttachment, 
+  saveAttachment, 
+  cleanupAttachments 
+};

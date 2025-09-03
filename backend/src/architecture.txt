@@ -12,6 +12,7 @@
 │   │   ├── clients.route.js
 │   │   └── clients.service.js
 │   ├── invoices
+│   │   ├── invoiceAttachments.model.js
 │   │   ├── invoiceClient.model.js
 │   │   ├── invoiceClient.service.js
 │   │   ├── invoices.controller.js
@@ -24,14 +25,28 @@
 │       ├── sellers.route.js
 │       └── sellers.service.js
 ├── uploads
+│   ├── factur-x
+│   │   ├── 169-factur-x.xml
+│   │   ├── 170-factur-x.xml
+│   │   ├── 171-factur-x.xml
+│   │   ├── 172-factur-x.xml
+│   │   └── 173-factur-x.xml
 │   └── invoices
 │       ├── 167_add_1756843574491_note_de_credit_fr.pdf
 │       ├── 167_main_1756843574489_modele_de_facture.pdf
-│       ├── 169_add_1756843835016_modele_de_facture.pdf
-│       ├── 169_main_1756843835015_note_de_credit_fr.pdf
+│       ├── 169_add_1756845637883_modele_de_facture.pdf
+│       ├── 169_main_1756845637882_note_de_credit_fr.pdf
+│       ├── 170_add_1756845667656_modele_de_facture.pdf
+│       ├── 170_main_1756845667653_note_de_credit_fr.pdf
+│       ├── 171_add_1756845291632_journal_jour1.txt
+│       ├── 171_add_1756845291634_factur-x.xml
+│       ├── 171_main_1756845291626_journal_jour1.md
+│       ├── 172_main_1756845437964_modele_de_facture.pdf
+│       ├── 173_main_1756845717519_Projet-de-facturation-electronique.pdf
 │       └── sample-invoice.pdf
 └── utils
     ├── facturx-generator.js
-    └── fileNaming.js
+    ├── fileNaming.js
+    └── pdf-generator.js
 
-10 directories, 25 files
+11 directories, 39 files
