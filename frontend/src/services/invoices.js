@@ -60,3 +60,20 @@ export async function deleteInvoice(id) {
   return true;
 }
 
+/**
+ * Génère un PDF pour une facture existante
+ * @param {string|number} id
+ */
+export async function generateInvoicePdf(id) {
+  const response = await fetch(`${API_BASE}/${id}/generate-pdf`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" }
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.error || data.message || "Erreur lors de la génération du PDF");
+  }
+
+  return response.json(); // -> { path: "/uploads/pdf-a3/xxx.pdf" }
+}
