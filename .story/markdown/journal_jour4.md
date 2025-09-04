@@ -55,10 +55,10 @@ C’était un premier vrai défi React, avec ses erreurs de parsing et d’impor
 
 L’étape suivante a été de faire communiquer correctement les deux serveurs :  
 - Le backend sur le port 3000 qui expose l’API  
-  ![](images/jour4/backend.png)
+  ![](../images/jour4/backend.png)
 
 - Le frontend sur le port 5173 qui fait la requête via la proxy Vite  
-  ![](images/jour4/frontend.png)
+  ![](../images/jour4/frontend.png)
 
 ## Ce que j’ai appris 📚
 

@@ -1,52 +1,52 @@
+// utils/xmp-helper.js
 const fs = require('fs');
 const path = require('path');
 
-const PDF_A3_DIR = path.resolve('src/uploads/pdf-a3');
-const TEMPLATE_XMP_PATH = path.resolve(__dirname, 'facturx-template.xmp');
-
 /**
- * Remplit le template XMP avec les valeurs dynamiques et renvoie le chemin du .xmp généré.
- * @param {Object} p
- * @param {number|string} p.invoiceId
- * @param {string} p.xmlFileName  ex: "174-factur-x.xml"
- * @param {string} [p.title]      ex: "Invoice 174"
- * @param {string} [p.createDate] ISO string
- * @param {string} [p.modifyDate] ISO string
- * @returns {string} Chemin du fichier XMP généré (dans src/uploads/pdf-a3)
+ * Génère un fichier XMP complet pour Factur-X, prêt à injecter dans le PDF
+ * @param {Object} options
+ * @param {string|number} options.invoiceId - ID de la facture
+ * @param {string} options.xmlFileName - Nom du XML Factur-X (ex: "174-factur-x.xml")
+ * @param {string} options.title - Titre de la facture (ex: "Invoice 174")
+ * @returns {string} Chemin vers le fichier XMP temporaire généré
  */
-function generateFilledXmp({ invoiceId, xmlFileName, title, createDate, modifyDate }) {
-  if (!fs.existsSync(TEMPLATE_XMP_PATH)) {
-    throw new Error(`Template XMP introuvable à ${TEMPLATE_XMP_PATH}`);
-  }
-  if (!fs.existsSync(PDF_A3_DIR)) {
-    fs.mkdirSync(PDF_A3_DIR, { recursive: true });
-  }
+function generateFilledXmp({ invoiceId, xmlFileName, title }) {
+  const now = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
 
-  let xmp = fs.readFileSync(TEMPLATE_XMP_PATH, 'utf-8');
+  const xmpContent = `<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/">
+  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <rdf:Description
+        xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/"
+        xmlns:fx="urn:factur-x:pdfa:metadata:fx"
+        pdfaid:part="3"
+        pdfaid:conformance="B"
+        fx:DocumentType="INVOICE"
+        fx:DocumentFileName="${xmlFileName}"
+        fx:Version="1.0"
+        fx:ConformanceLevel="BASIC"/>
+    <rdf:Description
+        xmlns:xmp="http://ns.adobe.com/xap/1.0/"
+        xmp:CreateDate="${now}"
+        xmp:ModifyDate="${now}"
+        xmp:CreatorTool="eInvoicing"/>
+    <rdf:Description
+        xmlns:xapMM="http://ns.adobe.com/xap/1.0/mm/"
+        xapMM:DocumentID="INV-${invoiceId}"/>
+    <rdf:Description
+        xmlns:dc="http://purl.org/dc/elements/1.1/"
+        dc:title="${title}"
+        dc:description="Facture électronique avec Factur-X"
+        dc:format="application/pdf"/>
+  </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>`;
 
-  // Valeurs par défaut
-  const now = new Date().toISOString();
-  const _title = title || `Invoice ${invoiceId}`;
-  const _create = createDate || now;
-  const _modify = modifyDate || now;
+  // Créer un fichier temporaire XMP
+  const tmpXmpPath = path.join(__dirname, `${invoiceId}-factur-x.xmp`);
+  fs.writeFileSync(tmpXmpPath, xmpContent, 'utf8');
 
-  // Remplacements basés sur placeholders si présents
-  xmp = xmp
-    .replace(/--CreateDate--/g, _create)
-    .replace(/--ModifyDate--/g, _modify)
-    .replace(/--DocumentID--/g, `INV-${invoiceId}`)
-    .replace(/--Title--/g, _title);
-
-  // Assurer que fx:DocumentFileName correspond bien au nom du XML attaché
-  // (fonctionne même si pas de placeholder, on remplace la valeur existante)
-  xmp = xmp.replace(
-    /fx:DocumentFileName="[^"]*"/,
-    `fx:DocumentFileName="${xmlFileName}"`
-  );
-
-  const outPath = path.join(PDF_A3_DIR, `${invoiceId}_temp.xmp`);
-  fs.writeFileSync(outPath, xmp, 'utf-8');
-  return outPath;
+  return tmpXmpPath;
 }
 
-module.exports = { generateFilledXmp, PDF_A3_DIR, TEMPLATE_XMP_PATH };
+module.exports = { generateFilledXmp };

@@ -9,7 +9,7 @@ Cela m’a permis d’avoir un environnement robuste et évolutif, capable de g�
 ## Choix de l’outil de gestion : DBeaver
 
 Pour interagir avec ma base, j’ai opté pour DBeaver, un client SQL open source, riche en fonctionnalités, qui supporte PostgreSQL et offre une interface graphique complète.
-![Client DBeaver](images/jour2/DBeaver.png)
+![Client DBeaver](../images/jour2/DBeaver.png)
 
 DBeaver facilite la création, la visualisation et la modification des tables ainsi que l’exécution de requêtes SQL, ce qui accélère grandement la phase de développement. C’est un excellent complément à VSCode, surtout pour la partie base de données.
 
@@ -20,7 +20,7 @@ La partie la plus intéressante de la journée a été de dessiner la structure 
 - **Tables `sellers` et `buyers`** : elles représentent les entités commerciales impliquées dans les factures, avec leurs informations légales, fiscales et bancaires.  
 - **Table `invoices`** : le cœur du système, elle regroupe toutes les informations essentielles d’une facture — numéros, dates, montants, références, et liens vers vendeur et acheteur.  
 - **Tables `invoice_lines`,  `invoice_taxes` et `invoice_attachments`** : détaillent les lignes de facture, la ventilation des taxes et les justificatifs de facture, indispensables pour un traitement précis et conforme des documents.  
-![DB](images/jour2/einvoicing_db.png)
+![DB](../images/jour2/einvoicing_db.png)
 
 Les commentaires associés à chaque colonne sont un atout précieux, ils garantissent que chaque donnée a un sens clair et que la maintenance future sera plus simple.
 
