@@ -1,6 +1,7 @@
 const InvoicesService = require('./invoices.service');
 const { getInvoiceById } = require('./invoices.model');
 const { generateInvoicePdf } = require('../../utils/invoice-pdf/generateInvoicePdf');
+const path = require("path");
 
 /**
  * Liste toutes les factures
@@ -183,26 +184,31 @@ async function updateInvoice(req, res, next) {
   }
 }
 
-async function createInvoicePdf(req, res, next) {
+async function createInvoicePdf(req, res) {
   try {
     const invoiceId = req.params.id;
-    console.log("➡️ Génération PDF pour facture:", invoiceId);
+    console.log("➡️ Requête createInvoicePdf pour invoiceId:", invoiceId);
 
     const invoice = await getInvoiceById(invoiceId);
     if (!invoice) {
-      console.error("❌ Facture introuvable:", invoiceId);
+      console.log("❌ Facture introuvable pour id:", invoiceId);
       return res.status(404).json({ error: "Facture introuvable" });
     }
 
     const pdfPath = await generateInvoicePdf(invoice);
-    console.log("✅ PDF généré:", pdfPath);
+    console.log("✅ PDF généré sur le serveur :", pdfPath);
 
-    res.json({ path: pdfPath }); 
+    const fileName = path.basename(pdfPath);
+    const publicPath = `/uploads/pdf/${fileName}`;
+    console.log("📎 URL publique renvoyée :", publicPath);
+
+    res.json({ path: publicPath });
   } catch (err) {
     console.error("❌ Erreur dans createInvoicePdf:", err);
-    res.status(500).json({ error: err.message || "Erreur serveur" });
+    res.status(500).json({ error: "Erreur serveur" });
   }
 }
+
 
 module.exports = {
   listInvoices,

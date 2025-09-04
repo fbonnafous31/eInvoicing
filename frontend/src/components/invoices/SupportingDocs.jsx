@@ -1,11 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { SmallDeleteButton } from '@/components/ui/buttons';
 
 export default function SupportingDocs({ data, onChange, disabled, hideLabelsInView }) {
-  const [mode, setMode] = useState(() => {
-    const hasGenerated = data.some(a => a.generated);
-    return hasGenerated ? "generate" : "upload";
-  });
 
   // Logs pour debug
   useEffect(() => {
@@ -15,17 +11,6 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
   const mainAttachment = data.find(a => a.attachment_type === 'main' && !a.generated);
   const additionalAttachments = data.filter(a => a.attachment_type === 'additional');
 
-  const handleModeChange = (e) => {
-    const selected = e.target.value;
-    setMode(selected);
-
-    if (selected === "generate") {
-      onChange([{ attachment_type: "main", generated: true }]);
-    } else {
-      // retour au mode upload → on vide les attachments
-      onChange([]);
-    }
-  };
 
   const handleMainChange = (e) => {
     const file = e.target.files[0];
@@ -72,66 +57,22 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
     <div className="card p-3 mb-3">
       <h5>Justificatifs</h5>
 
+
       <div className="mb-3">
-        <label className="form-label me-3">Mode de justificatif principal :</label>
-        <div className="d-inline-flex align-items-center">
-          <div className="form-check form-check-inline">
-            <input
-              className="form-check-input"
-              type="radio"
-              value="upload"
-              id="modeUpload"
-              checked={mode === "upload"}
-              onChange={handleModeChange}
-              disabled={disabled}
-            />
-            <label className="form-check-label" htmlFor="modeUpload">
-              Charger un fichier
-            </label>
+        <label>Justificatif principal (format PDF) *</label>
+        {!hideLabelsInView && (
+          <input type="file" onChange={handleMainChange} className="form-control" disabled={disabled} />
+        )}
+        {mainAttachment && (
+          <div className="mt-1 d-flex justify-content-between align-items-center">
+            <span>{mainAttachment.file_name}</span>
+            {!hideLabelsInView && (
+              <SmallDeleteButton onClick={() => removeFile(0, 'main')} disabled={disabled} />               
+            )}
           </div>
-          <div className="form-check form-check-inline">
-            <input
-              className="form-check-input"
-              type="radio"
-              value="generate"
-              id="modeGenerate"
-              checked={mode === "generate"}
-              onChange={handleModeChange}
-              disabled={disabled}
-            />
-            <label className="form-check-label" htmlFor="modeGenerate">
-              Générer automatiquement
-            </label>
-          </div>
-        </div>
+        )}
       </div>
 
-      {/* Cas upload classique */}
-      {mode === "upload" && (
-        <div className="mb-3">
-          <label>Justificatif principal (format PDF) *</label>
-          {!hideLabelsInView && (
-            <input type="file" onChange={handleMainChange} className="form-control" disabled={disabled} />
-          )}
-          {mainAttachment && (
-            <div className="mt-1 d-flex justify-content-between align-items-center">
-              <span>{mainAttachment.file_name}</span>
-              {!hideLabelsInView && (
-                <SmallDeleteButton onClick={() => removeFile(0, 'main')} disabled={disabled} />               
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Cas génération */}
-      {mode === "generate" && (
-        <p className="text-muted">
-          Le justificatif sera généré automatiquement lors de la sauvegarde de la facture.
-        </p>
-      )}
-
-      {/* Justificatifs additionnels (toujours possibles) */}
       <div className="mb-3">
         <label>Justificatifs additionnels</label>
         {!hideLabelsInView && (

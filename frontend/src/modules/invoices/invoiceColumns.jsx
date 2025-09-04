@@ -8,35 +8,78 @@ export default function useInvoiceColumns() {
   const navigate = useNavigate();
 
   return [
-    {
-      cell: row => (
-        <button
-          className="btn btn-sm"
-          onClick={() => {
-            if (row?.id) navigate(`/invoices/${row.id}/view`);
-          }}
-          title="Consulter la facture"
-        >
-          👁️
-        </button>
+{
+  cell: row => (
+        <div className="flex gap-1">
+          {/* Voir */}
+          <button
+            className="btn btn-sm"
+            onClick={() => {
+              if (row?.id) navigate(`/invoices/${row.id}/view`);
+            }}
+            title="Consulter la facture"
+          >
+            👁️
+          </button>
+
+          {/* Éditer */}
+          <button
+            className="btn btn-sm"
+            onClick={() => {
+              if (row?.id) navigate(`/invoices/${row.id}`);
+            }}
+            title="Modifier la facture"
+          >
+            ✏️
+          </button>
+
+          {/* Générer PDF */}
+          <button
+            className="btn btn-sm"
+            title="Générer et télécharger la facture (PDF)"
+            onClick={async () => {
+              if (!row?.id) return;
+
+              try {
+                console.log("➡️ Génération PDF pour invoice id:", row.id);
+
+                // 1️⃣ Génération du PDF côté backend
+                const resGenerate = await fetch(`/api/invoices/${row.id}/generate-pdf`);
+                const data = await resGenerate.json();
+                console.log("📄 JSON reçu :", data);
+
+                if (!data.path) {
+                  console.error("❌ Pas de chemin PDF renvoyé");
+                  return;
+                }
+
+                // 2️⃣ Récupération du PDF via URL complète backend
+                const pdfRes = await fetch(`http://localhost:3000${data.path}`);
+                const blob = await pdfRes.blob();
+
+                // 3️⃣ Téléchargement côté client
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = `facture_${row.invoice_number}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+
+                console.log("✅ PDF téléchargé");
+              } catch (err) {
+                console.error("❌ Erreur lors de la génération et téléchargement :", err);
+              }
+            }}
+          >
+            📄
+          </button>
+        </div>
       ),
       ignoreRowClick: true,
-      width: '50px',
-    },    
-    {   
-      cell: row => (
-        <button
-          className="btn btn-sm"
-          onClick={() => {
-            if (row?.id) navigate(`/invoices/${row.id}`);
-          }}
-        >
-          ✏️
-        </button>
-      ),
-      ignoreRowClick: true,
-      width: '50px', // pour la librairie, pas le DOM
+      width: '150px',
     },
+
     {
       name: 'Référence',
       selector: row => row.invoice_number || '',

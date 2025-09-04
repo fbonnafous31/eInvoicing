@@ -9,7 +9,6 @@ import SupportingDocs from "./SupportingDocs";
 import FormSection from "../form/FormSection";
 import { createInvoice, updateInvoice } from "../../services/invoices";
 import { fetchSellers } from '../../services/sellers';
-import { generateInvoicePdf } from "../../services/invoices";
 import { validateInvoiceField, validateClientData } from "../../utils/validators/invoice";
 import { EditButton, CancelButton, DeleteButton, SaveButton } from '@/components/ui/buttons';
 
@@ -210,7 +209,6 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
     }
 
     const mainAttachment = invoiceData.attachments.find(a => a.attachment_type === 'main');
-    const shouldGeneratePdf = mainAttachment?.generated === true;
     if (mainAttachment.raw_file && mainAttachment.raw_file.type !== "application/pdf") {
       setErrorMessage("Le justificatif principal doit être un fichier PDF !");
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -250,38 +248,21 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
       formData.append("taxes", JSON.stringify(taxesSummary));
       console.log("Payload FormData ready:", formData);
 
-      if (shouldGeneratePdf) {
-        try {
-          const { path } = await generateInvoicePdf(invoiceData.id);
-
-          // Télécharger automatiquement le PDF
-          const link = document.createElement("a");
-          link.href = path;
-          link.download = `facture_${invoiceData.header.invoice_number}.pdf`;
-          link.click();
-
-          setSuccessMessage("Facture créée et PDF généré avec succès ! 🎉");
-        } catch (err) {
-          console.error("❌ Erreur génération PDF:", err);
-          setErrorMessage("Impossible de générer le PDF : " + err.message);
+      if (initialData) {
+        // Mise à jour
+        if (isDraft) {
+          await updateInvoice(initialData.id, formData);
+          setSuccessMessage("Facture mise à jour avec succès ! 🎉");
+        } else {
+          // Ce cas ne devrait pas être possible via l'UI, mais c'est une sécurité
+          setErrorMessage("Impossible de modifier une facture qui n'est pas un brouillon.");
+          return;
         }
       } else {
-        if (initialData) {
-          // Mise à jour
-          if (isDraft) {
-            await updateInvoice(initialData.id, formData);
-            setSuccessMessage("Facture mise à jour avec succès ! 🎉");
-          } else {
-            // Ce cas ne devrait pas être possible via l'UI, mais c'est une sécurité
-            setErrorMessage("Impossible de modifier une facture qui n'est pas un brouillon.");
-            return;
-          }
-        } else {
-          // Création
-          await createInvoice(formData);
-          setSuccessMessage("Facture créée avec succès ! 🎉");
-        }
-      } 
+        // Création
+        await createInvoice(formData);
+        setSuccessMessage("Facture créée avec succès ! 🎉");
+      }
 
       window.scrollTo({ top: 0, behavior: "smooth" });
       setTimeout(() => {
