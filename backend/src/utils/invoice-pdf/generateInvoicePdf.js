@@ -4,7 +4,7 @@ const { PDFDocument, StandardFonts } = require("pdf-lib");
 
 async function generateInvoicePdf(invoice) {
   const pdfDoc = await PDFDocument.create();
-  const page = pdfDoc.addPage([595, 842]); // A4
+  const page = pdfDoc.addPage([595, 842]); 
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const { width, height } = page.getSize();
 
@@ -19,10 +19,10 @@ async function generateInvoicePdf(invoice) {
   const filePath = path.join(uploadDir, fileName);
   const pdfBytes = await pdfDoc.save();
   
-  console.log("Écriture du PDF ici :", filePath);
+  console.log("Écriture du PDF :", filePath);
   await fs.promises.writeFile(filePath, pdfBytes);
 
-  return filePath;
+  return `/uploads/pdf/${fileName}`;
 }
 
 module.exports = { generateInvoicePdf };
