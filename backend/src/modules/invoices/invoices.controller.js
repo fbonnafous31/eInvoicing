@@ -1,5 +1,6 @@
 const InvoicesService = require('./invoices.service');
-const InvoicesAttachmentsModel = require('./invoiceAttachments.model')
+const { getInvoiceById } = require('./invoices.model');
+const { generateInvoicePdf } = require('../../utils/invoice-pdf/generateInvoicePdf');
 
 /**
  * Liste toutes les factures
@@ -182,10 +183,32 @@ async function updateInvoice(req, res, next) {
   }
 }
 
+async function createInvoicePdf(req, res, next) {
+  try {
+    const invoiceId = req.params.id;
+    console.log("➡️ Génération PDF pour facture:", invoiceId);
+
+    const invoice = await getInvoiceById(invoiceId);
+    if (!invoice) {
+      console.error("❌ Facture introuvable:", invoiceId);
+      return res.status(404).json({ error: "Facture introuvable" });
+    }
+
+    const pdfPath = await generateInvoicePdf(invoice);
+    console.log("✅ PDF généré:", pdfPath);
+
+    res.json({ path: pdfPath }); 
+  } catch (err) {
+    console.error("❌ Erreur dans createInvoicePdf:", err);
+    res.status(500).json({ error: err.message || "Erreur serveur" });
+  }
+}
+
 module.exports = {
   listInvoices,
   getInvoice,
   createInvoice,
   updateInvoice, 
-  deleteInvoice
+  deleteInvoice,
+  createInvoicePdf
 };

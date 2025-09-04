@@ -9,6 +9,7 @@ import SupportingDocs from "./SupportingDocs";
 import FormSection from "../form/FormSection";
 import { createInvoice, updateInvoice } from "../../services/invoices";
 import { fetchSellers } from '../../services/sellers';
+import { generateInvoicePdf } from "../../services/invoices";
 import { validateInvoiceField, validateClientData } from "../../utils/validators/invoice";
 import { EditButton, CancelButton, DeleteButton, SaveButton } from '@/components/ui/buttons';
 
@@ -18,7 +19,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
   const [invoiceData, setInvoiceData] = useState({
     header: {
       // Initialiser la date d'émission à aujourd'hui et l'année fiscale correspondante
-      issue_date: new Date().toISOString().split("T")[0],
+      issue_date: new Date().toISOString().split("T")[0], 
       fiscal_year: new Date().getFullYear(),
       payment_terms: "30_df",
     },
@@ -75,7 +76,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
   }, [initialData]);
 
   console.log("InvoiceForm invoiceData:", invoiceData);
-  
+
   const headerFields = ["invoice_number", "issue_date", "fiscal_year", "seller_id"];
 
   // Calcul des totaux et TVA
@@ -87,7 +88,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
       const quantity = Number(line.quantity) || 0;
       const unit_price = Number(line.unit_price) || 0;
       const discount = Number(line.discount) || 0;
-      const vat_rate = Number(line.vat_rate) || 0; 
+      const vat_rate = Number(line.vat_rate) || 0;
 
       const line_net = quantity * unit_price - discount;
       const line_tax = (line_net * vat_rate) / 100;
@@ -208,30 +209,30 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
       return;
     }
 
+    const mainAttachment = invoiceData.attachments.find(a => a.attachment_type === 'main');
+    const shouldGeneratePdf = mainAttachment?.generated === true;
+    if (mainAttachment.raw_file && mainAttachment.raw_file.type !== "application/pdf") {
+      setErrorMessage("Le justificatif principal doit être un fichier PDF !");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
     try {
-      // Création FormData
       const formData = new FormData();
 
       const newAttachments = invoiceData.attachments.filter(a => a.raw_file);
-
-      // 1. Fichiers à uploader (uniquement les nouveaux)
       newAttachments.forEach(file => {
         formData.append("attachments", file.raw_file);
       });
 
-      // 2. Métadonnées pour les nouveaux fichiers, pour que le backend puisse les associer
-      const newAttachmentsMeta = newAttachments.map(a => ({
-        attachment_type: a.attachment_type
-      }));
+      const newAttachmentsMeta = newAttachments.map(a => ({attachment_type: a.attachment_type}));
       formData.append("attachments_meta", JSON.stringify(newAttachmentsMeta));
 
-      // 3. Pour la mise à jour, on envoie aussi les métadonnées des fichiers existants à conserver
       if (initialData) {
         const existingAttachments = invoiceData.attachments.filter(a => !a.raw_file);
         formData.append("existing_attachments", JSON.stringify(existingAttachments));
       }
 
-      // autres données
       formData.append("invoice", JSON.stringify({
         invoice_number: invoiceData.header.invoice_number,
         issue_date: invoiceData.header.issue_date,
@@ -249,21 +250,38 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
       formData.append("taxes", JSON.stringify(taxesSummary));
       console.log("Payload FormData ready:", formData);
 
-      if (initialData) {
-        // C'est une mise à jour
-        if (isDraft) {
-          await updateInvoice(initialData.id, formData);
-          setSuccessMessage("Facture mise à jour avec succès ! 🎉");
-        } else {
-          // Ce cas ne devrait pas être possible via l'UI, mais c'est une sécurité
-          setErrorMessage("Impossible de modifier une facture qui n'est pas un brouillon.");
-          return;
+      if (shouldGeneratePdf) {
+        try {
+          const { path } = await generateInvoicePdf(invoiceData.id);
+
+          // Télécharger automatiquement le PDF
+          const link = document.createElement("a");
+          link.href = path;
+          link.download = `facture_${invoiceData.header.invoice_number}.pdf`;
+          link.click();
+
+          setSuccessMessage("Facture créée et PDF généré avec succès ! 🎉");
+        } catch (err) {
+          console.error("❌ Erreur génération PDF:", err);
+          setErrorMessage("Impossible de générer le PDF : " + err.message);
         }
       } else {
-        // C'est une création
-        await createInvoice(formData);
-        setSuccessMessage("Facture créée avec succès ! 🎉");
-      }
+        if (initialData) {
+          // Mise à jour
+          if (isDraft) {
+            await updateInvoice(initialData.id, formData);
+            setSuccessMessage("Facture mise à jour avec succès ! 🎉");
+          } else {
+            // Ce cas ne devrait pas être possible via l'UI, mais c'est une sécurité
+            setErrorMessage("Impossible de modifier une facture qui n'est pas un brouillon.");
+            return;
+          }
+        } else {
+          // Création
+          await createInvoice(formData);
+          setSuccessMessage("Facture créée avec succès ! 🎉");
+        }
+      } 
 
       window.scrollTo({ top: 0, behavior: "smooth" });
       setTimeout(() => {

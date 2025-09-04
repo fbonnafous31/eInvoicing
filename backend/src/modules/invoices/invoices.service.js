@@ -114,10 +114,26 @@ async function deleteInvoice(id) {
   return await InvoicesModel.deleteInvoice(id);
 }
 
+
+async function registerGeneratedPdf(invoiceId, pdfPath) {
+  const fileName = pdfPath.split('/').pop(); // ex: facture_174.pdf
+
+  const attachment = {
+    file_name: fileName,
+    file_path: pdfPath,
+    attachment_type: 'main',
+    generated: true
+  };
+
+  await saveAttachment(invoiceId, attachment);
+  return attachment;
+}
+
 module.exports = {
   listInvoices,
   getInvoice,
   createInvoice,
   updateInvoice,
   deleteInvoice,
+  registerGeneratedPdf
 };
