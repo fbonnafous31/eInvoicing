@@ -26,6 +26,7 @@ Aujourd’hui, focus sur **la mise en forme et la finalisation du carousel eInvo
 - Carousel **complet et prêt à publier**, structuré pour LinkedIn.  
 - Contenu vivant, professionnel et fidèle à ton expérience.  
 - Slide 1 et 2 très personnelles, slides suivantes détaillent clairement les fonctionnalités et l’avancement technique.  
+![Carousel LinkedIn](../images/jour40/LinkedIn.png)
 
 ---
 

@@ -23,7 +23,7 @@ Chaque bloc a trouvé sa place et le tout fonctionne de manière fluide et cohé
   - Séparation visuelle nette des sections.  
   - Composants cohérents (`InputField`, `SelectField`).  
   - Plus de friction inutile → un vrai workflow complet.  
-
+  ![Formulaire de création de facture](../images/jour32/createInvoice.png)
 ---
 
 ## 💪 Le résultat
@@ -31,6 +31,7 @@ Chaque bloc a trouvé sa place et le tout fonctionne de manière fluide et cohé
 - Un formulaire **complet, robuste et agréable à utiliser**.  
 - Les données sont cohérentes et prêtes pour l’API.  
 - Le code est organisé et suffisamment modulaire pour évoluer facilement.  
+![Saisie de facture](../images/jour32/checkInvoice.png)
 
 ---
 

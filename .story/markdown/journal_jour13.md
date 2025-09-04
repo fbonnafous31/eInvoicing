@@ -86,7 +86,7 @@ Cette approche rend le projet **plus clair**, les échanges **plus rapides**, et
 ## 📚 Ce que j’ai appris
 
 - Les **tooltips combinés aux `...`** offrent un compromis parfait entre lisibilité et accessibilité des informations.  
-  ![Liste des factures](images/jour13/invoiceList.png)
+  ![Liste des factures](../images/jour13/invoiceList.png)
 - Décomposer les fils de conversation améliore réellement la **productivité et la clarté**.  
 - Préparer les helpers et appliquer les règles métier côté frontend (comme le SIRET) dès l’insertion ou la modification simplifie beaucoup la maintenance.
 

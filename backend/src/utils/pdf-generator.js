@@ -4,7 +4,7 @@ const path = require('path');
 const { PDFDocument } = require('pdf-lib');
 const { generateFilledXmp } = require('./xmp-helper');
 const { injectXmpIntoPdf } = require('./xmp-injector');
-const { execSync } = require('child_process');
+const { patchPdfA3 } = require('./pdf-postprocess');
 
 const PDF_A3_DIR = path.resolve('src/uploads/pdf-a3');
 
@@ -31,7 +31,7 @@ async function embedFacturXInPdf(pdfPath, facturxPath, attachments = [], invoice
 
   // Attacher le XML Factur-X
   const xmlBytes = fs.readFileSync(facturxPath);
-  await pdfDoc.attach(xmlBytes, `${invoiceId}-factur-x.xml`, {
+  await pdfDoc.attach(xmlBytes, 'factur-x.xml', {
     mimeType: 'application/xml',
     description: 'Factur-X XML',
   });
@@ -59,7 +59,7 @@ async function embedFacturXInPdf(pdfPath, facturxPath, attachments = [], invoice
 
   // ✅ Injection XMP avec exiftool (optionnel, non bloquant)
   try {
-    const xmlFileName = path.basename(facturxPath); // ex: "174-factur-x.xml"
+    const xmlFileName = path.basename(facturxPath); 
     const xmpPath = generateFilledXmp({
       invoiceId,
       xmlFileName,
@@ -67,7 +67,8 @@ async function embedFacturXInPdf(pdfPath, facturxPath, attachments = [], invoice
     });
 
     await injectXmpIntoPdf(pdfA3Path, xmpPath);
-
+    patchPdfA3(pdfA3Path, 'factur-x.xml');
+    
     // Nettoyer le fichier XMP temporaire
     try { fs.unlinkSync(xmpPath); } catch (_) {}
 
