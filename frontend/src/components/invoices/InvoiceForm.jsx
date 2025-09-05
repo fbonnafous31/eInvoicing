@@ -13,14 +13,12 @@ import { validateInvoiceField, validateClientData } from "../../utils/validators
 import { EditButton, CancelButton, DeleteButton, SaveButton } from '@/components/ui/buttons';
 
 export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly = false }) {
-
   const navigate = useNavigate();
   const [invoiceData, setInvoiceData] = useState({
     header: {
       // Initialiser la date d'émission à aujourd'hui et l'année fiscale correspondante
       issue_date: new Date().toISOString().split("T")[0], 
-      fiscal_year: new Date().getFullYear(),
-      payment_terms: "30_df",
+      fiscal_year: new Date().getFullYear()
     },
     client: {},
     lines: [],
@@ -35,6 +33,42 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Création de facture
+  useEffect(() => {
+    const loadDefaultSeller = async () => {
+      if (initialData) return; 
+
+      try {
+        const sellersList = await fetchSellers();
+        if (!sellersList || !sellersList.length) {
+          return;
+        }
+        const defaultSeller = sellersList[0];
+
+        setInvoiceData(prev => {
+          const newData = {
+            ...prev,
+            header: {
+              ...prev.header,
+              payment_terms: defaultSeller.payment_terms || "upon_receipt",
+              payment_method: defaultSeller.payment_method || "check",
+              seller_id: defaultSeller.id,
+            },
+            seller: [defaultSeller],
+          };
+          return newData;
+        });
+
+      } catch (err) {
+        console.error("Erreur fetch seller:", err);
+      }
+    };
+
+    loadDefaultSeller();
+  }, [initialData]);
+
+
+  // Mise à jour de facture
   useEffect(() => {
     const fetchFullInvoiceData = async () => {
       if (!initialData) return;
@@ -48,7 +82,6 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
         }
       }
       console.log("Seller:", seller);
-
 
       const safeData = {
         ...initialData,
@@ -239,6 +272,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
         contract_number: invoiceData.header.contract_number || null,
         purchase_order_number: invoiceData.header.purchase_order_number || null,
         payment_terms: invoiceData.header.payment_terms || null,
+        payment_method: invoiceData.header.payment_method || null,
         client_id: invoiceData.client.client_id || null,
         supply_date: invoiceData.header.supply_date || null
       }));

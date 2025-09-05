@@ -129,6 +129,7 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
       "purchase_order_number",
       "supply_date",
       "payment_terms",
+      "payment_method",
       "client_id",
     ];
     const invoiceValues = invoiceColumns.map((col) => invoice[col] || null);
@@ -254,14 +255,12 @@ async function updateInvoice(
         "contract_number",
         "purchase_order_number",
         "payment_terms",
+        "payment_method",
         "supply_date",
       ];
-      const updates = invoiceColumns
-        .filter((col) => invoice[col] !== undefined)
-        .map((col, i) => `${col} = $${i + 2}`);
-      const values = invoiceColumns
-        .filter((col) => invoice[col] !== undefined)
-        .map((col) => invoice[col]);
+      const filteredColumns = invoiceColumns.filter(col => invoice[col] !== undefined);
+      const updates = filteredColumns.map((col, i) => `${col} = $${i + 2}`);
+      const values = filteredColumns.map(col => invoice[col]);
 
       if (updates.length > 0) {
         await conn.query(

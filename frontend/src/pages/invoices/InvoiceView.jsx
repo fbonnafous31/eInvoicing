@@ -70,6 +70,7 @@ const InvoiceView = () => {
       contract_number: invoice.contract_number,
       purchase_order_number: invoice.purchase_order_number,
       payment_terms: invoice.payment_terms,
+      payment_method: invoice.payment_method,
     },
     client: mappedClient,
     lines: invoice.lines || [],
