@@ -18,16 +18,19 @@ export default function useSellerForm(initialData = {}) {
     contact_email: '',
     phone_number: '',
     company_type: 'MICRO',
+    additional_1: '',
+    additional_2: '',    
     ...initialData,
   });
 
   const [errors, setErrors] = useState({});
-  const [touched, setTouched] = useState({}); // ✅ champs touchés
+  const [touched, setTouched] = useState({}); 
   const [openSections, setOpenSections] = useState({
     legal: true,
     contact: true,
     address: true,
     finances: true,
+    mentions: true
   });
 
   const handleChange = (field, value) => {

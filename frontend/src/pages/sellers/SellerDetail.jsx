@@ -36,6 +36,7 @@ export default function SellerDetail() {
         setSeller(data);
         setIsEditing(false);
         setSuccessMessage("Vendeur mis à jour avec succès ! 🎉");
+        window.scrollTo({ top: 0, behavior: "smooth" });
         setTimeout(() => {
           setSuccessMessage('');
           navigate('/sellers');

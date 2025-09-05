@@ -1,11 +1,14 @@
 import React from 'react';
-import { InputField, TextAreaField } from '@/components/form';
+import { InputField, SelectField, TextAreaField } from '@/components/form';
+import { paymentTermsOptions } from "../../../constants/paymentTerms";
+import { paymentMethodsOptions } from "../../../constants/paymentMethods";
 
 export default function FinanceFields({ formData, errors, handleChange, handleBlur, touched, disabled }) {
   const handleFieldChange = (field) => (val) => handleChange(field, val);
 
   return (
     <>
+      {/* 🔹 TVA intracommunautaire */}
       <InputField
         id="vat_number"
         name="vat_number"
@@ -18,6 +21,7 @@ export default function FinanceFields({ formData, errors, handleChange, handleBl
         error={errors.vat_number}
       />
 
+      {/* 🔹 Registre du commerce */}
       <TextAreaField
         id="registration_info"
         name="registration_info"
@@ -30,6 +34,7 @@ export default function FinanceFields({ formData, errors, handleChange, handleBl
         error={errors.registration_info}
       />
 
+      {/* 🔹 Capital social */}
       <InputField
         id="share_capital"
         name="share_capital"
@@ -44,6 +49,35 @@ export default function FinanceFields({ formData, errors, handleChange, handleBl
         error={errors.share_capital}
       />
 
+      {/* 🔹 Moyen de paiement */}
+      <SelectField
+        id="payment_method"
+        name="payment_method"
+        label="Moyen de paiement"
+        value={formData.payment_method || 'bank_transfer'}
+        onChange={handleFieldChange('payment_method')}
+        onBlur={handleBlur}
+        touched={touched.payment_method}
+        disabled={disabled}
+        error={errors.payment_method}
+        options={paymentMethodsOptions}
+      />
+
+
+      <SelectField
+        id="payment_terms"
+        name="payment_terms"
+        label="Conditions de paiement"
+        value={formData.payment_terms || "30_df"} 
+        onChange={handleFieldChange('payment_terms')}
+        onBlur={handleBlur}
+        touched={touched.payment_terms}
+        disabled={disabled}
+        error={errors.payment_terms}
+        options={paymentTermsOptions}
+      />
+
+      {/* 🔹 IBAN */}
       <InputField
         id="iban"
         name="iban"
@@ -56,6 +90,7 @@ export default function FinanceFields({ formData, errors, handleChange, handleBl
         error={errors.iban}
       />
 
+      {/* 🔹 BIC */}
       <InputField
         id="bic"
         name="bic"

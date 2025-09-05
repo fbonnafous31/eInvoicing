@@ -19,18 +19,6 @@ export default function AddressFields({ formData, errors, handleChange, handleBl
       />
 
       <InputField
-        id="city"
-        name="city"
-        label="Ville *"
-        value={formData.city}
-        onChange={handleFieldChange('city')}
-        onBlur={handleBlur}
-        touched={touched.city}
-        disabled={disabled}
-        error={errors.city}
-      />
-
-      <InputField
         id="postal_code"
         name="postal_code"
         label="Code postal *"
@@ -42,6 +30,18 @@ export default function AddressFields({ formData, errors, handleChange, handleBl
         error={errors.postal_code}
       />
 
+      <InputField
+        id="city"
+        name="city"
+        label="Ville *"
+        value={formData.city}
+        onChange={handleFieldChange('city')}
+        onBlur={handleBlur}
+        touched={touched.city}
+        disabled={disabled}
+        error={errors.city}
+      />
+      
       <SelectField
         label="Pays *"
         name="country_code"
