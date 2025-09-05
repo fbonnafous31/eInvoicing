@@ -7,6 +7,7 @@ import LegalFields from './fields/LegalFields';
 import ContactFields from './fields/ContactFields';
 import AddressFields from './fields/AddressFields';
 import FinanceFields from './fields/FinanceFields';
+import MentionsFields from './fields/MentionsFields';
 import useSellerForm from '../../modules/sellers/useSellerForm';
 import { validateSeller } from '../../utils/validators/seller';
 import SaveButton from '@/components/ui/buttons/SaveButton';
@@ -31,7 +32,6 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Marquer tous les champs comme touchés pour déclencher les erreurs
     const allFieldsTouched = Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {});
     setTouched(allFieldsTouched);
 
@@ -41,14 +41,12 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
     if (siretExists) newErrors.legal_identifier = 'Ce SIRET est déjà utilisé';
     setErrors(newErrors);
 
-    // Ouvrir les sections contenant des erreurs
     Object.keys(openSections).forEach(section => {
       if (sectionHasError(section, newErrors) && !openSections[section]) {
         toggleSection(section);
       }
     });
 
-    // Submit si pas d’erreurs
     if (Object.keys(newErrors).length === 0 && onSubmit) {
       const payload = {
         ...formData,
@@ -62,7 +60,8 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
     { key: 'legal', label: 'Informations légales', component: LegalFields },
     { key: 'contact', label: 'Contact', component: ContactFields },
     { key: 'address', label: 'Adresse', component: AddressFields },
-    { key: 'finances', label: 'Finances', component: FinanceFields }
+    { key: 'finances', label: 'Finances', component: FinanceFields },
+    { key: 'mentions', label: 'Mentions complémentaires', component: MentionsFields }
   ];
 
   return (
@@ -112,8 +111,12 @@ function sectionHasError(section, errors) {
     legal: ['legal_name', 'legal_identifier', 'company_type'],
     contact: ['contact_email', 'phone_number'],
     address: ['address', 'city', 'postal_code', 'country_code'],
-    finances: ['vat_number', 'registration_info', 'share_capital', 'iban', 'bic']
+    finances: ['vat_number', 'registration_info', 'share_capital', 'iban', 'bic', 'payment_method', 'payment_terms'],
+    mentions: ['additional_1', 'additional_2']
   };
 
-  return Object.keys(errors).some(key => mapping[section]?.includes(key));
+  // return Object.keys(errors).some(key => mapping[section]?.includes(key));
+  return Object.keys(errors).some(
+    key => mapping[section]?.includes(key) && errors[key] 
+  );  
 }
