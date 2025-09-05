@@ -1,6 +1,7 @@
 // frontend/src/components/invoices/InvoiceHeader.jsx
 import React, { useEffect, useState } from "react";
 import { paymentTermsOptions } from "../../constants/paymentTerms";
+import { paymentMethodsOptions } from '../../constants/paymentMethods';
 import { FormSection, InputField, SelectField } from '@/components/form';
 import { fetchSellers } from "../../services/sellers";
 import { validateInvoiceField } from "../../utils/validators/invoice";
@@ -158,8 +159,17 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
         />
 
         <SelectField
+          label="Moyen de paiement"
+          value={data.payment_method || ''}
+          onChange={val => handleChange("payment_method", val)}
+          onBlur={() => handleBlur("payment_method")}
+          options={paymentMethodsOptions}
+          disabled={disabled}
+        />
+
+        <SelectField
           label="Conditions de paiement"
-          value={data.payment_terms || "30_df"}
+          value={data.payment_terms || ''}
           onChange={val => handleChange("payment_terms", val)}
           onBlur={() => handleBlur("payment_terms")}
           options={paymentTermsOptions}
