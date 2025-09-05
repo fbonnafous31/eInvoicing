@@ -1,6 +1,36 @@
 const fs = require("fs");
 const path = require("path");
 const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
+const { paymentMethodsOptions } = require("../../../constants/paymentMethods");
+const { paymentTermsOptions } = require("../../../constants/paymentTerms");
+
+// ---------------- wrapText ----------------
+function wrapText(text, font, size, maxWidth) {
+  const words = text.replace(/\r?\n/g, ' ').split(' ');
+  const lines = [];
+  let currentLine = '';
+
+  words.forEach(word => {
+    const testLine = currentLine ? currentLine + ' ' + word : word;
+    const width = font.widthOfTextAtSize(testLine, size);
+    if (width > maxWidth) {
+      if (currentLine) lines.push(currentLine);
+      currentLine = word;
+    } else {
+      currentLine = testLine;
+    }
+  });
+
+  if (currentLine) lines.push(currentLine);
+  return lines;
+}
+
+function formatDateFr(dateStr) {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
+}
+
 
 async function generateInvoicePdf(invoice) {
   console.log("invoice:", invoice);
@@ -121,24 +151,19 @@ async function generateInvoicePdf(invoice) {
     });
   }
   y -= 20;
+
   if (invoice.issue_date)
-    page.drawText(`Date d'émission : ${invoice.issue_date}`, {
+    page.drawText(`Date d'émission : ${formatDateFr(invoice.issue_date)}`, {
       x: margin,
       y,
       size: 10,
       font: fontRegular,
     });
+
   if (invoice.supply_date)
-    page.drawText(`Date de livraison : ${invoice.supply_date}`, {
+    page.drawText(`Date de livraison : ${formatDateFr(invoice.supply_date)}`, {
       x: margin + 200,
       y,
-      size: 10,
-      font: fontRegular,
-    });
-  if (invoice.payment_terms)
-    page.drawText(`Conditions de paiement : ${invoice.payment_terms}`, {
-      x: margin,
-      y: y - 15,
       size: 10,
       font: fontRegular,
     });
@@ -212,7 +237,7 @@ async function generateInvoicePdf(invoice) {
     tableY -= rowHeight;
   });
 
-  y = tableY - 40;
+  y = tableY - 20;
 
   // ---------------- Totaux ----------------
   const totalLabels = ["Sous-total", "Total TVA", "Total TTC"];
@@ -223,7 +248,7 @@ async function generateInvoicePdf(invoice) {
   ];
 
   const boxWidth = 180;
-  const boxHeight = totalLabels.length * 20 + 20;
+  const boxHeight = totalLabels.length * 20;
   const totalsX = width - margin - boxWidth;
   let totalsY = y;
 
@@ -252,6 +277,51 @@ async function generateInvoicePdf(invoice) {
     });
     totalsY -= 20;
   });
+  y = totalsY - 30;
+
+  // ---------------- Informations de paiement ----------------
+    if (invoice.seller?.payment_method) {
+      const paymentMethodOption = paymentMethodsOptions.find(
+        (opt) => opt.value === invoice.seller.payment_method
+      );
+      const paymentMethodLabel = paymentMethodOption ? paymentMethodOption.label : invoice.seller.payment_method;
+
+      page.drawText(`Moyen de paiement : ${paymentMethodLabel}`, {
+        x: margin,
+        y,
+        size: 10,
+        font: fontRegular,
+      });
+      y -= 15;
+    }
+
+    if (invoice.seller?.payment_terms) {
+      const termsLabel = paymentTermsOptions.find(t => t.value === invoice.seller.payment_terms)?.label || invoice.seller.payment_terms;
+      page.drawText(`Conditions de paiement : ${termsLabel}`, {
+        x: margin,
+        y,
+        size: 10,
+        font: fontRegular,
+      });
+      y -= 25;
+    }
+  
+  // ---------------- Mentions additionnelles ----------------
+    const mentions = [invoice.seller?.additional_1, invoice.seller?.additional_2].filter(Boolean);
+    const maxWidth = 595 - 2 * margin; // largeur de la page moins marges
+
+    mentions.forEach(mention => {
+      const wrappedLines = wrapText(mention, fontRegular, 9, maxWidth);
+      wrappedLines.forEach(line => {
+        if (y < 50) {
+          page.addPage([595, 842]); // nouvelle page
+          y = 842 - margin;
+        }
+        page.drawText(line, { x: margin, y, size: 9, font: fontRegular });
+        y -= 12;
+      });
+      y -= 10;
+    });
 
   // ---------------- Save ----------------
   const uploadDir = path.join(__dirname, "../../uploads/pdf");
