@@ -66,8 +66,6 @@
 ## 📌 Prochaines étapes
 - **Finalisation de la conformité PDF/A-3** : Résoudre les derniers points techniques (ex: profils de couleur, `AFRelationship`) pour obtenir une validation ISO 19005-3 complète.
 - **Authentification et gestion des utilisateurs** : Mettre en place un système de comptes pour sécuriser l'accès aux données par vendeur.
-- **Amélioration de l'UX/UI** : 
-  - Mise en place d'un tableau de bord.
 - **Industrialisation** :
   - Mise en place de tests unitaires et d'intégration (`Vitest`).
   - Logging et monitoring des API.
