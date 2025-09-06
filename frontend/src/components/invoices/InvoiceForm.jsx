@@ -388,6 +388,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
 
       <SupportingDocs
         data={invoiceData.attachments}
+        invoice={invoiceData} 
         onChange={val => handleChange("attachments", val)}
         disabled={!isEditing}
         hideLabelsInView={readOnly}

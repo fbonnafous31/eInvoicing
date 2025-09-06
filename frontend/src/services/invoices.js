@@ -75,5 +75,5 @@ export async function generateInvoicePdf(id) {
     throw new Error(data.error || data.message || "Erreur lors de la génération du PDF");
   }
 
-  return response.json(); // -> { path: "/uploads/pdf-a3/xxx.pdf" }
+  return response.json(); 
 }

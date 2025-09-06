@@ -14,7 +14,9 @@
 - **Frontend** : React + Vite  
 - **Backend** : Node.js + Express  
 - **Base de données** : PostgreSQL  
-- **Outils complémentaires** : DBeaver, ESLint, Prettier, Bootstrap, react-data-table-component  
+- **Outils et bibliothèques clés** :
+  - **Frontend** : `axios` pour les appels API, `react-data-table-component` pour les tableaux, `react-pdf` pour l'affichage de documents, `Bootstrap` pour le style.
+  - **Backend** : `multer` pour l'upload de fichiers, `node-zugferd` et `xmlbuilder2` pour la génération Factur-X, `pg` pour l'accès à la base de données.
 - **Gestion environnement** : Variables d’environnement pour sécuriser les accès sensibles (ex : mot de passe DB)  
 
 ---
@@ -29,20 +31,26 @@
 
 ---
 
-## ✅ Fonctionnalités développées *(jusqu’au Jour 13)*
+## ✅ Fonctionnalités développées
 
 - **CRUD Vendeurs** :  
   création, lecture (liste et fiche détail), modification, suppression.  
 - **CRUD Clients** :  
   création, lecture (liste et fiche détail), modification, suppression.    
-- **CRUD Factures** :  
-  liste, lecture (liste et fiche détail).           
+- **CRUD complet des Factures** : Création, lecture, mise à jour et suppression des factures, avec gestion des lignes de facture, des taxes et des informations du client associé.
+- **Génération de PDF de facture** : Création automatique du visuel de la facture au format PDF à partir des données (vendeur, client, lignes, totaux), éliminant le besoin d'un justificatif externe.
+- **Génération Factur-X finalisée** : Création d'un fichier XML Factur-X (profil MINIMUM) validé, contenant toutes les données structurées de la facture.
+- **Intégration PDF/A-3** : Le XML Factur-X et les pièces jointes sont embarqués dans le PDF généré, qui est préparé pour la conformité PDF/A-3 (métadonnées XMP incluses).
+- **Gestion des pièces jointes** : Upload de fichiers (via `multer`) avec distinction entre le document principal (si uploadé) et les documents additionnels.
 - **Formulaires complets et validations** :  
+  - Pré-remplissage intelligent des formulaires (client existant, vendeur par défaut).
   - tous les champs nécessaires  
   - validations frontend et backend  
   - validation SIRET (France)  
 - **Feedback utilisateur** : messages succès/erreur, redirection fluide.  
 - **UX et design** : tableaux stylés, Bootstrap, navigation intuitive.  
+- **Visionneuse PDF intégrée** : Affichage des PDF (factures, pièces jointes) directement dans l'interface avec des contrôles de navigation, zoom et téléchargement.
+- **Intégrité des données** : Utilisation de transactions PostgreSQL pour garantir la cohérence des opérations complexes sur la base de données.
 - **Gestion du projet** :  
   - suivi quotidien  
   - documentation en Markdown  
@@ -56,12 +64,17 @@
 
 
 ## 📌 Prochaines étapes
-- Authentification pour le compte vendeur.
-- Génération **Factur-X** : PDF/A-3 + XML structuré, conforme à la réglementation.
-- Communication avec un PDP pour gérer le cycle de vie des factures.
-- Génération automatique du justificatif principal PDF.
-- Tout le travail invisible : tests unitaires et d’intégration, logs, monitoring, pipelines CI/CD.
-
+- **Finalisation de la conformité PDF/A-3** : Résoudre les derniers points techniques (ex: profils de couleur, `AFRelationship`) pour obtenir une validation ISO 19005-3 complète.
+- **Authentification et gestion des utilisateurs** : Mettre en place un système de comptes pour sécuriser l'accès aux données par vendeur.
+- **Amélioration de l'UX/UI** : 
+  - Mise en place d'un tableau de bord.
+- **Industrialisation** :
+  - Mise en place de tests unitaires et d'intégration (`Vitest`).
+  - Logging et monitoring des API.
+  - Préparation au déploiement (CI/CD).
+- **Évolution fonctionnelle** :
+  - Gestion du cycle de vie des factures (statuts : `draft`, `issued`, `paid`...).
+  - Connexion à des plateformes de dématérialisation partenaires (PDP).
 
 ## Architecture projet
 project/
@@ -107,24 +120,29 @@ project/
 │   ├── errorHandler.js
 │   └── upload.js
 ├── modules
-│   ├── clients
-│   │   ├── clients.controller.js
-│   │   ├── clients.model.js
-│   │   ├── clients.route.js
-│   │   └── clients.service.js
-│   ├── invoices
-│   │   ├── invoiceClient.model.js
-│   │   ├── invoiceClient.service.js
-│   │   ├── invoices.controller.js
-│   │   ├── invoices.model.js
-│   │   ├── invoices.route.js
-│   │   └── invoices.service.js
-│   └── sellers
-│       ├── sellers.controller.js
-│       ├── sellers.model.js
-│       ├── sellers.route.js
-│       └── sellers.service.js
+│   ├── clients
+│   │   ├── clients.controller.js
+│   │   ├── clients.model.js
+│   │   ├── clients.route.js
+│   │   └── clients.service.js
+│   ├── invoices
+│   │   ├── invoiceAttachments.model.js
+│   │   ├── invoiceClient.model.js
+│   │   ├── invoiceClient.service.js
+│   │   ├── invoices.controller.js
+│   │   ├── invoices.model.js
+│   │   ├── invoices.route.js
+│   │   └── invoices.service.js
+│   └── sellers
+│       ├── sellers.controller.js
+│       ├── sellers.model.js
+│       ├── sellers.route.js
+│       └── sellers.service.js
 └── utils
+    ├── facturx-generator.js
+    ├── fileNaming.js
+    └── invoice-pdf
+        └── generateInvoicePdf.js
 
 ## Architecture frontend
 .
@@ -145,9 +163,12 @@ project/
 │   │   ├── SelectField.jsx
 │   │   └── TextAreaField.jsx
 │   ├── invoices
+│   │   ├── InvoiceClient.jsx
 │   │   ├── InvoiceForm.jsx
 │   │   ├── InvoiceHeader.jsx
 │   │   ├── InvoiceLines.jsx
+│   │   ├── InvoiceTabs.jsx
+│   │   ├── PdfViewer.jsx
 │   │   ├── SupportingDocs.jsx
 │   │   └── TaxBases.jsx
 │   └── NavBar.jsx

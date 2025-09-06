@@ -9,6 +9,7 @@ router.get("/:id/generate-pdf", InvoicesController.createInvoicePdf);
 
 router.post('/', upload.fields([{ name: 'attachments', maxCount: 10 }]), InvoicesController.createInvoice);
 router.post('/:id/generate-pdf', InvoicesController.createInvoicePdf);
+router.post('/generate-pdf', InvoicesController.generateInvoicePdfBuffer); 
 
 router.put('/:id', upload.fields([{ name: 'attachments', maxCount: 10 }]), InvoicesController.updateInvoice);
 

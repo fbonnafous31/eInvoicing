@@ -1,6 +1,6 @@
 const InvoicesService = require('./invoices.service');
 const { getInvoiceById } = require('./invoices.model');
-const { generateInvoicePdf } = require('../../utils/invoice-pdf/generateInvoicePdf');
+const { generateInvoicePdf, generateInvoicePdfBuffer: generatePdfUtil } = require('../../utils/invoice-pdf/generateInvoicePdf');
 const path = require("path");
 
 /**
@@ -209,6 +209,20 @@ async function createInvoicePdf(req, res) {
   }
 }
 
+async function generateInvoicePdfBuffer(req, res) {
+  try {
+    const invoice = req.body; 
+    const pdfBytes = await generatePdfUtil(invoice); 
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename=facture_preview.pdf');
+    res.send(pdfBytes);
+  } catch (err) {
+    console.error("Erreur génération PDF:", err);
+    res.status(500).json({ error: 'Impossible de générer le PDF' });
+  }
+}
+
 
 module.exports = {
   listInvoices,
@@ -216,5 +230,6 @@ module.exports = {
   createInvoice,
   updateInvoice, 
   deleteInvoice,
-  createInvoicePdf
+  createInvoicePdf,
+  generateInvoicePdfBuffer
 };

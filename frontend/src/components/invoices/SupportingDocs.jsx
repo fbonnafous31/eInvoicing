@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { SmallDeleteButton } from '@/components/ui/buttons';
 
-export default function SupportingDocs({ data, onChange, disabled, hideLabelsInView }) {
+export default function SupportingDocs({ data, onChange, disabled, hideLabelsInView, invoice }) {
 
   useEffect(() => {
     console.log("Current attachments array:", data);
@@ -52,45 +52,20 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
   };
 
   const handleGeneratePdf = async () => {
-    if (!mainAttachment) {
-      console.warn("❌ Pas de justificatif principal pour générer le PDF");
-      return;
-    }
-
-    if (!mainAttachment.invoice_id) {
-      console.warn("❌ invoiceId manquant !");
-      return;
-    }
+    if (!invoice) return console.error("❌ invoice missing");
 
     try {
-      console.log("➡️ Génération PDF pour invoice id:", mainAttachment.invoice_id);
+      const res = await fetch('/api/invoices/generate-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(invoice) // les données du front
+      });
 
-      const resGenerate = await fetch(`/api/invoices/${mainAttachment.invoice_id}/generate-pdf`);
-      const data = await resGenerate.json();
-      console.log("📄 JSON reçu :", data);
+      if (!res.ok) throw new Error("Erreur génération PDF");
 
-      if (!data.path) {
-        console.error("❌ Pas de chemin PDF renvoyé");
-        return;
-      }
-
-      const pdfRes = await fetch(`http://localhost:3000${data.path}`);
-      if (!pdfRes.ok) {
-        console.error("❌ Impossible de récupérer le PDF");
-        return;
-      }
-
-      const blob = await pdfRes.blob();
-
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `facture_${mainAttachment.invoice_id}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(link.href);
-
-      console.log("✅ PDF téléchargé");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank'); // ouvrir le PDF dans un nouvel onglet
     } catch (err) {
       console.error("❌ Erreur génération PDF :", err);
     }
@@ -103,6 +78,19 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
       {/* Justificatif principal */}
       <div className="mb-3">
         <label>Justificatif principal (format PDF) *</label>
+
+        {!mainAttachment && (
+          <div className="mt-3 pb-3">
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              disabled={disabled}
+              onClick={handleGeneratePdf}
+            >
+              Générer le PDF
+            </button>
+          </div>
+        )}
 
         {!hideLabelsInView && (
           <input
@@ -119,20 +107,6 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
             {!hideLabelsInView && (
               <SmallDeleteButton onClick={() => removeFile(0, 'main')} disabled={disabled} />
             )}
-          </div>
-        )}
-
-        {/* Bouton Générer PDF */}
-        {!hideLabelsInView && mainAttachment && (
-          <div className="mt-3">
-            <button
-              type="button" // empêche le submit
-              className="btn btn-primary btn-sm"
-              disabled={disabled}
-              onClick={handleGeneratePdf}
-            >
-              Générer le PDF
-            </button>
           </div>
         )}
       </div>
