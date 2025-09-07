@@ -1,22 +1,21 @@
 import React from 'react';
-import { InputField } from '@/components/form';
+import { InputField, InputEmail } from '@/components/form';
 
 export default function ContactFields({ formData, errors, touched, handleChange, handleBlur, disabled }) {
   const handleFieldChange = (field) => (val) => handleChange(field, val);
 
   return (
     <>
-      <InputField
+      <InputEmail
         id="email"
         name="email"
-        label="Email *"
-        type="email"
+        label="Email"
         value={formData.email}
         onChange={handleFieldChange('email')}
         onBlur={() => handleBlur('email')}
         touched={touched.email}
         disabled={disabled}
-        error={errors.email}
+        required={false}
       />
 
       <InputField

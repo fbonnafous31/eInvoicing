@@ -1,5 +1,5 @@
 import React from 'react';
-import { InputField } from '@/components/form';
+import { InputField, InputEmail } from '@/components/form';
 
 export default function ContactFields({ formData, errors, handleChange, handleBlur, touched, disabled }) {
   // helper pour ne pas répéter la syntaxe handleChange('field', val)
@@ -7,17 +7,16 @@ export default function ContactFields({ formData, errors, handleChange, handleBl
 
   return (
     <>
-      <InputField
+      <InputEmail
         id="contact_email"
         name="contact_email"
-        label="Email *"
-        type="email"
+        label="Email"
         value={formData.contact_email}
         onChange={handleFieldChange('contact_email')}
-        onBlur={handleBlur}
+        onBlur={() => handleBlur('contact_email')}
         touched={touched.contact_email}
         disabled={disabled}
-        error={errors.contact_email}
+        required={true} 
       />
 
       <InputField

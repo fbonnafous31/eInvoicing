@@ -1,26 +1,40 @@
 .navbar-custom {
-  background-color: #0d6efd; /* bleu doux */
-  color: white;
+  background-color: #111; /* noir profond */
 }
 
-.navbar-custom .navbar-brand,
+.navbar-custom .navbar-brand {
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
 .navbar-custom .nav-link {
-  color: white;
+  color: #ccc;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s, background 0.2s;
 }
 
-.navbar-custom .nav-link:hover {
-  color: #ffc107; /* accent doré au hover */
+.navbar-custom .nav-link:hover,
+.navbar-custom .nav-link:focus {
+  color: #fff;
+}
+
+.nav-icon {
+  margin-right: 0.5rem;
 }
 
 .navbar-custom .dropdown-menu {
-  background-color: #0d6efd; /* menu assorti */
+  background-color: #222;
+  border: none;
 }
 
 .navbar-custom .dropdown-item {
-  color: white;
+  color: #ccc;
+  transition: background 0.2s;
 }
 
 .navbar-custom .dropdown-item:hover {
-  color: #ffc107;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: #333;
+  color: #fff;
 }

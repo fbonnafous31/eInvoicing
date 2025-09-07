@@ -119,6 +119,6 @@ function sectionHasError(section, errors, touched) {
   };
 
   return Object.keys(errors).some(
-    key => mapping[section]?.includes(key) && touched[key]
+    key => mapping[section]?.includes(key) && touched[key] && Boolean(errors[key])
   );
 }

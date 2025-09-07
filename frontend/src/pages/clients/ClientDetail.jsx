@@ -66,7 +66,7 @@ export default function ClientDetail() {
         initialData={client}
       />
 
-      <div className="mt-3 d-flex justify-content-end gap-2">
+      <div className="mt-4 mb-5 d-flex justify-content-end gap-2">
         {isEditing ? (
           <CancelButton onClick={() => setIsEditing(false)} />
         ) : (

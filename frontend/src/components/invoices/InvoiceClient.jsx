@@ -1,12 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
-import { InputField, SelectField } from '@/components/form';
+import { InputField, SelectField, InputPostalCode, InputEmail } from '@/components/form';
 import Select from "react-select";
 import { fetchClients } from "../../services/clients";
 import { validateClientData } from "../../utils/validators/invoice";
-import { validateOptionalEmail } from "../../utils/validators/email";
 import { isValidSiret } from "../../utils/validators/siret";
 import { validatePhoneNumber } from "../../utils/validators/phone_number";
-import { isValidPostalCode } from "../../utils/validators/postal_code";
 
 import countries from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
@@ -277,33 +275,25 @@ export default function InvoiceClient({ value, onChange, error, disabled }) {
           />
         )}
 
-          <InputField
-            label="Adresse"
-            value={formData.address || ""}
-            onChange={(val) => handleChangeField("address", val)}
-            onBlur={() => handleBlurField("address")}
-            error={errors.address}
-            touched={touchedFields.address}
-            required
-            disabled={disabled} 
-          />
-          <InputField
-            label="Code postal"
-            value={formData.postal_code || ""}
-            onChange={(val) => {
-              handleChangeField("postal_code", val);
-              const error = isValidPostalCode(val) ? "" : "Code postal invalide";
-              setErrors(prev => ({ ...prev, postal_code: error }));
-            }}
-            onBlur={() => {
-              handleBlurField("postal_code");
-              const error = isValidPostalCode(formData.postal_code) ? "" : "Code postal invalide";
-              setErrors(prev => ({ ...prev, postal_code: error }));
-            }}
-            error={errors.postal_code}
-            touched={touchedFields.postal_code}
-            disabled={disabled} 
-          />
+        <InputField
+          label="Adresse"
+          value={formData.address || ""}
+          onChange={(val) => handleChangeField("address", val)}
+          onBlur={() => handleBlurField("address")}
+          error={errors.address}
+          touched={touchedFields.address}
+          required
+          disabled={disabled} 
+        />
+
+        <InputPostalCode
+          label="Code postal"
+          value={formData.postal_code || ""}
+          onChange={(val) => handleChangeField("postal_code", val)}
+          onBlur={() => handleBlurField("postal_code")}
+          touched={touchedFields.postal_code}
+          disabled={disabled}
+        />
       
         <InputField
           label="Ville"
@@ -322,23 +312,17 @@ export default function InvoiceClient({ value, onChange, error, disabled }) {
           error={errors.country_code}
           disabled={disabled} 
         />        
-        <InputField
+        <InputEmail
+          id="email"
+          name="email"
           label="Email"
           value={formData.email || ""}
-          onChange={(val) => {
-            handleChangeField("email", val);
-            const error = validateOptionalEmail(val);
-            setErrors(prev => ({ ...prev, email: error }));
-          }}
-          onBlur={() => {
-            handleBlurField("email");
-            const error = validateOptionalEmail(formData.email);
-            setErrors(prev => ({ ...prev, email: error }));
-          }}
-          error={errors.email}
+          onChange={(val) => handleChangeField("email", val)}
+          onBlur={() => handleBlurField("email")}
           touched={touchedFields.email}
-          disabled={disabled} 
-        />  
+          disabled={disabled}
+          required={false}
+        />
         <InputField
           label="Téléphone"
           value={formData.phone || ""}

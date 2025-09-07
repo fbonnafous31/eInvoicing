@@ -1,5 +1,5 @@
 import React from 'react';
-import { InputField, SelectField, TextAreaField } from '@/components/form';
+import { InputField, SelectField, TextAreaField, InputPostalCode } from '@/components/form';
 
 export default function AddressFields({ formData, errors, handleChange, handleBlur, touched, disabled, countryCodes }) {
   const handleFieldChange = (field) => (val) => handleChange(field, val);
@@ -18,16 +18,16 @@ export default function AddressFields({ formData, errors, handleChange, handleBl
         error={errors.address}
       />
 
-      <InputField
+      <InputPostalCode
         id="postal_code"
         name="postal_code"
-        label="Code postal *"
+        label="Code postal"
         value={formData.postal_code}
         onChange={handleFieldChange('postal_code')}
         onBlur={handleBlur}
         touched={touched.postal_code}
         disabled={disabled}
-        error={errors.postal_code}
+        required={true} 
       />
 
       <InputField

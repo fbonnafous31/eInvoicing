@@ -1,14 +1,15 @@
 // frontend/src/components/layout/NavBar.jsx
 import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
+import { FaUserTie, FaUsers, FaFileInvoice } from 'react-icons/fa';
 import './NavBar.css';
 
 export default function NavBar() {
   return (
-    <nav className="navbar navbar-expand-lg navbar-custom shadow-sm">
+    <nav className="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm">
       <div className="container-fluid">
         {/* Marque */}
-        <Link className="navbar-brand fw-bold" to="/">eInvoicing</Link>
+        <Link className="navbar-brand fw-semibold" to="/">eInvoicing</Link>
 
         {/* Toggle mobile */}
         <button
@@ -25,18 +26,11 @@ export default function NavBar() {
 
         {/* Menu */}
         <div className="collapse navbar-collapse" id="navbarNavDropdown">
-          <ul className="navbar-nav">
-
+          <ul className="navbar-nav me-auto">
             {/* Vendeurs */}
             <li className="nav-item dropdown">
-              <span
-                className="nav-link dropdown-toggle"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-                style={{ cursor: 'pointer' }}
-              >
-                👔 Vendeurs
+              <span className="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <FaUserTie className="nav-icon" /> Vendeurs
               </span>
               <ul className="dropdown-menu">
                 <li><NavLink className="dropdown-item" to="/sellers">Liste</NavLink></li>
@@ -46,14 +40,8 @@ export default function NavBar() {
 
             {/* Clients */}
             <li className="nav-item dropdown">
-              <span
-                className="nav-link dropdown-toggle"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-                style={{ cursor: 'pointer' }}
-              >
-                🧑‍🤝‍🧑 Clients
+              <span className="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <FaUsers className="nav-icon" /> Clients
               </span>
               <ul className="dropdown-menu">
                 <li><NavLink className="dropdown-item" to="/clients">Liste</NavLink></li>
@@ -63,14 +51,8 @@ export default function NavBar() {
 
             {/* Factures */}
             <li className="nav-item dropdown">
-              <span
-                className="nav-link dropdown-toggle"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-                style={{ cursor: 'pointer' }}
-              >
-                🗂️ Factures
+              <span className="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <FaFileInvoice className="nav-icon" /> Factures
               </span>
               <ul className="dropdown-menu">
                 <li><NavLink className="dropdown-item" to="/invoices">Liste</NavLink></li>
