@@ -22,6 +22,8 @@ Aujourd'hui, j'ai travaillé sur **l'optimisation de la création de facture** a
 
 * Il est désormais possible de **créer une facture sans justificatif PDF préalable**.
 * Le justificatif est **produit automatiquement en même temps que la facture**, simplifiant le workflow.
+![Génération au moment de la création de facture](../images/jour49/invoiceCreate.png)
+![Visualisation de la facture](../images/jour49/invoiceView.png)
 
 ### 3. Synchronisation frontend/backend
 

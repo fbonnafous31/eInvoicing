@@ -54,6 +54,8 @@ Ce matin, on a travaillé sur **l’amélioration de la logique côté frontend 
   - Les informations de paiement et mentions sont affichées correctement.  
   - Les dates sont au format français et lisibles.  
 - Gestion intelligente des textes longs et des sauts de page pour les mentions additionnelles.  
+![Génération depuis liste de factures](../images/jour47/invoiceList.png)
+![Justificatif de facture](../images/jour47/invoicePDF.png)
 
 ---
 
