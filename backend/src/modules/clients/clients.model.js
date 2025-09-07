@@ -66,26 +66,8 @@ async function getAllClients() {
 // ----------------- Get client by ID -----------------
 async function getClientById(id) {
   const result = await pool.query(
-<<<<<<< HEAD
     'SELECT * FROM invoicing.clients WHERE id = $1',
     [id]
-=======
-    `INSERT INTO invoicing.clients
-      (legal_name, legal_identifier, address, city, postal_code, country_code, vat_number)
-     VALUES ($1, 
-             CASE WHEN $6 = 'FR' THEN REPLACE($2, ' ', '') ELSE $2 END, 
-             $3, $4, $5, $6, $7)
-     RETURNING *`,
-    [
-      legal_name,
-      legal_identifier,
-      address,
-      city,
-      postal_code,
-      country_code,
-      vat_number
-    ]
->>>>>>> 5f08e77 (Jour 13 : liste des factures frontend, helpers et tooltips, stratégie de travail avec ChatGPT)
   );
   return result.rows[0];
 }

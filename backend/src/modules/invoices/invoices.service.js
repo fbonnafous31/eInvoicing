@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // invoices.service.js
 const InvoicesModel = require('./invoices.model');
 const { generateFacturXXML } = require('../../utils/facturx-generator');
@@ -37,16 +36,11 @@ async function getMainPdfPath(invoiceId) {
   if (!attachment) throw new Error(`PDF principal introuvable pour invoice ${invoiceId}`);
   return path.resolve(attachment.file_path); 
 }
-=======
-const InvoicesModel = require('./invoices.model');
-console.log(InvoicesModel);
->>>>>>> 5f08e77 (Jour 13 : liste des factures frontend, helpers et tooltips, stratégie de travail avec ChatGPT)
 
 async function listInvoices() {
   return await InvoicesModel.getAllInvoices();
 }
 
-<<<<<<< HEAD
 async function getInvoice(id) {
   const invoice = await InvoicesModel.getInvoiceById(id);
   return invoice || null;
@@ -141,12 +135,5 @@ module.exports = {
   createInvoice,
   updateInvoice,
   deleteInvoice,
-<<<<<<< HEAD
   registerGeneratedPdf
-=======
-module.exports = {
-  listInvoices
->>>>>>> 5f08e77 (Jour 13 : liste des factures frontend, helpers et tooltips, stratégie de travail avec ChatGPT)
-=======
->>>>>>> 523deb4 (feat: ajout et correction des métadatas pour factur-x et PDF A3)
 };

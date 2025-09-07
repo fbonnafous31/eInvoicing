@@ -14,8 +14,11 @@ import InvoiceView from './pages/invoices/InvoiceView';
 import TestPdfViewer from './components/invoices/TestPdfViewer'; 
 
 import NotFound from './pages/NotFound';
+import Home from './pages/Home';
 
 const routes = [
+  { path: '/', element: <Home /> },
+  
   // Sellers
   { path: '/sellers', element: <SellersList /> },
   { path: '/sellers/new', element: <NewSeller /> },

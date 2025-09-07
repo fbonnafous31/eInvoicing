@@ -15,22 +15,18 @@ function Layout({ children, fluid = false }) {
   );
 }
 
-// Invoices
-import InvoicesList from './pages/invoices/InvoicesList';
-
 function App() {
   return (
     <Router>
       <Routes>
         {routes.map(({ path, element }) => {
-          // On détecte si le composant doit être full width
+          // Détecte si le composant doit être full width
           const isFullWidth =
             element.type.name === "InvoiceView" ||
             element.type.name === "ClientsList" ||
             element.type.name === "SellersList" ||
             element.type.name === "InvoicesList";
 
-<<<<<<< HEAD
           return (
             <Route
               key={path}
@@ -39,15 +35,6 @@ function App() {
             />
           );
         })}
-=======
-        {/* Clients */}
-        <Route path="/clients" element={<ClientsList />} />
-        <Route path="/clients/new" element={<NewClient />} />
-        <Route path="/clients/:id" element={<ClientDetail />} />
-
-        {/* Invoices */}
-        <Route path="/invoices" element={<InvoicesList />} />
->>>>>>> 5f08e77 (Jour 13 : liste des factures frontend, helpers et tooltips, stratégie de travail avec ChatGPT)
       </Routes>
     </Router>
   );

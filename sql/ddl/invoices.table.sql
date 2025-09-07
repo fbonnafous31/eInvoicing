@@ -4,7 +4,6 @@
 
 -- DROP TABLE invoicing.invoices;
 
-<<<<<<< HEAD
 CREATE TABLE invoicing.invoices (
 	id serial4 NOT NULL, -- Identifiant unique interne de la facture
 	invoice_number bpchar(20) NOT NULL, -- Référence facture chez l’émetteur (max 20 caractères)
@@ -29,9 +28,6 @@ CREATE TABLE invoicing.invoices (
 	CONSTRAINT invoices_pkey PRIMARY KEY (id)
 );
 CREATE UNIQUE INDEX uniq_invoice_seller_year_number ON invoicing.invoices USING btree (seller_id, fiscal_year, invoice_number);
-=======
-CREATE TABLE invoicing.invoices ( id serial4 NOT NULL, invoice_number bpchar(20) NOT NULL, issue_date date NOT NULL, supply_date date NULL, currency bpchar(3) DEFAULT 'EUR'::bpchar NULL, contract_number varchar(100) NULL, purchase_order_number varchar(100) NULL, seller_id int4 NOT NULL, client_id int4 NOT NULL, seller_legal_name varchar(255) NOT NULL, client_legal_name varchar(255) NOT NULL, subtotal numeric(14, 2) NULL, total_taxes numeric(14, 2) NULL, total numeric(14, 2) NULL, payment_terms text NULL, status varchar(20) DEFAULT 'draft'::character varying NULL, created_at timestamp DEFAULT now() NULL, updated_at timestamp DEFAULT now() NULL, CONSTRAINT invoices_invoice_number_key UNIQUE (invoice_number), CONSTRAINT invoices_pkey PRIMARY KEY (id));
->>>>>>> 5f08e77 (Jour 13 : liste des factures frontend, helpers et tooltips, stratégie de travail avec ChatGPT)
 
 -- Column comments
 
@@ -48,11 +44,7 @@ COMMENT ON COLUMN invoicing.invoices.seller_legal_name IS 'Raison sociale du ven
 COMMENT ON COLUMN invoicing.invoices.subtotal IS 'Montant HT total';
 COMMENT ON COLUMN invoicing.invoices.total_taxes IS 'Montant total TVA';
 COMMENT ON COLUMN invoicing.invoices.total IS 'Montant TTC total';
-<<<<<<< HEAD
 COMMENT ON COLUMN invoicing.invoices.payment_terms IS 'Conditions de paiement';
-=======
-COMMENT ON COLUMN invoicing.invoices.recovery_fee IS 'Indemnité forfaitaire de recouvrement';
->>>>>>> 5f08e77 (Jour 13 : liste des factures frontend, helpers et tooltips, stratégie de travail avec ChatGPT)
 COMMENT ON COLUMN invoicing.invoices.status IS 'Statut (draft, final, canceled)';
 COMMENT ON COLUMN invoicing.invoices.created_at IS 'Date de création';
 COMMENT ON COLUMN invoicing.invoices.updated_at IS 'Date de mise à jour';

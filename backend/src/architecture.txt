@@ -34,13 +34,8 @@
 │   │   ├── 173-factur-x.xml
 │   │   └── 174-factur-x.xml
 │   ├── invoices
-<<<<<<< HEAD
 │   │   ├── 167_add_1756929048804_note_de_credit_fr.pdf
 │   │   ├── 167_main_1756929048803_modele_de_facture.pdf
-=======
-│   │   ├── 167_add_1756843574491_note_de_credit_fr.pdf
-│   │   ├── 167_main_1756843574489_modele_de_facture.pdf
->>>>>>> 523deb4 (feat: ajout et correction des métadatas pour factur-x et PDF A3)
 │   │   ├── 169_add_1756845637883_modele_de_facture.pdf
 │   │   ├── 169_main_1756845637882_note_de_credit_fr.pdf
 │   │   ├── 170_add_1756845667656_modele_de_facture.pdf
@@ -52,7 +47,6 @@
 │   │   ├── 172_add_1756885692692_prompts.txt
 │   │   ├── 172_add_1756885692693_note_de_credit_fr.pdf
 │   │   ├── 172_main_1756885692689_modele_de_facture.pdf
-<<<<<<< HEAD
 │   │   ├── 173_add_1756967626203_modele_de_facture.pdf
 │   │   ├── 173_main_1756967626201_Projet-de-facturation-electronique.pdf
 │   │   ├── 174_add_1756972101931_README.md
@@ -66,20 +60,12 @@
 │       ├── 167_temp.xmp
 │       ├── 172_pdf-a3.pdf
 │       ├── 173_pdf-a3.pdf
-=======
-│   │   ├── 173_main_1756845717519_Projet-de-facturation-electronique.pdf
-│   │   ├── 174_main_1756908440884_modele_de_facture.pdf
-│   │   └── sample-invoice.pdf
-│   └── pdf-a3
-│       ├── 172_pdf-a3.pdf
->>>>>>> 523deb4 (feat: ajout et correction des métadatas pour factur-x et PDF A3)
 │       └── 174_pdf-a3.pdf
 └── utils
     ├── facturx-generator.js
     ├── facturx-template.xmp
     ├── fileNaming.js
     ├── icc
-<<<<<<< HEAD
     │   └── sRGB.icc
     ├── invoice-pdf
     │   ├── generateInvoicePdf.js
@@ -92,12 +78,3 @@
     └── xmp-injector.js
 
 17 directories, 61 files
-=======
-    │   ├── Gray.icc
-    │   └── sRGB.icc
-    ├── pdf-generator.js
-    ├── xmp-helper.js
-    └── xmp-injector.js
-
-13 directories, 51 files
->>>>>>> 523deb4 (feat: ajout et correction des métadatas pour factur-x et PDF A3)

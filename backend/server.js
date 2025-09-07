@@ -16,13 +16,10 @@ const invoicesRoutes = require('./src/modules/invoices/invoices.route');
 app.use('/api/sellers', sellersRoutes);
 app.use('/api/clients', clientsRoutes);
 app.use('/api/invoices', invoicesRoutes);
-<<<<<<< HEAD
 app.use('/uploads', express.static(path.join(__dirname, 'src/uploads')));
 
 // Middleware global d'erreurs
 app.use(errorHandler);
-=======
->>>>>>> 5f08e77 (Jour 13 : liste des factures frontend, helpers et tooltips, stratégie de travail avec ChatGPT)
 
 // Lancement serveur
 const PORT = process.env.PORT || 3000;
