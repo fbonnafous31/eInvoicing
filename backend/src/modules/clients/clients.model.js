@@ -58,7 +58,8 @@ async function getAllClients() {
     `SELECT id, is_company, legal_name, firstname, lastname, siret, legal_identifier,
             address, city, postal_code, country_code, vat_number, email, phone,
             created_at, updated_at
-     FROM invoicing.clients`
+     FROM invoicing.clients
+     ORDER BY legal_name`
   );
   return result.rows;
 }

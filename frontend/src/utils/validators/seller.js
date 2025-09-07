@@ -2,6 +2,7 @@
 import { isValidSiret } from './siret';
 import { validateContact } from './contact';
 import IBAN from 'iban';
+import { isValidPostalCode } from './postal_code';
 
 /**
  * Validation d'un vendeur (toujours une entreprise)
@@ -42,9 +43,13 @@ export function validateSeller(data) {
   if (!data.address?.trim()) {
     errors.address = 'L’adresse est obligatoire';
   }
+  
   if (!data.postal_code?.trim()) {
     errors.postal_code = 'Le code postal est obligatoire';
+  } else if (!isValidPostalCode(data.postal_code)) {
+    errors.postal_code = 'Code postal invalide';
   }
+
   if (!data.city?.trim()) {
     errors.city = 'La ville est obligatoire';
   }

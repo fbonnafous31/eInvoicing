@@ -32,6 +32,7 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    // Marquer tous les champs comme touchés pour afficher les erreurs
     const allFieldsTouched = Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {});
     setTouched(allFieldsTouched);
 
@@ -41,12 +42,14 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
     if (siretExists) newErrors.legal_identifier = 'Ce SIRET est déjà utilisé';
     setErrors(newErrors);
 
+    // Ouvrir les sections avec erreurs
     Object.keys(openSections).forEach(section => {
-      if (sectionHasError(section, newErrors) && !openSections[section]) {
+      if (sectionHasError(section, newErrors, touched) && !openSections[section]) {
         toggleSection(section);
       }
     });
 
+    // Envoi si pas d'erreurs
     if (Object.keys(newErrors).length === 0 && onSubmit) {
       const payload = {
         ...formData,
@@ -67,7 +70,8 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
   return (
     <form onSubmit={handleSubmit} className="p-3 border rounded bg-light">
       {sections.map(({ key, label, component }) => {
-        const hasError = sectionHasError(key, errors);
+        const hasError = sectionHasError(key, errors, touched);
+        const Component = component;
 
         return (
           <div className="mb-3" key={key}>
@@ -80,15 +84,15 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
             </button>
 
             {openSections[key] &&
-              React.createElement(component, {
-                formData,
-                errors,
-                touched,
-                handleChange,
-                handleBlur,
-                disabled,
-                countryCodes: key === 'address' ? countryCodes : undefined
-              })
+              <Component
+                formData={formData}
+                errors={errors}
+                touched={touched}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                disabled={disabled}
+                countryCodes={key === 'address' ? countryCodes : undefined}
+              />
             }
           </div>
         );
@@ -106,7 +110,7 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
 // ---------------------
 // Helper pour savoir si une section contient des erreurs
 // ---------------------
-function sectionHasError(section, errors) {
+function sectionHasError(section, errors, touched) {
   const mapping = {
     legal: ['legal_name', 'legal_identifier', 'company_type'],
     contact: ['contact_email', 'phone_number'],
@@ -115,8 +119,7 @@ function sectionHasError(section, errors) {
     mentions: ['additional_1', 'additional_2']
   };
 
-  // return Object.keys(errors).some(key => mapping[section]?.includes(key));
   return Object.keys(errors).some(
-    key => mapping[section]?.includes(key) && errors[key] 
+    key => mapping[section]?.includes(key) && touched[key] && errors[key]
   );  
 }

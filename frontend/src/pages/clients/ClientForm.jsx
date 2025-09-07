@@ -41,7 +41,7 @@ export default function ClientForm({ onSubmit, disabled = false, initialData = {
 
     // Ouvrir les sections avec erreurs
     Object.keys(openSections).forEach(section => {
-      if (sectionHasError(section, newErrors) && !openSections[section]) {
+      if (sectionHasError(section, newErrors, touched) && !openSections[section]) {
         toggleSection(section);
       }
     });

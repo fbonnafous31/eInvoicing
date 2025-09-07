@@ -1,12 +1,7 @@
-// utils/validators/client.js
 import { isValidSiret } from './siret';
 import { validateContact } from './contact';
+import { isValidPostalCode } from './postal_code';
 
-/**
- * Validation d'un client
- * @param {Object} data - Les données du formulaire
- * @returns {Object} errors - Objet des erreurs de validation
- */
 export function validateClient(data) {
   const errors = {};
 
@@ -49,9 +44,17 @@ export function validateClient(data) {
   // ---------------------
   // Validation contact
   // ---------------------
-  // Pour les clients, le champ email n'est pas obligatoire
+  const contactErrors = validateContact(data, { emailField: 'email', emailRequired: false });
+
+  // ---------------------
+  // Validation adresse
+  // ---------------------
+  if (data.country_code === 'FR' && !isValidPostalCode(data.postal_code)) {
+    errors.postal_code = 'Le code postal doit contenir 5 chiffres';
+  }
+
   return {
     ...errors,
-    ...validateContact(data, { emailField: 'email', emailRequired: false })
+    ...contactErrors
   };
 }

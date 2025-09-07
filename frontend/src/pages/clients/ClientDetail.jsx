@@ -25,6 +25,7 @@ export default function ClientDetail() {
         setClient(data);           
         setIsEditing(false);       
         setSuccessMessage("Client mis à jour avec succès ! 🎉"); 
+        window.scrollTo({ top: 0, behavior: "smooth" });
         setTimeout(() => {
           setSuccessMessage('');
           navigate('/clients');
