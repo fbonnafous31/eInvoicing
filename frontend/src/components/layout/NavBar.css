@@ -1,0 +1,26 @@
+.navbar-custom {
+  background-color: #0d6efd; /* bleu doux */
+  color: white;
+}
+
+.navbar-custom .navbar-brand,
+.navbar-custom .nav-link {
+  color: white;
+}
+
+.navbar-custom .nav-link:hover {
+  color: #ffc107; /* accent doré au hover */
+}
+
+.navbar-custom .dropdown-menu {
+  background-color: #0d6efd; /* menu assorti */
+}
+
+.navbar-custom .dropdown-item {
+  color: white;
+}
+
+.navbar-custom .dropdown-item:hover {
+  color: #ffc107;
+  background-color: rgba(255, 255, 255, 0.1);
+}
