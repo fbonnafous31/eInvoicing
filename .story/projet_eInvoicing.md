@@ -16,7 +16,7 @@
 - **Base de données** : PostgreSQL  
 - **Outils et bibliothèques clés** :
   - **Frontend** : `axios` pour les appels API, `react-data-table-component` pour les tableaux, `react-pdf` pour l'affichage de documents, `Bootstrap` pour le style.
-  - **Backend** : `multer` pour l'upload de fichiers, `node-zugferd` et `xmlbuilder2` pour la génération Factur-X, `pg` pour l'accès à la base de données.
+  - **Backend** : `multer` pour l'upload de fichiers, `xmlbuilder2` pour la génération Factur-X, `pg` pour l'accès à la base de données.
 - **Gestion environnement** : Variables d’environnement pour sécuriser les accès sensibles (ex : mot de passe DB)  
 
 ---
