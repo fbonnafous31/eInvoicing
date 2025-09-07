@@ -280,31 +280,56 @@ async function generateInvoicePdf(invoice) {
   y = totalsY - 30;
 
   // ---------------- Informations de paiement ----------------
-    if (invoice.seller?.payment_method) {
-      const paymentMethodOption = paymentMethodsOptions.find(
-        (opt) => opt.value === invoice.seller.payment_method
-      );
-      const paymentMethodLabel = paymentMethodOption ? paymentMethodOption.label : invoice.seller.payment_method;
+  if (invoice.seller?.payment_method) {
+    // Cherche le libellé correspondant à la méthode de paiement
+    const paymentMethodOption = paymentMethodsOptions.find(
+      (opt) => opt.value === invoice.seller?.payment_method
+    );
+    const paymentMethodLabel = paymentMethodOption
+      ? paymentMethodOption.label
+      : invoice.seller?.payment_method;
 
-      page.drawText(`Moyen de paiement : ${paymentMethodLabel}`, {
-        x: margin,
-        y,
-        size: 10,
-        font: fontRegular,
-      });
-      y -= 15;
-    }
+    page.drawText(`Moyen de paiement : ${paymentMethodLabel}`, {
+      x: margin,
+      y,
+      size: 10,
+      font: fontRegular,
+    });
+    y -= 15;
 
-    if (invoice.seller?.payment_terms) {
-      const termsLabel = paymentTermsOptions.find(t => t.value === invoice.seller.payment_terms)?.label || invoice.seller.payment_terms;
-      page.drawText(`Conditions de paiement : ${termsLabel}`, {
-        x: margin,
-        y,
-        size: 10,
-        font: fontRegular,
-      });
-      y -= 25;
-    }
+    // 👉 IBAN + BIC si virement bancaire
+    if (invoice.seller?.payment_method === "bank_transfer") {
+      if (seller.iban) {
+        page.drawText(`IBAN : ${seller.iban}`, {
+          x: margin,
+          y,
+          size: 10,
+          font: fontRegular,
+        });
+        y -= 15;
+      }
+      if (seller.bic) {
+        page.drawText(`BIC : ${seller.bic}`, {
+          x: margin,
+          y,
+          size: 10,
+          font: fontRegular,
+        });
+        y -= 15;
+      }
+    }  
+  }
+
+  if (invoice.seller?.payment_terms) {
+    const termsLabel = paymentTermsOptions.find(t => t.value === invoice.seller.payment_terms)?.label || invoice.seller.payment_terms;
+    page.drawText(`Conditions de paiement : ${termsLabel}`, {
+      x: margin,
+      y,
+      size: 10,
+      font: fontRegular,
+    });
+    y -= 25;
+  }
   
   // ---------------- Mentions additionnelles ----------------
     const mentions = [invoice.seller?.additional_1, invoice.seller?.additional_2].filter(Boolean);
@@ -572,39 +597,81 @@ async function generateInvoicePdfBuffer(invoice) {
   y = totalsY - 30; 
 
   // ---------------- Infos paiement ----------------
-// ---------------- Informations de paiement ----------------
-if (header.payment_method) {
-  // Cherche le libellé correspondant à la méthode de paiement
-  const paymentMethodOption = paymentMethodsOptions.find(
-    (opt) => opt.value === header.payment_method
-  );
-  const paymentMethodLabel = paymentMethodOption
-    ? paymentMethodOption.label
-    : header.payment_method;
+  // ---------------- Informations de paiement ----------------
+  // if (header.payment_method) {
+  //   // Cherche le libellé correspondant à la méthode de paiement
+  //   const paymentMethodOption = paymentMethodsOptions.find(
+  //     (opt) => opt.value === header.payment_method
+  //   );
+  //   const paymentMethodLabel = paymentMethodOption
+  //     ? paymentMethodOption.label
+  //     : header.payment_method;
 
-  page.drawText(`Moyen de paiement : ${paymentMethodLabel}`, {
-    x: margin,
-    y,
-    size: 10,
-    font: fontRegular,
-  });
-  y -= 15;
-}
+  //   page.drawText(`Moyen de paiement : ${paymentMethodLabel}`, {
+  //     x: margin,
+  //     y,
+  //     size: 10,
+  //     font: fontRegular,
+  //   });
+  //   y -= 15;
+  // }
 
-if (header.payment_terms) {
-  // Cherche le libellé correspondant aux conditions de paiement
-  const termsLabel = paymentTermsOptions.find(
-    (t) => t.value === header.payment_terms
-  )?.label || header.payment_terms;
+  // ---------------- Informations de paiement ----------------
+  if (header.payment_method) {
+    // Cherche le libellé correspondant à la méthode de paiement
+    const paymentMethodOption = paymentMethodsOptions.find(
+      (opt) => opt.value === header.payment_method
+    );
+    const paymentMethodLabel = paymentMethodOption
+      ? paymentMethodOption.label
+      : header.payment_method;
 
-  page.drawText(`Conditions de paiement : ${termsLabel}`, {
-    x: margin,
-    y,
-    size: 10,
-    font: fontRegular,
-  });
-  y -= 25;
-}
+    page.drawText(`Moyen de paiement : ${paymentMethodLabel}`, {
+      x: margin,
+      y,
+      size: 10,
+      font: fontRegular,
+    });
+    y -= 15;
+    console.log("seller:", seller);
+
+    // 👉 IBAN + BIC si virement bancaire
+    if (header.payment_method === "bank_transfer") {
+      if (seller.iban) {
+        page.drawText(`IBAN : ${seller.iban}`, {
+          x: margin,
+          y,
+          size: 10,
+          font: fontRegular,
+        });
+        y -= 15;
+      }
+      if (seller.bic) {
+        page.drawText(`BIC : ${seller.bic}`, {
+          x: margin,
+          y,
+          size: 10,
+          font: fontRegular,
+        });
+        y -= 15;
+      }
+    }  
+  }  
+
+  if (header.payment_terms) {
+    // Cherche le libellé correspondant aux conditions de paiement
+    const termsLabel = paymentTermsOptions.find(
+      (t) => t.value === header.payment_terms
+    )?.label || header.payment_terms;
+
+    page.drawText(`Conditions de paiement : ${termsLabel}`, {
+      x: margin,
+      y,
+      size: 10,
+      font: fontRegular,
+    });
+    y -= 25;
+  }
 
   // ---------------- Mentions additionnelles ----------------
   const mentions = [seller?.additional_1, seller?.additional_2].filter(Boolean);

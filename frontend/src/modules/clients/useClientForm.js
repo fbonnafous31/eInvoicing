@@ -26,9 +26,9 @@ export default function useClientForm(initialData = {}) {
   const [siretExists, setSiretExists] = useState(false);
   const [openSections, setOpenSections] = useState({
     legal: true,
-    contact: false,
-    address: false,
-    finances: false,
+    contact: true,
+    address: true,
+    finances: true,
   });
 
   // Vérification SIRET côté API (sécurisée)

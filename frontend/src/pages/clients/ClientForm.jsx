@@ -75,7 +75,7 @@ export default function ClientForm({ onSubmit, disabled = false, initialData = {
   return (
     <form onSubmit={handleSubmit} className="p-3 border rounded bg-light">
       {sections.map(({ key, label, component }) => {
-        const hasError = sectionHasError(key, errors);
+        const hasError = sectionHasError(key, errors, touched);
         const Component = component;
 
         return (
@@ -110,7 +110,7 @@ export default function ClientForm({ onSubmit, disabled = false, initialData = {
 // ---------------------
 // Helper pour savoir si une section contient des erreurs
 // ---------------------
-function sectionHasError(section, errors) {
+function sectionHasError(section, errors, touched) {
   const mapping = {
     legal: ['legal_name', 'siret', 'legal_identifier', 'firstname', 'lastname'],
     contact: ['email', 'phone'],
@@ -118,5 +118,7 @@ function sectionHasError(section, errors) {
     finances: ['vat_number']
   };
 
-  return Object.keys(errors).some(key => mapping[section]?.includes(key));
+  return Object.keys(errors).some(
+    key => mapping[section]?.includes(key) && touched[key]
+  );
 }
