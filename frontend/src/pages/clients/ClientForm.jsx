@@ -17,29 +17,40 @@ export default function ClientForm({ onSubmit, disabled = false, initialData = {
     formData,
     errors,
     touched,
-    siretExists,
     openSections,
     toggleSection,
     handleChange,
     handleBlur,
     setErrors,
-    setTouched
+    setTouched,
+    checkSiretAPI
   } = useClientForm(initialData);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // On marque tous les champs comme "touchés" pour afficher les erreurs
-    const allFields = Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {});
-    setTouched(allFields);
+    // Marquer tous les champs comme touchés
+    const allTouched = Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {});
+    setTouched(allTouched);
 
+    // Nettoyage SIRET
     const cleanedSiret = (formData.siret || '').toString().replace(/\D/g, '');
-    const newErrors = validateClient({ ...formData, siret: cleanedSiret });
 
-    if (siretExists) newErrors.siret = 'Ce SIRET est déjà utilisé';
+    // Validation locale
+    const newErrors = validateClient({ ...formData, siret: cleanedSiret });
     setErrors(newErrors);
 
-    // Ouvrir les sections avec erreurs
+    // Vérification SIRET côté API si FR
+    if (formData.is_company && formData.country_code === 'FR' && cleanedSiret) {
+      const result = await checkSiretAPI(cleanedSiret);
+      if (!result.valid) {
+        // Ouvre la section legal si erreur SIRET
+        if (!openSections.legal) toggleSection('legal');
+        return; // stop l'envoi
+      }
+    }
+
+    // Ouvrir les sections avec erreurs locales
     Object.keys(openSections).forEach(section => {
       if (sectionHasError(section, newErrors, touched) && !openSections[section]) {
         toggleSection(section);

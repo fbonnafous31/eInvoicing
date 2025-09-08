@@ -60,15 +60,20 @@ export async function deleteClient(id) {
 }
 
 /**
- * Vérifie si un SIRET existe déjà
+ * Vérifie si un SIRET existe déjà pour un autre client
  * @param {string} siret
+ * @param {number} clientId
  */
-export async function checkSiret(siret) {
-  const res = await fetch(`${API_BASE}/check-siret/${siret}`);
+export async function checkSiret(siret, clientId = null) {
+  const url = new URL(`${API_BASE}/check-siret/${siret}`);
+  if (clientId) url.searchParams.append("id", clientId);
+
+  const res = await fetch(url.toString());
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Erreur API SIRET: ${res.status} - ${text}`);
   }
   return res.json(); // { exists: true/false }
 }
+
 

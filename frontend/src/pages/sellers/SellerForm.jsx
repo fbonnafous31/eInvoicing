@@ -32,30 +32,33 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Marquer tous les champs comme touchés pour afficher les erreurs
+    // Marquer tous les champs comme touchés
     const allFieldsTouched = Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {});
     setTouched(allFieldsTouched);
 
+    // Nettoyage du SIRET
     const cleanedSiret = (formData.legal_identifier || '').toString().replace(/\D/g, '');
     const newErrors = validateSeller({ ...formData, legal_identifier: cleanedSiret });
 
-    if (siretExists) newErrors.legal_identifier = 'Ce SIRET est déjà utilisé';
+    if (siretExists) newErrors.legal_identifier = 'Ce SIRET est déjà utilisé98';
     setErrors(newErrors);
 
-    // Ouvrir les sections avec erreurs
+    // Ouvrir les sections avec erreurs (avec allFieldsTouched)
     Object.keys(openSections).forEach(section => {
-      if (sectionHasError(section, newErrors, touched) && !openSections[section]) {
+      if (sectionHasError(section, newErrors, allFieldsTouched) && !openSections[section]) {
         toggleSection(section);
       }
     });
 
-    // Envoi si pas d'erreurs
+    // Bloquer la soumission si erreurs
     if (Object.keys(newErrors).length === 0 && onSubmit) {
       const payload = {
         ...formData,
         legal_identifier: formData.country_code === 'FR' ? cleanedSiret : formData.vat_number?.trim() || null
       };
       onSubmit(payload);
+    } else {
+      console.log("Blocage : erreurs détectées", newErrors);
     }
   };
 
@@ -120,6 +123,6 @@ function sectionHasError(section, errors, touched) {
   };
 
   return Object.keys(errors).some(
-    key => mapping[section]?.includes(key) && touched[key] && errors[key]
+    key => mapping[section]?.includes(key) && touched[key] && Boolean(errors[key])
   );  
 }

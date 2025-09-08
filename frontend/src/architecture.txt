@@ -4,7 +4,7 @@
 ├── AppRoutes.jsx
 ├── architecture.txt
 ├── assets
-│   ├── pdf.worker.mjs
+│   ├── pdf.worker.min.mjs
 │   ├── react.svg
 │   └── sample-invoice.pdf
 ├── components
@@ -15,7 +15,10 @@
 │   ├── form
 │   │   ├── FormSection.jsx
 │   │   ├── index.js
+│   │   ├── InputEmail.jsx
 │   │   ├── InputField.jsx
+│   │   ├── InputPhone.jsx
+│   │   ├── InputPostalCode.jsx
 │   │   ├── SelectField.jsx
 │   │   └── TextAreaField.jsx
 │   ├── invoices
@@ -23,17 +26,20 @@
 │   │   ├── InvoiceForm.jsx
 │   │   ├── InvoiceHeader.jsx
 │   │   ├── InvoiceLines.jsx
+│   │   ├── InvoiceTabs.jsx
 │   │   ├── PdfViewer.jsx
 │   │   ├── SupportingDocs.jsx
 │   │   ├── TaxBases.jsx
 │   │   └── TestPdfViewer.jsx
 │   ├── layout
 │   │   ├── Breadcrumb.jsx
+│   │   ├── NavBar.css
 │   │   └── NavBar.jsx
 │   └── ui
 │       └── buttons
 ├── constants
 │   ├── companyTypes.js
+│   ├── paymentMethods.js
 │   ├── paymentTerms.js
 │   └── translations.js
 ├── index.css
@@ -59,9 +65,11 @@
 │   │   ├── ClientsPage.jsx
 │   │   ├── fields
 │   │   └── NewClient.jsx
+│   ├── Home.jsx
 │   ├── invoices
 │   │   ├── InvoiceDetail.jsx
 │   │   ├── InvoicesList.jsx
+│   │   ├── InvoiceView.jsx
 │   │   └── NewInvoice.jsx
 │   ├── NotFound.jsx
 │   └── sellers
@@ -79,6 +87,8 @@
     ├── architecture.txt
     ├── formatters
     │   └── formatters.js
+    ├── formatters.js
+    ├── helpers
     └── validators
         ├── client.js
         ├── contact.js
@@ -90,4 +100,4 @@
         ├── seller.js
         └── siret.js
 
-25 directories, 66 files
+26 directories, 75 files

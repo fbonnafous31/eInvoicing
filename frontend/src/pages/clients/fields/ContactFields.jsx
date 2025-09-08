@@ -1,7 +1,7 @@
 import React from 'react';
-import { InputField, InputEmail } from '@/components/form';
+import { InputField, InputEmail, InputPhone } from '@/components/form';
 
-export default function ContactFields({ formData, errors, touched, handleChange, handleBlur, disabled }) {
+export default function ContactFields({ formData, touched, handleChange, handleBlur, disabled }) {
   const handleFieldChange = (field) => (val) => handleChange(field, val);
 
   return (
@@ -18,7 +18,7 @@ export default function ContactFields({ formData, errors, touched, handleChange,
         required={false}
       />
 
-      <InputField
+      <InputPhone
         id="phone"
         name="phone"
         label="Téléphone"
@@ -27,7 +27,7 @@ export default function ContactFields({ formData, errors, touched, handleChange,
         onBlur={() => handleBlur('phone')}
         touched={touched.phone}
         disabled={disabled}
-        error={errors.phone}
+        required={false} 
       />
     </>
   );

@@ -1,22 +1,20 @@
 import React, { useState, useEffect } from "react";
 import InputField from "./InputField";
-import { validateEmail, validateOptionalEmail } from "@/utils/validators/email";
+import { validatePhoneNumber } from "@/utils/validators/phone_number";
 
-export default function InputEmail({ value, touched, required = false, ...props }) {
+export default function InputPhone({ value, touched, required = false, ...props }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (touched) {
-      const validationError = required
-        ? validateEmail(value)
-        : validateOptionalEmail(value);
+      const validationError = validatePhoneNumber(value);
       setError(validationError);
     }
-  }, [value, touched, required]);
+  }, [value, touched]);
 
   return (
     <InputField
-      type="email"
+      type="tel"
       value={value}
       error={error}
       required={required}

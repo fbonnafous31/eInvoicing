@@ -1,5 +1,5 @@
 import React from 'react';
-import { InputField } from '@/components/form';
+import { InputField, InputSiret } from '@/components/form';
 
 export default function LegalFields({ formData, errors, touched, handleChange, handleBlur, disabled }) {
   const handleFieldChange = (field) => (val) => handleChange(field, val);
@@ -54,16 +54,17 @@ export default function LegalFields({ formData, errors, touched, handleChange, h
 
           {/* SIRET uniquement si FR */}
           {formData.country_code === 'FR' && (
-            <InputField
+            <InputSiret
               id="siret"
               name="siret"
-              label="SIRET *"
+              label="SIRET"
               value={formData.siret}
               onChange={handleFieldChange('siret')}
               onBlur={() => handleBlur('siret')}
               touched={touched.siret}
-              disabled={disabled}
               error={errors.siret}
+              disabled={disabled}
+              required={false}
             />
           )}
         </>

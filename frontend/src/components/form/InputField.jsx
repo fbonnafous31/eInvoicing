@@ -8,17 +8,15 @@ export default function InputField({
   value,
   onChange,
   onBlur,
-  touched,   
+  touched = false,
   required = false,
-  error,
+  error = "",
   submitted = false,
   hideLabel = false,
   ...props
 }) {
-  const hasError =
-    (required && touched && !value) ||  
-    (required && submitted && !value) ||
-    Boolean(error);
+  // Détermination si le champ est en erreur
+  const hasError = Boolean(error) || (required && (touched || submitted) && !value);
 
   return (
     <div className="mb-3">
@@ -27,16 +25,18 @@ export default function InputField({
           {label} {required && "*"}
         </label>
       )}
+
       <input
         type={type}
         id={id || name}
         name={name}
         className={`form-control ${hasError ? "is-invalid" : ""}`}
         value={value ?? ""}
-        onChange={(e) => onChange?.(e.target.value)}  
-        onBlur={() => onBlur?.(name)}   
+        onChange={(e) => onChange?.(e.target.value)}
+        onBlur={() => onBlur?.(name)}
         {...props}
       />
+
       {hasError && (
         <small className="text-danger">
           {error || "Ce champ est obligatoire"}

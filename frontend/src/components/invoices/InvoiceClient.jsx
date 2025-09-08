@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
-import { InputField, SelectField, InputPostalCode, InputEmail } from '@/components/form';
+import { InputField, SelectField, InputPostalCode } from '@/components/form';
 import Select from "react-select";
 import { fetchClients } from "../../services/clients";
 import { validateClientData } from "../../utils/validators/invoice";
+import { validateOptionalEmail } from "../../utils/validators/email";
 import { isValidSiret } from "../../utils/validators/siret";
 import { validatePhoneNumber } from "../../utils/validators/phone_number";
 
@@ -312,17 +313,23 @@ export default function InvoiceClient({ value, onChange, error, disabled }) {
           error={errors.country_code}
           disabled={disabled} 
         />        
-        <InputEmail
-          id="email"
-          name="email"
+        <InputField
           label="Email"
           value={formData.email || ""}
-          onChange={(val) => handleChangeField("email", val)}
-          onBlur={() => handleBlurField("email")}
+          onChange={(val) => {
+            handleChangeField("email", val);
+            const error = validateOptionalEmail(val);
+            setErrors(prev => ({ ...prev, email: error }));
+          }}
+          onBlur={() => {
+            handleBlurField("email");
+            const error = validateOptionalEmail(formData.email);
+            setErrors(prev => ({ ...prev, email: error }));
+          }}
+          error={errors.email}
           touched={touchedFields.email}
-          disabled={disabled}
-          required={false}
-        />
+          disabled={disabled} 
+        />  
         <InputField
           label="Téléphone"
           value={formData.phone || ""}

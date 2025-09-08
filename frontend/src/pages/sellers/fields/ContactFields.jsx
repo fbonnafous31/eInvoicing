@@ -1,8 +1,8 @@
+// frontend/src/pages/sellers/fields/ContactFields.jsx
 import React from 'react';
-import { InputField, InputEmail } from '@/components/form';
+import { InputEmail, InputPhone } from '@/components/form';
 
-export default function ContactFields({ formData, errors, handleChange, handleBlur, touched, disabled }) {
-  // helper pour ne pas répéter la syntaxe handleChange('field', val)
+export default function ContactFields({ formData, touched, handleChange, handleBlur, disabled }) {
   const handleFieldChange = (field) => (val) => handleChange(field, val);
 
   return (
@@ -16,19 +16,19 @@ export default function ContactFields({ formData, errors, handleChange, handleBl
         onBlur={() => handleBlur('contact_email')}
         touched={touched.contact_email}
         disabled={disabled}
-        required={true} 
+        required={false}
       />
 
-      <InputField
+      <InputPhone
         id="phone_number"
         name="phone_number"
         label="Téléphone"
         value={formData.phone_number}
         onChange={handleFieldChange('phone_number')}
-        onBlur={handleBlur}
+        onBlur={() => handleBlur('phone_number')}
         touched={touched.phone_number}
         disabled={disabled}
-        error={errors.phone_number}
+        required={false}
       />
     </>
   );
