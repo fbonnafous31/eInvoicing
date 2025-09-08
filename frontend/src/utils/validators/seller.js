@@ -68,9 +68,15 @@ export function validateSeller(data) {
   // ---------------------
   // Validation contact
   // ---------------------
-  // Pour les vendeurs, le champ email est contact_email et obligatoire
+  const contactErrors = validateContact(data, { emailField: 'contact_email', emailRequired: true });
+
+  // Validation téléphone vendeur (optionnelle)
+  if (data.phone_number?.trim() && !/^\+?[0-9\s\-()]{6,20}$/.test(data.phone_number)) {
+    contactErrors.phone_number = 'Numéro de téléphone invalide';
+  }
+
   return {
     ...errors,
-    ...validateContact(data, { emailField: 'contact_email', emailRequired: true }),
+    ...contactErrors,
   };
 }

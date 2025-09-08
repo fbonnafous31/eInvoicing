@@ -1,0 +1,11 @@
+/* frontend/src/pages/LoginPage.css */
+.login-page {
+  background: linear-gradient(135deg, #1f2937, #374151); /* sombre et moderne */
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 1rem;
+  background-color: #ffffff;
+}

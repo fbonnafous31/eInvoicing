@@ -13,6 +13,7 @@ import InvoiceDetail from './pages/invoices/InvoiceDetail';
 import InvoiceView from './pages/invoices/InvoiceView';
 import TestPdfViewer from './components/invoices/TestPdfViewer'; 
 
+import AuthTest from './pages/AuthTest.jsx';
 import NotFound from './pages/NotFound';
 import Home from './pages/Home';
 
@@ -38,6 +39,9 @@ const routes = [
   // Test PDFViewer
   { path: '/test-pdf', element: <TestPdfViewer /> },
 
+  // Test Auth0
+  { path: '/auth-test', element: <AuthTest /> },
+  
   // 404
   { path: '*', element: <NotFound /> },
 ];

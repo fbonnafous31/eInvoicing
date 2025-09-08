@@ -10,6 +10,7 @@
     "start:all": "concurrently \"cd ../backend && node server.js\" \"npm run dev\""
   },
   "dependencies": {
+    "@auth0/auth0-react": "^2.4.0",
     "@popperjs/core": "^2.11.8",
     "axios": "^1.11.0",
     "bootstrap": "^5.3.7",

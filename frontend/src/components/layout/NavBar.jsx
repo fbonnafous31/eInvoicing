@@ -2,9 +2,12 @@
 import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { FaUserTie, FaUsers, FaFileInvoice } from 'react-icons/fa';
+import { useAuth0 } from '@auth0/auth0-react';
 import './NavBar.css';
 
 export default function NavBar() {
+  const { isAuthenticated, loginWithRedirect, logout, user } = useAuth0();
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm">
       <div className="container-fluid">
@@ -59,6 +62,36 @@ export default function NavBar() {
                 <li><NavLink className="dropdown-item" to="/invoices/new">Créer</NavLink></li>
               </ul>
             </li>
+          </ul>
+
+          {/* Login / Logout */}
+          <ul className="navbar-nav ms-auto">
+            {isAuthenticated ? (
+              <>
+                <li className="nav-item d-flex align-items-center me-3 text-white">
+                  {user?.name || user?.email}
+                </li>
+                <li className="nav-item">
+                  <button
+                    className="btn btn-outline-light"
+                    onClick={() =>
+                      logout({ returnTo: window.location.origin + "/login" })
+                    }
+                  >
+                    Logout
+                  </button>
+                </li>
+              </>
+            ) : (
+              <li className="nav-item">
+                <button
+                  className="btn btn-outline-light"
+                  onClick={() => loginWithRedirect()}
+                >
+                  Login
+                </button>
+              </li>
+            )}
           </ul>
         </div>
       </div>
