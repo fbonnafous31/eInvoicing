@@ -5,7 +5,7 @@ import Breadcrumb from "../../components/layout/Breadcrumb";
 import InvoiceTabs from "../../components/invoices/InvoiceTabs";
 import { useEffect, useState, useMemo } from "react";
 import { fetchInvoice } from "../../services/invoices";
-import { fetchClient } from "../../services/clients";
+import { useClientService } from "@/services/clients";
 import { useAuth } from "../../hooks/useAuth";
 
 const InvoiceView = () => {
@@ -16,6 +16,7 @@ const InvoiceView = () => {
   const { getToken } = useAuth();
 
   // Chargement des données
+  const { fetchClient } = useClientService();
   useEffect(() => {
     if (!id) return;
 
@@ -44,7 +45,8 @@ const InvoiceView = () => {
     };
 
     loadInvoice();
-  }, [id, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   // Mapping client
   const mappedClient = useMemo(() => {

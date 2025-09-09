@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { fetchClients } from "../../services/clients";
 import { useAuth } from "../../hooks/useAuth";
+import { useClientService } from '@/services/clients';
 
 export default function useClients() {
+  const { fetchClients } = useClientService();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

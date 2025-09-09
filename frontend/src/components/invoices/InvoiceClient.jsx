@@ -1,12 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { InputField, SelectField, InputPostalCode } from '@/components/form';
 import Select from "react-select";
-import { fetchClients } from "../../services/clients";
 import { validateClientData } from "../../utils/validators/invoice";
 import { validateOptionalEmail } from "../../utils/validators/email";
 import { isValidSiret } from "../../utils/validators/siret";
 import { validatePhoneNumber } from "../../utils/validators/phone_number";
-import { useAuth } from "../../hooks/useAuth";
+import { useClientService } from "@/services/clients";
 
 import countries from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
@@ -80,29 +79,26 @@ export default function InvoiceClient({ value, onChange, error, disabled }) {
     [onChange]
   );
 
-  const { getToken } = useAuth(); // récupère le JWT
 
+  const { fetchClients } = useClientService();
   useEffect(() => {
-    let isMounted = true; // empêche le setState après démontage
+    let isMounted = true;
 
     const loadClients = async () => {
       try {
-        const token = await getToken({ audience: import.meta.env.VITE_AUTH0_AUDIENCE });
-        const data = await fetchClients(token);
-
+        const data = await fetchClients();
         if (isMounted) {
-          // Tri par nom légal avant de mettre à jour l'état
           setClients(data.sort((a, b) => (a.legal_name || "").localeCompare(b.legal_name || "")));
         }
       } catch (err) {
-        console.error("Erreur chargement clients :", err);
+        console.error(err);
       }
     };
 
     loadClients();
-
     return () => { isMounted = false; };
-  }, [getToken]);
+  }, [fetchClients]); 
+
 
   useEffect(() => {
     // Cet effet synchronise l'état interne `formData` avec la prop `value` venant du parent.

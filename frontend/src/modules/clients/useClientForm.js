@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { validateClient } from '../../utils/validators/client';
-import { checkSiret } from '../../services/clients';
+import { useClientService } from '@/services/clients';
 
 export default function useClientForm(initialData = {}) {
+
   const [formData, setFormData] = useState({
     is_company: true,
     legal_name: '',
@@ -32,6 +33,7 @@ export default function useClientForm(initialData = {}) {
   // ----------------------
   // Vérification SIRET côté API
   // ----------------------
+  const { checkSiret } = useClientService();
   const checkSiretAPI = async (siret) => {
     if (!siret || siret.length !== 14) return { valid: true };
 

@@ -2,9 +2,8 @@ import React, { useEffect, useState } from 'react';
 import ClientForm from './ClientForm';
 import { useParams, useNavigate } from 'react-router-dom';
 import Breadcrumb from '../../components/layout/Breadcrumb';
-import { fetchClient, updateClient, deleteClient } from '../../services/clients';
+import { useClientService } from "@/services/clients";
 import { EditButton, CancelButton, DeleteButton } from '@/components/ui/buttons';
-import { useAuth } from '@/hooks/useAuth'; 
 
 export default function ClientDetail() {
   const { id } = useParams();
@@ -13,60 +12,57 @@ export default function ClientDetail() {
   const [isEditing, setIsEditing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(true);
-  const { getToken } = useAuth(); 
 
+  const clientService = useClientService();
+  const { updateClient, deleteClient } = useClientService();
   useEffect(() => {
-    let isMounted = true; // ⚡ flag pour éviter les fetch après démontage
+    let isMounted = true;
 
     const loadClient = async () => {
       try {
-        const token = await getToken({ audience: import.meta.env.VITE_AUTH0_AUDIENCE });
-        const data = await fetchClient(id, token);
-        if (isMounted) {
-          setClient(data);
-          setLoading(false);
-        }
+        const data = await clientService.fetchClient(id);
+        if (!isMounted) return;
+        setClient(data);
       } catch (err) {
-        if (isMounted) {
-          console.error("Erreur chargement client :", err);
-          setLoading(false);
-          // si le client n'existe pas, redirige directement
-          if (err.message.includes('404')) navigate('/clients');
-        }
+        if (!isMounted) return;
+        console.error("Erreur chargement client :", err);
+        if (err.message.includes("404")) navigate("/clients");
+      } finally {
+        if (isMounted) setLoading(false);
       }
     };
 
-    loadClient();
+    if (id) loadClient();
 
-    return () => { isMounted = false; }; // cleanup
-  }, [id, getToken, navigate]);
+    return () => { isMounted = false; };
+  }, [id, navigate, clientService]);
 
   const handleUpdate = async (updatedData) => {
     try {
-      const token = await getToken({ audience: import.meta.env.VITE_AUTH0_AUDIENCE });
-      const data = await updateClient(id, updatedData, token); 
+      const data = await updateClient(id, updatedData); 
       setClient(data);
       setIsEditing(false);
       setSuccessMessage("Client mis à jour avec succès ! 🎉");
       window.scrollTo({ top: 0, behavior: "smooth" });
+
       setTimeout(() => {
         setSuccessMessage('');
         navigate('/clients');
       }, 2000);
     } catch (err) {
-      console.error(err);
+      console.error("Erreur mise à jour client :", err);
     }
   };
 
+
   const handleDelete = async () => {
-    if (window.confirm('Voulez-vous vraiment supprimer ce client ?')) {
-      try {
-        const token = await getToken({ audience: import.meta.env.VITE_AUTH0_AUDIENCE });
-        await deleteClient(id, token); 
-        navigate('/clients');
-      } catch (err) {
-        console.error(err);
-      }
+    if (!window.confirm('Voulez-vous vraiment supprimer ce client ?')) return;
+
+    try {
+      await deleteClient(id); // token géré automatiquement par le service
+      navigate('/clients');
+    } catch (err) {
+      console.error("Erreur suppression client :", err);
     }
   };
 

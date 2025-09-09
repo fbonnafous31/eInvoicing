@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ClientForm from '../clients/ClientForm';
 import Breadcrumb from '../../components/layout/Breadcrumb';
-import { createClient } from '../../services/clients'; 
-import { useAuth } from '@/hooks/useAuth'; 
+import { useClientService } from "@/services/clients";
 
 export default function NewClient() {
   const navigate = useNavigate();
@@ -11,13 +10,13 @@ export default function NewClient() {
   const [errorMessage, setErrorMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { getToken } = useAuth();
+  const { createClient } = useClientService();
   const handleCreateClient = async (formData) => {
     setIsSubmitting(true);
     setErrorMessage('');
+
     try {
-      const token = await getToken({ audience: import.meta.env.VITE_AUTH0_AUDIENCE });
-      await createClient(formData, token);
+      await createClient(formData); 
 
       setSuccessMessage("Client créé avec succès ! 🎉");
       window.scrollTo({ top: 0, behavior: "smooth" });

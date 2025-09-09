@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import InvoiceForm from "../../components/invoices/InvoiceForm";
 import { fetchInvoice, updateInvoice, deleteInvoice } from "../../services/invoices";
-import { fetchClient } from "../../services/clients"; 
+import { useClientService } from "@/services/clients";
 import { useAuth } from "../../hooks/useAuth";
 
 export default function InvoiceDetail() {
@@ -15,6 +15,7 @@ export default function InvoiceDetail() {
   const navigate = useNavigate();
   const { getToken } = useAuth();
 
+  const { fetchClient } = useClientService();
   useEffect(() => {
     let isMounted = true;
 
