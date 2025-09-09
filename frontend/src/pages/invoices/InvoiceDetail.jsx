@@ -16,42 +16,50 @@ export default function InvoiceDetail() {
   const { getToken } = useAuth();
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadInvoice = async () => {
       try {
-        const token = await getToken({
-          audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-        });
-
+        const token = await getToken({ audience: import.meta.env.VITE_AUTH0_AUDIENCE });
         const data = await fetchInvoice(id, token);
 
         if (data.client_id) {
           try {
             const clientData = await fetchClient(data.client_id, token);
-            setInvoice({ ...data, client: clientData });
-          } catch (err) {
-            console.error("Erreur fetch client:", err);
-            setInvoice(data);
+            if (isMounted) setInvoice({ ...data, client: clientData });
+          } catch {
+            if (isMounted) setInvoice(data);
           }
-        } else {
+        } else if (isMounted) {
           setInvoice(data);
         }
       } catch (err) {
-        console.error("Erreur fetch invoice:", err);
+        console.error(err);
       }
     };
 
     loadInvoice();
-  }, [id, getToken]);
+
+    return () => { isMounted = false; };
+    // ⚠️ pas de dépendance sur getToken pour éviter la boucle infinie
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]); // on enlève getToken des dépendances
 
   const handleUpdate = async (formData) => {
     try {
-      const updated = await updateInvoice(id, formData);
+      const token = await getToken({
+        audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+      });
+
+      const updated = await updateInvoice(id, formData, token);
+
       setInvoice(updated);
       setIsEditing(false);
       setSuccessMessage("Facture mise à jour avec succès ! 🎉");
+
       setTimeout(() => setSuccessMessage(""), 2000);
     } catch (err) {
-      console.error(err);
+      console.error("Erreur update invoice:", err);
       alert("Erreur lors de la mise à jour de la facture");
     }
   };
@@ -60,11 +68,17 @@ export default function InvoiceDetail() {
     if (!window.confirm("Voulez-vous vraiment supprimer cette facture ?")) return;
 
     try {
-      await deleteInvoice(id);
+      const token = await getToken({
+        audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+      });
+
+      await deleteInvoice(id, token);
+
       alert("Facture supprimée avec succès !");
       navigate("/invoices");
     } catch (err) {
-      alert(err.message);
+      console.error("Erreur delete invoice:", err);
+      alert(err.message || "Erreur lors de la suppression de la facture");
     }
   };
 

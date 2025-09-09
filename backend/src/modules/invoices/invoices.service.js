@@ -48,8 +48,6 @@ async function getInvoice(id) {
 
 async function createInvoice(data) {
   const { invoice, client, lines, taxes, attachments } = data;
-
-  console.log("=== createInvoice called ===");
   const createdInvoice = await InvoicesModel.createInvoice({ invoice, client, lines, taxes, attachments });
   console.log("✅ Invoice created, id:", createdInvoice.id);
 

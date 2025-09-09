@@ -3,12 +3,14 @@ import { useNavigate } from "react-router-dom";
 import InvoiceForm from "../../components/invoices/InvoiceForm";
 import Breadcrumb from '../../components/layout/Breadcrumb';
 import * as invoiceService from '../../services/invoices';
+import { useAuth } from '@/hooks/useAuth'; 
 
 export default function NewInvoice() {
   const navigate = useNavigate();
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { getToken } = useAuth(); 
 
   const handleCreateInvoice = async (formData) => {
     setIsSubmitting(true);
@@ -16,7 +18,11 @@ export default function NewInvoice() {
     setSuccessMessage('');
 
     try {
-      await invoiceService.createInvoice(formData);
+      const token = await getToken({
+        audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+      });
+
+      await invoiceService.createInvoice(formData, token);
 
       // Succès
       setSuccessMessage("Facture créée avec succès ! 🎉");
@@ -28,7 +34,6 @@ export default function NewInvoice() {
       }, 2000);
 
     } catch (error) {
-      // Récupération du message renvoyé par le backend
       let backendMessage = "Erreur lors de la création de la facture";
 
       if (error.response?.data?.error) {

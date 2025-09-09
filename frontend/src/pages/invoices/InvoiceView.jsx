@@ -2,9 +2,8 @@
 import { useParams } from "react-router-dom";
 import InvoiceForm from "../../components/invoices/InvoiceForm";
 import Breadcrumb from "../../components/layout/Breadcrumb";
-import PdfViewer from "../../components/invoices/PdfViewer";
 import InvoiceTabs from "../../components/invoices/InvoiceTabs";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { fetchInvoice } from "../../services/invoices";
 import { fetchClient } from "../../services/clients";
 import { useAuth } from "../../hooks/useAuth";
@@ -14,8 +13,9 @@ const InvoiceView = () => {
   const [invoice, setInvoice] = useState(null);
 
   const BACKEND_URL = import.meta.env.VITE_API_URL;
-
   const { getToken } = useAuth();
+
+  // Chargement des données
   useEffect(() => {
     if (!id) return;
 
@@ -46,13 +46,12 @@ const InvoiceView = () => {
     loadInvoice();
   }, [id, getToken]);
 
-  if (!invoice) return <div>Chargement...</div>;
-
-  // Mapping client pour InvoiceForm
-  const mapClientForForm = (invoiceData) => {
-    const c = invoiceData.client || {};
+  // Mapping client
+  const mappedClient = useMemo(() => {
+    if (!invoice) return {};
+    const c = invoice.client || {};
     return {
-      client_id: invoiceData.client_id || null,
+      client_id: invoice.client_id || null,
       client_legal_name: c.legal_name || "",
       client_address: c.address || "",
       client_city: c.city || "",
@@ -65,29 +64,34 @@ const InvoiceView = () => {
       client_siret: c.legal_identifier_type === "SIRET" ? c.legal_identifier : c.siret || "",
       client_vat_number: c.legal_identifier_type === "VAT" ? c.legal_identifier : c.vat_number || "",
     };
-  };
+  }, [invoice]);
 
-  const mappedClient = mapClientForForm(invoice);
+  // Données pour InvoiceForm
+  const invoiceFormData = useMemo(() => {
+    if (!invoice) return null;
+    return {
+      id: invoice.id,
+      status: invoice.status,
+      header: {
+        invoice_number: invoice.invoice_number,
+        issue_date: invoice.issue_date,
+        supply_date: invoice.supply_date,
+        fiscal_year: invoice.fiscal_year,
+        seller_id: invoice.seller_id,
+        contract_number: invoice.contract_number,
+        purchase_order_number: invoice.purchase_order_number,
+        payment_terms: invoice.payment_terms,
+        payment_method: invoice.payment_method,
+      },
+      client: mappedClient,
+      lines: invoice.lines || [],
+      taxes: invoice.taxes || [],
+      attachments: invoice.attachments || [],
+    };
+  }, [invoice, mappedClient]);
 
-  const invoiceFormData = {
-    id: invoice.id,
-    status: invoice.status,
-    header: {
-      invoice_number: invoice.invoice_number,
-      issue_date: invoice.issue_date,
-      supply_date: invoice.supply_date,
-      fiscal_year: invoice.fiscal_year,
-      seller_id: invoice.seller_id,
-      contract_number: invoice.contract_number,
-      purchase_order_number: invoice.purchase_order_number,
-      payment_terms: invoice.payment_terms,
-      payment_method: invoice.payment_method,
-    },
-    client: mappedClient,
-    lines: invoice.lines || [],
-    taxes: invoice.taxes || [],
-    attachments: invoice.attachments || [],
-  };
+  // Loading
+  if (!invoice || !invoiceFormData) return <div>Chargement...</div>;
 
   const breadcrumbItems = [
     { label: "Accueil", path: "/" },
@@ -97,12 +101,10 @@ const InvoiceView = () => {
 
   return (
     <div style={{ height: "100vh", width: "100vw", boxSizing: "border-box", padding: "20px" }}>
-      {/* Breadcrumb */}
       <div style={{ marginBottom: "20px" }}>
         <Breadcrumb items={breadcrumbItems} />
       </div>
 
-      {/* Contenu principal : deux colonnes */}
       <div
         style={{
           display: "flex",
@@ -110,12 +112,10 @@ const InvoiceView = () => {
           height: "calc(100% - 60px)",
         }}
       >
-        {/* Partie gauche : détails */}
         <div style={{ flex: 1, overflowY: "auto", paddingRight: "10px" }}>
           <InvoiceForm initialData={invoiceFormData} readOnly />
         </div>
 
-        {/* Partie droite : PDF + sélection */}
         <div
           style={{
             flex: 1,
@@ -124,7 +124,6 @@ const InvoiceView = () => {
             borderLeft: "1px solid #ccc"
           }}
         >
-          {/* Viewer PDF */}
           <InvoiceTabs attachments={invoice.attachments} backendUrl={BACKEND_URL} />
         </div>
       </div>

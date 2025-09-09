@@ -46,9 +46,15 @@ export async function fetchInvoice(id, token) {
 /**
  * Crée une nouvelle facture
  */
-export async function createInvoice(formData) {
+export async function createInvoice(formData, token) {
   console.log("Data being sent to createInvoice:", formData);
-  const response = await fetch(API_BASE, { method: "POST", body: formData });
+  const response = await fetch(API_BASE, { 
+    method: "POST",
+    body: formData,
+    headers: {
+      Authorization: `Bearer ${token}`, 
+    },
+  });
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
     throw new Error(data.error || data.message || "Erreur lors de la création de la facture");
@@ -59,9 +65,14 @@ export async function createInvoice(formData) {
 /**
  * Met à jour une facture existante
  */
-export async function updateInvoice(id, formData) {
-  // Le FormData est déjà construit par InvoiceForm.jsx, il suffit de l'envoyer.
-  const response = await fetch(`${API_BASE}/${id}`, { method: "PUT", body: formData });
+export async function updateInvoice(id, formData, token) {
+  const response = await fetch(`${API_BASE}/${id}`, { 
+    method: "PUT",
+    body: formData,
+    headers: {
+      Authorization: `Bearer ${token}`, // ← essentiel
+    },
+  });
 
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
@@ -73,14 +84,24 @@ export async function updateInvoice(id, formData) {
 
 /**
  * Supprime une facture
+ * @param {string|number} id
+ * @param {string} token - token Auth0 de l'utilisateur
  */
-export async function deleteInvoice(id) {
-  const response = await fetch(`${API_BASE}/${id}`, { method: "DELETE" });
-  
+export async function deleteInvoice(id, token) {
+  if (!token) throw new Error("Token manquant pour supprimer la facture");
+
+  const response = await fetch(`${API_BASE}/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
     throw new Error(data.error || data.message || "Erreur lors de la suppression de la facture");
   }
+
   return true;
 }
 

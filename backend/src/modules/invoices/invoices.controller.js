@@ -35,14 +35,10 @@ async function getInvoice(req, res) {
  */
 async function createInvoice(req, res, next) {
   try {
-    console.log("req.body:", req.body);
-    console.log("req.files:", req.files);
-
     const invoiceData = req.body.invoice ? JSON.parse(req.body.invoice) : null;
     const lines = req.body.lines ? JSON.parse(req.body.lines) : null;
     const taxes = req.body.taxes ? JSON.parse(req.body.taxes) : null;
     const attachmentsMeta = req.body.attachments_meta ? JSON.parse(req.body.attachments_meta) : [];
-    console.log("Parsed client data:", req.body.client);
     const client = req.body.client ? JSON.parse(req.body.client) : null;
 
     const attachments = (req.files.attachments || []).map((file, i) => ({
@@ -101,11 +97,6 @@ async function deleteInvoice(req, res) {
  */
 async function updateInvoice(req, res, next) {
   try {
-    // 🚨 Debug logs
-    console.log("=== UpdateInvoice called with id ===", req.params.id);
-    console.log("=== Raw body received ===", req.body);
-    console.log("=== Files received ===", req.files);
-
     // Parser les champs JSON en toute sécurité
     let invoiceData = null;
     let client = null;
@@ -159,15 +150,6 @@ async function updateInvoice(req, res, next) {
 
     const allAttachments = [...existingAttachments, ...newAttachments];
 
-    console.log("=== Final parsed data before service call ===", {
-      id: req.params.id,
-      invoice: invoiceData,
-      client,
-      lines,
-      taxes,
-      attachments: allAttachments
-    });
-
     const updatedInvoice = await InvoicesService.updateInvoice(req.params.id, {
       invoice: invoiceData,
       client,
@@ -187,8 +169,6 @@ async function updateInvoice(req, res, next) {
 async function createInvoicePdf(req, res) {
   try {
     const invoiceId = req.params.id;
-    console.log("➡️ Requête createInvoicePdf pour invoiceId:", invoiceId);
-
     const invoice = await getInvoiceById(invoiceId);
     if (!invoice) {
       console.log("❌ Facture introuvable pour id:", invoiceId);

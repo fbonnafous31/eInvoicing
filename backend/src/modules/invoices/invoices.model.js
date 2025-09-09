@@ -234,11 +234,7 @@ async function updateInvoice(
 ) {
   const conn = await pool.connect();
   try {
-    console.log("=== updateInvoice called for id:", id, "===");
-
     await conn.query("BEGIN");
-    console.log("Transaction started");
-
     // --- 1. Update invoice main data ---
     if (invoice) {
       // Trim invoice_number if present to ensure data quality
@@ -246,7 +242,6 @@ async function updateInvoice(
         invoice.invoice_number = invoice.invoice_number.trim().slice(0, 20);
       }
 
-      console.log("Updating invoice main data:", invoice);
       const invoiceColumns = [
         "invoice_number",
         "issue_date",
@@ -376,8 +371,6 @@ async function updateInvoice(
     }
 
     // --- 4. Attachments ---
-    console.log("📂 Processing attachments...");
-
     // Récupérer ceux existants en DB
     const { rows: dbAttachments } = await conn.query(
       `SELECT id, stored_name FROM invoicing.invoice_attachments WHERE invoice_id = $1`,
@@ -432,8 +425,6 @@ async function updateInvoice(
     }
 
     await conn.query("COMMIT");
-    console.log("Transaction committed successfully for invoice", id);
-
     return await getInvoiceById(id);
   } catch (err) {
     await conn.query("ROLLBACK");

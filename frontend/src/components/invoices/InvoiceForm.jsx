@@ -11,6 +11,7 @@ import { createInvoice, updateInvoice } from "../../services/invoices";
 import { fetchSellers } from '../../services/sellers';
 import { validateInvoiceField, validateClientData } from "../../utils/validators/invoice";
 import { EditButton, CancelButton, DeleteButton, SaveButton } from '@/components/ui/buttons';
+import { useAuth } from '../../hooks/useAuth'; 
 
 export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly = false }) {
   const navigate = useNavigate();
@@ -68,11 +69,10 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
   }, [initialData]);
 
 
-    // Mise à jour de facture
+  // Mise à jour de facture
   useEffect(() => {
     const fetchFullInvoiceData = async () => {
       if (!initialData) return;
-      console.log("➡️ Avant fetchFullInvoiceData, invoiceData:", initialData);
 
       let seller = {};
       if (initialData.header?.seller_id) {
@@ -100,12 +100,18 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
         })),
         seller,
       };
-      console.log("Après fetchFullInvoiceData safeData:", safeData);
-      setInvoiceData(safeData);
+
+      // Comparer avant de setter
+      const prevJson = JSON.stringify(invoiceData);
+      const newJson = JSON.stringify(safeData);
+      if (prevJson !== newJson) {
+        setInvoiceData(safeData);
+      }
     };
 
     fetchFullInvoiceData();
-  }, [initialData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialData]); // invoiceData volontairement exclu
 
   const headerFields = ["invoice_number", "issue_date", "fiscal_year", "seller_id"];
 
@@ -199,6 +205,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
     return clientErrors;
   };
 
+  const { getToken } = useAuth();
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitted(true);
@@ -283,7 +290,11 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
       if (initialData) {
         // Mise à jour
         if (isDraft) {
-          await updateInvoice(initialData.id, formData);
+          const token = await getToken({
+            audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+          });
+
+          await updateInvoice(initialData.id, formData, token);
           setSuccessMessage("Facture mise à jour avec succès ! 🎉");
         } else {
           // Ce cas ne devrait pas être possible via l'UI, mais c'est une sécurité
@@ -292,7 +303,11 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
         }
       } else {
         // Création
-        await createInvoice(formData);
+        const token = await getToken({
+          audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+        });
+
+        await createInvoice(formData, token);
         setSuccessMessage("Facture créée avec succès ! 🎉");
       }
 
