@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../../hooks/useAuth";
 import { useClientService } from '@/services/clients';
 
 export default function useClients() {
@@ -8,23 +7,16 @@ export default function useClients() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const { getToken } = useAuth(); // récupère le JWT
-
   useEffect(() => {
-    let isMounted = true; // empêche le setState après démontage
+    let isMounted = true;
 
     const loadClients = async () => {
       try {
-        const token = await getToken({
-          audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-        });
-        console.log("Token JWT obtenu :", token);
-
-        const data = await fetchClients(token);
+        const data = await fetchClients(); 
         if (isMounted) setClients(data);
       } catch (err) {
         console.error(err);
-        if (isMounted) setError("Erreur 403 lors du chargement des clients");
+        if (isMounted) setError("Erreur lors du chargement des clients");
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -35,8 +27,7 @@ export default function useClients() {
     return () => {
       isMounted = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchClients]);
 
   return { clients, loading, error };
 }

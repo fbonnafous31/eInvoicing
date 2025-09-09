@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { validateClient } from '../../utils/validators/client';
 import { useClientService } from '@/services/clients';
 
@@ -30,16 +30,14 @@ export default function useClientForm(initialData = {}) {
     finances: true,
   });
 
-  // ----------------------
-  // Vérification SIRET côté API
-  // ----------------------
   const { checkSiret } = useClientService();
-  const checkSiretAPI = async (siret) => {
+
+  // ✅ Stabilisation avec useCallback
+  const checkSiretAPI = useCallback(async (siret) => {
     if (!siret || siret.length !== 14) return { valid: true };
 
     try {
       const result = await checkSiret(siret, formData.id || undefined);
-      // En création, formData.id est undefined
       if (result.exists) {
         setErrors(prev => ({ ...prev, siret: 'Ce SIRET est déjà utilisé par un autre client' }));
         return { valid: false };
@@ -52,7 +50,7 @@ export default function useClientForm(initialData = {}) {
       setErrors(prev => ({ ...prev, siret: 'Impossible de vérifier le SIRET' }));
       return { valid: false };
     }
-  };
+  }, [checkSiret, formData.id]);
 
   // ----------------------
   // Handle Change
@@ -61,14 +59,12 @@ export default function useClientForm(initialData = {}) {
     setFormData(prev => {
       const updated = { ...prev, [field]: value };
 
-      // Validation locale
       const fieldError = validateClient(updated, field);
       setErrors(prevErrors => {
         if (field === 'siret' && prevErrors.siret?.includes('déjà utilisé')) return prevErrors;
         return { ...prevErrors, [field]: fieldError[field] };
       });
 
-      // Vérification asynchrone pour SIRET
       if (field === 'siret') {
         const cleaned = (value || '').replace(/\D/g, '');
         if (cleaned.length === 14) { 
@@ -87,16 +83,13 @@ export default function useClientForm(initialData = {}) {
     setTouched(prev => ({ ...prev, [field]: true }));
 
     const fieldError = validateClient(formData, field);
-
     setErrors(prevErrors => {
-      // Si le champ est le SIRET et qu'un message API existe, on ne l'écrase pas
       if (field === 'siret' && prevErrors.siret?.includes('déjà utilisé')) {
         return prevErrors;
       }
       return { ...prevErrors, [field]: fieldError[field] };
     });
 
-    // Vérification asynchrone pour SIRET si nécessaire
     if (field === 'siret') {
       const cleaned = (formData.siret || '').replace(/\D/g, '');
       if (cleaned.length === 14) {
@@ -123,6 +116,6 @@ export default function useClientForm(initialData = {}) {
     toggleSection,
     handleChange,
     handleBlur,
-    checkSiretAPI, // on expose pour handleSubmit
+    checkSiretAPI, 
   };
 }

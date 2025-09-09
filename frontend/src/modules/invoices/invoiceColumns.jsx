@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import EllipsisCell from '../../components/common/EllipsisCell';
 import { formatCurrency, formatDate } from '../../utils/formatters/formatters';
 import { FR } from '../../constants/translations';
+import { useInvoiceService } from "@/services/invoices"; 
 
 export default function useInvoiceColumns() {
   const navigate = useNavigate();
+  const invoiceService = useInvoiceService();
 
-  return [
-{
+  return [{
   cell: row => (
         <div className="flex gap-1">
           {/* Voir */}
@@ -33,31 +34,29 @@ export default function useInvoiceColumns() {
             ✏️
           </button>
 
-          {/* Générer PDF */}
+      {/* Générer PDF */}
           <button
             className="btn btn-sm"
             title="Générer et télécharger la facture (PDF)"
             onClick={async () => {
               if (!row?.id) return;
-
               try {
                 console.log("➡️ Génération PDF pour invoice id:", row.id);
 
-                // 1️⃣ Génération du PDF côté backend
-                const resGenerate = await fetch(`/api/invoices/${row.id}/generate-pdf`);
-                const data = await resGenerate.json();
-                console.log("📄 JSON reçu :", data);
+                // 1️⃣ Génération du PDF via service (token inclus)
+                const data = await invoiceService.generateInvoicePdf(row.id);
+                console.log("📄 Réponse service :", data);
 
-                if (!data.path) {
+                if (!data?.path) {
                   console.error("❌ Pas de chemin PDF renvoyé");
                   return;
                 }
 
-                // 2️⃣ Récupération du PDF via URL complète backend
+                // 2️⃣ Récupération du PDF via URL backend
                 const pdfRes = await fetch(`http://localhost:3000${data.path}`);
                 const blob = await pdfRes.blob();
 
-                // 3️⃣ Téléchargement côté client
+                // 3️⃣ Téléchargement
                 const link = document.createElement("a");
                 link.href = URL.createObjectURL(blob);
                 link.download = `facture_${row.invoice_number}.pdf`;
@@ -68,7 +67,7 @@ export default function useInvoiceColumns() {
 
                 console.log("✅ PDF téléchargé");
               } catch (err) {
-                console.error("❌ Erreur lors de la génération et téléchargement :", err);
+                console.error("❌ Erreur génération PDF :", err);
               }
             }}
           >

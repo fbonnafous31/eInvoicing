@@ -7,11 +7,10 @@ import InvoiceLines from "./InvoiceLines";
 import TaxBases from "./TaxBases";
 import SupportingDocs from "./SupportingDocs";
 import FormSection from "../form/FormSection";
-import { createInvoice, updateInvoice } from "../../services/invoices";
 import { fetchSellers } from '../../services/sellers';
 import { validateInvoiceField, validateClientData } from "../../utils/validators/invoice";
 import { EditButton, CancelButton, DeleteButton, SaveButton } from '@/components/ui/buttons';
-import { useAuth } from '../../hooks/useAuth'; 
+import { useInvoiceService } from "@/services/invoices";
 
 export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly = false }) {
   const navigate = useNavigate();
@@ -205,7 +204,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
     return clientErrors;
   };
 
-  const { getToken } = useAuth();
+  const { createInvoice, updateInvoice } = useInvoiceService();
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitted(true);
@@ -286,28 +285,20 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
       formData.append("lines", JSON.stringify(linesWithTotals));
       formData.append("taxes", JSON.stringify(taxesSummary));
       console.log("Payload FormData ready:", formData);
-
+      
       if (initialData) {
         // Mise à jour
         if (isDraft) {
-          const token = await getToken({
-            audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-          });
-
-          await updateInvoice(initialData.id, formData, token);
+          await updateInvoice(initialData.id, formData);
           setSuccessMessage("Facture mise à jour avec succès ! 🎉");
         } else {
-          // Ce cas ne devrait pas être possible via l'UI, mais c'est une sécurité
+          // Sécurité : on ne peut pas modifier une facture validée
           setErrorMessage("Impossible de modifier une facture qui n'est pas un brouillon.");
           return;
         }
       } else {
         // Création
-        const token = await getToken({
-          audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-        });
-
-        await createInvoice(formData, token);
+        await createInvoice(formData);
         setSuccessMessage("Facture créée avec succès ! 🎉");
       }
 

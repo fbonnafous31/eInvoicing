@@ -1,3 +1,4 @@
+// frontend/src/pages/clients/ClientDetail.jsx
 import React, { useEffect, useState } from 'react';
 import ClientForm from './ClientForm';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -13,9 +14,14 @@ export default function ClientDetail() {
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(true);
 
+  // ⚡ Une seule instance stable
   const clientService = useClientService();
-  const { updateClient, deleteClient } = useClientService();
+
+  // ----------------------
+  // Chargement client
+  // ----------------------
   useEffect(() => {
+    if (!id) return;
     let isMounted = true;
 
     const loadClient = async () => {
@@ -24,7 +30,6 @@ export default function ClientDetail() {
         if (!isMounted) return;
         setClient(data);
       } catch (err) {
-        if (!isMounted) return;
         console.error("Erreur chargement client :", err);
         if (err.message.includes("404")) navigate("/clients");
       } finally {
@@ -32,34 +37,42 @@ export default function ClientDetail() {
       }
     };
 
-    if (id) loadClient();
+    loadClient();
 
     return () => { isMounted = false; };
   }, [id, navigate, clientService]);
 
+  // ----------------------
+  // Update client
+  // ----------------------
   const handleUpdate = async (updatedData) => {
     try {
-      const data = await updateClient(id, updatedData); 
+      const data = await clientService.updateClient(id, updatedData);
       setClient(data);
       setIsEditing(false);
       setSuccessMessage("Client mis à jour avec succès ! 🎉");
       window.scrollTo({ top: 0, behavior: "smooth" });
 
+      // Redirection après un court délai
       setTimeout(() => {
         setSuccessMessage('');
-        navigate('/clients');
-      }, 2000);
+        navigate('/clients');   
+      }, 1500);
     } catch (err) {
       console.error("Erreur mise à jour client :", err);
+      alert("Erreur lors de la mise à jour du client");
     }
   };
 
-
+  // ----------------------
+  // Supprimer client
+  // ----------------------
   const handleDelete = async () => {
+    console.log("Suppression client", id);
     if (!window.confirm('Voulez-vous vraiment supprimer ce client ?')) return;
 
     try {
-      await deleteClient(id); // token géré automatiquement par le service
+      await clientService.deleteClient(id); 
       navigate('/clients');
     } catch (err) {
       console.error("Erreur suppression client :", err);
@@ -97,7 +110,7 @@ export default function ClientDetail() {
         ) : (
           <EditButton onClick={() => setIsEditing(true)}>Modifier</EditButton>
         )}
-        <DeleteButton onClick={handleDelete} />
+        <DeleteButton type="button" onClick={handleDelete} />
       </div>
     </div>
   );

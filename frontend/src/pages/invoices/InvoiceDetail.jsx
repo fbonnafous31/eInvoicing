@@ -3,9 +3,8 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import InvoiceForm from "../../components/invoices/InvoiceForm";
-import { fetchInvoice, updateInvoice, deleteInvoice } from "../../services/invoices";
+import { useInvoiceService } from "@/services/invoices";
 import { useClientService } from "@/services/clients";
-import { useAuth } from "../../hooks/useAuth";
 
 export default function InvoiceDetail() {
   const { id } = useParams();
@@ -13,46 +12,44 @@ export default function InvoiceDetail() {
   const [isEditing, setIsEditing] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
-  const { getToken } = useAuth();
 
-  const { fetchClient } = useClientService();
+  const { fetchInvoice } = useInvoiceService();
+  const { fetchClient } = useClientService();  
+  const invoiceService = useInvoiceService();
   useEffect(() => {
+    console.log("useEffect InvoiceDetail déclenché");
+    if (!id) return;
     let isMounted = true;
 
     const loadInvoice = async () => {
       try {
-        const token = await getToken({ audience: import.meta.env.VITE_AUTH0_AUDIENCE });
-        const data = await fetchInvoice(id, token);
+        // fetchInvoice gère maintenant le token automatiquement
+        let invoiceData = await fetchInvoice(id);
 
-        if (data.client_id) {
+        if (invoiceData.client_id) {
           try {
-            const clientData = await fetchClient(data.client_id, token);
-            if (isMounted) setInvoice({ ...data, client: clientData });
-          } catch {
-            if (isMounted) setInvoice(data);
+            const clientData = await fetchClient(invoiceData.client_id);
+            if (isMounted) invoiceData = { ...invoiceData, client: clientData };
+          } catch (err) {
+            console.error("Erreur fetch client :", err);
           }
-        } else if (isMounted) {
-          setInvoice(data);
         }
+
+        if (isMounted) setInvoice(invoiceData);
       } catch (err) {
-        console.error(err);
+        console.error("Erreur fetch invoice :", err);
       }
     };
 
     loadInvoice();
 
     return () => { isMounted = false; };
-    // ⚠️ pas de dépendance sur getToken pour éviter la boucle infinie
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]); // on enlève getToken des dépendances
+  }, [id, fetchInvoice, fetchClient]); // ⚡ dépendances correctes
 
   const handleUpdate = async (formData) => {
     try {
-      const token = await getToken({
-        audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-      });
-
-      const updated = await updateInvoice(id, formData, token);
+      // updateInvoice gère automatiquement le token
+      const updated = await invoiceService.updateInvoice(id, formData);
 
       setInvoice(updated);
       setIsEditing(false);
@@ -69,12 +66,7 @@ export default function InvoiceDetail() {
     if (!window.confirm("Voulez-vous vraiment supprimer cette facture ?")) return;
 
     try {
-      const token = await getToken({
-        audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-      });
-
-      await deleteInvoice(id, token);
-
+      await invoiceService.deleteInvoice(id); // token géré automatiquement
       alert("Facture supprimée avec succès !");
       navigate("/invoices");
     } catch (err) {

@@ -4,49 +4,46 @@ import InvoiceForm from "../../components/invoices/InvoiceForm";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import InvoiceTabs from "../../components/invoices/InvoiceTabs";
 import { useEffect, useState, useMemo } from "react";
-import { fetchInvoice } from "../../services/invoices";
 import { useClientService } from "@/services/clients";
-import { useAuth } from "../../hooks/useAuth";
+import { useInvoiceService } from "@/services/invoices";
 
 const InvoiceView = () => {
   const { id } = useParams();
   const [invoice, setInvoice] = useState(null);
 
   const BACKEND_URL = import.meta.env.VITE_API_URL;
-  const { getToken } = useAuth();
 
   // Chargement des données
   const { fetchClient } = useClientService();
+  const { fetchInvoice } = useInvoiceService();
   useEffect(() => {
     if (!id) return;
 
+    let isMounted = true;
+
     const loadInvoice = async () => {
       try {
-        const token = await getToken({
-          audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-        });
+        let invoiceData = await fetchInvoice(id);
 
-        let invoiceData = await fetchInvoice(id, token);
-
-        // Récup client si nécessaire
         if (invoiceData.client_id) {
           try {
-            const clientData = await fetchClient(invoiceData.client_id, token);
+            const clientData = await fetchClient(invoiceData.client_id);
             invoiceData = { ...invoiceData, client: clientData };
           } catch (err) {
             console.error("Erreur fetch client:", err);
           }
         }
 
-        setInvoice(invoiceData);
+        if (isMounted) setInvoice(invoiceData);
       } catch (err) {
         console.error("Erreur fetch invoice:", err);
       }
     };
 
     loadInvoice();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+
+    return () => { isMounted = false; };
+  }, [id, fetchInvoice, fetchClient]);
 
   // Mapping client
   const mappedClient = useMemo(() => {

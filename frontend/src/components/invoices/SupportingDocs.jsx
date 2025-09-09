@@ -1,14 +1,20 @@
-import React, { useEffect } from 'react';
-import { SmallDeleteButton } from '@/components/ui/buttons';
+// frontend/src/components/invoices/SupportingDocs.jsx
+import React, { useEffect } from "react";
+import { SmallDeleteButton } from "@/components/ui/buttons";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function SupportingDocs({ data, onChange, disabled, hideLabelsInView, invoice }) {
+  const { getToken } = useAuth();
 
   useEffect(() => {
-    console.log("Current attachments array:", data);
+    console.log("📎 SupportingDocs - current attachments:", data);
   }, [data]);
 
-  const mainAttachment = data.find(a => a.attachment_type === 'main' && !a.generated);
-  const additionalAttachments = data.filter(a => a.attachment_type === 'additional');
+  // ----------------------
+  // Gestion justificatif principal
+  // ----------------------
+  const mainAttachment = data.find(a => a.attachment_type === "main" && !a.generated);
+  const additionalAttachments = data.filter(a => a.attachment_type === "additional");
 
   const handleMainChange = (e) => {
     const file = e.target.files[0];
@@ -17,55 +23,78 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
     const mainFile = {
       file_name: file.name,
       raw_file: file,
-      attachment_type: 'main'
+      attachment_type: "main",
     };
 
-    const newData = [mainFile, ...data.filter(a => a.attachment_type !== 'main' && !a.generated)];
-    console.log("Adding main attachment:", mainFile);
+    const newData = [mainFile, ...data.filter(a => a.attachment_type !== "main" && !a.generated)];
+    console.log("📎 Ajout justificatif principal:", mainFile);
     onChange(newData);
   };
 
+  // ----------------------
+  // Gestion justificatifs additionnels
+  // ----------------------
   const handleAdditionalChange = (e) => {
     const files = Array.from(e.target.files).map(f => ({
       file_name: f.name,
       raw_file: f,
-      attachment_type: 'additional'
+      attachment_type: "additional",
     }));
 
-    console.log("Adding additional attachments:", files);
+    console.log("📎 Ajout justificatifs additionnels:", files);
     onChange([...data, ...files]);
   };
 
+  // ----------------------
+  // Suppression fichier
+  // ----------------------
   const removeFile = (index, type) => {
     let newData;
-    if (type === 'main') {
-      newData = data.filter(a => a.attachment_type !== 'main' && !a.generated);
+    if (type === "main") {
+      newData = data.filter(a => a.attachment_type !== "main" && !a.generated);
     } else {
       let count = -1;
       newData = data.filter(a => {
-        if (a.attachment_type === 'additional') count++;
-        return !(type === 'additional' && count === index);
+        if (a.attachment_type === "additional") count++;
+        return !(type === "additional" && count === index);
       });
     }
-    console.log(`Removing ${type} file at index ${index}`);
+    console.log(`🗑️ Suppression fichier ${type} index ${index}`);
     onChange(newData);
   };
 
+  // ----------------------
+  // Génération PDF backend
+  // ----------------------
   const handleGeneratePdf = async () => {
     if (!invoice) return console.error("❌ invoice missing");
 
     try {
-      const res = await fetch('/api/invoices/generate-pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(invoice) // les données du front
+      const token = await getToken({
+        audience: import.meta.env.VITE_AUTH0_AUDIENCE,
       });
 
-      if (!res.ok) throw new Error("Erreur génération PDF");
+      console.log("➡️ Génération PDF pour facture:", invoice.id);
+
+      const res = await fetch("/api/invoices/generate-pdf", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`, // ✅ Auth0 JWT
+        },
+        body: JSON.stringify(invoice),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Erreur génération PDF: ${res.status} - ${errText}`);
+      }
 
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
-      window.open(url, '_blank'); // ouvrir le PDF dans un nouvel onglet
+      window.open(url, "_blank"); // ouvrir le PDF dans un nouvel onglet
+
+      console.log("✅ PDF généré et ouvert dans un nouvel onglet");
     } catch (err) {
       console.error("❌ Erreur génération PDF :", err);
     }
@@ -105,7 +134,7 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
           <div className="mt-1 d-flex justify-content-between align-items-center">
             <span>{mainAttachment.file_name}</span>
             {!hideLabelsInView && (
-              <SmallDeleteButton onClick={() => removeFile(0, 'main')} disabled={disabled} />
+              <SmallDeleteButton onClick={() => removeFile(0, "main")} disabled={disabled} />
             )}
           </div>
         )}
@@ -128,7 +157,7 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
             <li key={index} className="d-flex justify-content-between align-items-center mb-2">
               <span>{file.file_name || "Nom non disponible"}</span>
               {!hideLabelsInView && (
-                <SmallDeleteButton onClick={() => removeFile(index, 'additional')} disabled={disabled} />
+                <SmallDeleteButton onClick={() => removeFile(index, "additional")} disabled={disabled} />
               )}
             </li>
           ))}

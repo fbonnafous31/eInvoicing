@@ -1,25 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import ClientsList from '../modules/clients/ClientsList';
 import ClientForm from '../modules/clients/ClientForm';
+import { useClientService } from '@/services/clients';
 
 export default function ClientsPage() {
-  const [clients, setCients] = useState([]);
+  const [clients, setClients] = useState([]);
+  const clientService = useClientService();
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/clients')
-      .then(res => res.json())
-      .then(data => setCients(data));
-  }, []);
+    let isMounted = true;
 
-  function handleClientCreated(newClient) {
-    setCients(prev => [newClient, ...prev]);
-  }
+    const loadClients = async () => {
+      try {
+        const data = await clientService.fetchClients();
+        if (isMounted) setClients(data);
+      } catch (err) {
+        console.error("Erreur chargement clients :", err);
+      }
+    };
+
+    loadClients();
+
+    return () => { isMounted = false; };
+  }, [clientService]);
+
+  // Après création client
+  const handleClientCreated = (newClient) => {
+    setClients(prev => [newClient, ...prev]);
+  };
 
   return (
     <div>
-      <ClientForm onClientCreated={handleClientCreated} />
+      <ClientForm onSubmit={handleClientCreated} />
       <ClientsList clients={clients} />
     </div>
   );
 }
-

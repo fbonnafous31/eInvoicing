@@ -38,3 +38,4 @@ node_modules/.vite/
 backend/src/uploads/invoices/*
 backend/src/uploads/factur-x/*
 backend/src/uploads/pdf-a3/*
+backend/src/uploads/pdf/*

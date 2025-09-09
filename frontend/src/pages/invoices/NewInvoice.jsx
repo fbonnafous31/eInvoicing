@@ -2,15 +2,15 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import InvoiceForm from "../../components/invoices/InvoiceForm";
 import Breadcrumb from '../../components/layout/Breadcrumb';
-import * as invoiceService from '../../services/invoices';
-import { useAuth } from '@/hooks/useAuth'; 
+import { useInvoiceService } from "@/services/invoices";
 
 export default function NewInvoice() {
   const navigate = useNavigate();
+  const invoiceService = useInvoiceService();
+
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { getToken } = useAuth(); 
 
   const handleCreateInvoice = async (formData) => {
     setIsSubmitting(true);
@@ -18,32 +18,22 @@ export default function NewInvoice() {
     setSuccessMessage('');
 
     try {
-      const token = await getToken({
-        audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-      });
+      // Création via le service, token géré automatiquement
+      await invoiceService.createInvoice(formData);
 
-      await invoiceService.createInvoice(formData, token);
-
-      // Succès
       setSuccessMessage("Facture créée avec succès ! 🎉");
       window.scrollTo({ top: 0, behavior: "smooth" });
 
       setTimeout(() => {
         setSuccessMessage('');
-        navigate('/invoices');
+        navigate("/invoices");
       }, 2000);
 
     } catch (error) {
-      let backendMessage = "Erreur lors de la création de la facture";
-
-      if (error.response?.data?.error) {
-        backendMessage = error.response.data.error;
-      } else if (error.message) {
-        backendMessage = error.message;
-      }
-
+      const backendMessage = error.message || "Erreur lors de la création de la facture";
       setErrorMessage(backendMessage);
       window.scrollTo({ top: 0, behavior: "smooth" });
+
     } finally {
       setIsSubmitting(false);
     }

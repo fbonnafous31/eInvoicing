@@ -4,10 +4,9 @@ import DataTable from 'react-data-table-component';
 import Breadcrumb from '../../components/layout/Breadcrumb';
 import AuditPanel from '../../components/common/AuditPanel';
 import { datatableStyles } from '../../modules/common/datatableStyles';
-import * as invoiceService from '../../services/invoices';
 import useInvoiceColumns from '../../modules/invoices/invoiceColumns';
 import { FR } from '../../constants/translations';
-import { useAuth } from '../../hooks/useAuth';
+import { useInvoiceService } from '@/services/invoices';
 
 export default function InvoicesList() {
   const [invoices, setInvoices] = useState([]);
@@ -17,19 +16,13 @@ export default function InvoicesList() {
   const columns = useInvoiceColumns();
 
   // Récupération des factures
-  const { getToken } = useAuth();
-
+  const { fetchInvoicesBySeller } = useInvoiceService();
   useEffect(() => {
     let isMounted = true; // pour éviter les updates après un unmount
 
     const loadInvoices = async () => {
       try {
-        const token = await getToken({
-          audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-        });
-        console.log("Token JWT :", token);
-
-        const data = await invoiceService.fetchInvoicesBySeller(token);
+        const data = await fetchInvoicesBySeller(); // token géré automatiquement par le service
         if (isMounted) setInvoices(data);
       } catch (err) {
         console.error("Erreur chargement factures :", err);
@@ -38,11 +31,8 @@ export default function InvoicesList() {
 
     loadInvoices();
 
-    return () => {
-      isMounted = false;
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    return () => { isMounted = false; };
+  }, [fetchInvoicesBySeller]);
 
   // Filtre texte identique aux autres listes
   const getStatusLabel = status => FR.status[status] || status;
