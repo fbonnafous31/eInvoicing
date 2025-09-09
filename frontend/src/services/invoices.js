@@ -28,12 +28,18 @@ export async function fetchInvoices() {
 }
 
 /**
- * Récupère une facture par son ID
+ * Récupère une facture par son ID avec token Auth0
  * @param {string|number} id
+ * @param {string} token
  */
-export async function fetchInvoice(id) {
-  const response = await fetch(`${API_BASE}/${id}`);
-  if (!response.ok) throw new Error("Erreur lors de la récupération de la facture");
+export async function fetchInvoice(id, token) {
+  const response = await fetch(`${API_BASE}/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`, 
+    },
+  });
+
+  if (!response.ok) throw new Error(`Erreur ${response.status} lors de la récupération de la facture`);
   return response.json();
 }
 

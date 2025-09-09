@@ -1,12 +1,11 @@
 // frontend/src/pages/invoices/InvoiceDetail.jsx
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState, useMemo } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import Breadcrumb from "../../components/layout/Breadcrumb";
 import InvoiceForm from "../../components/invoices/InvoiceForm";
-import { fetchInvoice, updateInvoice } from "../../services/invoices";
+import { fetchInvoice, updateInvoice, deleteInvoice } from "../../services/invoices";
 import { fetchClient } from "../../services/clients"; 
-import { deleteInvoice } from '../../services/invoices';
-import { useNavigate } from 'react-router-dom';
+import { useAuth } from "../../hooks/useAuth";
 
 export default function InvoiceDetail() {
   const { id } = useParams();
@@ -14,24 +13,35 @@ export default function InvoiceDetail() {
   const [isEditing, setIsEditing] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
+  const { getToken } = useAuth();
 
   useEffect(() => {
-    fetchInvoice(id)
-      .then(async data => {
+    const loadInvoice = async () => {
+      try {
+        const token = await getToken({
+          audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+        });
+
+        const data = await fetchInvoice(id, token);
+
         if (data.client_id) {
           try {
-            const clientData = await fetchClient(data.client_id);
+            const clientData = await fetchClient(data.client_id, token);
             setInvoice({ ...data, client: clientData });
           } catch (err) {
             console.error("Erreur fetch client:", err);
-            setInvoice(data); 
+            setInvoice(data);
           }
         } else {
           setInvoice(data);
         }
-      })
-      .catch(console.error);
-  }, [id]);
+      } catch (err) {
+        console.error("Erreur fetch invoice:", err);
+      }
+    };
+
+    loadInvoice();
+  }, [id, getToken]);
 
   const handleUpdate = async (formData) => {
     try {
@@ -52,19 +62,18 @@ export default function InvoiceDetail() {
     try {
       await deleteInvoice(id);
       alert("Facture supprimée avec succès !");
-      navigate("/invoices"); // redirection vers la liste
+      navigate("/invoices");
     } catch (err) {
       alert(err.message);
     }
   };
 
-  if (!invoice) return <p>Chargement...</p>;
-
-  const mapClientForForm = (invoiceData) => {
-    const c = invoiceData.client || {};
-
+  // Mapping client
+  const mappedClient = useMemo(() => {
+    if (!invoice) return {};
+    const c = invoice.client || {};
     return {
-      client_id: invoiceData.client_id || null,
+      client_id: invoice.client_id || null,
       client_legal_name: c.legal_name || "",
       client_address: c.address || "",
       client_city: c.city || "",
@@ -77,9 +86,33 @@ export default function InvoiceDetail() {
       client_siret: c.legal_identifier_type === "SIRET" ? c.legal_identifier : c.siret || "",
       client_vat_number: c.legal_identifier_type === "VAT" ? c.legal_identifier : c.vat_number || "",
     };
-  };
+  }, [invoice]);
 
-  const mappedClient = mapClientForForm(invoice);
+  // Memoized initialData
+  const initialData = useMemo(() => {
+    if (!invoice) return null;
+    return {
+      id: invoice.id,
+      status: invoice.status,
+      header: {
+        invoice_number: invoice.invoice_number,
+        issue_date: invoice.issue_date,
+        supply_date: invoice.supply_date,
+        fiscal_year: invoice.fiscal_year,
+        seller_id: invoice.seller_id,
+        contract_number: invoice.contract_number,
+        purchase_order_number: invoice.purchase_order_number,
+        payment_terms: invoice.payment_terms,
+        payment_method: invoice.payment_method,
+      },
+      client: mappedClient,
+      lines: invoice.lines || [],
+      taxes: invoice.taxes || [],
+      attachments: invoice.attachments || [],
+    };
+  }, [invoice, mappedClient]);
+
+  if (!invoice || !initialData) return <p>Chargement...</p>;
 
   const breadcrumbItems = [
     { label: "Accueil", path: "/" },
@@ -102,25 +135,7 @@ export default function InvoiceDetail() {
         onDelete={handleDelete}
         disabled={isEditing}
         setIsEditing={setIsEditing}
-        initialData={{
-          id: invoice.id,
-          status: invoice.status,
-          header: {
-            invoice_number: invoice.invoice_number,
-            issue_date: invoice.issue_date,
-            supply_date: invoice.supply_date,
-            fiscal_year: invoice.fiscal_year,
-            seller_id: invoice.seller_id,
-            contract_number: invoice.contract_number,
-            purchase_order_number: invoice.purchase_order_number,
-            payment_terms: invoice.payment_terms,
-            payment_method: invoice.payment_method,
-          },
-          client: mappedClient,
-          lines: invoice.lines || [],
-          taxes: invoice.taxes || [],
-          attachments: invoice.attachments || [],
-        }}
+        initialData={initialData}
       />
     </div>
   );

@@ -68,10 +68,11 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
   }, [initialData]);
 
 
-  // Mise à jour de facture
+    // Mise à jour de facture
   useEffect(() => {
     const fetchFullInvoiceData = async () => {
       if (!initialData) return;
+      console.log("➡️ Avant fetchFullInvoiceData, invoiceData:", initialData);
 
       let seller = {};
       if (initialData.header?.seller_id) {
@@ -81,7 +82,6 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
           console.error("Erreur fetch seller:", err);
         }
       }
-      console.log("Seller:", seller);
 
       const safeData = {
         ...initialData,
@@ -100,14 +100,12 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
         })),
         seller,
       };
-
+      console.log("Après fetchFullInvoiceData safeData:", safeData);
       setInvoiceData(safeData);
     };
 
     fetchFullInvoiceData();
   }, [initialData]);
-
-  console.log("InvoiceForm invoiceData:", invoiceData);
 
   const headerFields = ["invoice_number", "issue_date", "fiscal_year", "seller_id"];
 

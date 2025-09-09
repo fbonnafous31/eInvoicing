@@ -7,6 +7,7 @@ import InvoiceTabs from "../../components/invoices/InvoiceTabs";
 import { useEffect, useState } from "react";
 import { fetchInvoice } from "../../services/invoices";
 import { fetchClient } from "../../services/clients";
+import { useAuth } from "../../hooks/useAuth";
 
 const InvoiceView = () => {
   const { id } = useParams();
@@ -14,26 +15,36 @@ const InvoiceView = () => {
 
   const BACKEND_URL = import.meta.env.VITE_API_URL;
 
+  const { getToken } = useAuth();
   useEffect(() => {
-    if (id) {
-      fetchInvoice(id)
-        .then(async data => {
-          let invoiceData = data;
+    if (!id) return;
 
-          // Récup client si nécessaire
-          if (data.client_id) {
-            try {
-              const clientData = await fetchClient(data.client_id);
-              invoiceData = { ...data, client: clientData };
-            } catch (err) {
-              console.error("Erreur fetch client:", err);
-            }
+    const loadInvoice = async () => {
+      try {
+        const token = await getToken({
+          audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+        });
+
+        let invoiceData = await fetchInvoice(id, token);
+
+        // Récup client si nécessaire
+        if (invoiceData.client_id) {
+          try {
+            const clientData = await fetchClient(invoiceData.client_id, token);
+            invoiceData = { ...invoiceData, client: clientData };
+          } catch (err) {
+            console.error("Erreur fetch client:", err);
           }
-          setInvoice(invoiceData);
-        })
-        .catch(console.error);
-    }
-  }, [id]);
+        }
+
+        setInvoice(invoiceData);
+      } catch (err) {
+        console.error("Erreur fetch invoice:", err);
+      }
+    };
+
+    loadInvoice();
+  }, [id, getToken]);
 
   if (!invoice) return <div>Chargement...</div>;
 
