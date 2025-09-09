@@ -129,11 +129,16 @@ async function registerGeneratedPdf(invoiceId, pdfPath) {
   return attachment;
 }
 
+async function getInvoicesBySeller(sellerId) {
+  return await InvoicesModel.getInvoicesBySeller(sellerId);
+}
+
 module.exports = {
   listInvoices,
   getInvoice,
   createInvoice,
   updateInvoice,
   deleteInvoice,
-  registerGeneratedPdf
+  registerGeneratedPdf,
+  getInvoicesBySeller
 };

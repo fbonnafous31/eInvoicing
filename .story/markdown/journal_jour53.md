@@ -59,7 +59,6 @@ Aujourd'hui, j'ai travaillé sur la **connexion sécurisée entre le frontend Re
 * Développer la **page d'accueil** dynamique, adaptée selon que l'utilisateur corresponde à un **vendeur existant** ou à un **nouveau vendeur**, avec un aperçu clair de ses données.
 * Implémenter le **processus d’inscription d’un nouveau vendeur**, permettant de créer son profil et de l’associer automatiquement à l’utilisateur Auth0 connecté.
 
-
 ---
 
 👉 **Bilan de la journée** : la communication sécurisée entre le frontend et le backend est enfin fonctionnelle ! Chaque utilisateur Auth0 est correctement lié à un vendeur et peut accéder uniquement à ses données. 💪✨

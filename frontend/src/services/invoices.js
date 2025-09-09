@@ -1,6 +1,24 @@
 const API_BASE = "http://localhost:3000/api/invoices";
 
 /**
+ * Récupère toutes les factures de l'utilisateur connecté avec token Auth0
+ * @param {string} token
+ */
+export async function fetchInvoicesBySeller(token) {
+  const res = await fetch("http://localhost:3000/api/invoices", {
+    headers: {
+      Authorization: `Bearer ${token}`, // on envoie le token
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Erreur ${res.status} lors du chargement des factures`);
+  }
+
+  return res.json();
+}
+
+/**
  * Récupère toutes les factures
  */
 export async function fetchInvoices() {

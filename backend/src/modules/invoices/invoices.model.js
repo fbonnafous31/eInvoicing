@@ -444,10 +444,23 @@ async function updateInvoice(
   }
 }
 
+// ----------------- Get invoices by seller -----------------
+async function getInvoicesBySeller(sellerId) {
+  const result = await pool.query(
+    `SELECT *
+     FROM invoicing.invoices
+     WHERE seller_id = $1
+     ORDER BY created_at DESC`,
+    [sellerId]
+  );
+  return result.rows;
+}
+
 module.exports = {
   getAllInvoices,
   getInvoiceById,
   createInvoice,
   deleteInvoice,
-  updateInvoice
+  updateInvoice,
+  getInvoicesBySeller
 };

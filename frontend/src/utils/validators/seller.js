@@ -68,7 +68,7 @@ export function validateSeller(data) {
   // ---------------------
   // Validation contact
   // ---------------------
-  const contactErrors = validateContact(data, { emailField: 'contact_email', emailRequired: true });
+  const contactErrors = validateContact(data, { emailField: 'contact_email', emailRequired: false });
 
   // Validation téléphone vendeur (optionnelle)
   if (data.phone_number?.trim() && !/^\+?[0-9\s\-()]{6,20}$/.test(data.phone_number)) {

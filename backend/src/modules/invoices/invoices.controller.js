@@ -223,6 +223,18 @@ async function generateInvoicePdfBuffer(req, res) {
   }
 }
 
+async function getInvoices(req, res, next) {
+  try {
+    if (!req.seller) {
+      return res.status(403).json({ message: 'Vendeur non trouvé' });
+    }
+
+    const invoices = await InvoicesService.getInvoicesBySeller(req.seller.id);
+    res.json(invoices);
+  } catch (err) {
+    next(err);
+  }
+}
 
 module.exports = {
   listInvoices,
@@ -231,5 +243,6 @@ module.exports = {
   updateInvoice, 
   deleteInvoice,
   createInvoicePdf,
-  generateInvoicePdfBuffer
+  generateInvoicePdfBuffer,
+  getInvoices
 };
