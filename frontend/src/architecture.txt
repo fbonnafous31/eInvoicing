@@ -7,8 +7,13 @@
 │   ├── pdf.worker.min.mjs
 │   ├── react.svg
 │   └── sample-invoice.pdf
+├── AuthProvider.jsx
 ├── components
 │   ├── architecture.txt
+│   ├── auth
+│   │   ├── LoginButton.jsx
+│   │   ├── LogoutButton.jsx
+│   │   └── PrivateRoute.jsx
 │   ├── common
 │   │   ├── AuditPanel.jsx
 │   │   └── EllipsisCell.jsx
@@ -19,6 +24,7 @@
 │   │   ├── InputField.jsx
 │   │   ├── InputPhone.jsx
 │   │   ├── InputPostalCode.jsx
+│   │   ├── InputSiret.jsx
 │   │   ├── SelectField.jsx
 │   │   └── TextAreaField.jsx
 │   ├── invoices
@@ -42,7 +48,12 @@
 │   ├── paymentMethods.js
 │   ├── paymentTerms.js
 │   └── translations.js
+├── hooks
+│   ├── useAuth.js 
+│   └── useAuthToken.js
 ├── index.css
+├── LoginPage.css
+├── LoginPage.jsx
 ├── main.jsx
 ├── modules
 │   ├── clients
@@ -58,6 +69,7 @@
 │       ├── useSellerForm.js
 │       └── useSellers.js
 ├── pages
+│   ├── AuthTest.jsx
 │   ├── clients
 │   │   ├── ClientDetail.jsx
 │   │   ├── ClientForm.jsx
@@ -88,7 +100,6 @@
     ├── formatters
     │   └── formatters.js
     ├── formatters.js
-    ├── helpers
     └── validators
         ├── client.js
         ├── contact.js
@@ -100,4 +111,4 @@
         ├── seller.js
         └── siret.js
 
-26 directories, 75 files
+27 directories, 85 files

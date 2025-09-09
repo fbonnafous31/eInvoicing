@@ -2,11 +2,20 @@
 const API_BASE = "http://localhost:3000/api/clients";
 
 /**
- * Récupère la liste complète des clients
+ * Récupère tous les clients avec token Auth0
+ * @param {string} token
  */
-export async function fetchClients() {
-  const res = await fetch(API_BASE);
-  if (!res.ok) throw new Error("Erreur lors du chargement des clients");
+export async function fetchClients(token) {
+  const res = await fetch("http://localhost:3000/api/clients", {
+    headers: {
+      Authorization: `Bearer ${token}`, // on envoie le token
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Erreur ${res.status} lors du chargement des clients`);
+  }
+
   return res.json();
 }
 

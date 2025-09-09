@@ -12,7 +12,6 @@ function validateClientData(clientData) {
     phone
   } = clientData;
 
-  // Validation type client
   if (is_company) {
     if (!legal_name) throw new Error('Le nom légal est requis pour une entreprise');
     if (country_code === 'FR') {
@@ -24,13 +23,8 @@ function validateClientData(clientData) {
     if (siret) throw new Error('Un particulier ne peut pas avoir de SIRET');
   }
 
-  // Country code ISO
   if (!/^[A-Z]{2}$/.test(country_code)) throw new Error('Le code pays doit être au format ISO 2 lettres');
-
-  // Email simple
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Email invalide');
-
-  // Phone simple
   if (phone && !/^[0-9 +()-]{5,30}$/.test(phone)) throw new Error('Numéro de téléphone invalide');
 }
 
@@ -64,17 +58,31 @@ async function getAllClients() {
   return result.rows;
 }
 
-// ----------------- Get client by ID -----------------
-async function getClientById(id) {
+// ----------------- Get clients by seller -----------------
+async function getClientsBySeller(sellerId) {
   const result = await pool.query(
-    'SELECT * FROM invoicing.clients WHERE id = $1',
-    [id]
+    `SELECT id, is_company, legal_name, firstname, lastname, siret, legal_identifier,
+            address, city, postal_code, country_code, vat_number, email, phone,
+            created_at, updated_at
+     FROM invoicing.clients
+     WHERE seller_id = $1
+     ORDER BY legal_name`,
+    [sellerId]
+  );
+  return result.rows;
+}
+
+// ----------------- Get client by ID -----------------
+async function getClientById(id, sellerId) {
+  const result = await pool.query(
+    'SELECT * FROM invoicing.clients WHERE id = $1 AND seller_id = $2',
+    [id, sellerId]
   );
   return result.rows[0];
 }
 
 // ----------------- Insert client -----------------
-async function insertClient(clientData) {
+async function insertClient(clientData, sellerId) {
   validateClientData(clientData);
 
   const {
@@ -102,8 +110,8 @@ async function insertClient(clientData) {
   const result = await pool.query(
     `INSERT INTO invoicing.clients
       (is_company, legal_name, firstname, lastname, siret, legal_identifier,
-       address, city, postal_code, country_code, vat_number, email, phone)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+       address, city, postal_code, country_code, vat_number, email, phone, seller_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
      RETURNING *`,
     [
       is_company,
@@ -118,7 +126,8 @@ async function insertClient(clientData) {
       country_code,
       vat_number,
       email,
-      phone
+      phone,
+      sellerId
     ]
   );
 
@@ -126,17 +135,17 @@ async function insertClient(clientData) {
 }
 
 // ----------------- Remove client -----------------
-async function removeClient(id) {
+async function removeClient(id, sellerId) {
   const result = await pool.query(
-    'DELETE FROM invoicing.clients WHERE id = $1 RETURNING *',
-    [id]
+    'DELETE FROM invoicing.clients WHERE id = $1 AND seller_id = $2 RETURNING *',
+    [id, sellerId]
   );
   if (result.rowCount === 0) throw new Error('Client not found');
   return result.rows[0];
 }
 
 // ----------------- Update client -----------------
-async function updateClient(id, clientData) {
+async function updateClient(id, clientData, sellerId) {
   validateClientData(clientData);
 
   const {
@@ -177,7 +186,7 @@ async function updateClient(id, clientData) {
          email = $12,
          phone = $13,
          updated_at = NOW()
-     WHERE id = $14
+     WHERE id = $14 AND seller_id = $15
      RETURNING *`,
     [
       is_company,
@@ -193,7 +202,8 @@ async function updateClient(id, clientData) {
       vat_number,
       email,
       phone,
-      id
+      id,
+      sellerId
     ]
   );
 
@@ -204,8 +214,9 @@ async function updateClient(id, clientData) {
 
 module.exports = {
   getAllClients,
-  insertClient,
+  getClientsBySeller,
   getClientById,
+  insertClient,
   removeClient,
   updateClient
 };

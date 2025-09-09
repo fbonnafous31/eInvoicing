@@ -1,28 +1,27 @@
 const ClientsModel = require('./clients.model');
-console.log(ClientsModel);
 
-async function listClients() {
-  return await ClientsModel.getAllClients();
+async function getClientsBySeller(sellerId) {
+  return await ClientsModel.getClientsBySeller(sellerId);
 }
 
-async function createClient(clientData) {
-  return await ClientsModel.insertClient(clientData);
+async function createClient(clientData, sellerId) {
+  return await ClientsModel.insertClient(clientData, sellerId);
 }
 
-async function getClientById(id) {
-  return await ClientsModel.getClientById(id);
+async function getClientById(id, sellerId) {
+  return await ClientsModel.getClientById(id, sellerId);
 }
 
-async function deleteClient(id) {
-  return await ClientsModel.removeClient(id);
+async function deleteClient(id, sellerId) {
+  return await ClientsModel.removeClient(id, sellerId);
 }
 
-async function updateClientData(id, clientData) {
-  return await ClientsModel.updateClient(id, clientData);
+async function updateClientData(id, clientData, sellerId) {
+  return await ClientsModel.updateClient(id, clientData, sellerId);
 }
 
 module.exports = {
-  listClients,
+  getClientsBySeller,
   createClient,
   getClientById,
   deleteClient,

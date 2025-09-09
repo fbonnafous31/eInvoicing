@@ -1,3 +1,5 @@
+const db = require('../../config/db');  
+
 const SellersModel = require('./sellers.model');
 console.log(SellersModel);
 
@@ -21,10 +23,21 @@ async function updateSellerData(id, sellerData) {
   return await SellersModel.updateSeller(id, sellerData);
 }
 
+async function getSellerByAuth0Id (auth0_id) {
+  console.log("🔍 getSellerByAuth0Id appelé avec auth0_id =", auth0_id);
+  const result = await db.query(
+    'SELECT * FROM invoicing.sellers WHERE auth0_id = $1',
+    [auth0_id]
+  );
+  console.log("🔍 getSellerByAuth0Id:", auth0_id, "->", result.rows[0] || null);
+  return result.rows[0] || null;
+};
+
 module.exports = {
   listSellers,
   createSeller,
   getSellerById,
   deleteSeller,
-  updateSellerData
+  updateSellerData, 
+  getSellerByAuth0Id
 };
