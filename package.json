@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/fbonnafous31/eInvoicing#readme",
   "dependencies": {
+    "auth0-js": "^9.28.0",
     "bootstrap": "^5.3.8",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",

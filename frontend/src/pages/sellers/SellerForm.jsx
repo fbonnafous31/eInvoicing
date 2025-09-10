@@ -1,5 +1,6 @@
 // frontend/src/pages/sellers/SellerForm.jsx
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import countries from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
 
@@ -16,6 +17,7 @@ countries.registerLocale(enLocale);
 const countryCodes = Object.entries(countries.getNames("en")).map(([code, name]) => ({ code, name }));
 
 export default function SellerForm({ onSubmit, disabled = false, initialData = {} }) {
+  const navigate = useNavigate();
   const {
     formData,
     errors,
@@ -26,40 +28,61 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
     handleBlur,
     setErrors,
     setTouched,
-    siretExists
+    checkIdentifierAPI,
   } = useSellerForm(initialData);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Marquer tous les champs comme touchés
     const allFieldsTouched = Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {});
     setTouched(allFieldsTouched);
 
-    // Nettoyage du SIRET
-    const cleanedSiret = (formData.legal_identifier || '').toString().replace(/\D/g, '');
-    const newErrors = validateSeller({ ...formData, legal_identifier: cleanedSiret });
-
-    if (siretExists) newErrors.legal_identifier = 'Ce SIRET est déjà utilisé98';
+    // Nettoyage du SIRET pour validation locale
+    const cleanedSiret = (formData.legal_identifier || '').replace(/\D/g, '');
+    let newErrors = validateSeller({ ...formData, legal_identifier: cleanedSiret });
     setErrors(newErrors);
 
-    // Ouvrir les sections avec erreurs (avec allFieldsTouched)
+    // Bloquer si erreurs frontend
+    if (Object.keys(newErrors).length > 0) {
+      openErrorSections(newErrors, allFieldsTouched);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // Vérification doublon backend
+    const isIdentifierValid = await checkIdentifierAPI(cleanedSiret);
+    if (!isIdentifierValid.valid) {
+      newErrors = { ...newErrors, legal_identifier: 'Cet identifiant est déjà utilisé' };
+      setErrors(newErrors);
+      openErrorSections(newErrors, allFieldsTouched);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // Payload final
+    const payload = {
+      ...formData,
+      legal_identifier: formData.country_code === 'FR' ? cleanedSiret : formData.vat_number?.trim() || null,
+    };
+
+    try {
+      await onSubmit?.(payload);
+      // Redirection vers la page d'accueil après succès
+      navigate('/');
+    } catch (err) {
+      console.error(err);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // Ouvre les sections qui contiennent des erreurs
+  const openErrorSections = (errorsToCheck, fieldsTouched) => {
     Object.keys(openSections).forEach(section => {
-      if (sectionHasError(section, newErrors, allFieldsTouched) && !openSections[section]) {
+      if (sectionHasError(section, errorsToCheck, fieldsTouched) && !openSections[section]) {
         toggleSection(section);
       }
     });
-
-    // Bloquer la soumission si erreurs
-    if (Object.keys(newErrors).length === 0 && onSubmit) {
-      const payload = {
-        ...formData,
-        legal_identifier: formData.country_code === 'FR' ? cleanedSiret : formData.vat_number?.trim() || null
-      };
-      onSubmit(payload);
-    } else {
-      console.log("Blocage : erreurs détectées", newErrors);
-    }
   };
 
   const sections = [
@@ -124,5 +147,5 @@ function sectionHasError(section, errors, touched) {
 
   return Object.keys(errors).some(
     key => mapping[section]?.includes(key) && touched[key] && Boolean(errors[key])
-  );  
+  );
 }

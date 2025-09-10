@@ -13,13 +13,15 @@ async function getSellers(req, res) {
 async function createSeller(req, res) {
   try {
     const sellerData = req.body;
-    const newSeller = await SellersService.createSeller(sellerData);
+    const auth0_id = req.user.sub; 
+    const newSeller = await SellersService.createSeller(sellerData, auth0_id);
     res.status(201).json(newSeller);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Erreur serveur lors de la création' });
   }
 }
+
 
 async function getSellerById(req, res) {
   try {
@@ -79,11 +81,18 @@ async function getMySeller(req, res, next) {
   }
 }
 
+async function checkIdentifier(req, res) {
+  const { identifier, id } = req.query;
+  const exists = await SellersService.checkIdentifierExists(identifier, id);
+  res.json({ exists });
+}
+
 module.exports = {
   getSellers,
   createSeller,
   getSellerById,
   deleteSeller,
   updateSeller,
-  getMySeller
+  getMySeller,
+  checkIdentifier
 };

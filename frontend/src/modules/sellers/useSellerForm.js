@@ -34,10 +34,10 @@ export default function useSellerForm(initialData = {}) {
     mentions: true,
   });
 
-  const { checkIdentifier } = useSellerService(); // exemple de vérif API si besoin
+  const { checkIdentifier } = useSellerService();
 
   // ----------------------
-  // Vérification asynchrone (ex. legal_identifier)
+  // Vérification asynchrone (uniquement submit)
   // ----------------------
   const checkIdentifierAPI = useCallback(
     async (identifier) => {
@@ -61,45 +61,27 @@ export default function useSellerForm(initialData = {}) {
   );
 
   // ----------------------
-  // Handle Change
+  // Handle Change (validation locale seulement)
   // ----------------------
   const handleChange = (field, value) => {
     setFormData(prev => {
       const updated = { ...prev, [field]: value };
 
       const fieldError = validateSeller(updated, field);
-      setErrors(prevErrors => {
-        if (field === 'legal_identifier' && prevErrors.legal_identifier?.includes('déjà utilisé')) {
-          return prevErrors;
-        }
-        return { ...prevErrors, [field]: fieldError[field] };
-      });
-
-      if (field === 'legal_identifier') {
-        checkIdentifierAPI(value);
-      }
+      setErrors(prevErrors => ({ ...prevErrors, [field]: fieldError[field] }));
 
       return updated;
     });
   };
 
   // ----------------------
-  // Handle Blur
+  // Handle Blur (validation locale seulement)
   // ----------------------
   const handleBlur = (field) => {
     setTouched(prev => ({ ...prev, [field]: true }));
 
     const fieldError = validateSeller(formData, field);
-    setErrors(prevErrors => {
-      if (field === 'legal_identifier' && prevErrors.legal_identifier?.includes('déjà utilisé')) {
-        return prevErrors;
-      }
-      return { ...prevErrors, [field]: fieldError[field] };
-    });
-
-    if (field === 'legal_identifier') {
-      checkIdentifierAPI(formData.legal_identifier);
-    }
+    setErrors(prevErrors => ({ ...prevErrors, [field]: fieldError[field] }));
   };
 
   // ----------------------
@@ -115,11 +97,11 @@ export default function useSellerForm(initialData = {}) {
     errors,
     setErrors,
     touched,
-    setTouched, // pour le submit
+    setTouched,
     handleChange,
     handleBlur,
     openSections,
     toggleSection,
-    checkIdentifierAPI, // exposé si besoin côté composant
+    checkIdentifierAPI, // à appeler uniquement au submit
   };
 }

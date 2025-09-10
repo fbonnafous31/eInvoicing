@@ -55,6 +55,8 @@ export function useSellerService() {
         }),
       deleteSeller: (id) => request(`${API_BASE}/${id}`, { method: "DELETE" }),
       fetchMySeller: () => request(`${API_BASE}/me`),
+      checkIdentifier: (identifier, sellerId) =>
+        request(`${API_BASE}/check-identifier?identifier=${identifier}${sellerId ? `&id=${sellerId}` : ''}`),
     };
   }, [getToken]);
 }

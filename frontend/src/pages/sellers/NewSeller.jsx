@@ -23,7 +23,7 @@ export default function NewSeller() {
 
       setTimeout(() => {
         setSuccessMessage('');
-        navigate('/sellers');
+        navigate('/');
       }, 2000);
     } catch (error) {
       setErrorMessage(error.message || "Erreur lors de la création du vendeur");

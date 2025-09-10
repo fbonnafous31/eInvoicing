@@ -19,27 +19,69 @@ import TestPdfViewer from './components/invoices/TestPdfViewer';
 import AuthTest from './pages/AuthTest.jsx';
 import NotFound from './pages/NotFound';
 
+import RequireSeller from './components/guard/RequireSeller';
+
 const routes = [
   { path: '/', element: <Home /> },
 
   // Profil utilisateur (vendeur connecté)
-  { path: '/seller', element: <ProfilePage /> },
+  { path: '/seller', element: 
+    <RequireSeller>
+      <ProfilePage />
+    </RequireSeller>
+  },
 
-  // Sellers (ancienne liste / détail éventuel)
-  { path: '/sellers', element: <SellersList /> },
+  // Sellers
+  { path: '/sellers', element: 
+    <RequireSeller>
+      <SellersList />
+    </RequireSeller>
+  },
   { path: '/sellers/new', element: <NewSeller /> },
-  { path: '/sellers/:id', element: <SellerDetail /> },
+  { path: '/sellers/:id', element: 
+    <RequireSeller>
+      <SellerDetail />
+    </RequireSeller>
+  },
 
   // Clients
-  { path: '/clients', element: <ClientsList /> },
-  { path: '/clients/new', element: <NewClient /> },
-  { path: '/clients/:id', element: <ClientDetail /> },
+  { path: '/clients', element: 
+    <RequireSeller>
+      <ClientsList />
+    </RequireSeller>
+  },
+  { path: '/clients/new', element: 
+    <RequireSeller>
+      <NewClient />
+    </RequireSeller>
+  },
+  { path: '/clients/:id', element: 
+    <RequireSeller>
+      <ClientDetail />
+    </RequireSeller>
+  },
 
   // Invoices
-  { path: '/invoices', element: <InvoicesList /> },
-  { path: '/invoices/new', element: <NewInvoice /> },
-  { path: '/invoices/:id', element: <InvoiceDetail /> },
-  { path: '/invoices/:id/view', element: <InvoiceView /> },  
+  { path: '/invoices', element: 
+    <RequireSeller>
+      <InvoicesList />
+    </RequireSeller>
+  },
+  { path: '/invoices/new', element: 
+    <RequireSeller>
+      <NewInvoice />
+    </RequireSeller>
+  },
+  { path: '/invoices/:id', element: 
+    <RequireSeller>
+      <InvoiceDetail />
+    </RequireSeller>
+  },
+  { path: '/invoices/:id/view', element: 
+    <RequireSeller>
+      <InvoiceView />
+    </RequireSeller>
+  },  
 
   // Test PDFViewer
   { path: '/test-pdf', element: <TestPdfViewer /> },

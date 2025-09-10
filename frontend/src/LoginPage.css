@@ -9,3 +9,11 @@
   border-radius: 1rem;
   background-color: #ffffff;
 }
+
+.login-card .logo {
+  height: 100px;       
+  width: auto;        
+  object-fit: contain; 
+  margin-bottom: 0rem;
+  justify-content: flex-start;
+}

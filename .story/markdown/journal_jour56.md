@@ -1,4 +1,4 @@
-# Jour 55 – Intégration du profil vendeur et récupération sécurisée des données 🧩🔑
+# Jour 56 – Intégration du profil vendeur et récupération sécurisée des données 🧩🔑
 
 Aujourd'hui, j'ai travaillé sur **l’intégration du profil vendeur** côté frontend et backend, ainsi que sur la **récupération sécurisée des données du vendeur connecté** via Auth0. L’objectif était de finaliser le parcours utilisateur pour qu’un utilisateur puisse voir son profil vendeur dès sa connexion.  
 
