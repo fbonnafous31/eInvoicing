@@ -7,7 +7,7 @@ import InvoiceLines from "./InvoiceLines";
 import TaxBases from "./TaxBases";
 import SupportingDocs from "./SupportingDocs";
 import FormSection from "../form/FormSection";
-import { fetchSellers } from '../../services/sellers';
+import { useSellerService } from '../../services/sellers';
 import { validateInvoiceField, validateClientData } from "../../utils/validators/invoice";
 import { EditButton, CancelButton, DeleteButton, SaveButton } from '@/components/ui/buttons';
 import { useInvoiceService } from "@/services/invoices";
@@ -34,39 +34,33 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
   const [errorMessage, setErrorMessage] = useState("");
 
   // Création de facture
+  const { fetchSellers } = useSellerService();
   useEffect(() => {
     const loadDefaultSeller = async () => {
-      if (initialData) return; 
+      if (initialData) return;
 
       try {
         const sellersList = await fetchSellers();
-        if (!sellersList || !sellersList.length) {
-          return;
-        }
+        if (!sellersList || !sellersList.length) return;
+
         const defaultSeller = sellersList[0];
-
-        setInvoiceData(prev => {
-          const newData = {
-            ...prev,
-            header: {
-              ...prev.header,
-              payment_terms: defaultSeller.payment_terms || "upon_receipt",
-              payment_method: defaultSeller.payment_method || "check",
-              seller_id: defaultSeller.id,
-            },
-            seller: [defaultSeller],
-          };
-          return newData;
-        });
-
+        setInvoiceData(prev => ({
+          ...prev,
+          header: {
+            ...prev.header,
+            payment_terms: defaultSeller.payment_terms || "upon_receipt",
+            payment_method: defaultSeller.payment_method || "check",
+            seller_id: defaultSeller.id,
+          },
+          seller: [defaultSeller],
+        }));
       } catch (err) {
         console.error("Erreur fetch seller:", err);
       }
     };
 
     loadDefaultSeller();
-  }, [initialData]);
-
+  }, [initialData, fetchSellers]);
 
   // Mise à jour de facture
   useEffect(() => {

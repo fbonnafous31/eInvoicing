@@ -3,6 +3,8 @@
 ├── config
 │   └── db.js
 ├── middlewares
+│   ├── attachSeller.js
+│   ├── auth.js
 │   ├── errorHandler.js
 │   └── upload.js
 ├── modules
@@ -26,9 +28,76 @@
 │       └── sellers.service.js
 ├── uploads
 │   ├── factur-x
+│   │   ├── 167-factur-x.xml
+│   │   ├── 168-factur-x.xml
+│   │   ├── 169-factur-x.xml
+│   │   ├── 170-factur-x.xml
+│   │   ├── 171-factur-x.xml
+│   │   ├── 172-factur-x.xml
+│   │   ├── 173-factur-x.xml
+│   │   ├── 174-factur-x.xml
+│   │   ├── 175-factur-x.xml
+│   │   ├── 176-factur-x.xml
+│   │   ├── 177-factur-x.xml
+│   │   ├── 178-factur-x.xml
+│   │   ├── 179-factur-x.xml
+│   │   ├── 180-factur-x.xml
+│   │   ├── 181-factur-x.xml
+│   │   └── 182-factur-x.xml
 │   ├── invoices
+│   │   ├── 167_add_1756929048804_note_de_credit_fr.pdf
+│   │   ├── 167_main_1756929048803_modele_de_facture.pdf
+│   │   ├── 168_add_1757002817567_todo.md
+│   │   ├── 168_main_1757002817566_Projet-de-facturation-electronique.pdf
+│   │   ├── 169_add_1756845637883_modele_de_facture.pdf
+│   │   ├── 169_main_1756845637882_note_de_credit_fr.pdf
+│   │   ├── 170_add_1756845667656_modele_de_facture.pdf
+│   │   ├── 170_main_1756845667653_note_de_credit_fr.pdf
+│   │   ├── 171_add_1756845291632_journal_jour1.txt
+│   │   ├── 171_add_1756845291634_factur-x.xml
+│   │   ├── 171_main_1756845291626_journal_jour1.md
+│   │   ├── 172_add_1756885692691_journal_jour1.md
+│   │   ├── 172_add_1756885692692_prompts.txt
+│   │   ├── 172_add_1756885692693_note_de_credit_fr.pdf
+│   │   ├── 172_main_1756885692689_modele_de_facture.pdf
+│   │   ├── 173_add_1756967626203_modele_de_facture.pdf
+│   │   ├── 173_main_1756967626201_Projet-de-facturation-electronique.pdf
+│   │   ├── 174_add_1756987057156_todo.md
+│   │   ├── 174_main_1756987057158_modele_de_facture.pdf
+│   │   ├── 175_add_1757173440174_Projet-de-facturation-electronique.pdf
+│   │   ├── 175_main_1757173440173_note_de_credit_fr.pdf
+│   │   ├── 176_main_1757196559018_Night_1.0.pdf
+│   │   ├── 177_main_1757197220211_Night_1.1.pdf
+│   │   ├── 178_main_1757259354664_Afternoo_5.1.pdf
+│   │   ├── 179_main_1757265698444_Afternoon_5.3.pdf
+│   │   ├── 180_main_1757430693663_facture_Afternoon_5.1_-6.pdf
+│   │   ├── 181_main_1757444849540_facture_Afternoon_5.5_-2.pdf
+│   │   └── 182_main_1757447559415_Evening_4.2.pdf
 │   ├── pdf
+│   │   ├── 166_invoice.pdf
+│   │   ├── 174_invoice.pdf
+│   │   ├── 175_invoice.pdf
+│   │   ├── 176_invoice.pdf
+│   │   ├── 177_invoice.pdf
+│   │   ├── 178_invoice.pdf
+│   │   ├── 180_invoice.pdf
+│   │   ├── 181_invoice.pdf
+│   │   └── 999_invoice.pdf
 │   └── pdf-a3
+│       ├── 167_pdf-a3.pdf
+│       ├── 167_temp.xmp
+│       ├── 168_pdf-a3.pdf
+│       ├── 172_pdf-a3.pdf
+│       ├── 173_pdf-a3.pdf
+│       ├── 174_pdf-a3.pdf
+│       ├── 175_pdf-a3.pdf
+│       ├── 176_pdf-a3.pdf
+│       ├── 177_pdf-a3.pdf
+│       ├── 178_pdf-a3.pdf
+│       ├── 179_pdf-a3.pdf
+│       ├── 180_pdf-a3.pdf
+│       ├── 181_pdf-a3.pdf
+│       └── 182_pdf-a3.pdf
 └── utils
     ├── facturx-generator.js
     ├── facturx-template.xmp
@@ -37,12 +106,12 @@
     │   └── sRGB.icc
     ├── invoice-pdf
     │   ├── generateInvoicePdf.js
+    │   ├── logo.png
     │   └── testGenerate.js
     ├── pdf-generator.js
     ├── pdf-postprocess.js
-    ├── uploads
-    │   └── pdf
+    ├── siret.js
     ├── xmp-helper.js
     └── xmp-injector.js
 
-17 directories, 61 files
+15 directories, 100 files

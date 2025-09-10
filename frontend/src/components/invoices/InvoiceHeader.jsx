@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { paymentTermsOptions } from "../../constants/paymentTerms";
 import { paymentMethodsOptions } from '../../constants/paymentMethods';
 import { FormSection, InputField, SelectField } from '@/components/form';
-import { fetchSellers } from "../../services/sellers";
+import { useSellerService } from "../../services/sellers";
 import { validateInvoiceField } from "../../utils/validators/invoice";
 import { validateIssueDate } from "../../utils/validators/issueDate";
 
@@ -14,17 +14,18 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
   const [openSections, setOpenSections] = useState({ info: true, contract: true });
 
   // Récupération des vendeurs
+  const { fetchSellers } = useSellerService();
   useEffect(() => {
     const fetchData = async () => {
       try {
         const sellersData = await fetchSellers();
         setSellers(sellersData);
       } catch (err) {
-        console.error(err);
+        console.error("Erreur fetch sellers:", err);
       }
     };
     fetchData();
-  }, []);
+  }, [fetchSellers]);
 
   const validateField = (field, value) => {
     let error = null;

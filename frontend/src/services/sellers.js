@@ -1,56 +1,60 @@
-// frontend/src/services/sellers.js
+import { useMemo } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
-const BASE_URL = "http://localhost:3000/api/sellers";
+const API_BASE = "http://localhost:3000/api/sellers";
 
-/**
- * Récupère la liste de tous les vendeurs
- */
-export async function fetchSellers() {
-  const res = await fetch(BASE_URL);
-  if (!res.ok) throw new Error("Erreur lors du chargement des vendeurs");
-  return res.json();
-}
+export function useSellerService() {
+  const { getToken } = useAuth();
 
-/**
- * Récupère un vendeur par ID
- */
-export async function fetchSeller(id) {
-  const res = await fetch(`${BASE_URL}/${id}`);
-  if (!res.ok) throw new Error("Erreur lors du chargement du vendeur");
-  return res.json();
-}
+  return useMemo(() => {
+    const request = async (url, options = {}) => {
+      console.log("[Service] → request URL:", url);
+      console.log("[Service] → options avant token:", options);
 
-/**
- * Crée un nouveau vendeur
- */
-export async function createSeller(data) {
-  const res = await fetch(BASE_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error("Erreur lors de la création du vendeur");
-  return res.json();
-}
+      const token = await getToken();
+      console.log("[Service] → token obtenu:", token?.substring(0, 10) + "..."); // on ne log pas tout
 
-/**
- * Met à jour un vendeur existant
- */
-export async function updateSeller(id, data) {
-  const res = await fetch(`${BASE_URL}/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error("Erreur lors de la mise à jour du vendeur");
-  return res.json();
-}
+      const res = await fetch(url, {
+        ...options,
+        headers: {
+          ...options.headers,
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-/**
- * Supprime un vendeur
- */
-export async function deleteSeller(id) {
-  const res = await fetch(`${BASE_URL}/${id}`, { method: "DELETE" });
-  if (!res.ok) throw new Error("Erreur lors de la suppression du vendeur");
-  return res.json();
+      console.log("[Service] ← status:", res.status, res.statusText);
+
+      const text = await res.text();
+      console.log("[Service] ← raw response text:", text);
+
+      if (!res.ok) {
+        throw new Error(`Erreur ${res.status}: ${text}`);
+      }
+
+      try {
+        return JSON.parse(text);
+      } catch {
+        return true; // pour 204 No Content
+      }
+    };
+
+    return {
+      fetchSellers: () => request(API_BASE),
+      fetchSeller: (id) => request(`${API_BASE}/${id}`),
+      createSeller: (data) =>
+        request(API_BASE, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }),
+      updateSeller: (id, data) =>
+        request(`${API_BASE}/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }),
+      deleteSeller: (id) => request(`${API_BASE}/${id}`, { method: "DELETE" }),
+      fetchMySeller: () => request(`${API_BASE}/me`),
+    };
+  }, [getToken]);
 }

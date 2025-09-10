@@ -49,8 +49,7 @@
 │   ├── paymentTerms.js
 │   └── translations.js
 ├── hooks
-│   ├── useAuth.js 
-│   └── useAuthToken.js
+│   └── useAuth.js
 ├── index.css
 ├── LoginPage.css
 ├── LoginPage.jsx
@@ -111,4 +110,4 @@
         ├── seller.js
         └── siret.js
 
-27 directories, 85 files
+27 directories, 84 files

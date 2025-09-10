@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SellerForm from '../sellers/SellerForm';
 import Breadcrumb from '../../components/layout/Breadcrumb';
-import { createSeller } from '../../services/sellers'; // <-- import du service
+import { useSellerService } from '../../services/sellers'; // <-- hook
 
 export default function NewSeller() {
   const navigate = useNavigate();
@@ -10,11 +10,13 @@ export default function NewSeller() {
   const [errorMessage, setErrorMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { createSeller } = useSellerService(); // ← destructuring depuis le hook
+
   const handleCreateSeller = async (formData) => {
     setIsSubmitting(true);
     setErrorMessage('');
     try {
-      await createSeller(formData); // <-- utilisation du service
+      await createSeller(formData); 
 
       setSuccessMessage("Vendeur créé avec succès ! 🎉");
       window.scrollTo({ top: 0, behavior: "smooth" }); 
@@ -38,13 +40,10 @@ export default function NewSeller() {
 
   return (
     <div className="container mt-4">
-      {/* H1 invisible pour SEO/accessibilité */}
       <h1 className="visually-hidden">Créer un nouveau vendeur</h1>
 
-      {/* Breadcrumb */}
       <Breadcrumb items={breadcrumbItems} />
 
-      {/* Messages */}
       {successMessage && (
         <div className="alert alert-success" role="alert">
           {successMessage}
@@ -56,7 +55,6 @@ export default function NewSeller() {
         </div>
       )}
 
-      {/* Formulaire */}
       <SellerForm onSubmit={handleCreateSeller} disabled={isSubmitting} />
     </div>
   );

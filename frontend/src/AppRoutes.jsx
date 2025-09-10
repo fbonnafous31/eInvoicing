@@ -1,4 +1,7 @@
 // frontend/src/AppRoutes.jsx
+import Home from './pages/Home';
+import ProfilePage from './pages/sellers/ProfilePage';
+
 import SellersList from './pages/sellers/SellersList';
 import NewSeller from './pages/sellers/NewSeller';
 import SellerDetail from './pages/sellers/SellerDetail';
@@ -15,12 +18,14 @@ import TestPdfViewer from './components/invoices/TestPdfViewer';
 
 import AuthTest from './pages/AuthTest.jsx';
 import NotFound from './pages/NotFound';
-import Home from './pages/Home';
 
 const routes = [
   { path: '/', element: <Home /> },
-  
-  // Sellers
+
+  // Profil utilisateur (vendeur connecté)
+  { path: '/seller', element: <ProfilePage /> },
+
+  // Sellers (ancienne liste / détail éventuel)
   { path: '/sellers', element: <SellersList /> },
   { path: '/sellers/new', element: <NewSeller /> },
   { path: '/sellers/:id', element: <SellerDetail /> },
@@ -41,7 +46,7 @@ const routes = [
 
   // Test Auth0
   { path: '/auth-test', element: <AuthTest /> },
-  
+
   // 404
   { path: '*', element: <NotFound /> },
 ];

@@ -64,51 +64,7 @@ CREATE SEQUENCE invoicing.sellers_id_seq
 	MAXVALUE 2147483647
 	START 1
 	CACHE 1
-	NO CYCLE;-- invoicing.clients definition
-
--- Drop table
-
--- DROP TABLE invoicing.clients;
-
-CREATE TABLE invoicing.clients (
-	id serial4 NOT NULL, -- Identifiant unique interne du client
-	legal_name varchar(255) NULL, -- Raison sociale
-	legal_identifier varchar(50) NULL, -- Identifiant légal (ex : SIRET, VAT ID)
-	address text NULL, -- Adresse complète
-	city varchar(100) NULL, -- Ville
-	postal_code varchar(20) NULL, -- Code postal
-	country_code bpchar(2) DEFAULT 'FR'::bpchar NULL, -- Code pays ISO 3166-1 alpha-2
-	vat_number varchar(50) NULL, -- Numéro de TVA intracommunautaire
-	created_at timestamp DEFAULT now() NULL, -- Date de création
-	updated_at timestamp DEFAULT now() NULL, -- Date de mise à jour
-	firstname varchar(100) NULL,
-	lastname varchar(100) NULL,
-	is_company bool DEFAULT true NOT NULL,
-	siret varchar(14) NULL,
-	email varchar(255) NULL,
-	phone varchar(30) NULL,
-	CONSTRAINT clients_company_person_required CHECK (((is_company AND (legal_name IS NOT NULL)) OR ((NOT is_company) AND (firstname IS NOT NULL) AND (lastname IS NOT NULL)))),
-	CONSTRAINT clients_country_iso2 CHECK ((country_code ~ '^[A-Z]{2}$'::text)),
-	CONSTRAINT clients_pkey PRIMARY KEY (id),
-	CONSTRAINT clients_siret_format_when_company CHECK ((((NOT is_company) AND (siret IS NULL)) OR (is_company AND (country_code = 'FR'::bpchar) AND ((siret)::text ~ '^[0-9]{14}$'::text)) OR (is_company AND (country_code <> 'FR'::bpchar) AND (siret IS NULL))))
-);
-CREATE UNIQUE INDEX clients_siret_unique_idx ON invoicing.clients USING btree (siret) WHERE (is_company AND (country_code = 'FR'::bpchar) AND (siret IS NOT NULL));
-
--- Column comments
-
-COMMENT ON COLUMN invoicing.clients.id IS 'Identifiant unique interne du client';
-COMMENT ON COLUMN invoicing.clients.legal_name IS 'Raison sociale';
-COMMENT ON COLUMN invoicing.clients.legal_identifier IS 'Identifiant légal (ex : SIRET, VAT ID)';
-COMMENT ON COLUMN invoicing.clients.address IS 'Adresse complète';
-COMMENT ON COLUMN invoicing.clients.city IS 'Ville';
-COMMENT ON COLUMN invoicing.clients.postal_code IS 'Code postal';
-COMMENT ON COLUMN invoicing.clients.country_code IS 'Code pays ISO 3166-1 alpha-2';
-COMMENT ON COLUMN invoicing.clients.vat_number IS 'Numéro de TVA intracommunautaire';
-COMMENT ON COLUMN invoicing.clients.created_at IS 'Date de création';
-COMMENT ON COLUMN invoicing.clients.updated_at IS 'Date de mise à jour';
-
-
--- invoicing.sellers definition
+	NO CYCLE;-- invoicing.sellers definition
 
 -- Drop table
 
@@ -132,6 +88,12 @@ CREATE TABLE invoicing.sellers (
 	company_type varchar(50) DEFAULT 'MICRO'::character varying NOT NULL, -- Type de société : MICRO, EI, SAS, SARL, SA, etc.
 	iban varchar(34) NULL,
 	bic varchar(11) NULL,
+	payment_method varchar(100) NULL, -- Moyen de paiement du vendeur (ex: Virement, Chèque, Carte bancaire)
+	payment_terms varchar(50) NULL, -- Conditions de paiement du vendeur (ex: À 30 jours, À réception)
+	additional_1 text NULL, -- Mention complémentaire 1 à afficher sur les factures
+	additional_2 text NULL, -- Mention complémentaire 2 à afficher sur les factures
+	auth0_id varchar(255) NULL,
+	CONSTRAINT sellers_auth0_id_key UNIQUE (auth0_id),
 	CONSTRAINT sellers_pkey PRIMARY KEY (id),
 	CONSTRAINT siret_format_check CHECK ((((legal_identifier)::text ~ '^\d{14}$'::text) OR (country_code <> 'FR'::bpchar)))
 );
@@ -153,6 +115,57 @@ COMMENT ON COLUMN invoicing.sellers.updated_at IS 'Date de mise à jour';
 COMMENT ON COLUMN invoicing.sellers.contact_email IS 'Adresse email de contact du vendeur (facturation, support)';
 COMMENT ON COLUMN invoicing.sellers.phone_number IS 'Numéro de téléphone du vendeur';
 COMMENT ON COLUMN invoicing.sellers.company_type IS 'Type de société : MICRO, EI, SAS, SARL, SA, etc.';
+COMMENT ON COLUMN invoicing.sellers.payment_method IS 'Moyen de paiement du vendeur (ex: Virement, Chèque, Carte bancaire)';
+COMMENT ON COLUMN invoicing.sellers.payment_terms IS 'Conditions de paiement du vendeur (ex: À 30 jours, À réception)';
+COMMENT ON COLUMN invoicing.sellers.additional_1 IS 'Mention complémentaire 1 à afficher sur les factures';
+COMMENT ON COLUMN invoicing.sellers.additional_2 IS 'Mention complémentaire 2 à afficher sur les factures';
+
+
+-- invoicing.clients definition
+
+-- Drop table
+
+-- DROP TABLE invoicing.clients;
+
+CREATE TABLE invoicing.clients (
+	id serial4 NOT NULL, -- Identifiant unique interne du client
+	legal_name varchar(255) NULL, -- Raison sociale
+	legal_identifier varchar(50) NULL, -- Identifiant légal (ex : SIRET, VAT ID)
+	address text NULL, -- Adresse complète
+	city varchar(100) NULL, -- Ville
+	postal_code varchar(20) NULL, -- Code postal
+	country_code bpchar(2) DEFAULT 'FR'::bpchar NULL, -- Code pays ISO 3166-1 alpha-2
+	vat_number varchar(50) NULL, -- Numéro de TVA intracommunautaire
+	created_at timestamp DEFAULT now() NULL, -- Date de création
+	updated_at timestamp DEFAULT now() NULL, -- Date de mise à jour
+	firstname varchar(100) NULL,
+	lastname varchar(100) NULL,
+	is_company bool DEFAULT true NOT NULL,
+	siret varchar(14) NULL,
+	email varchar(255) NULL,
+	phone varchar(30) NULL,
+	seller_id int4 NOT NULL,
+	CONSTRAINT clients_company_person_required CHECK (((is_company AND (legal_name IS NOT NULL)) OR ((NOT is_company) AND (firstname IS NOT NULL) AND (lastname IS NOT NULL)))),
+	CONSTRAINT clients_country_iso2 CHECK ((country_code ~ '^[A-Z]{2}$'::text)),
+	CONSTRAINT clients_pkey PRIMARY KEY (id),
+	CONSTRAINT clients_siret_format_when_company CHECK ((((NOT is_company) AND (siret IS NULL)) OR (is_company AND (country_code = 'FR'::bpchar) AND ((siret)::text ~ '^[0-9]{14}$'::text)) OR (is_company AND (country_code <> 'FR'::bpchar) AND (siret IS NULL)))),
+	CONSTRAINT clients_seller_id_fkey FOREIGN KEY (seller_id) REFERENCES invoicing.sellers(id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX clients_siret_unique_idx ON invoicing.clients USING btree (siret) WHERE (is_company AND (country_code = 'FR'::bpchar) AND (siret IS NOT NULL));
+CREATE INDEX idx_clients_seller_id ON invoicing.clients USING btree (seller_id);
+
+-- Column comments
+
+COMMENT ON COLUMN invoicing.clients.id IS 'Identifiant unique interne du client';
+COMMENT ON COLUMN invoicing.clients.legal_name IS 'Raison sociale';
+COMMENT ON COLUMN invoicing.clients.legal_identifier IS 'Identifiant légal (ex : SIRET, VAT ID)';
+COMMENT ON COLUMN invoicing.clients.address IS 'Adresse complète';
+COMMENT ON COLUMN invoicing.clients.city IS 'Ville';
+COMMENT ON COLUMN invoicing.clients.postal_code IS 'Code postal';
+COMMENT ON COLUMN invoicing.clients.country_code IS 'Code pays ISO 3166-1 alpha-2';
+COMMENT ON COLUMN invoicing.clients.vat_number IS 'Numéro de TVA intracommunautaire';
+COMMENT ON COLUMN invoicing.clients.created_at IS 'Date de création';
+COMMENT ON COLUMN invoicing.clients.updated_at IS 'Date de mise à jour';
 
 
 -- invoicing.invoices definition
@@ -180,6 +193,7 @@ CREATE TABLE invoicing.invoices (
 	created_at timestamp DEFAULT now() NULL, -- Date de création
 	updated_at timestamp DEFAULT now() NULL, -- Date de mise à jour
 	fiscal_year int4 NOT NULL, -- Année fiscale (année de l'émission de la facture)
+	payment_method varchar(50) NULL -- Moyen de paiement utilisé pour la facture,
 	CONSTRAINT chk_fiscal_year_range CHECK (((fiscal_year >= 2000) AND (fiscal_year <= 2100))),
 	CONSTRAINT chk_fiscal_year_reasonable CHECK (((fiscal_year >= ((EXTRACT(year FROM issue_date))::integer - 1)) AND (fiscal_year <= ((EXTRACT(year FROM issue_date))::integer + 1)))),
 	CONSTRAINT invoices_pkey PRIMARY KEY (id),
@@ -208,6 +222,7 @@ COMMENT ON COLUMN invoicing.invoices.status IS 'Statut (draft, final, canceled)'
 COMMENT ON COLUMN invoicing.invoices.created_at IS 'Date de création';
 COMMENT ON COLUMN invoicing.invoices.updated_at IS 'Date de mise à jour';
 COMMENT ON COLUMN invoicing.invoices.fiscal_year IS 'Année fiscale (année de l''émission de la facture)';
+COMMENT ON COLUMN invoicing.invoices.payment_method IS 'Moyen de paiement utilisé pour la facture';
 
 -- Table Triggers
 

@@ -26,9 +26,7 @@ async function getSellerById(req, res) {
     const { id } = req.params;
     const seller = await SellersService.getSellerById(id);
 
-    if (!seller) {
-      return res.status(404).json({ message: 'Vendeur non trouvé' });
-    }
+    if (!seller) return res.status(404).json({ message: 'Vendeur non trouvé' });
 
     res.json(seller);
   } catch (err) {
@@ -38,8 +36,8 @@ async function getSellerById(req, res) {
 }
 
 async function deleteSeller(req, res) {
-  const { id } = req.params;
   try {
+    const { id } = req.params;
     const deleted = await SellersService.deleteSeller(id);
     res.json({ message: 'Seller deleted', seller: deleted });
   } catch (err) {
@@ -49,10 +47,9 @@ async function deleteSeller(req, res) {
 }
 
 async function updateSeller(req, res) {
-  const { id } = req.params;
-  const sellerData = req.body;
-
   try {
+    const { id } = req.params;
+    const sellerData = req.body;
     const updatedSeller = await SellersService.updateSellerData(id, sellerData);
     res.json(updatedSeller);
   } catch (err) {
@@ -61,10 +58,32 @@ async function updateSeller(req, res) {
   }
 }
 
+async function getMySeller(req, res, next) {
+  try {
+    console.log("[Backend] → getMySeller appelé");
+    console.log("[Backend] req.user :", req.user);
+
+    // 🔹 Utilise le service existant getSellerByAuth0Id
+    const seller = await SellersService.getSellerByAuth0Id(req.user.sub);
+    console.log("[Backend] ← seller trouvé :", seller);
+
+    if (!seller) {
+      console.warn("[Backend] Aucun vendeur trouvé pour cet utilisateur");
+      return res.status(404).json({ message: "Aucun vendeur trouvé pour cet utilisateur" });
+    }
+
+    res.json(seller);
+  } catch (err) {
+    console.error("[Backend] Erreur getMySeller :", err);
+    next(err);
+  }
+}
+
 module.exports = {
   getSellers,
   createSeller,
   getSellerById,
   deleteSeller,
-  updateSeller
+  updateSeller,
+  getMySeller
 };
