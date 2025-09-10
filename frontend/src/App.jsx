@@ -19,6 +19,16 @@ function Layout({ children, fluid = false }) {
   );
 }
 
+// Fonction utilitaire pour récupérer le nom du composant réel
+const getComponentName = (element) => {
+  // Si l'élément est enveloppé dans un HOC comme RequireSeller
+  if (element?.props?.children?.type?.name) {
+    return element.props.children.type.name;
+  }
+  // Sinon on retourne le nom du composant directement
+  return element.type.name;
+};
+
 function App() {
   return (
     <Routes>
@@ -27,14 +37,15 @@ function App() {
 
       {/* Toutes les autres routes protégées */}
       {routes.map(({ path, element }) => {
-        // Ne pas protéger la page de login si elle était incluse dans routes
         if (path === "/login") return null;
 
-        const isFullWidth =
-          element.type.name === "InvoiceView" ||
-          element.type.name === "ClientsList" ||
-          element.type.name === "SellersList" ||
-          element.type.name === "InvoicesList";
+        const componentName = getComponentName(element);
+        const isFullWidth = [
+          "InvoiceView",
+          "ClientsList",
+          "SellersList",
+          "InvoicesList",
+        ].includes(componentName);
 
         return (
           <Route

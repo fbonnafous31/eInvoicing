@@ -18,6 +18,8 @@ const AuthProvider = ({ children }) => {
         redirect_uri: window.location.origin
       }}
       onRedirectCallback={onRedirectCallback}
+      cacheLocation="memory"     
+      useRefreshTokens={false}   
     >
       {children}
     </Auth0Provider>
