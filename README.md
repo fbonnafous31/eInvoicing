@@ -16,7 +16,7 @@ Le projet est conçu **jour après jour**, avec une approche progressive, struct
 
 - Développer une application web pour la gestion complète des factures : création, suivi, réception, génération de formats standards (UBL, Factur-X), et communication via API.
 - Implémenter un **CRUD complet pour les vendeurs et les clients**.
-- Fournir un socle robuste pour la **gestion de factures électroniques**, avec validation des données métier (ex. SIRET, capital social, informations bancaires).
+- Fournir un socle robuste pour la **gestion de factures électroniques**, avec validation des données métier (SIRET, informations bancaires, adresse).
 - Préparer l’application à évoluer vers une **Plateforme de Dématérialisation Partenaire (PDP)**.
 
 ---
@@ -43,7 +43,6 @@ Le projet est conçu **jour après jour**, avec une approche progressive, struct
 
 ## 🏗 Architecture du projet
 **backend**
-```
 ├── config
 │   └── db.js
 ├── middlewares
@@ -52,10 +51,8 @@ Le projet est conçu **jour après jour**, avec une approche progressive, struct
 │   ├── invoices
 │   └── sellers
 └── utils
-```
 
 **frontend**
-```
 ├── App.css
 ├── App.jsx
 ├── assets
@@ -68,7 +65,7 @@ Le projet est conçu **jour après jour**, avec une approche progressive, struct
 │   ├── invoices
 │   └── sellers
 │── utils
-```
+
 - Séparation **frontend / backend** pour clarifier le rôle de chaque couche.
 - Découpage **par domaine métier** : vendeurs, clients, factures.
 - **Modules backend isolés** : models, services, controllers, routes.
@@ -95,7 +92,21 @@ Le projet est conçu **jour après jour**, avec une approche progressive, struct
 - Composants frontend réutilisables (`ClientsList`, `NewClient`, `ClientDetail`).
 - Navigation fluide via la barre principale.
 
-### 3. Architecture robuste et modulaire
+### 3. Gestion des factures
+- **Intégration vendeur → client** lors de la création de facture.
+- Développement complet des **factures** : lignes, taxes, justificatifs.
+- Encodage et compression des justificatifs PDF.
+- Génération de formats standards **UBL / Factur-X**.
+- Amélioration UX globale et navigation fluide entre entités.
+- Consolidation des validations et règles métier.
+- **Finalisation de la conformité PDF/A-3** : résolution des derniers points techniques (profils de couleur, `AFRelationship`) pour validation ISO 19005-3 complète.
+
+### 4. Authentification et sécurité
+- Mise en place de **Auth0** pour gérer comptes utilisateurs et tokens JWT.
+- Sécurisation des routes frontend et backend.
+- Parcours utilisateur fluide : inscription → profil vendeur → accès aux données protégées.
+
+### 5. Architecture robuste et modulaire
 - Pattern backend **Model → Service → Controller → Route**.
 - Fonctions utilitaires réutilisables (`isValidSiret`, gestion capital social).
 - Validation et cohérence des données dès l’entrée.
@@ -113,12 +124,15 @@ Le projet est conçu **jour après jour**, avec une approche progressive, struct
 
 ## 🚀 Prochaines étapes
 
-- **Intégration vendeur → client** lors de la création de facture.
-- Développement complet des **factures** : lignes, taxes, justificatifs.
-- Encodage et compression des justificatifs PDF.
-- Génération de formats standards **UBL / Factur-X**.
-- Amélioration UX globale et navigation fluide entre entités.
-- Consolidation des validations et règles métier.
+### Évolution fonctionnelle
+- **Préparation des API permettant les échanges avec des plateformes de dématérialisation partenaires (PDP)** pour l’envoi des factures et réception des cycles de vie.
+- **Gestion du cycle de vie des factures** pour suivre le statut réglementaire de chaque document.
+- Préparer les échanges et intégrations en s’appuyant sur le **swagger officiel** pour garantir l’interopérabilité maximale et respecter les contraintes réglementaires.
+
+### Industrialisation
+- Mise en place de tests unitaires et d'intégration (`Vitest`).
+- Logging et monitoring des API.
+- Préparation au déploiement (CI/CD).
 
 ---
 
@@ -134,3 +148,13 @@ Le projet est conçu **jour après jour**, avec une approche progressive, struct
 - Chaque jour de développement est documenté en Markdown.
 - L’approche est itérative : on construit un module complet avant de passer au suivant.
 - Réutilisation maximale des composants et patterns pour faciliter l’évolution du projet.
+
+## 📝 Bilan du premier mois
+
+Ça fait maintenant 30 jours de travail quotidien, avec 116 commits, et j’ai presque couvert tout le périmètre que je m’étais fixé.  
+Il y a eu des moments de découragement, surtout quand je devais gérer les tokens Auth0 entre le front et le back : je ne voyais pas la fin, je faisais des erreurs sans fin, et je me demandais si ça valait le coup. Mais j’ai persévéré, cherché, testé, et finalement trouvé les solutions.  
+
+Je suis vraiment fier de ne jamais avoir baissé les bras. Même sans être un spécialiste de React, Node ou sécurité, j’ai réussi à avancer pas à pas, à construire une base solide et fonctionnelle.  
+Ce mois-ci, j’ai appris plein de choses techniques, mais aussi beaucoup sur ma manière de m’organiser et de planifier le travail. Discuter avec ChatGPT, préparer mes sessions et réfléchir aux étapes suivantes avant de coder m’a énormément aidé.  
+
+Au final, je me sens motivé, fier du chemin parcouru et enthousiaste pour la suite. La base est là, propre et prête à évoluer : prochaines étapes ? Terminer le cycle de vie des factures et intégrer les flux PDP, tout en gardant l’UX simple et efficace.
