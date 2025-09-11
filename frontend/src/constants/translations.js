@@ -6,4 +6,11 @@ export const FR = {
     paid: 'Payée',
     cancelled: 'Annulée',
   },
+  technicalStatus: {
+    pending: 'En attente',
+    received: 'Reçue',
+    validated: 'Validée',
+    rejected: 'Rejetée',
+    error: 'Erreur',
+  },
 };

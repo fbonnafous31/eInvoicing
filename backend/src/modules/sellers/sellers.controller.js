@@ -67,12 +67,8 @@ async function updateSeller(req, res) {
 
 async function getMySeller(req, res, next) {
   try {
-    console.log("[Backend] → getMySeller appelé");
-    console.log("[Backend] req.user :", req.user);
-
     // 🔹 Utilise le service existant getSellerByAuth0Id
     const seller = await SellersService.getSellerByAuth0Id(req.user.sub);
-    console.log("[Backend] ← seller trouvé :", seller);
 
     if (!seller) {
       console.warn("[Backend] Aucun vendeur trouvé pour cet utilisateur");

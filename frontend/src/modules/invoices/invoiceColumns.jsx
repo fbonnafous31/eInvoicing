@@ -200,6 +200,41 @@ export default function useInvoiceColumns() {
       )
     },
     {
+      name: 'Statut PDP',
+      selector: row => row.technical_status || '',
+      sortable: true,
+      width: '120px',
+      cell: row => {
+        const statusKey = row.technical_status?.toLowerCase() || 'pending';
+        const label = FR.technicalStatus[statusKey] || statusKey;
+
+        // Couleur du badge selon le statut
+        let color = 'gray';
+        if (statusKey === 'received') color = 'green';
+        else if (statusKey === 'validated') color = 'blue';
+        else if (statusKey === 'rejected') color = 'red';
+        else if (statusKey === 'error') color = 'darkred';
+
+        return (
+          <div style={{ textAlign: 'center' }}>
+            <span 
+              style={{
+                display: 'inline-block',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                backgroundColor: color,
+                color: 'white',
+                fontWeight: 500,
+                fontSize: '0.85em'
+              }}
+            >
+              {label}
+            </span>
+          </div>
+        );
+      }
+    },
+    {
       name: 'Créé le',
       selector: row => row.created_at ? formatDate(row.created_at) : '',
       sortable: true,

@@ -18,18 +18,15 @@ const checkJwt = jwt({
 
 // Wrapper pour ajouter des logs détaillés
 function withLogging(req, res, next) {
-  console.log("🔑 Vérification JWT pour :", req.originalUrl);
 
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     console.warn("⚠️ Aucun header Authorization trouvé !");
   } else {
     const rawToken = authHeader.split(" ")[1];
-    console.log("➡️ Header Authorization :", authHeader.split(" ")[0], "(token tronqué)");
     if (rawToken) {
       try {
         const payload = JSON.parse(Buffer.from(rawToken.split(".")[1], "base64").toString("utf8"));
-        console.log("📦 Payload reçu :", payload);
       } catch (err) {
         console.error("❌ Impossible de décoder le token :", err.message);
       }

@@ -447,11 +447,28 @@ async function getInvoicesBySeller(sellerId) {
   return result.rows;
 }
 
+// invoices.model.js
+async function updateTechnicalStatus(invoiceId, { technicalStatus, submissionId }) {
+  const query = `
+    UPDATE invoicing.invoices
+    SET technical_status = $1,
+        submission_id = $2,
+        last_technical_update = now()
+    WHERE id = $3
+    RETURNING *;
+  `;
+  const values = [technicalStatus, submissionId, invoiceId];
+  const result = await pool.query(query, values);
+  return result.rows[0];
+}
+
+
 module.exports = {
   getAllInvoices,
   getInvoiceById,
   createInvoice,
   deleteInvoice,
   updateInvoice,
-  getInvoicesBySeller
+  getInvoicesBySeller,
+  updateTechnicalStatus
 };

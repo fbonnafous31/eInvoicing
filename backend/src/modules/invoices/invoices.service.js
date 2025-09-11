@@ -184,6 +184,13 @@ async function sendInvoice(invoiceId) {
     }
   });
 
+  const { status: technicalStatus, submissionId } = response.data;
+
+  await InvoicesModel.updateTechnicalStatus(invoiceId, {
+    technicalStatus,
+    submissionId
+  });
+  
   console.log(`✅ Facture ${invoiceId} envoyée :`, response.data);
 
   return {
