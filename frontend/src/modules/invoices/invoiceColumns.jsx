@@ -3,11 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import EllipsisCell from '../../components/common/EllipsisCell';
 import { formatCurrency, formatDate } from '../../utils/formatters/formatters';
 import { FR } from '../../constants/translations';
-import { useInvoiceService } from "@/services/invoices"; 
+import TechnicalStatusCell from './TechnicalStatusCell';
 
-export default function useInvoiceColumns() {
+export default function useInvoiceColumns(invoiceService, onTechnicalStatusChange) {
   const navigate = useNavigate();
-  const invoiceService = useInvoiceService();
 
   return [{
       name: 'Voir / Éditer / PDF',
@@ -155,13 +154,6 @@ export default function useInvoiceColumns() {
       cell: row => <EllipsisCell value={row.purchase_order_number || ''} style={{ minWidth: '120px' }} />
     },
     {
-      name: 'Vendeur',
-      selector: row => row.seller_legal_name || '',
-      sortable: true,
-      width: '140px',
-      cell: row => <EllipsisCell value={row.seller_legal_name || ''} style={{ minWidth: '150px' }} />
-    },
-    {
       name: 'Client',
       selector: row => row.client_legal_name || '',
       sortable: true,
@@ -204,35 +196,13 @@ export default function useInvoiceColumns() {
       selector: row => row.technical_status || '',
       sortable: true,
       width: '120px',
-      cell: row => {
-        const statusKey = row.technical_status?.toLowerCase() || 'pending';
-        const label = FR.technicalStatus[statusKey] || statusKey;
-
-        // Couleur du badge selon le statut
-        let color = 'gray';
-        if (statusKey === 'received') color = 'green';
-        else if (statusKey === 'validated') color = 'blue';
-        else if (statusKey === 'rejected') color = 'red';
-        else if (statusKey === 'error') color = 'darkred';
-
-        return (
-          <div style={{ textAlign: 'center' }}>
-            <span 
-              style={{
-                display: 'inline-block',
-                padding: '2px 6px',
-                borderRadius: '4px',
-                backgroundColor: color,
-                color: 'white',
-                fontWeight: 500,
-                fontSize: '0.85em'
-              }}
-            >
-              {label}
-            </span>
-          </div>
-        );
-      }
+      cell: row => (
+        <TechnicalStatusCell
+          row={row}
+          invoiceService={invoiceService}
+          onTechnicalStatusChange={onTechnicalStatusChange} // ← important
+        />
+      )
     },
     {
       name: 'Créé le',

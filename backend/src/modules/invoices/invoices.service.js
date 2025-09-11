@@ -160,38 +160,27 @@ async function sendInvoice(invoiceId) {
     throw new Error(`Factur-X non trouvé pour invoice ${invoiceId}`);
   }
 
-  const fileStats = fs.statSync(facturXPath); // taille du fichier
+  const fileStats = fs.statSync(facturXPath);
   const fileName = path.basename(facturXPath);
 
-  // Création du formulaire multipart
   const form = new FormData();
   form.append('invoice', fs.createReadStream(facturXPath));
 
-  // 🔹 Log amélioré avant envoi
-  console.log('📤 Envoi au PDP simulé :', {
-    url: PDP_URL,
-    method: 'POST',
-    file: {
-      name: fileName,
-      size: `${fileStats.size} bytes`
-    }
-  });
-
-  // Envoi de la requête
   const response = await axios.post(PDP_URL, form, {
     headers: {
       ...form.getHeaders()
     }
   });
 
-  const { status: technicalStatus, submissionId } = response.data;
+  const { status: initialStatus, submissionId } = response.data;
 
-  await InvoicesModel.updateTechnicalStatus(invoiceId, {
-    technicalStatus,
-    submissionId
-  });
-  
+  // ⚡ Mettre à jour immédiatement le status “received”
+  await InvoicesModel.updateTechnicalStatus(invoiceId, { technicalStatus: initialStatus, submissionId });
+
   console.log(`✅ Facture ${invoiceId} envoyée :`, response.data);
+
+  // 🔹 Lancer le polling pour suivre la facture jusqu'au statut final
+  pollInvoiceStatusPDP(invoiceId, submissionId);
 
   return {
     invoiceId,
@@ -205,6 +194,44 @@ async function getInvoiceById(id) {
   return await InvoicesModel.getInvoiceById(id);
 }
 
+const POLLING_INTERVAL = 2000; // 2 secondes
+const POLLING_TIMEOUT = 60000; // 60 secondes max
+
+async function pollInvoiceStatusPDP(invoiceId, submissionId) {
+  const startTime = Date.now();
+  let finalStatus = false;
+
+  while (!finalStatus && Date.now() - startTime < POLLING_TIMEOUT) {
+    try {
+      // Requête au mock PDP
+      const response = await axios.get(`${PDP_URL}/${submissionId}/status`);
+      const { technicalStatus } = response.data; // ⚠️ utiliser technicalStatus
+
+      console.log(`📡 Polling invoice ${invoiceId}: status = ${technicalStatus}`);
+
+      // Mettre à jour la DB
+      await InvoicesModel.updateTechnicalStatus(invoiceId, { technicalStatus, submissionId });
+
+      // Vérifier statut final
+      if (technicalStatus === 'validated' || technicalStatus === 'rejected') {
+        finalStatus = true;
+        console.log(`✅ Invoice ${invoiceId} reached final status: ${technicalStatus}`);
+      } else {
+        await new Promise(res => setTimeout(res, POLLING_INTERVAL));
+      }
+    } catch (err) {
+      console.error(`❌ Polling failed for invoice ${invoiceId}:`, err.message);
+      await new Promise(res => setTimeout(res, POLLING_INTERVAL));
+    }
+  }
+
+  if (!finalStatus) {
+    console.warn(`⚠️ Invoice ${invoiceId} polling timeout`);
+  }
+
+  return finalStatus;
+}
+
 module.exports = {
   listInvoices,
   getInvoice,
@@ -214,5 +241,6 @@ module.exports = {
   registerGeneratedPdf,
   getInvoicesBySeller,
   sendInvoice,
-  getInvoiceById
+  getInvoiceById,
+  pollInvoiceStatusPDP
 };

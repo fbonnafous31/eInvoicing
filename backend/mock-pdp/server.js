@@ -1,55 +1,62 @@
-// backend/mock-pdp/server.js
 const express = require('express');
-const fileUpload = require('express-fileupload');
+const multer = require('multer');
+const cors = require('cors');
 
+const upload = multer({ dest: 'uploads/' });
 const app = express();
+app.use(cors());
+app.use(express.json());
+
 const PORT = 4000;
 
-app.use(fileUpload());
+// Stockage en mémoire des submissions
+const submissions = {};
 
-app.post('/invoices', (req, res) => {
-  try {
-    // 🎲 Simulation aléatoire d'erreur technique (10% des cas)
-    if (Math.random() < 0.1) {
-      console.error('❌ Simulated random server error.');
-      return res.status(500).json({
-        status: 'ERROR',
-        code: 'SERVER_ERROR',
-        message: 'Random simulated server failure.'
-      });
-    }
-
-    // Vérification de la présence du fichier
-    if (!req.files || !req.files.invoice) {
-      return res.status(400).json({
-        status: 'ERROR',
-        code: 'BAD_REQUEST',
-        message: 'No invoice file uploaded.'
-      });
-    }
-
-    const invoiceFile = req.files.invoice;
-    console.log('📄 Fichier reçu :', invoiceFile.name, '-', invoiceFile.size, 'bytes');
-
-    // Réponse technique OK
-    return res.status(201).json({
-      status: 'RECEIVED',
-      submissionId: 'subm_' + Date.now(),
-      filename: invoiceFile.name,
-      size: invoiceFile.size,
-      timestamp: new Date().toISOString(),
-      details: 'Invoice successfully uploaded, pending validation.'
-    });
-  } catch (err) {
-    console.error('❌ Server error:', err);
-    return res.status(500).json({
-      status: 'ERROR',
-      code: 'SERVER_ERROR',
-      message: 'Unexpected error while processing the request.'
-    });
+// Envoi d’une facture
+app.post('/invoices', upload.single('invoice'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'Fichier manquant' });
   }
+
+  const invoiceId = req.file.originalname.split('-')[0];
+  const submissionId = `sub_${invoiceId}_${Date.now()}`;
+
+  // Stocker le statut initial
+  submissions[submissionId] = {
+    invoiceId,
+    status: 'received'
+  };
+
+  console.log(`📥 Facture reçue : ${invoiceId}, submissionId: ${submissionId}`);
+
+  // Simuler un traitement asynchrone pour passer à validated/rejected
+  setTimeout(() => {
+    const finalStatus = Math.random() < 0.8 ? 'validated' : 'rejected';
+    submissions[submissionId].status = finalStatus;
+    console.log(`✅ Facture ${invoiceId} traitement terminé : ${finalStatus}`);
+  }, 5000 + Math.random() * 5000); // délai aléatoire 5-10s
+
+  res.json({
+    status: 'received',
+    submissionId
+  });
 });
 
-app.listen(PORT, () =>
-  console.log(`✅ Mock PDP running on http://localhost:${PORT}`)
-);
+// Récupération du statut PDP
+app.get('/invoices/:submissionId/status', (req, res) => {
+  const { submissionId } = req.params;
+  const sub = submissions[submissionId];
+
+  if (!sub) {
+    return res.status(404).json({ error: 'Submission non trouvée' });
+  }
+
+  res.json({
+    invoiceId: sub.invoiceId,
+    technicalStatus: sub.status
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`[MOCK-PDP] Mock PDP démarré sur http://localhost:${PORT}`);
+});

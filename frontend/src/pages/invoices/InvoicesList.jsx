@@ -12,11 +12,20 @@ export default function InvoicesList() {
   const [invoices, setInvoices] = useState([]);
   const [filterText, setFilterText] = useState('');
 
-  // Hook pour les colonnes
-  const columns = useInvoiceColumns();
+  const invoiceService = useInvoiceService();
+
+  // Callback pour mettre à jour le statut technique dans le tableau
+  const handleTechnicalStatusChange = (invoiceId, newStatus) => {
+    setInvoices(prev =>
+      prev.map(inv => inv.id === invoiceId ? { ...inv, technical_status: newStatus } : inv)
+    );
+  };
+
+  // Hook pour les colonnes, on passe le callback
+  const columns = useInvoiceColumns(invoiceService, handleTechnicalStatusChange);
 
   // Récupération des factures
-  const { fetchInvoicesBySeller } = useInvoiceService();
+  const { fetchInvoicesBySeller } = invoiceService;
   useEffect(() => {
     let isMounted = true; // pour éviter les updates après un unmount
 
@@ -43,7 +52,6 @@ export default function InvoicesList() {
     })
   );
   
-
   const breadcrumbItems = [
     { label: 'Accueil', path: '/' },
     { label: 'Factures', path: '/invoices' },
