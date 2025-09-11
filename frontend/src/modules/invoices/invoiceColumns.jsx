@@ -8,55 +8,63 @@ import TechnicalStatusCell from './TechnicalStatusCell';
 export default function useInvoiceColumns(invoiceService, onTechnicalStatusChange) {
   const navigate = useNavigate();
 
-  return [{
+  // -------------------- Polling du statut technique --------------------
+  const pollStatus = async (invoiceId, interval = 2000, timeout = 60000) => {
+    const start = Date.now();
+
+    return new Promise((resolve, reject) => {
+      const check = async () => {
+        try {
+          const statusObj = await invoiceService.getInvoiceStatus(invoiceId);
+          console.log(`📡 Polling invoice ${invoiceId} status =`, statusObj);
+
+          const technicalStatus = statusObj?.technicalStatus;
+          if (["validated", "rejected"].includes(technicalStatus)) {
+            resolve(statusObj);
+          } else if (Date.now() - start > timeout) {
+            reject(new Error("⏱️ Timeout récupération statut PDP"));
+          } else {
+            setTimeout(check, interval);
+          }
+        } catch (err) {
+          reject(err);
+        }
+      };
+      check();
+    });
+  };
+
+  // -------------------- Colonnes du tableau --------------------
+  return [
+    {
       name: 'Voir / Éditer / PDF',
       cell: row => (
         <div className="flex gap-1">
-          {/* Voir */}
           <button
             className="btn btn-sm"
-            onClick={() => {
-              if (row?.id) navigate(`/invoices/${row.id}/view`);
-            }}
+            onClick={() => row?.id && navigate(`/invoices/${row.id}/view`)}
             title="Consulter la facture"
           >
             👁️
           </button>
-
-          {/* Éditer */}
           <button
             className="btn btn-sm"
-            onClick={() => {
-              if (row?.id) navigate(`/invoices/${row.id}`);
-            }}
+            onClick={() => row?.id && navigate(`/invoices/${row.id}`)}
             title="Modifier la facture"
           >
             ✏️
           </button>
-
-      {/* Générer PDF */}
           <button
             className="btn btn-sm"
             title="Générer et télécharger la facture (PDF)"
             onClick={async () => {
               if (!row?.id) return;
               try {
-                console.log("➡️ Génération PDF pour invoice id:", row.id);
-
-                // 1️⃣ Génération du PDF via service (token inclus)
                 const data = await invoiceService.generateInvoicePdf(row.id);
-                console.log("📄 Réponse service :", data);
+                if (!data?.path) return console.error("❌ Pas de chemin PDF renvoyé");
 
-                if (!data?.path) {
-                  console.error("❌ Pas de chemin PDF renvoyé");
-                  return;
-                }
-
-                // 2️⃣ Récupération du PDF via URL backend
                 const pdfRes = await fetch(`http://localhost:3000${data.path}`);
                 const blob = await pdfRes.blob();
-
-                // 3️⃣ Téléchargement
                 const link = document.createElement("a");
                 link.href = URL.createObjectURL(blob);
                 link.download = `facture_${row.invoice_number}.pdf`;
@@ -64,7 +72,6 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
                 link.click();
                 document.body.removeChild(link);
                 URL.revokeObjectURL(link.href);
-
                 console.log("✅ PDF téléchargé");
               } catch (err) {
                 console.error("❌ Erreur génération PDF :", err);
@@ -82,37 +89,44 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
       name: 'Envoyer / Statut',
       cell: row => (
         <div className="flex gap-1 justify-end">
-          {/* Envoyer / Publier facture */}
           <button
             className="btn btn-sm"
-            title="Envoyer la facture"
             onClick={async () => {
+              if (!row?.id) return;
               try {
-                if (!row?.id) return;
                 console.log("📤 Envoi facture id:", row.id);
                 const res = await invoiceService.sendInvoice(row.id);
                 console.log("✅ Facture envoyée :", res);
-                alert("Facture envoyée avec succès !");
+
+                if (!res.submissionId) {
+                  console.warn("⚠️ Pas de submissionId renvoyé, polling impossible");
+                  alert("Facture envoyée mais le statut technique ne peut pas être suivi pour l'instant.");
+                  return;
+                }
+
+                alert("Facture transmise");
+
+                const finalStatus = await pollStatus(row.id);
+                console.log("✅ Statut final :", finalStatus);
+                onTechnicalStatusChange?.(row.id, finalStatus.technicalStatus);
               } catch (err) {
-                console.error("❌ Erreur envoi facture :", err);
-                alert("Erreur lors de l'envoi de la facture");
+                console.error("❌ Erreur envoi ou polling :", err);
+                alert("Erreur lors de l'envoi ou du polling du statut");
               }
             }}
           >
             📧
           </button>
 
-          {/* Recevoir statut / cycle de vie */}
           <button
             className="btn btn-sm"
             title="Récupérer le statut de la facture"
             onClick={async () => {
+              if (!row?.id) return;
               try {
-                if (!row?.id) return;
-                console.log("🔄 Récupération statut facture id:", row.id);
                 const status = await invoiceService.getInvoiceStatus(row.id);
                 console.log("ℹ️ Statut reçu :", status);
-                alert(`Statut actuel : ${status}`);
+                alert(`Statut actuel : ${status.technicalStatus}`);
               } catch (err) {
                 console.error("❌ Erreur récupération statut :", err);
                 alert("Erreur lors de la récupération du statut");
@@ -130,7 +144,7 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
       name: 'Référence',
       selector: row => row.invoice_number || '',
       sortable: true,
-      width: '150px', 
+      width: '150px',
       cell: row => <EllipsisCell value={row.invoice_number || ''} maxWidth="150px" />
     },
     {
@@ -166,7 +180,7 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
       sortable: true,
       style: { justifyContent: 'flex-end', textAlign: 'right' },
       format: row => formatCurrency(row.subtotal)
-    },    
+    },
     {
       name: 'TVA',
       selector: row => row.total_taxes,
@@ -180,16 +194,12 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
       sortable: true,
       style: { justifyContent: 'flex-end', textAlign: 'right' },
       format: row => formatCurrency(row.total)
-    },    
+    },
     {
       name: 'Statut',
       selector: row => row.status || '',
       sortable: true,
-      cell: row => (
-        <div style={{ textAlign: 'center' }}>
-          {FR.status[row.status] || row.status}
-        </div>
-      )
+      cell: row => <div style={{ textAlign: 'center' }}>{FR.status[row.status] || row.status}</div>
     },
     {
       name: 'Statut PDP',
@@ -200,7 +210,7 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
         <TechnicalStatusCell
           row={row}
           invoiceService={invoiceService}
-          onTechnicalStatusChange={onTechnicalStatusChange} // ← important
+          onTechnicalStatusChange={onTechnicalStatusChange}
         />
       )
     },

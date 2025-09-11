@@ -25,6 +25,7 @@ router.post(
   InvoicesController.createInvoice
 );
 
+router.get('/:id/status', InvoicesController.getInvoiceStatus);
 router.post('/:id/generate-pdf', InvoicesController.createInvoicePdf);
 router.post('/generate-pdf', InvoicesController.generateInvoicePdfBuffer);
 

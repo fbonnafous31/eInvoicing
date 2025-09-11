@@ -251,6 +251,7 @@ async function sendInvoice(req, res, next) {
     res.json({
       message: 'Facture envoyée avec succès',
       invoiceId,
+      submissionId: result.submissionId,
       result, 
     });
   } catch (err) {
@@ -258,6 +259,23 @@ async function sendInvoice(req, res, next) {
     next(err); 
   }
 };
+
+async function getInvoiceStatus(req, res, next) {
+  try {
+    const invoiceId = req.params.id;
+    const invoice = await InvoicesService.getInvoiceById(invoiceId);
+
+    if (!invoice) {
+      return res.status(404).json({ message: 'Facture introuvable' });
+    }
+
+    // Retourner le statut technique uniquement
+    res.json({ technicalStatus: invoice.technical_status || 'pending' });
+  } catch (err) {
+    console.error('Erreur getInvoiceStatus:', err);
+    next(err);
+  }
+}
 
 module.exports = {
   listInvoices,
@@ -268,5 +286,6 @@ module.exports = {
   createInvoicePdf,
   generateInvoicePdfBuffer,
   getInvoices,
-  sendInvoice
+  sendInvoice,
+  getInvoiceStatus
 };

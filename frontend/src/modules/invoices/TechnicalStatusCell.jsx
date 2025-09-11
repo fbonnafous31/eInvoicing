@@ -1,66 +1,68 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect } from "react";
 import { FR } from "../../constants/translations";
 
-export default function TechnicalStatusCell({ row, invoiceService }) {
-  const [status, setStatus] = useState(row.technical_status || "PENDING");
-
+export default function TechnicalStatusCell({ row, invoiceService, onTechnicalStatusChange }) {
+  const status = row.technical_status || "PENDING";
   const statusKey = status.toLowerCase();
   const label = FR.technicalStatus[statusKey] || statusKey;
 
-  // Couleur du badge selon le statut
   let color = "gray";
   if (statusKey === "received") color = "green";
   else if (statusKey === "validated") color = "blue";
   else if (statusKey === "rejected") color = "red";
   else if (statusKey === "error") color = "darkred";
 
-  // Memoize la fonction de polling pour que React ne la recrée pas à chaque render
-  const pollStatus = useCallback(async () => {
-    if (!row.submissionId) return;
-
-    try {
-      const pdpStatus = await invoiceService.pollInvoiceStatusPDP(
-        row.submissionId,
-        2000,   // interval
-        20000   // timeout
-      );
-
-      if (pdpStatus && pdpStatus.technicalStatus) {
-        setStatus(pdpStatus.technicalStatus);
-      }
-    } catch (err) {
-      console.error("Erreur polling PDP:", err);
-    }
-  }, [row.submissionId, invoiceService]);
-
-  // Polling automatique
   useEffect(() => {
     if (!row.submissionId) return;
     if (["validated", "rejected"].includes(statusKey)) return;
 
     let isMounted = true;
-
     const intervalTime = 2000;
 
     const timer = setInterval(async () => {
       if (!isMounted) return;
 
-      await pollStatus();
+      try {
+        const pdpStatus = await invoiceService.pollInvoiceStatusPDP(
+          row.submissionId,
+          intervalTime,
+          20000
+        );
 
-      // Si statut final, stop le polling
-      if (["validated", "rejected"].includes(status.toLowerCase())) {
+        if (pdpStatus?.technicalStatus) {
+          onTechnicalStatusChange?.(row.id, pdpStatus.technicalStatus);
+
+          if (["validated", "rejected"].includes(pdpStatus.technicalStatus.toLowerCase())) {
+            clearInterval(timer);
+          }
+        }
+      } catch (err) {
+        console.error("Erreur polling PDP:", err);
         clearInterval(timer);
       }
     }, intervalTime);
 
-    // Poll une première fois immédiatement
-    pollStatus();
+    // Première vérification immédiate
+    (async () => {
+      try {
+        const pdpStatus = await invoiceService.pollInvoiceStatusPDP(
+          row.submissionId,
+          intervalTime,
+          20000
+        );
+        if (pdpStatus?.technicalStatus) {
+          onTechnicalStatusChange?.(row.id, pdpStatus.technicalStatus);
+        }
+      } catch (err) {
+        console.error("Erreur polling PDP initial :", err);
+      }
+    })();
 
     return () => {
       isMounted = false;
       clearInterval(timer);
     };
-  }, [pollStatus, statusKey, status, row.submissionId]); 
+  }, [row.submissionId, statusKey, invoiceService, onTechnicalStatusChange, row.id]);
 
   return (
     <div style={{ textAlign: "center" }}>

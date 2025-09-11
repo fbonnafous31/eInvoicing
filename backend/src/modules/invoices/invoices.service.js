@@ -186,7 +186,8 @@ async function sendInvoice(invoiceId) {
     invoiceId,
     filename: fileName,
     size: fileStats.size,
-    pdpResponse: response.data
+    pdpResponse: response.data,
+    submissionId
   };
 }
 

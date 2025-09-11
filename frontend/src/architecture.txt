@@ -27,6 +27,9 @@
 │   │   ├── InputSiret.jsx
 │   │   ├── SelectField.jsx
 │   │   └── TextAreaField.jsx
+│   ├── guard
+│   │   ├── RequireNoSeller.jsx
+│   │   └── RequireSeller.jsx
 │   ├── invoices
 │   │   ├── InvoiceClient.jsx
 │   │   ├── InvoiceForm.jsx
@@ -62,7 +65,8 @@
 │   ├── common
 │   │   └── datatableStyles.js
 │   ├── invoices
-│   │   └── invoiceColumns.jsx
+│   │   ├── invoiceColumns.jsx
+│   │   └── TechnicalStatusCell.jsx
 │   └── sellers
 │       ├── sellerColumns.jsx
 │       ├── useSellerForm.js
@@ -86,6 +90,7 @@
 │   └── sellers
 │       ├── fields
 │       ├── NewSeller.jsx
+│       ├── ProfilePage.jsx
 │       ├── SellerDetail.jsx
 │       ├── SellerForm.jsx
 │       ├── SellersList.jsx
@@ -110,4 +115,4 @@
         ├── seller.js
         └── siret.js
 
-27 directories, 84 files
+28 directories, 88 files
