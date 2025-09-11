@@ -1,10 +1,12 @@
 // invoices.service.js
+const FormData = require('form-data');
 const InvoicesModel = require('./invoices.model');
 const { generateFacturXXML } = require('../../utils/facturx-generator');
 const { embedFacturXInPdf } = require('../../utils/pdf-generator');
 const InvoicesAttachmentsModel = require('./invoiceAttachments.model');
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 
 const FACTURX_DIR = path.resolve('src/uploads/factur-x');
 
@@ -131,6 +133,71 @@ async function getInvoicesBySeller(sellerId) {
   return await InvoicesModel.getInvoicesBySeller(sellerId);
 }
 
+axios.interceptors.request.use(request => {
+  let dataInfo = request.data;
+
+  if (dataInfo instanceof FormData) {
+    const fileField = dataInfo._streams?.find(stream => stream.includes('filename="'));
+    const fileNameMatch = fileField?.match(/filename="(.+?)"/);
+    const fileName = fileNameMatch ? fileNameMatch[1] : 'unknown';
+    dataInfo = { file: fileName };
+  }
+
+  console.log('📤 Axios envoi :', {
+    url: request.url,
+    method: request.method,
+    headers: request.headers,
+    data: dataInfo
+  });
+
+  return request;
+});
+
+const PDP_URL = 'http://localhost:4000/invoices'; // endpoint simulé
+async function sendInvoice(invoiceId) {
+  const facturXPath = path.join(FACTURX_DIR, `${invoiceId}-factur-x.xml`);
+  if (!fs.existsSync(facturXPath)) {
+    throw new Error(`Factur-X non trouvé pour invoice ${invoiceId}`);
+  }
+
+  const fileStats = fs.statSync(facturXPath); // taille du fichier
+  const fileName = path.basename(facturXPath);
+
+  // Création du formulaire multipart
+  const form = new FormData();
+  form.append('invoice', fs.createReadStream(facturXPath));
+
+  // 🔹 Log amélioré avant envoi
+  console.log('📤 Envoi au PDP simulé :', {
+    url: PDP_URL,
+    method: 'POST',
+    file: {
+      name: fileName,
+      size: `${fileStats.size} bytes`
+    }
+  });
+
+  // Envoi de la requête
+  const response = await axios.post(PDP_URL, form, {
+    headers: {
+      ...form.getHeaders()
+    }
+  });
+
+  console.log(`✅ Facture ${invoiceId} envoyée :`, response.data);
+
+  return {
+    invoiceId,
+    filename: fileName,
+    size: fileStats.size,
+    pdpResponse: response.data
+  };
+}
+
+async function getInvoiceById(id) {
+  return await InvoicesModel.getInvoiceById(id);
+}
+
 module.exports = {
   listInvoices,
   getInvoice,
@@ -138,5 +205,7 @@ module.exports = {
   updateInvoice,
   deleteInvoice,
   registerGeneratedPdf,
-  getInvoicesBySeller
+  getInvoicesBySeller,
+  sendInvoice,
+  getInvoiceById
 };

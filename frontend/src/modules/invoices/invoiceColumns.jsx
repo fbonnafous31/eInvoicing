@@ -10,7 +10,8 @@ export default function useInvoiceColumns() {
   const invoiceService = useInvoiceService();
 
   return [{
-  cell: row => (
+      name: 'Voir / Éditer / PDF',
+      cell: row => (
         <div className="flex gap-1">
           {/* Voir */}
           <button
@@ -78,7 +79,54 @@ export default function useInvoiceColumns() {
       ignoreRowClick: true,
       width: '150px',
     },
+    {
+      name: 'Envoyer / Statut',
+      cell: row => (
+        <div className="flex gap-1 justify-end">
+          {/* Envoyer / Publier facture */}
+          <button
+            className="btn btn-sm"
+            title="Envoyer la facture"
+            onClick={async () => {
+              try {
+                if (!row?.id) return;
+                console.log("📤 Envoi facture id:", row.id);
+                const res = await invoiceService.sendInvoice(row.id);
+                console.log("✅ Facture envoyée :", res);
+                alert("Facture envoyée avec succès !");
+              } catch (err) {
+                console.error("❌ Erreur envoi facture :", err);
+                alert("Erreur lors de l'envoi de la facture");
+              }
+            }}
+          >
+            📧
+          </button>
 
+          {/* Recevoir statut / cycle de vie */}
+          <button
+            className="btn btn-sm"
+            title="Récupérer le statut de la facture"
+            onClick={async () => {
+              try {
+                if (!row?.id) return;
+                console.log("🔄 Récupération statut facture id:", row.id);
+                const status = await invoiceService.getInvoiceStatus(row.id);
+                console.log("ℹ️ Statut reçu :", status);
+                alert(`Statut actuel : ${status}`);
+              } catch (err) {
+                console.error("❌ Erreur récupération statut :", err);
+                alert("Erreur lors de la récupération du statut");
+              }
+            }}
+          >
+            🔄
+          </button>
+        </div>
+      ),
+      ignoreRowClick: true,
+      width: '140px',
+    },
     {
       name: 'Référence',
       selector: row => row.invoice_number || '',
@@ -162,6 +210,6 @@ export default function useInvoiceColumns() {
       selector: row => row.updated_at ? formatDate(row.updated_at) : '',
       sortable: true,
       width: '150px',
-    },
+    }
   ];
 }

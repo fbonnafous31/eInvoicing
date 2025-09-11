@@ -57,6 +57,20 @@ export function useInvoiceService() {
     [request]
   );
 
+  const sendInvoice = useCallback(
+    (id) =>
+      request(`${API_BASE}/${id}/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      }),
+    [request]
+  );
+
+  const getInvoiceStatus = useCallback(
+    (id) => request(`${API_BASE}/${id}/status`),
+    [request]
+  );
+
   return {
     fetchInvoicesBySeller,
     fetchInvoice,
@@ -64,5 +78,7 @@ export function useInvoiceService() {
     updateInvoice,
     deleteInvoice,
     generateInvoicePdf,
+    sendInvoice,
+    getInvoiceStatus,
   };
 }

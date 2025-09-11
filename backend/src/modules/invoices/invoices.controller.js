@@ -220,7 +220,6 @@ async function generateInvoicePdfBuffer(req, res) {
   }
 }
 
-
 async function getInvoices(req, res, next) {
   try {
     if (!req.seller) {
@@ -234,6 +233,32 @@ async function getInvoices(req, res, next) {
   }
 }
 
+async function sendInvoice(req, res, next) {
+  try {
+    const invoiceId = req.params.id;
+
+    if (!invoiceId) {
+      return res.status(400).json({ error: 'ID de facture manquant' });
+    }
+
+    const invoice = await InvoicesService.getInvoiceById(invoiceId);
+    if (!invoice) {
+      return res.status(404).json({ error: 'Facture introuvable' });
+    }
+
+    const result = await InvoicesService.sendInvoice(invoiceId);
+
+    res.json({
+      message: 'Facture envoyée avec succès',
+      invoiceId,
+      result, 
+    });
+  } catch (err) {
+    console.error('Erreur sendInvoice:', err);
+    next(err); 
+  }
+};
+
 module.exports = {
   listInvoices,
   getInvoice,
@@ -242,5 +267,6 @@ module.exports = {
   deleteInvoice,
   createInvoicePdf,
   generateInvoicePdfBuffer,
-  getInvoices
+  getInvoices,
+  sendInvoice
 };

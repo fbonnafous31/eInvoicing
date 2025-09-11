@@ -5,16 +5,19 @@ const upload = require('../../middlewares/upload');
 const attachSeller = require('../../middlewares/attachSeller'); 
 const checkJwt = require('../../middlewares/auth'); 
 
-// Vérification si besoin (pas obligatoire ici, tu peux créer une route publique si tu veux)
-  
+// Routes publiques (si besoin)
+
 // Routes protégées par Auth0 et middleware attachSeller
 router.use(checkJwt);    
 router.use(attachSeller);
 
+// Route spécifique pour envoyer la facture
+router.post('/:id/send', InvoicesController.sendInvoice);
+
 // Routes factures
 router.get('/', InvoicesController.getInvoices);
-router.get('/:id', InvoicesController.getInvoice);
 router.get('/:id/generate-pdf', InvoicesController.createInvoicePdf);
+router.get('/:id', InvoicesController.getInvoice);
 
 router.post(
   '/',

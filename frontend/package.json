@@ -7,7 +7,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start:all": "concurrently \"cd ../backend && node server.js\" \"npm run dev\""
+    "start:all": "concurrently -k -n \"BACKEND,FRONTEND,MOCK-PDP\" -c \"cyan,green,yellow\" \"cd ../backend && node server.js\" \"npm run dev\" \"cd ../backend && node mock-pdp/server.js\""
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.4.0",
