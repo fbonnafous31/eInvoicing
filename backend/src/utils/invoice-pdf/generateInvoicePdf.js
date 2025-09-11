@@ -373,7 +373,9 @@ async function generateInvoicePdfBuffer(invoice) {
   // ---------------- Récupération des données ----------------
   const header = invoice.header || {};
   const client = invoice.client || {};
-  const seller = Array.isArray(invoice.seller) ? invoice.seller[0] : invoice.seller || {};
+  const seller = Array.isArray(invoice.seller) && invoice.seller.length > 0 
+    ? invoice.seller[0] 
+    : (invoice.seller && typeof invoice.seller === "object" ? invoice.seller : {});
   const lines = invoice.lines || [];
 
   // ---------------- Logo ----------------
@@ -595,26 +597,6 @@ async function generateInvoicePdfBuffer(invoice) {
   });
 
   y = totalsY - 30; 
-
-  // ---------------- Infos paiement ----------------
-  // ---------------- Informations de paiement ----------------
-  // if (header.payment_method) {
-  //   // Cherche le libellé correspondant à la méthode de paiement
-  //   const paymentMethodOption = paymentMethodsOptions.find(
-  //     (opt) => opt.value === header.payment_method
-  //   );
-  //   const paymentMethodLabel = paymentMethodOption
-  //     ? paymentMethodOption.label
-  //     : header.payment_method;
-
-  //   page.drawText(`Moyen de paiement : ${paymentMethodLabel}`, {
-  //     x: margin,
-  //     y,
-  //     size: 10,
-  //     font: fontRegular,
-  //   });
-  //   y -= 15;
-  // }
 
   // ---------------- Informations de paiement ----------------
   if (header.payment_method) {

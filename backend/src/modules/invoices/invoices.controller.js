@@ -189,19 +189,37 @@ async function createInvoicePdf(req, res) {
   }
 }
 
+const { getSellerById } = require('../sellers/sellers.service'); // adapte le chemin
+
 async function generateInvoicePdfBuffer(req, res) {
   try {
-    const invoice = req.body; 
+    const invoiceBody = { ...req.body };
+
+    // ---------------- Récupérer le seller complet ----------------
+    let seller = {};
+    const sellerId = invoiceBody.header?.seller_id;
+    if (sellerId) {
+      seller = await getSellerById(sellerId); 
+    }
+
+    // ---------------- Composer l'objet invoice complet ----------------
+    const invoice = {
+      ...invoiceBody,
+      seller
+    };
+
     const pdfBytes = await generatePdfUtil(invoice); 
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'inline; filename=facture_preview.pdf');
     res.send(pdfBytes);
+
   } catch (err) {
     console.error("Erreur génération PDF:", err);
     res.status(500).json({ error: 'Impossible de générer le PDF' });
   }
 }
+
 
 async function getInvoices(req, res, next) {
   try {

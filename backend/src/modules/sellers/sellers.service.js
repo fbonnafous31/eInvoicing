@@ -43,6 +43,11 @@ async function checkIdentifierExists(identifier, sellerId) {
   return result.rowCount > 0;
 }
 
+async function getMySeller(auth0_id) {
+  if (!auth0_id) return null;
+  return await getSellerByAuth0Id(auth0_id);
+}
+
 module.exports = {
   listSellers,
   createSeller,
@@ -50,4 +55,6 @@ module.exports = {
   deleteSeller,
   updateSellerData, 
   getSellerByAuth0Id,
-  checkIdentifierExists};
+  checkIdentifierExists,
+  getMySeller
+};

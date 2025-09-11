@@ -1,5 +1,5 @@
 // frontend/src/components/invoices/InvoiceHeader.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { paymentTermsOptions } from "../../constants/paymentTerms";
 import { paymentMethodsOptions } from '../../constants/paymentMethods';
 import { FormSection, InputField, SelectField } from '@/components/form';
@@ -8,26 +8,14 @@ import { validateInvoiceField } from "../../utils/validators/invoice";
 import { validateIssueDate } from "../../utils/validators/issueDate";
 
 export default function InvoiceHeader({ data, onChange, submitted, errors = {}, disabled }) {
-  const [sellers, setSellers] = useState([]);
   const [fieldErrors, setFieldErrors] = useState({});
   const [touchedFields, setTouchedFields] = useState({});
   const [openSections, setOpenSections] = useState({ info: true, contract: true });
 
-  // Récupération des vendeurs
-  const { fetchSellers } = useSellerService();
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const sellersData = await fetchSellers();
-        setSellers(sellersData);
-      } catch (err) {
-        console.error("Erreur fetch sellers:", err);
-      }
-    };
-    fetchData();
-  }, [fetchSellers]);
+  const { fetchMySeller } = useSellerService();
 
-  const validateField = (field, value) => {
+  // --- Validation ---
+  const validateField = useCallback((field, value) => {
     let error = null;
     if (field === "issue_date") {
       error = validateIssueDate(value);
@@ -35,17 +23,20 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
       error = validateInvoiceField(field, value, data);
     }
     setFieldErrors(prev => ({ ...prev, [field]: error }));
-  };
+  }, [data]);
 
-  const handleChange = (field, value) => {
+  // --- Gestion du changement ---
+  const handleChange = useCallback((field, value) => {
     const newData = { ...data, [field]: value };
     if (field === "issue_date") {
       newData.fiscal_year = new Date(value).getFullYear();
     }
     onChange(newData);
     validateField(field, value);
-    if (!touchedFields[field]) setTouchedFields(prev => ({ ...prev, [field]: true }));
-  };
+    if (!touchedFields[field]) {
+      setTouchedFields(prev => ({ ...prev, [field]: true }));
+    }
+  }, [data, onChange, touchedFields, validateField]);
 
   const handleBlur = (field) => {
     setTouchedFields(prev => ({ ...prev, [field]: true }));
@@ -65,6 +56,21 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
     const currentErrors = submitted ? errors : fieldErrors;
     return fields.some(f => currentErrors[f]);
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const seller = await fetchMySeller();
+        if (seller && !data.seller_id) {
+          handleChange("seller_id", seller.id);
+        }
+      } catch (err) {
+        console.error("Erreur fetch my seller:", err);
+      }
+    };
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchMySeller]);
 
   const issueYear = data.issue_date ? new Date(data.issue_date).getFullYear() : new Date().getFullYear();
   const fiscalYearValue = data.fiscal_year || issueYear;
@@ -117,17 +123,6 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
           disabled={disabled} 
           min={issueYear - 1}
           max={issueYear + 1}
-        />
-
-        <SelectField
-          label="Vendeur"
-          value={data.seller_id}
-          onChange={val => handleChange("seller_id", val)}
-          onBlur={() => handleBlur("seller_id")}
-          options={sellers.map(s => ({ value: s.id, label: s.legal_name || "Vendeur" }))}
-          error={getError("seller_id")}
-          required
-          disabled={disabled} 
         />
       </FormSection>
 

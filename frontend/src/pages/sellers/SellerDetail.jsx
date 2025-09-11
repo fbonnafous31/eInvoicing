@@ -16,7 +16,7 @@ export default function SellerDetail({ sellerId: propSellerId }) {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const { fetchSeller, updateSeller } = useSellerService();
+  const { fetchMySeller, updateSeller } = useSellerService();
 
   useEffect(() => {
     if (!id) return;
@@ -25,7 +25,7 @@ export default function SellerDetail({ sellerId: propSellerId }) {
 
     const loadSeller = async () => {
       try {
-        const data = await fetchSeller(id);
+        const data = await fetchMySeller(id);
         if (!data.contact_email) data.contact_email = "";
         if (isMounted) setSeller(data);
       } catch (err) {
@@ -39,7 +39,7 @@ export default function SellerDetail({ sellerId: propSellerId }) {
     return () => {
       isMounted = false;
     };
-  }, [id, fetchSeller]);
+  }, [id, fetchMySeller]);
 
   const handleUpdate = async (updatedData) => {
     if (!updatedData.contact_email) updatedData.contact_email = "";

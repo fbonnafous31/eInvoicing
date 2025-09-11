@@ -34,13 +34,13 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
   const [errorMessage, setErrorMessage] = useState("");
 
   // Création de facture
-  const { fetchSellers } = useSellerService();
+  const { fetchMySeller } = useSellerService();
   useEffect(() => {
     const loadDefaultSeller = async () => {
       if (initialData) return;
 
       try {
-        const sellersList = await fetchSellers();
+        const sellersList = await fetchMySeller();
         if (!sellersList || !sellersList.length) return;
 
         const defaultSeller = sellersList[0];
@@ -60,7 +60,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
     };
 
     loadDefaultSeller();
-  }, [initialData, fetchSellers]);
+  }, [initialData, fetchMySeller]);
 
   // Mise à jour de facture
   useEffect(() => {
@@ -70,7 +70,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
       let seller = {};
       if (initialData.header?.seller_id) {
         try {
-          seller = await fetchSellers(initialData.header.seller_id);
+          seller = await fetchMySeller(initialData.header.seller_id);
         } catch (err) {
           console.error("Erreur fetch seller:", err);
         }
@@ -272,9 +272,10 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
         payment_terms: invoiceData.header.payment_terms || null,
         payment_method: invoiceData.header.payment_method || null,
         client_id: invoiceData.client.client_id || null,
-        supply_date: invoiceData.header.supply_date || null
+        supply_date: invoiceData.header.supply_date || null,
       }));
 
+      formData.append("seller", JSON.stringify(invoiceData.seller));
       formData.append("client", JSON.stringify(invoiceData.client));
       formData.append("lines", JSON.stringify(linesWithTotals));
       formData.append("taxes", JSON.stringify(taxesSummary));

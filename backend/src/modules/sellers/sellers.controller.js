@@ -12,8 +12,14 @@ async function getSellers(req, res) {
 
 async function createSeller(req, res) {
   try {
+    // Vérifie si l'utilisateur a déjà un vendeur attaché
+    if (req.seller) {
+      return res.status(400).json({ error: "Un vendeur existe déjà pour cet utilisateur" });
+    }
+
     const sellerData = req.body;
-    const auth0_id = req.user.sub; 
+    const auth0_id = req.user.sub;
+
     const newSeller = await SellersService.createSeller(sellerData, auth0_id);
     res.status(201).json(newSeller);
   } catch (err) {
@@ -21,7 +27,6 @@ async function createSeller(req, res) {
     res.status(500).json({ error: 'Erreur serveur lors de la création' });
   }
 }
-
 
 async function getSellerById(req, res) {
   try {

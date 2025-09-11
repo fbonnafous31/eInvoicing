@@ -4,19 +4,20 @@ const SellersController = require('./sellers.controller');
 const checkJwt = require('../../middlewares/auth');
 const attachSeller = require('../../middlewares/attachSeller');
 
-// Routes publiques (optionnel)
-// Vérification de l'identifiant légal (SIRET) avant création
+// Route publique (optionnelle)
 router.get('/check-identifier', SellersController.checkIdentifier);
 
-// Routes protégées (JWT + seller attaché)
+// Routes protégées
 router.use(checkJwt);
 router.use(attachSeller);
 
+// Récupérer son vendeur
 router.get('/me', SellersController.getMySeller);
-router.get('/:id', SellersController.getSellerById);
-router.get('/', SellersController.getSellers);
+
+// Créer son vendeur (si pas encore créé)
 router.post('/', SellersController.createSeller);
+
+// Mettre à jour son vendeur
 router.put('/:id', SellersController.updateSeller);
-router.delete('/:id', SellersController.deleteSeller);
 
 module.exports = router;

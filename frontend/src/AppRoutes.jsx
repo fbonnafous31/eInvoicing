@@ -1,8 +1,5 @@
-// frontend/src/AppRoutes.jsx
 import Home from './pages/Home';
 import ProfilePage from './pages/sellers/ProfilePage';
-
-import SellersList from './pages/sellers/SellersList';
 import NewSeller from './pages/sellers/NewSeller';
 import SellerDetail from './pages/sellers/SellerDetail';
 
@@ -20,6 +17,8 @@ import AuthTest from './pages/AuthTest.jsx';
 import NotFound from './pages/NotFound';
 
 import RequireSeller from './components/guard/RequireSeller';
+import RequireNoSeller from './components/guard/RequireNoSeller.jsx';
+import { Navigate } from "react-router-dom";
 
 const routes = [
   { path: '/', element: <Home /> },
@@ -31,18 +30,19 @@ const routes = [
     </RequireSeller>
   },
 
-  // Sellers
-  { path: '/sellers', element: 
-    <RequireSeller>
-      <SellersList />
-    </RequireSeller>
+  // Création vendeur (accessible uniquement si pas encore de vendeur)
+  { path: '/sellers/new', element: 
+    <RequireNoSeller>
+      <NewSeller />
+    </RequireNoSeller>
   },
-  { path: '/sellers/new', element: <NewSeller /> },
-  { path: '/sellers/:id', element: 
-    <RequireSeller>
-      <SellerDetail />
-    </RequireSeller>
-  },
+
+  // Redirection /sellers -> /seller
+  { path: '/sellers', element: <Navigate to="/seller" replace /> },
+
+  // (optionnel) accès direct à un vendeur par ID
+  // à supprimer pour vraiment interdire toute lecture d'autres vendeurs
+  // { path: '/sellers/:id', element: <SellerDetail /> },
 
   // Clients
   { path: '/clients', element: 

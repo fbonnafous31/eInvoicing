@@ -34,27 +34,25 @@ export function useSellerService() {
       try {
         return JSON.parse(text);
       } catch {
-        return true; // pour 204 No Content
+        return true; // pour les DELETE qui ne renvoient rien
       }
     };
 
     return {
-      fetchSellers: () => request(API_BASE),
-      fetchSeller: (id) => request(`${API_BASE}/${id}`),
+      fetchMySeller: () => request(`${API_BASE}/me`),
       createSeller: (data) =>
         request(API_BASE, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
         }),
-      updateSeller: (id, data) =>
-        request(`${API_BASE}/${id}`, {
+      updateSeller: (data) =>
+        request(`${API_BASE}`, { // on met à jour le vendeur connecté
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
         }),
-      deleteSeller: (id) => request(`${API_BASE}/${id}`, { method: "DELETE" }),
-      fetchMySeller: () => request(`${API_BASE}/me`),
+      deleteSeller: () => request(`${API_BASE}`, { method: "DELETE" }), // supprime le vendeur connecté
       checkIdentifier: (identifier, sellerId) =>
         request(`${API_BASE}/check-identifier?identifier=${identifier}${sellerId ? `&id=${sellerId}` : ''}`),
     };
