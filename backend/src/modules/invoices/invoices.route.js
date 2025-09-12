@@ -25,8 +25,16 @@ router.post(
   InvoicesController.createInvoice
 );
 
+// Récupération du statut technique d'une facture
 router.get('/:id/status', InvoicesController.getInvoiceStatus);
 router.post('/:id/generate-pdf', InvoicesController.createInvoicePdf);
+
+// Rafraîchir le statut métier d'une facture
+router.post('/:id/refresh-status', InvoicesController.refreshInvoiceStatus);
+
+// Récupérer le cycle métier complet d'une facture
+router.get('/:id/lifecycle', InvoicesController.getInvoiceLifecycle);
+
 router.post('/generate-pdf', InvoicesController.generateInvoicePdfBuffer);
 
 router.put(

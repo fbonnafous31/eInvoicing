@@ -5,7 +5,7 @@ import { formatCurrency, formatDate } from '../../utils/formatters/formatters';
 import { FR } from '../../constants/translations';
 import TechnicalStatusCell from './TechnicalStatusCell';
 
-export default function useInvoiceColumns(invoiceService, onTechnicalStatusChange) {
+export default function useInvoiceColumns(invoiceService, onTechnicalStatusChange, onBusinessStatusChange) {
   const navigate = useNavigate();
 
   // -------------------- Polling du statut technique --------------------
@@ -104,7 +104,7 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
                   return;
                 }
 
-                alert("Facture transmise");
+                alert("Facture transmise.");
 
                 const finalStatus = await pollStatus(row.id);
                 console.log("✅ Statut final :", finalStatus);
@@ -120,16 +120,27 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
 
           <button
             className="btn btn-sm"
-            title="Récupérer le statut de la facture"
+            title="Rafraîchir le cycle de vie métier"
             onClick={async () => {
               if (!row?.id) return;
+
               try {
-                const status = await invoiceService.getInvoiceStatus(row.id);
-                console.log("ℹ️ Statut reçu :", status);
-                alert(`Statut actuel : ${status.technicalStatus}`);
+                console.log("🔄 Demande rafraîchissement cycle métier invoice id:", row.id);
+
+                const refresh = await invoiceService.refreshInvoiceLifecycle(row.id);
+                console.log("📤 Lifecycle refresh response:", refresh);
+
+                alert("Cycle métier demandé au PDP");
+
+                const finalStatus = await invoiceService.pollInvoiceLifecycle(row.id);
+                console.log("✅ Statut final métier :", finalStatus);
+
+                onBusinessStatusChange?.(row.id, finalStatus.status_code);
+
+                alert(`Statut final métier : ${finalStatus.status_label}`);
               } catch (err) {
-                console.error("❌ Erreur récupération statut :", err);
-                alert("Erreur lors de la récupération du statut");
+                console.error("❌ Erreur rafraîchissement ou polling cycle métier :", err);
+                alert("Erreur lors du rafraîchissement ou du polling du cycle métier");
               }
             }}
           >

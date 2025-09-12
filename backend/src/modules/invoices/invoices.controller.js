@@ -2,6 +2,7 @@ const InvoicesService = require('./invoices.service');
 const { getInvoiceById } = require('./invoices.model');
 const { generateInvoicePdf, generateInvoicePdfBuffer: generatePdfUtil } = require('../../utils/invoice-pdf/generateInvoicePdf');
 const path = require("path");
+const axios = require('axios');
 
 /**
  * Liste toutes les factures
@@ -277,6 +278,65 @@ async function getInvoiceStatus(req, res, next) {
   }
 }
 
+async function refreshInvoiceStatus(req, res, next) {
+  try {
+    const invoiceId = req.params.id;
+    const invoice = await InvoicesService.getInvoiceById(invoiceId);
+
+    if (!invoice) {
+      return res.status(404).json({ message: 'Facture introuvable' });
+    }
+
+    if (!invoice.submission_id) {
+      return res.status(400).json({ message: 'Facture non encore envoyée au PDP' });
+    }
+
+    // Appel au Mock PDP pour faire progresser le cycle métier
+    const pduResponse = await axios.post(`http://localhost:4000/invoices/${invoice.submission_id}/lifecycle/request`);
+    
+    // Mettre à jour la DB avec le nouveau statut métier
+    await InvoicesService.updateInvoiceLifecycle(invoiceId, pduResponse.data.lifecycle);
+
+    res.json({
+      message: 'Statut métier rafraîchi',
+      invoiceId,
+      lifecycle: pduResponse.data.lifecycle
+    });
+  } catch (err) {
+    console.error('Erreur refreshInvoiceStatus:', err);
+    next(err);
+  }
+}
+
+/**
+ * Récupérer l'historique complet des statuts métier
+ */
+async function getInvoiceLifecycle(req, res, next) {
+  try {
+    const invoiceId = req.params.id;
+    const invoice = await InvoicesService.getInvoiceById(invoiceId);
+
+    if (!invoice) {
+      return res.status(404).json({ message: 'Facture introuvable' });
+    }
+
+    if (!invoice.submission_id) {
+      return res.status(400).json({ message: 'Facture non encore envoyée au PDP' });
+    }
+
+    // Appel au Mock PDP pour récupérer l'historique
+    const pduResponse = await axios.get(`http://localhost:4000/invoices/${invoice.submission_id}/lifecycle`);
+
+    res.json({
+      invoiceId,
+      lifecycle: pduResponse.data.lifecycle
+    });
+  } catch (err) {
+    console.error('Erreur getInvoiceLifecycle:', err);
+    next(err);
+  }
+}
+
 module.exports = {
   listInvoices,
   getInvoice,
@@ -287,5 +347,7 @@ module.exports = {
   generateInvoicePdfBuffer,
   getInvoices,
   sendInvoice,
-  getInvoiceStatus
+  getInvoiceStatus,
+  refreshInvoiceStatus,
+  getInvoiceLifecycle
 };

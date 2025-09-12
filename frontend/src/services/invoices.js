@@ -86,6 +86,60 @@ export function useInvoiceService() {
     [request]
   );
 
+  const refreshInvoiceLifecycle = useCallback(
+    (id) =>
+      request(`${API_BASE}/${id}/refresh-status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      }),
+    [request]
+  );
+
+  const getInvoiceLifecycle = useCallback(
+    (id) => request(`${API_BASE}/${id}/lifecycle`),
+    [request]
+  );
+
+  // Polling métier si besoin
+  const pollInvoiceLifecycle = useCallback(
+    (invoiceId, interval = 2000, timeout = 20000) =>
+      new Promise((resolve, reject) => {
+        const startTime = Date.now();
+
+        const check = async () => {
+          try {
+            const data = await getInvoiceLifecycle(invoiceId);
+            const lifecycle = Array.isArray(data.lifecycle) ? data.lifecycle : [];
+
+            if (lifecycle.length === 0) {
+              reject(new Error("Aucun statut métier trouvé"));
+              return;
+            }
+
+            const lastStatusRaw = lifecycle[lifecycle.length - 1];
+            const lastStatus = {
+              status_code: lastStatusRaw.code,
+              status_label: lastStatusRaw.label
+            };
+
+            // Codes finaux métier
+            if ([201, 299].includes(lastStatus.status_code)) {
+              resolve(lastStatus);
+            } else if (Date.now() - startTime > timeout) {
+              reject(new Error("Timeout récupération statut métier"));
+            } else {
+              setTimeout(check, interval);
+            }
+          } catch (err) {
+            reject(err);
+          }
+        };
+
+        check();
+      }),
+    [getInvoiceLifecycle]
+  );
+
   return {
     fetchInvoicesBySeller,
     fetchInvoice,
@@ -96,5 +150,8 @@ export function useInvoiceService() {
     sendInvoice,
     getInvoiceStatus,
     pollInvoiceStatusPDP, 
+    refreshInvoiceLifecycle,
+    getInvoiceLifecycle,
+    pollInvoiceLifecycle,
   };
 }

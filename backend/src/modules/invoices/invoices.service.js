@@ -233,6 +233,66 @@ async function pollInvoiceStatusPDP(invoiceId, submissionId) {
   return finalStatus;
 }
 
+// Récupérer le cycle de vie métier d'une facture auprès du PDP
+async function requestInvoiceLifecycle(invoiceId) {
+  const response = await axios.post(`${PDP_URL}/${invoiceId}/request-lifecycle`);
+  const { submissionId, status: initialStatus } = response.data;
+
+  // Stocker submissionId et statut initial dans la DB
+  await InvoicesModel.updateBusinessStatus(invoiceId, { businessStatus: initialStatus, submissionId });
+
+  console.log(`📤 Lifecycle requested for invoice ${invoiceId}: submissionId = ${submissionId}, status = ${initialStatus}`);
+  return { invoiceId, submissionId, initialStatus };
+}
+
+// Rafraîchir le cycle de vie métier depuis le PDP
+async function refreshInvoiceLifecycle(invoiceId, submissionId) {
+  const response = await axios.get(`${PDP_URL}/${submissionId}/lifecycle`);
+  const { businessStatus } = response.data;
+
+  console.log(`📡 Lifecycle refresh for invoice ${invoiceId}: status = ${businessStatus}`);
+
+  // Mettre à jour la DB
+  await InvoicesModel.updateBusinessStatus(invoiceId, { businessStatus, submissionId });
+
+  return businessStatus;
+}
+
+async function updateInvoiceLifecycle(invoiceId, lifecycle) {
+  console.log(`[SERVICE] updateInvoiceLifecycle: invoiceId=${invoiceId}`);
+  console.log("[SERVICE] Lifecycle reçu :", JSON.stringify(lifecycle, null, 2));
+
+  // Récupérer la facture depuis le modèle
+  const invoice = await InvoicesModel.getInvoiceById(invoiceId);
+  if (!invoice) {
+    console.log("[SERVICE] Facture introuvable !");
+    throw new Error("Facture introuvable");
+  }
+  console.log("[SERVICE] Facture actuelle :", JSON.stringify(invoice, null, 2));
+
+  // Récupérer le dernier statut métier du tableau lifecycle
+  const lastStatus = Array.isArray(lifecycle) && lifecycle.length > 0
+    ? lifecycle[lifecycle.length - 1]
+    : null;
+  console.log("[SERVICE] Dernier statut extrait :", lastStatus);
+
+  // Préparer les données à mettre à jour
+  const updatedData = {
+    lifecycle,
+    status_code: lastStatus?.code || invoice.status_code,
+    business_status_label: lastStatus?.label || invoice.business_status_label
+  };
+  console.log("[SERVICE] Données à mettre à jour :", updatedData);
+
+  // Appeler la méthode update de ton modèle
+  const result = await InvoicesModel.updateBusinessStatus(invoiceId, { businessStatus: lastStatus.code, statusCode: lastStatus.code, statusLabel: lastStatus.label});
+
+  console.log("[SERVICE] Résultat update :", result);
+
+  // Retourner l'objet mis à jour (optionnel)
+  return { ...invoice, ...updatedData };
+}
+
 module.exports = {
   listInvoices,
   getInvoice,
@@ -243,5 +303,8 @@ module.exports = {
   getInvoicesBySeller,
   sendInvoice,
   getInvoiceById,
-  pollInvoiceStatusPDP
+  pollInvoiceStatusPDP,
+  requestInvoiceLifecycle,
+  refreshInvoiceLifecycle,
+  updateInvoiceLifecycle
 };
