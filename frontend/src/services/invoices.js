@@ -104,13 +104,13 @@ export function useInvoiceService() {
   const pollInvoiceLifecycle = useCallback(
     (invoiceId, interval = 2000, timeout = 20000) =>
       new Promise((resolve, reject) => {
+        console.log("⏱️ Start polling lifecycle for invoice", invoiceId); // <-- log ici
         const startTime = Date.now();
 
         const check = async () => {
           try {
             const data = await getInvoiceLifecycle(invoiceId);
             const lifecycle = Array.isArray(data.lifecycle) ? data.lifecycle : [];
-
             if (lifecycle.length === 0) {
               reject(new Error("Aucun statut métier trouvé"));
               return;
@@ -122,7 +122,6 @@ export function useInvoiceService() {
               status_label: lastStatusRaw.label
             };
 
-            // Codes finaux métier
             if ([201, 299].includes(lastStatus.status_code)) {
               resolve(lastStatus);
             } else if (Date.now() - startTime > timeout) {

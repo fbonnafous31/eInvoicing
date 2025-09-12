@@ -259,35 +259,26 @@ async function refreshInvoiceLifecycle(invoiceId, submissionId) {
 }
 
 async function updateInvoiceLifecycle(invoiceId, lifecycle) {
-  console.log(`[SERVICE] updateInvoiceLifecycle: invoiceId=${invoiceId}`);
-  console.log("[SERVICE] Lifecycle reçu :", JSON.stringify(lifecycle, null, 2));
-
   // Récupérer la facture depuis le modèle
   const invoice = await InvoicesModel.getInvoiceById(invoiceId);
   if (!invoice) {
-    console.log("[SERVICE] Facture introuvable !");
     throw new Error("Facture introuvable");
   }
-  console.log("[SERVICE] Facture actuelle :", JSON.stringify(invoice, null, 2));
 
   // Récupérer le dernier statut métier du tableau lifecycle
   const lastStatus = Array.isArray(lifecycle) && lifecycle.length > 0
     ? lifecycle[lifecycle.length - 1]
     : null;
-  console.log("[SERVICE] Dernier statut extrait :", lastStatus);
 
-  // Préparer les données à mettre à jour
+    // Préparer les données à mettre à jour
   const updatedData = {
     lifecycle,
     status_code: lastStatus?.code || invoice.status_code,
     business_status_label: lastStatus?.label || invoice.business_status_label
   };
-  console.log("[SERVICE] Données à mettre à jour :", updatedData);
 
   // Appeler la méthode update de ton modèle
   const result = await InvoicesModel.updateBusinessStatus(invoiceId, { businessStatus: lastStatus.code, statusCode: lastStatus.code, statusLabel: lastStatus.label});
-
-  console.log("[SERVICE] Résultat update :", result);
 
   // Retourner l'objet mis à jour (optionnel)
   return { ...invoice, ...updatedData };

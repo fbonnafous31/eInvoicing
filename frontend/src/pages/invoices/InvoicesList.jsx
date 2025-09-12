@@ -11,61 +11,95 @@ import { useInvoiceService } from '@/services/invoices';
 export default function InvoicesList() {
   const [invoices, setInvoices] = useState([]);
   const [filterText, setFilterText] = useState('');
+  const [version, setVersion] = useState(0); // compteur pour forcer re-render
 
   const invoiceService = useInvoiceService();
 
-  // Callback pour mettre à jour le statut technique dans le tableau
+  // -------------------------------
+  // Callbacks pour mise à jour du tableau
+  // -------------------------------
   const handleTechnicalStatusChange = (invoiceId, newStatus) => {
     setInvoices(prev =>
-      prev.map(inv => inv.id === invoiceId ? { ...inv, technical_status: newStatus } : inv)
+      prev.map(inv => (inv.id === invoiceId ? { ...inv, technical_status: newStatus } : inv))
     );
+    console.log(`[InvoiceList] Technical status mise à jour pour invoice ${invoiceId}: ${newStatus}`);
   };
 
-  // Hook pour les colonnes, on passe le callback
-  const columns = useInvoiceColumns(invoiceService, handleTechnicalStatusChange);
+  const handleBusinessStatusChange = (invoiceId, statusCode, statusLabel) => {
+    console.log(`[InvoiceList] Business status reçu pour invoice ${invoiceId}: ${statusCode} (${statusLabel})`);
+    setInvoices(prev =>
+      prev.map(inv =>
+        inv.id === invoiceId
+          ? { ...inv, business_status: statusCode, business_status_label: statusLabel }
+          : inv
+      )
+    );
+    setVersion(v => v + 1); // forcer le re-render du DataTable
+  };
 
-  // Récupération des factures
+  // -------------------------------
+  // Colonnes avec callbacks
+  // -------------------------------
+  const columns = useInvoiceColumns(
+    invoiceService,
+    handleTechnicalStatusChange,
+    handleBusinessStatusChange
+  );
+
+  // -------------------------------
+  // Chargement initial des factures
+  // -------------------------------
   const { fetchInvoicesBySeller } = invoiceService;
   useEffect(() => {
-    let isMounted = true; // pour éviter les updates après un unmount
+    let isMounted = true;
 
     const loadInvoices = async () => {
       try {
-        const data = await fetchInvoicesBySeller(); // token géré automatiquement par le service
-        if (isMounted) setInvoices(data);
+        console.log('[InvoiceList] Chargement des factures...');
+        const data = await fetchInvoicesBySeller();
+        if (isMounted) {
+          setInvoices(data);
+          console.log('[InvoiceList] Factures chargées:', data.map(i => `${i.id}:${i.business_status}`));
+        }
       } catch (err) {
-        console.error("Erreur chargement factures :", err);
+        console.error("[InvoiceList] Erreur chargement factures :", err);
       }
     };
 
     loadInvoices();
 
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [fetchInvoicesBySeller]);
 
-  // Filtre texte identique aux autres listes
+  // -------------------------------
+  // Filtrage texte
+  // -------------------------------
   const getStatusLabel = status => FR.status[status] || status;
   const filteredItems = invoices.filter(item =>
     Object.entries(item).some(([key, val]) => {
-      if (key === 'status') val = getStatusLabel(val);  // traduit le status
+      if (key === 'status') val = getStatusLabel(val);
       return val && val.toString().toLowerCase().includes(filterText.toLowerCase());
     })
   );
-  
+
+  // -------------------------------
+  // Breadcrumb
+  // -------------------------------
   const breadcrumbItems = [
     { label: 'Accueil', path: '/' },
     { label: 'Factures', path: '/invoices' },
   ];
 
+  // -------------------------------
+  // Rendu
+  // -------------------------------
   return (
     <div className="container-fluid p-5 mt-4">
-      {/* H1 invisible pour SEO/accessibilité */}
       <h1 className="visually-hidden">Liste des factures</h1>
-
-      {/* Breadcrumb */}
       <Breadcrumb items={breadcrumbItems} />
 
-      {/* Filtre */}
       <input
         type="text"
         placeholder="Rechercher une facture"
@@ -75,8 +109,8 @@ export default function InvoicesList() {
         style={{ maxWidth: '300px' }}
       />
 
-      {/* DataTable */}
       <DataTable
+        key={version} // forcer re-render à chaque changement de statut
         style={{ width: '100vw' }}
         columns={columns}
         data={filteredItems}

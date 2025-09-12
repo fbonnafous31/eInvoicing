@@ -2,8 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import EllipsisCell from '../../components/common/EllipsisCell';
 import { formatCurrency, formatDate } from '../../utils/formatters/formatters';
-import { FR } from '../../constants/translations';
 import TechnicalStatusCell from './TechnicalStatusCell';
+import BusinessStatusCell from './BusinessStatusCell';
 
 export default function useInvoiceColumns(invoiceService, onTechnicalStatusChange, onBusinessStatusChange) {
   const navigate = useNavigate();
@@ -11,22 +11,28 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
   // -------------------- Polling du statut technique --------------------
   const pollStatus = async (invoiceId, interval = 2000, timeout = 60000) => {
     const start = Date.now();
+    console.log(`⏱️ Démarrage polling invoice ${invoiceId}`);
 
     return new Promise((resolve, reject) => {
       const check = async () => {
         try {
           const statusObj = await invoiceService.getInvoiceStatus(invoiceId);
-          console.log(`📡 Polling invoice ${invoiceId} status =`, statusObj);
+          console.log(`📡 [Polling] invoice ${invoiceId} status =`, statusObj);
 
           const technicalStatus = statusObj?.technicalStatus;
+
           if (["validated", "rejected"].includes(technicalStatus)) {
+            console.log(`✅ [Polling] invoice ${invoiceId} statut final atteint :`, technicalStatus);
             resolve(statusObj);
           } else if (Date.now() - start > timeout) {
-            reject(new Error("⏱️ Timeout récupération statut PDP"));
+            console.warn(`⏰ [Polling] invoice ${invoiceId} timeout`);
+            reject(new Error("Timeout récupération statut PDP"));
           } else {
+            console.log(`🔁 [Polling] invoice ${invoiceId} pas encore final, prochaine vérif dans ${interval}ms`);
             setTimeout(check, interval);
           }
         } catch (err) {
+          console.error(`❌ [Polling] invoice ${invoiceId} erreur :`, err);
           reject(err);
         }
       };
@@ -89,8 +95,10 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
       name: 'Envoyer / Statut',
       cell: row => (
         <div className="flex gap-1 justify-end">
+          {/* Bouton envoi facture */}
           <button
             className="btn btn-sm"
+            title="Envoyer la facture"
             onClick={async () => {
               if (!row?.id) return;
               try {
@@ -118,29 +126,36 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
             📧
           </button>
 
+          {/* Bouton rafraîchir statut métier */}
           <button
             className="btn btn-sm"
-            title="Rafraîchir le cycle de vie métier"
+            title={
+              !["received", "validated"].includes(row.technical_status)
+                ? "Impossible de rafraîchir : statut PDP non reçu ou validé"
+                : "Rafraîchir le cycle de vie métier"
+            }
+            style={{
+              pointerEvents: !["received", "validated"].includes(row.technical_status) ? "none" : "auto",
+              opacity: !["received", "validated"].includes(row.technical_status) ? 0.6 : 1,
+            }}
             onClick={async () => {
               if (!row?.id) return;
 
               try {
                 console.log("🔄 Demande rafraîchissement cycle métier invoice id:", row.id);
+                await invoiceService.refreshInvoiceLifecycle(row.id);
 
-                const refresh = await invoiceService.refreshInvoiceLifecycle(row.id);
-                console.log("📤 Lifecycle refresh response:", refresh);
+                // ⚡ Récupération du dernier statut
+                const lifecycle = await invoiceService.getInvoiceLifecycle(row.id);
+                const lastStatusRaw = lifecycle?.lifecycle?.[lifecycle.lifecycle.length - 1];
+                if (!lastStatusRaw) return;
 
-                alert("Cycle métier demandé au PDP");
+                console.log(`📤 Nouveau statut métier pour invoice ${row.id}: ${lastStatusRaw.label}`);
+                onBusinessStatusChange?.(row.id, lastStatusRaw.code, lastStatusRaw.label);
 
-                const finalStatus = await invoiceService.pollInvoiceLifecycle(row.id);
-                console.log("✅ Statut final métier :", finalStatus);
-
-                onBusinessStatusChange?.(row.id, finalStatus.status_code);
-
-                alert(`Statut final métier : ${finalStatus.status_label}`);
               } catch (err) {
-                console.error("❌ Erreur rafraîchissement ou polling cycle métier :", err);
-                alert("Erreur lors du rafraîchissement ou du polling du cycle métier");
+                console.error("❌ Erreur rafraîchissement cycle métier :", err);
+                alert("Erreur lors du rafraîchissement du cycle métier");
               }
             }}
           >
@@ -207,10 +222,17 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
       format: row => formatCurrency(row.total)
     },
     {
-      name: 'Statut',
-      selector: row => row.status || '',
+      name: 'Statut facture',
+      selector: row => row.business_status || row.status,
       sortable: true,
-      cell: row => <div style={{ textAlign: 'center' }}>{FR.status[row.status] || row.status}</div>
+      width: '160px',
+      cell: row => (
+        <BusinessStatusCell
+          row={row}
+          invoiceService={invoiceService}
+          onBusinessStatusChange={onBusinessStatusChange}
+        />
+      )
     },
     {
       name: 'Statut PDP',
@@ -221,7 +243,7 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
         <TechnicalStatusCell
           row={row}
           invoiceService={invoiceService}
-          onTechnicalStatusChange={onTechnicalStatusChange}
+          onTechnicalStatusChange={onTechnicalStatusChange} // callback du parent
         />
       )
     },
