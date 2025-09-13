@@ -12,6 +12,8 @@ Aujourd’hui, j’ai travaillé sur **la mise en place des tests pour les écha
 * Gestion des fichiers uploadés via `express-fileupload` : le serveur reçoit les fichiers et renvoie un message de confirmation.  
 * Log systématique des fichiers reçus pour vérifier que les factures sont bien transmises.  
 * Possibilité d’ajouter facilement des statuts ou traitements simulés pour les cycles de vie des factures.
+ 
+![Serveur Mock PDP](../images/jour59/mockPDP.png)
 
 ---
 
@@ -24,6 +26,9 @@ Aujourd’hui, j’ai travaillé sur **la mise en place des tests pour les écha
 * Ajout d’un **intercepteur Axios** pour logger les détails de chaque requête sortante : URL, méthode, headers et info sur le fichier envoyé.  
 * Gestion des erreurs HTTP et vérification du bon retour du Mock PDP.
 
+![Envoi d'une facture](../images/jour59/sendInvoice.png)
+![Réception de l'accusé de réception](../images/jour59/getTechnicalStatus.png)
+
 ---
 
 ### 3. Affichage et suivi côté frontend
@@ -31,6 +36,7 @@ Aujourd’hui, j’ai travaillé sur **la mise en place des tests pour les écha
 * Log côté backend pour confirmer la bonne réception des fichiers et leur taille.  
 * Préparation à l’affichage dans le frontend : possibilité d’indiquer à l’utilisateur que la facture a bien été transmise au PDP simulé.  
 * L’objectif futur : intégrer ces retours dans l’interface pour visualiser le statut (`draft`, `sent`, `received`) de chaque facture.
+![Liste de factures](../images/jour59/invoiceList.png)
 
 ---
 

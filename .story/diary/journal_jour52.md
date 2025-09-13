@@ -22,6 +22,7 @@ Aujourd'hui, j'ai travaillé sur l'intégration de l'**authentification des util
 * Ajout du package `@auth0/auth0-react` dans le frontend.
 * Création du **AuthProvider** pour encapsuler l’application et fournir les hooks Auth0 à tous les composants.
 * Mise en place du **.env** pour sécuriser le `VITE_AUTH0_DOMAIN` et `VITE_AUTH0_CLIENT_ID`.
+![Auth0](../images/jour52/Auth0.png)
 
 ### 4. Protection globale de l’application
 
@@ -35,11 +36,14 @@ Aujourd'hui, j'ai travaillé sur l'intégration de l'**authentification des util
 * Ajout d’un **LoginButton** intégré au SDK Auth0.
 * Application d’un **fond sombre avec carte blanche** pour un contraste élégant et une expérience utilisateur agréable.
 
+![Connexion](../images/jour52/Connect.png)
+
 ### 6. Mise à jour de la NavBar
 
 * Ajout des boutons **Login / Logout** dans la NavBar existante, respectant le style et la hiérarchie des menus.
 * Affichage du **nom ou email de l’utilisateur connecté** pour un feedback immédiat.
 * Gestion du **Logout avec redirection vers la page Login**, assurant un flux propre et intuitif.
+![Barre de navigation](../images/jour52/NavBar.png)
 
 ### 7. Test complet du flux Auth0
 

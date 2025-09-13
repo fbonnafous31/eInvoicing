@@ -16,6 +16,7 @@ Aujourd’hui, j’ai travaillé sur **la mise à jour des statuts techniques et
   - rouge → `REJECTED`  
   - gris → `PENDING`  
 * Correction des warnings ESLint : ajout de `row.submissionId` dans les dépendances du hook pour garantir un comportement stable.
+![Demande de statut facture](../images/jour60/getLifeCycle.png)
 
 ---
 
@@ -48,6 +49,7 @@ Aujourd’hui, j’ai travaillé sur **la mise à jour des statuts techniques et
 * Vérification que le polling fonctionne : le badge passe automatiquement de `PENDING → RECEIVED → VALIDATED`.  
 * Vérification que l’UI n’a pas besoin de `F5` pour le statut technique (mais reste à finaliser le refresh temps réel côté statuts métiers).  
 * Correction des erreurs de hook et dépendances pour garantir un rendu stable et éviter les erreurs React.
+![Demande de statut facture](../images/jour60/invoiceList.png)
 
 ---
 
