@@ -23,7 +23,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/sellers', sellersRoutes);
 app.use('/api/clients', clientsRoutes);
 app.use('/api/invoices', invoicesRoutes);
+
+// 📂 Rendre accessible tout le répertoire uploads
 app.use('/uploads', express.static(path.join(__dirname, 'src/uploads')));
+
+// 📂 Rendre accessible directement le sous-dossier pdf-a3
+app.use(
+  '/pdf-a3',
+  express.static(path.join(__dirname, 'src/uploads/pdf-a3'))
+);
 
 // Middleware global d'erreurs
 app.use(errorHandler);

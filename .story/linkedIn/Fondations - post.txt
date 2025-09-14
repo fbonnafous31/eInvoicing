@@ -1,15 +1,14 @@
-✨ Ce dernier mois, je me suis lancé un vrai défi : construire une application complète d’eInvoicing, alors que je n’avais jamais touché à React ou Node.
+🚀 Ces dernières semaines, je me suis lancé un petit défi perso… et j’ai vraiment pris plaisir à créer.
 
-📅 Quelques heures par jour, beaucoup de curiosité et de persévérance m’ont permis de :
+💡 J’ai développé une application complète d’eInvoicing avec React, Node et PostgreSQL.
 
-découvrir de nouvelles technologies,
+⏳ Quelques heures par jour m’ont permis de :
+🔹 explorer de nouvelles technos,
+🔹 construire l’architecture backend et frontend,
+🔹 intégrer des normes comme Factur-X et PDF/A-3.
 
-créer une app frontend/backend avec base de données,
+⚙️ C’était exigeant par moments, mais aussi très stimulant. Retrouver cette liberté de construire à mon rythme, de tester, d’apprendre et de voir le projet avancer… c’est exactement ce que j’aime dans mon métier.
 
-intégrer des normes exigeantes (Factur-X, PDF/A-3, conformité e-invoicing).
+🤖 L’IA m’a aidé en copilote : pratique pour tester et accélérer, mais toutes les décisions importantes et la cohérence générale sont restées entre mes mains.
 
-💡 Pour m’aider, j’ai utilisé l’IA comme copilote. Mais loin de faire le travail à ma place, elle m’a surtout permis d’aller plus vite et d’explorer des solutions. Tout le reste — les choix techniques, la structure du code, la qualité — c’était mon expérience d’ingénieur logiciel qui guidait le projet.
-
-🚀 Le résultat est un projet fonctionnel et complet, qui m’a surtout fait redécouvrir le plaisir de construire pour moi, pas pour quelqu’un d’autre.
-
-👉 Je partage un petit aperçu en carousel ci-dessous. Je n’ai jamais publié ici, mais je me suis dit que ça pouvait peut-être donner envie à d’autres d’oser, d’expérimenter et d’apprendre.
+#eInvoicing #FacturX #WebDevelopment #ProductDevelopment

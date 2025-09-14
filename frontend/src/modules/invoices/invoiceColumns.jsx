@@ -4,6 +4,7 @@ import EllipsisCell from '../../components/common/EllipsisCell';
 import { formatCurrency, formatDate } from '../../utils/formatters/formatters';
 import TechnicalStatusCell from './TechnicalStatusCell';
 import BusinessStatusCell from './BusinessStatusCell';
+import { FaFilePdf } from "react-icons/fa";
 
 export default function useInvoiceColumns(invoiceService, onTechnicalStatusChange, onBusinessStatusChange) {
   const navigate = useNavigate();
@@ -42,55 +43,74 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
 
   // -------------------- Colonnes du tableau --------------------
   return [
-    {
-      name: 'Voir / Éditer / PDF',
-      cell: row => (
-        <div className="flex gap-1">
-          <button
-            className="btn btn-sm"
-            onClick={() => row?.id && navigate(`/invoices/${row.id}/view`)}
-            title="Consulter la facture"
-          >
-            👁️
-          </button>
-          <button
-            className="btn btn-sm"
-            onClick={() => row?.id && navigate(`/invoices/${row.id}`)}
-            title="Modifier la facture"
-          >
-            ✏️
-          </button>
-          <button
-            className="btn btn-sm"
-            title="Générer et télécharger la facture (PDF)"
-            onClick={async () => {
-              if (!row?.id) return;
-              try {
-                const data = await invoiceService.generateInvoicePdf(row.id);
-                if (!data?.path) return console.error("❌ Pas de chemin PDF renvoyé");
+{
+  name: 'Voir / Modifier / PDF ',
+  cell: row => (
+    <div className="d-flex align-items-center gap-2">
+      {/* Voir */}
+      <button
+        className="btn btn-sm btn-link p-0 m-0 align-middle text-decoration-none"
+        onClick={() => row?.id && navigate(`/invoices/${row.id}/view`)}
+        title="Consulter la facture"
+      >
+        👁️
+      </button>
 
-                const pdfRes = await fetch(`http://localhost:3000${data.path}`);
-                const blob = await pdfRes.blob();
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = `facture_${row.invoice_number}.pdf`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(link.href);
-                console.log("✅ PDF téléchargé");
-              } catch (err) {
-                console.error("❌ Erreur génération PDF :", err);
-              }
-            }}
-          >
-            📄
-          </button>
-        </div>
-      ),
-      ignoreRowClick: true,
-      width: '150px',
-    },
+      {/* Modifier */}
+      <button
+        className="btn btn-sm btn-link p-0 m-0 align-middle text-decoration-none"
+        onClick={() => row?.id && navigate(`/invoices/${row.id}`)}
+        title="Modifier la facture"
+      >
+        ✏️
+      </button>
+
+      {/* Générer PDF */}
+      <button
+        className="btn btn-sm btn-link p-0 m-0 align-middle text-decoration-none"
+        title="Générer et télécharger la facture (PDF)"
+        onClick={async () => {
+          if (!row?.id) return;
+          try {
+            const data = await invoiceService.generateInvoicePdf(row.id);
+            if (!data?.path) return console.error("❌ Pas de chemin PDF renvoyé");
+
+            const pdfRes = await fetch(`http://localhost:3000${data.path}`);
+            const blob = await pdfRes.blob();
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `facture_${row.invoice_number}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            console.log("✅ PDF téléchargé");
+          } catch (err) {
+            console.error("❌ Erreur génération PDF :", err);
+          }
+        }}
+      >
+        📄
+      </button>
+
+      {/* PDF/A-3 */}
+      <button
+        className="btn btn-sm btn-link p-0 m-0 align-middle"
+        title="Voir le PDF/A-3 de la facture"
+        onClick={() => {
+          if (!row?.id) return;
+          const pdfUrl = `http://localhost:3000/pdf-a3/${row.id}_pdf-a3.pdf`;
+          window.open(pdfUrl, "_blank");
+        }}
+      >
+        <FaFilePdf size={18} color="red" style={{ position: "relative", top: "-2px" }} />
+      </button>
+    </div>
+  ),
+  ignoreRowClick: true,
+  width: '180px',
+}
+,
     {
       name: 'Envoyer / Statut',
       cell: row => (
