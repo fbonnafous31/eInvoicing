@@ -29,6 +29,7 @@ app.post('/invoices', upload.single('invoice'), (req, res) => {
 
   console.log(`📥 Facture reçue : ${invoiceId}, submissionId: ${submissionId}`);
 
+  // Traitement technique simulé
   setTimeout(() => {
     const finalStatus = Math.random() < 0.8 ? 'validated' : 'rejected';
     submissions[submissionId].technicalStatus = finalStatus;
@@ -51,23 +52,20 @@ app.get('/invoices/:submissionId/status', (req, res) => {
 });
 
 // -------------------------------
-// Demande d’un nouveau statut métier
+// Rafraîchissement du cycle métier 
 // -------------------------------
 app.post('/invoices/:submissionId/lifecycle/request', (req, res) => {
   const { submissionId } = req.params;
+  const sub = submissions[submissionId];
+  if (!sub) return res.status(404).json({ error: 'Submission non trouvée' });
 
-  if (!submissions[submissionId]) {
-    submissions[submissionId] = {
-      invoiceId: submissionId.split('_')[1],
-      technicalStatus: 'validated',
-      lifecycle: []
-    };
+  // Si la facture est rejetée techniquement, ne pas avancer le cycle métier
+  if (sub.technicalStatus === 'rejected') {
+    console.log(`⚠️ Facture ${submissionId} rejetée, pas de statut métier ajouté`);
+    return res.json({ invoiceId: sub.invoiceId, lifecycle: sub.lifecycle });
   }
 
-  const sub = submissions[submissionId];
-
   const possibleStatuses = [
-    { code: 201, label: 'Émise par la plateforme' },
     { code: 202, label: 'Reçue par la plateforme' },
     { code: 203, label: 'Mise à disposition' },
     { code: 204, label: 'Prise en charge' },
@@ -77,10 +75,12 @@ app.post('/invoices/:submissionId/lifecycle/request', (req, res) => {
     { code: 208, label: 'Suspendue' },
     { code: 210, label: 'Refusée' },
     { code: 211, label: 'Paiement transmis' },
-    { code: 212, label: 'Encaissement constaté' } // nouveau
+    { code: 212, label: 'Encaissement constaté' }
   ];
 
-  const nextStatus = possibleStatuses[sub.lifecycle.length];
+  const lastCode = sub.lifecycle.length ? sub.lifecycle[sub.lifecycle.length - 1].code : 201;
+
+  const nextStatus = possibleStatuses.find(s => s.code > lastCode);
   if (nextStatus) {
     sub.lifecycle.push({ ...nextStatus, createdAt: new Date().toISOString() });
     console.log(`📊 Cycle métier avancé pour ${submissionId} : ${nextStatus.label}`);
@@ -90,17 +90,19 @@ app.post('/invoices/:submissionId/lifecycle/request', (req, res) => {
 });
 
 // -------------------------------
-// Endpoint spécifique pour encaissement
+// Encaissement spécifique
 // -------------------------------
 app.post('/invoices/:submissionId/paid', (req, res) => {
   const { submissionId } = req.params;
   const sub = submissions[submissionId];
   if (!sub) return res.status(404).json({ error: 'Submission non trouvée' });
 
-  sub.lifecycle.push({ code: 212, label: 'Encaissement constaté', createdAt: new Date().toISOString() });
-  console.log(`💰 Facture ${submissionId} : encaissement constaté`);
+  const lastCode = sub.lifecycle.length ? sub.lifecycle[sub.lifecycle.length - 1].code : 0;
+  if (lastCode < 212) {
+    sub.lifecycle.push({ code: 212, label: 'Encaissement constaté', createdAt: new Date().toISOString() });
+    console.log(`💰 Facture ${submissionId} : encaissement constaté`);
+  }
 
-  // Mettre à jour le statut technique si nécessaire
   sub.technicalStatus = 'validated';
 
   res.json({ invoiceId: sub.invoiceId, lifecycle: sub.lifecycle });
@@ -111,16 +113,10 @@ app.post('/invoices/:submissionId/paid', (req, res) => {
 // -------------------------------
 app.get('/invoices/:submissionId/lifecycle', (req, res) => {
   const { submissionId } = req.params;
-
-  if (!submissions[submissionId]) {
-    submissions[submissionId] = {
-      invoiceId: submissionId.split('_')[1],
-      technicalStatus: 'validated',
-      lifecycle: []
-    };
-  }
-
   const sub = submissions[submissionId];
+
+  if (!sub) return res.status(404).json({ error: 'Submission non trouvée' });
+
   res.json({ invoiceId: sub.invoiceId, lifecycle: sub.lifecycle });
 });
 
