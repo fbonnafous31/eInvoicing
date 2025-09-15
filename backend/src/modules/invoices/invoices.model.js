@@ -438,13 +438,47 @@ async function updateInvoice(
 // ----------------- Get invoices by seller -----------------
 async function getInvoicesBySeller(sellerId) {
   const result = await pool.query(
-    `SELECT *
-     FROM invoicing.invoices
-     WHERE seller_id = $1
-     ORDER BY created_at DESC`,
+    `SELECT 
+        i.*,
+        c.id AS client_id,
+        c.is_company AS client_is_company,
+        c.firstname AS client_firstname,
+        c.lastname AS client_lastname,
+        c.legal_name AS client_legal_name,
+        c.siret AS client_siret,
+        c.vat_number AS client_vat_number,
+        c.address AS client_address,
+        c.city AS client_city,
+        c.postal_code AS client_postal_code,
+        c.country_code AS client_country_code,
+        c.email AS client_email,
+        c.phone AS client_phone
+     FROM invoicing.invoices i
+     LEFT JOIN invoicing.clients c ON i.client_id = c.id
+     WHERE i.seller_id = $1
+     ORDER BY i.created_at DESC`,
     [sellerId]
   );
-  return result.rows;
+
+  // On transforme chaque row pour imbriquer les infos client dans un objet `client`
+  return result.rows.map(row => ({
+    ...row,
+    client: {
+      id: row.client_id,
+      is_company: row.client_is_company,
+      firstname: row.client_firstname,
+      lastname: row.client_lastname,
+      legal_name: row.client_legal_name,
+      siret: row.client_siret,
+      vat_number: row.client_vat_number,
+      address: row.client_address,
+      city: row.client_city,
+      postal_code: row.client_postal_code,
+      country_code: row.client_country_code,
+      email: row.client_email,
+      phone: row.client_phone,
+    }
+  }));
 }
 
 // invoices.model.js

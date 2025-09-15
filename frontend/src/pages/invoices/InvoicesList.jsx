@@ -55,11 +55,9 @@ export default function InvoicesList() {
 
     const loadInvoices = async () => {
       try {
-        console.log('[InvoiceList] Chargement des factures...');
         const data = await fetchInvoicesBySeller();
         if (isMounted) {
           setInvoices(data);
-          console.log('[InvoiceList] Factures chargées:', data.map(i => `${i.id}:${i.business_status}`));
         }
       } catch (err) {
         console.error("[InvoiceList] Erreur chargement factures :", err);

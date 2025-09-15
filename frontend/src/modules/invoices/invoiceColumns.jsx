@@ -5,7 +5,6 @@ import { formatCurrency, formatDate } from '../../utils/formatters/formatters';
 import TechnicalStatusCell from './TechnicalStatusCell';
 import BusinessStatusCell from './BusinessStatusCell';
 import { FaFilePdf } from "react-icons/fa";
-import { BUSINESS_STATUSES } from '../../constants/businessStatuses';
 
 export default function useInvoiceColumns(invoiceService, onTechnicalStatusChange, onBusinessStatusChange) {
   const navigate = useNavigate();
@@ -247,10 +246,10 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
     },
     {
       name: 'Client',
-      selector: row => row.client_legal_name || '',
+      selector: row => row.client?.legal_name || '',
       sortable: true,
       width: '140px',
-      cell: row => <EllipsisCell value={row.client_legal_name || ''} style={{ minWidth: '150px' }} />
+      cell: row => <EllipsisCell value={row.client?.legal_name || ''} style={{ minWidth: '150px' }} />
     },
     {
       name: 'HT',
