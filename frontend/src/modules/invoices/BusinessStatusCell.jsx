@@ -1,24 +1,11 @@
 // BusinessStatusCell.jsx
 import React, { useState } from "react";
-
-const BUSINESS_STATUSES = {
-  201: { label: 'Émise par la plateforme', color: 'green' },
-  202: { label: 'Reçue par la plateforme', color: 'blue' },
-  203: { label: 'Mise à disposition', color: 'teal' },
-  204: { label: 'Prise en charge', color: 'purple' },
-  205: { label: 'Approuvée', color: 'green' },
-  206: { label: 'Approuvée partiellement', color: 'black' },
-  207: { label: 'En litige', color: 'orange' },
-  208: { label: 'Suspendue', color: 'gray' },
-  210: { label: 'Refusée', color: 'red' },
-  211: { label: 'Paiement transmis', color: 'blue' },
-  100: { label: 'En attente', color: 'gray' },
-};
+import { BUSINESS_STATUSES } from '../../constants/businessStatuses';
 
 export default function BusinessStatusCell({ row, invoiceService, onBusinessStatusChange }) {
   const [status, setStatus] = useState({
     code: row.business_status || 100,
-    label: BUSINESS_STATUSES[row.business_status || 100]?.label || 'Inconnu',
+    label: BUSINESS_STATUSES[row.business_status || 100]?.label || 'Non renseigné',
   });
 
   const fetchLatestStatus = async () => {

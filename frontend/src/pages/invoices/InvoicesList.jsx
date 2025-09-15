@@ -7,6 +7,7 @@ import { datatableStyles } from '../../modules/common/datatableStyles';
 import useInvoiceColumns from '../../modules/invoices/invoiceColumns';
 import { FR } from '../../constants/translations';
 import { useInvoiceService } from '@/services/invoices';
+import { BUSINESS_STATUSES } from '../../constants/businessStatuses';
 
 export default function InvoicesList() {
   const [invoices, setInvoices] = useState([]);
@@ -76,14 +77,25 @@ export default function InvoicesList() {
   // -------------------------------
   // Filtrage texte
   // -------------------------------
-  const getStatusLabel = status => FR.status[status] || status;
-  const filteredItems = invoices.filter(item =>
-    Object.entries(item).some(([key, val]) => {
-      if (key === 'status') val = getStatusLabel(val);
-      return val && val.toString().toLowerCase().includes(filterText.toLowerCase());
-    })
-  );
-
+  // const getStatusLabel = status => FR.status[status] || status;
+  // const filteredItems = invoices.filter(item =>
+  //   Object.entries(item).some(([key, val]) => {
+  //     if (key === 'status') val = getStatusLabel(val);
+  //     return val && val.toString().toLowerCase().includes(filterText.toLowerCase());
+  //   })
+  // );
+const filteredItems = invoices.filter(item =>
+  Object.entries(item).some(([key, val]) => {
+    // On mappe uniquement business_status et status
+    if (key === 'business_status' || key === 'status') {
+      const code = parseInt(val, 10);
+      if (!isNaN(code) && BUSINESS_STATUSES[code]) {
+        val = BUSINESS_STATUSES[code].label; 
+      }
+    }
+    return val && val.toString().toLowerCase().includes(filterText.toLowerCase());
+  })
+);
   // -------------------------------
   // Breadcrumb
   // -------------------------------
