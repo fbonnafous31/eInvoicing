@@ -74,28 +74,25 @@ export default function InvoicesList() {
     };
   }, [fetchInvoicesBySeller]);
 
-  // -------------------------------
-  // Filtrage texte
-  // -------------------------------
-  // const getStatusLabel = status => FR.status[status] || status;
-  // const filteredItems = invoices.filter(item =>
-  //   Object.entries(item).some(([key, val]) => {
-  //     if (key === 'status') val = getStatusLabel(val);
-  //     return val && val.toString().toLowerCase().includes(filterText.toLowerCase());
-  //   })
-  // );
-const filteredItems = invoices.filter(item =>
-  Object.entries(item).some(([key, val]) => {
-    // On mappe uniquement business_status et status
-    if (key === 'business_status' || key === 'status') {
-      const code = parseInt(val, 10);
-      if (!isNaN(code) && BUSINESS_STATUSES[code]) {
-        val = BUSINESS_STATUSES[code].label; 
+  const filteredItems = invoices.filter(item =>
+    Object.entries(item).some(([key, val]) => {
+      // Business status
+      if (key === 'business_status' || key === 'status') {
+        const code = parseInt(val, 10);
+        if (!isNaN(code) && BUSINESS_STATUSES[code]) {
+          val = BUSINESS_STATUSES[code].label;
+        }
       }
-    }
-    return val && val.toString().toLowerCase().includes(filterText.toLowerCase());
-  })
-);
+
+      // Technical status
+      if (key === 'technical_status') {
+        val = FR.technicalStatus[val?.toLowerCase()] || val;
+      }
+
+      return val && val.toString().toLowerCase().includes(filterText.toLowerCase());
+    })
+  );
+
   // -------------------------------
   // Breadcrumb
   // -------------------------------
