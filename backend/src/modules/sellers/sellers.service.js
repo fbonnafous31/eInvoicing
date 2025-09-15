@@ -1,7 +1,6 @@
 const db = require('../../config/db');  
 
 const SellersModel = require('./sellers.model');
-console.log(SellersModel);
 
 async function listSellers() {
   return await SellersModel.getAllSellers();

@@ -206,17 +206,26 @@ async function pollInvoiceStatusPDP(invoiceId, submissionId) {
     try {
       // Requête au mock PDP
       const response = await axios.get(`${PDP_URL}/${submissionId}/status`);
-      const { technicalStatus } = response.data; // ⚠️ utiliser technicalStatus
+      const { technicalStatus } = response.data;
 
       console.log(`📡 Polling invoice ${invoiceId}: status = ${technicalStatus}`);
 
-      // Mettre à jour la DB
+      // Mettre à jour le statut technique
       await InvoicesModel.updateTechnicalStatus(invoiceId, { technicalStatus, submissionId });
 
       // Vérifier statut final
       if (technicalStatus === 'validated' || technicalStatus === 'rejected') {
         finalStatus = true;
         console.log(`✅ Invoice ${invoiceId} reached final status: ${technicalStatus}`);
+
+        // 🔹 Déterminer le code spec et le label métier
+        const businessData = technicalStatus === 'validated'
+          ? { statusCode: 202, statusLabel: 'Facture conforme' }
+          : { statusCode: 400, statusLabel: 'Rejetée par le PDP' };
+
+        // Mettre à jour l'historique et le statut courant (via statusCode)
+        await InvoicesModel.updateBusinessStatus(invoiceId, businessData);
+        console.log(`📌 Statut métier mis à jour pour invoice ${invoiceId}`);
       } else {
         await new Promise(res => setTimeout(res, POLLING_INTERVAL));
       }

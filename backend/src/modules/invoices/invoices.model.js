@@ -499,10 +499,9 @@ async function updateTechnicalStatus(invoiceId, { technicalStatus, submissionId 
 /**
  * Met à jour le statut métier courant et stocke dans l'historique
  * @param {number} invoiceId 
- * @param {Object} data - { businessStatus: string, statusCode: number, statusLabel: string }
+ * @param {Object} data - { businessStatus?, statusCode, statusLabel, submissionId? }
  */
 async function updateBusinessStatus(invoiceId, data) {
-  // 1️⃣ Mettre à jour le statut courant dans invoices
   const queryUpdateInvoice = `
     UPDATE invoicing.invoices
     SET business_status = $1,
@@ -510,10 +509,9 @@ async function updateBusinessStatus(invoiceId, data) {
     WHERE id = $2
     RETURNING *;
   `;
-  const valuesUpdateInvoice = [data.businessStatus, invoiceId];
+  const valuesUpdateInvoice = [data.statusCode, invoiceId];
   const { rows } = await pool.query(queryUpdateInvoice, valuesUpdateInvoice);
 
-  // 2️⃣ Ajouter une ligne dans invoice_status
   const queryInsertStatus = `
     INSERT INTO invoicing.invoice_status(invoice_id, status_code, status_label)
     VALUES ($1, $2, $3)

@@ -119,38 +119,62 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
 
         return (
           <div className="flex gap-1 justify-end">
-            {/* Bouton envoi facture */}
-            <button
-              className="btn btn-sm"
-              style={{
-                background: "transparent",
-                border: "none",
-                padding: "2px 6px",
-                cursor: isFinalStatus ? "not-allowed" : "pointer",
-                opacity: isFinalStatus ? 0.5 : 1,
-              }}
-              title={isFinalStatus ? "Action impossible : statut final" : "Envoyer la facture"}
-              disabled={isFinalStatus}
-              onClick={async () => {
-                if (!row?.id) return;
-                try {
-                  console.log("📤 Envoi facture id:", row.id);
-                  const res = await invoiceService.sendInvoice(row.id);
-                  if (!res.submissionId) {
-                    alert("Facture envoyée mais le statut technique ne peut pas être suivi pour l'instant.");
-                    return;
-                  }
-                  alert("Facture transmise.");
-                  const finalStatus = await pollStatus(row.id);
-                  onTechnicalStatusChange?.(row.id, finalStatus.technicalStatus);
-                } catch (err) {
-                  console.error("❌ Erreur envoi ou polling :", err);
-                  alert("Erreur lors de l'envoi ou du polling du statut");
-                }
-              }}
-            >
-              📧
-            </button>
+{/* Bouton envoi facture */}
+<button
+  className="btn btn-sm"
+  style={{
+    background: "transparent",
+    border: "none",
+    padding: "2px 6px",
+    cursor: isFinalStatus ? "not-allowed" : "pointer",
+    opacity: isFinalStatus ? 0.5 : 1,
+  }}
+  title={isFinalStatus ? "Action impossible : statut final" : "Envoyer la facture"}
+  disabled={isFinalStatus}
+  onClick={async () => {
+    if (!row?.id) return;
+
+    try {
+      console.log("📤 Envoi facture id:", row.id);
+
+      // 1️⃣ Envoi de la facture
+      const res = await invoiceService.sendInvoice(row.id);
+      if (!res.submissionId) {
+        alert("Facture envoyée mais le statut technique ne peut pas être suivi pour l'instant.");
+        console.log(`[InvoiceColumns] Pas de submissionId pour invoice ${row.id}`);
+        return;
+      }
+      console.log(`[InvoiceColumns] Facture ${row.id} envoyée, submissionId:`, res.submissionId);
+      alert("Facture transmise.");
+
+      // 2️⃣ Polling du statut technique
+      const finalStatus = await pollStatus(row.id);
+      console.log(`[InvoiceColumns] Technical status final pour invoice ${row.id}:`, finalStatus.technicalStatus);
+      onTechnicalStatusChange?.(row.id, finalStatus.technicalStatus);
+
+      // 3️⃣ Rafraîchissement du cycle métier (business_status)
+      console.log(`[InvoiceColumns] Rafraîchissement cycle métier pour invoice ${row.id}`);
+      const lifecycleResp = await invoiceService.refreshInvoiceLifecycle(row.id, res.submissionId);
+      if (lifecycleResp?.lastStatus) {
+        console.log(`[InvoiceColumns] Nouveau business_status pour invoice ${row.id}:`, lifecycleResp.lastStatus);
+        onBusinessStatusChange?.(
+          row.id,
+          lifecycleResp.lastStatus.code,
+          lifecycleResp.lastStatus.label
+        );
+      } else {
+        console.log(`[InvoiceColumns] Aucun nouveau business_status pour invoice ${row.id}`);
+      }
+
+    } catch (err) {
+      console.error("❌ Erreur envoi, polling ou rafraîchissement :", err);
+      alert("Erreur lors de l'envoi, du polling ou du rafraîchissement du cycle métier");
+    }
+  }}
+>
+  📧
+</button>
+
 
             {/* Bouton rafraîchissement cycle métier */}
             <button
