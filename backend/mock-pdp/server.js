@@ -12,7 +12,9 @@ const PORT = 4000;
 // Stockage en mémoire des submissions
 const submissions = {};
 
+// -------------------------------
 // Envoi d’une facture
+// -------------------------------
 app.post('/invoices', upload.single('invoice'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Fichier manquant' });
 
@@ -36,7 +38,9 @@ app.post('/invoices', upload.single('invoice'), (req, res) => {
   res.json({ status: 'received', submissionId });
 });
 
+// -------------------------------
 // Récupération du statut technique
+// -------------------------------
 app.get('/invoices/:submissionId/status', (req, res) => {
   const { submissionId } = req.params;
   const sub = submissions[submissionId];
@@ -46,11 +50,12 @@ app.get('/invoices/:submissionId/status', (req, res) => {
   res.json({ invoiceId: sub.invoiceId, technicalStatus: sub.technicalStatus });
 });
 
+// -------------------------------
 // Demande d’un nouveau statut métier
+// -------------------------------
 app.post('/invoices/:submissionId/lifecycle/request', (req, res) => {
   const { submissionId } = req.params;
 
-  // Création automatique si la submission n’existe pas
   if (!submissions[submissionId]) {
     submissions[submissionId] = {
       invoiceId: submissionId.split('_')[1],
@@ -71,7 +76,8 @@ app.post('/invoices/:submissionId/lifecycle/request', (req, res) => {
     { code: 207, label: 'En litige' },
     { code: 208, label: 'Suspendue' },
     { code: 210, label: 'Refusée' },
-    { code: 211, label: 'Paiement transmis' }
+    { code: 211, label: 'Paiement transmis' },
+    { code: 212, label: 'Encaissement constaté' } // nouveau
   ];
 
   const nextStatus = possibleStatuses[sub.lifecycle.length];
@@ -83,11 +89,29 @@ app.post('/invoices/:submissionId/lifecycle/request', (req, res) => {
   res.json({ invoiceId: sub.invoiceId, lifecycle: sub.lifecycle });
 });
 
+// -------------------------------
+// Endpoint spécifique pour encaissement
+// -------------------------------
+app.post('/invoices/:submissionId/paid', (req, res) => {
+  const { submissionId } = req.params;
+  const sub = submissions[submissionId];
+  if (!sub) return res.status(404).json({ error: 'Submission non trouvée' });
+
+  sub.lifecycle.push({ code: 212, label: 'Encaissement constaté', createdAt: new Date().toISOString() });
+  console.log(`💰 Facture ${submissionId} : encaissement constaté`);
+
+  // Mettre à jour le statut technique si nécessaire
+  sub.technicalStatus = 'validated';
+
+  res.json({ invoiceId: sub.invoiceId, lifecycle: sub.lifecycle });
+});
+
+// -------------------------------
 // Récupération de l’historique complet des statuts métiers
+// -------------------------------
 app.get('/invoices/:submissionId/lifecycle', (req, res) => {
   const { submissionId } = req.params;
 
-  // Création automatique si la submission n’existe pas
   if (!submissions[submissionId]) {
     submissions[submissionId] = {
       invoiceId: submissionId.split('_')[1],
@@ -100,6 +124,9 @@ app.get('/invoices/:submissionId/lifecycle', (req, res) => {
   res.json({ invoiceId: sub.invoiceId, lifecycle: sub.lifecycle });
 });
 
+// -------------------------------
+// Démarrage du serveur
+// -------------------------------
 app.listen(PORT, () => {
   console.log(`[MOCK-PDP] Mock PDP démarré sur http://localhost:${PORT}`);
 });

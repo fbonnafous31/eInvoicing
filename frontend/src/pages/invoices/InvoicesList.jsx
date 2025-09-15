@@ -23,11 +23,10 @@ export default function InvoicesList() {
     setInvoices(prev =>
       prev.map(inv => (inv.id === invoiceId ? { ...inv, technical_status: newStatus } : inv))
     );
-    console.log(`[InvoiceList] Technical status mise à jour pour invoice ${invoiceId}: ${newStatus}`);
+    setVersion(v => v + 1); 
   };
 
   const handleBusinessStatusChange = (invoiceId, statusCode, statusLabel) => {
-    console.log(`[InvoiceList] Business status reçu pour invoice ${invoiceId}: ${statusCode} (${statusLabel})`);
     setInvoices(prev =>
       prev.map(inv =>
         inv.id === invoiceId
@@ -35,7 +34,7 @@ export default function InvoicesList() {
           : inv
       )
     );
-    setVersion(v => v + 1); // forcer le re-render du DataTable
+    setVersion(v => v + 1); 
   };
 
   // -------------------------------

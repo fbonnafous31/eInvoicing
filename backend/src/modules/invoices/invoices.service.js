@@ -247,16 +247,23 @@ async function requestInvoiceLifecycle(invoiceId) {
 
 // Rafraîchir le cycle de vie métier depuis le PDP
 async function refreshInvoiceLifecycle(invoiceId, submissionId) {
-  const response = await axios.get(`${PDP_URL}/${submissionId}/lifecycle`);
-  const { businessStatus } = response.data;
+  try {
+    const response = await axios.get(`${PDP_URL}/${submissionId}/lifecycle`);
+    const { businessStatus } = response.data;
 
-  console.log(`📡 Lifecycle refresh for invoice ${invoiceId}: status = ${businessStatus}`);
+    console.log(`📡 Lifecycle refresh for invoice ${invoiceId}: status = ${businessStatus}`);
 
-  // Mettre à jour la DB
-  await InvoicesModel.updateBusinessStatus(invoiceId, { businessStatus, submissionId });
+    // Mettre à jour la DB
+    await InvoicesModel.updateBusinessStatus(invoiceId, { businessStatus, submissionId });
 
-  return businessStatus;
+    // Retourner directement le nouveau statut pour que le front l'applique immédiatement
+    return businessStatus;
+  } catch (err) {
+    console.error(`❌ Erreur refreshInvoiceLifecycle invoice ${invoiceId}:`, err);
+    throw new Error("Erreur serveur");
+  }
 }
+
 
 async function updateInvoiceLifecycle(invoiceId, lifecycle) {
   // Récupérer la facture depuis le modèle

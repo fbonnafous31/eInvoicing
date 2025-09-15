@@ -9,5 +9,6 @@ export const BUSINESS_STATUSES = {
   208: { label: 'Suspendue', color: 'gray' },
   210: { label: 'Refusée', color: 'red' },
   211: { label: 'Paiement transmis', color: 'blue' },
+  212: { label: 'Facture encaissée', color: 'green' },
   100: { label: 'En attente', color: 'gray' },
 };

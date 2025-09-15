@@ -297,25 +297,32 @@ async function refreshInvoiceStatus(req, res, next) {
   try {
     const invoiceId = req.params.id;
     const invoice = await InvoicesService.getInvoiceById(invoiceId);
+    if (!invoice) return res.status(404).json({ message: 'Facture introuvable' });
+    if (!invoice.submission_id) return res.status(400).json({ message: 'Facture non encore envoyée au PDP' });
 
-    if (!invoice) {
-      return res.status(404).json({ message: 'Facture introuvable' });
+    // Avancer le cycle métier côté mock PDP
+    const pduResponse = await axios.post(
+      `http://localhost:4000/invoices/${invoice.submission_id}/lifecycle/request`
+    );
+    const lifecycle = pduResponse.data.lifecycle || [];
+
+    // Mettre à jour le cycle complet dans la DB
+    await InvoicesService.updateInvoiceLifecycle(invoiceId, lifecycle);
+
+    // Dernier statut métier
+    const lastStatus = lifecycle[lifecycle.length - 1] || { code: null, label: 'Non renseigné' };
+
+    // Si le dernier code est 211 (Paiement transmis), passer à 212
+    if (lastStatus.code === 211) {
+      await InvoicesService.updateInvoice(invoiceId, { business_status: 212 });
+      lastStatus.code = 212;
+      lastStatus.label = 'Encaissée';
     }
-
-    if (!invoice.submission_id) {
-      return res.status(400).json({ message: 'Facture non encore envoyée au PDP' });
-    }
-
-    // Appel au Mock PDP pour faire progresser le cycle métier
-    const pduResponse = await axios.post(`http://localhost:4000/invoices/${invoice.submission_id}/lifecycle/request`);
-    
-    // Mettre à jour la DB avec le nouveau statut métier
-    await InvoicesService.updateInvoiceLifecycle(invoiceId, pduResponse.data.lifecycle);
 
     res.json({
-      message: 'Statut métier rafraîchi',
       invoiceId,
-      lifecycle: pduResponse.data.lifecycle
+      lastStatus,
+      lifecycle
     });
   } catch (err) {
     console.error('Erreur refreshInvoiceStatus:', err);
@@ -352,6 +359,39 @@ async function getInvoiceLifecycle(req, res, next) {
   }
 }
 
+/**
+ * Marquer une facture comme encaissée
+ */
+async function markInvoicePaid(req, res, next) {
+  try {
+    const invoiceId = req.params.id;
+    const invoice = await InvoicesService.getInvoiceById(invoiceId);
+
+    if (!invoice) {
+      return res.status(404).json({ message: 'Facture introuvable' });
+    }
+
+    if (!invoice.submission_id) {
+      return res.status(400).json({ message: 'Facture non encore envoyée au PDP' });
+    }
+
+    // Appel au mock PDP pour simuler le paiement encaissé
+    const pduResponse = await axios.post(`http://localhost:4000/invoices/${invoice.submission_id}/lifecycle/request`);
+
+    // Mettre à jour la DB avec le nouveau cycle métier
+    await InvoicesService.updateInvoiceLifecycle(invoiceId, pduResponse.data.lifecycle);
+
+    res.json({
+      message: 'Facture marquée comme encaissée',
+      invoiceId,
+      lifecycle: pduResponse.data.lifecycle
+    });
+  } catch (err) {
+    console.error('Erreur markInvoicePaid:', err);
+    next(err);
+  }
+}
+
 module.exports = {
   listInvoices,
   getInvoice,
@@ -364,5 +404,6 @@ module.exports = {
   sendInvoice,
   getInvoiceStatus,
   refreshInvoiceStatus,
-  getInvoiceLifecycle
+  getInvoiceLifecycle,
+  markInvoicePaid
 };

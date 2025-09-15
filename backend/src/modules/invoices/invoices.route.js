@@ -32,6 +32,9 @@ router.post('/:id/generate-pdf', InvoicesController.createInvoicePdf);
 // Rafraîchir le statut métier d'une facture
 router.post('/:id/refresh-status', InvoicesController.refreshInvoiceStatus);
 
+// Marquer la facture comme encaissée
+router.post('/:id/paid', InvoicesController.markInvoicePaid);
+
 // Récupérer le cycle métier complet d'une facture
 router.get('/:id/lifecycle', InvoicesController.getInvoiceLifecycle);
 

@@ -5,6 +5,7 @@ import { formatCurrency, formatDate } from '../../utils/formatters/formatters';
 import TechnicalStatusCell from './TechnicalStatusCell';
 import BusinessStatusCell from './BusinessStatusCell';
 import { FaFilePdf } from "react-icons/fa";
+import { BUSINESS_STATUSES } from '../../constants/businessStatuses';
 
 export default function useInvoiceColumns(invoiceService, onTechnicalStatusChange, onBusinessStatusChange) {
   const navigate = useNavigate();
@@ -107,82 +108,115 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
         </div>
       ),
       ignoreRowClick: true,
-      width: '180px',
+      width: '170px',
     },
     {
       name: 'Envoyer / Statut',
-      cell: row => (
-        <div className="flex gap-1 justify-end">
-          {/* Bouton envoi facture */}
-          <button
-            className="btn btn-sm"
-            title="Envoyer la facture"
-            onClick={async () => {
-              if (!row?.id) return;
-              try {
-                console.log("📤 Envoi facture id:", row.id);
-                const res = await invoiceService.sendInvoice(row.id);
-                console.log("✅ Facture envoyée :", res);
+      width: '150px',
+      cell: row => {
+        const isFinalStatus = ["210", "212"].includes(row.business_status); // Refusée ou Encaissée
+        const canRefresh = !isFinalStatus && ["received", "validated"].includes(row.technical_status);
+        const canCash = row.business_status === "211";
 
-                if (!res.submissionId) {
-                  console.warn("⚠️ Pas de submissionId renvoyé, polling impossible");
-                  alert("Facture envoyée mais le statut technique ne peut pas être suivi pour l'instant.");
-                  return;
+        return (
+          <div className="flex gap-1 justify-end">
+            {/* Bouton envoi facture */}
+            <button
+              className="btn btn-sm"
+              style={{
+                background: "transparent",
+                border: "none",
+                padding: "2px 6px",
+                cursor: isFinalStatus ? "not-allowed" : "pointer",
+                opacity: isFinalStatus ? 0.5 : 1,
+              }}
+              title={isFinalStatus ? "Action impossible : statut final" : "Envoyer la facture"}
+              disabled={isFinalStatus}
+              onClick={async () => {
+                if (!row?.id) return;
+                try {
+                  console.log("📤 Envoi facture id:", row.id);
+                  const res = await invoiceService.sendInvoice(row.id);
+                  if (!res.submissionId) {
+                    alert("Facture envoyée mais le statut technique ne peut pas être suivi pour l'instant.");
+                    return;
+                  }
+                  alert("Facture transmise.");
+                  const finalStatus = await pollStatus(row.id);
+                  onTechnicalStatusChange?.(row.id, finalStatus.technicalStatus);
+                } catch (err) {
+                  console.error("❌ Erreur envoi ou polling :", err);
+                  alert("Erreur lors de l'envoi ou du polling du statut");
                 }
+              }}
+            >
+              📧
+            </button>
 
-                alert("Facture transmise.");
-
-                const finalStatus = await pollStatus(row.id);
-                console.log("✅ Statut final :", finalStatus);
-                onTechnicalStatusChange?.(row.id, finalStatus.technicalStatus);
-              } catch (err) {
-                console.error("❌ Erreur envoi ou polling :", err);
-                alert("Erreur lors de l'envoi ou du polling du statut");
+            {/* Bouton rafraîchissement cycle métier */}
+            <button
+              className="btn btn-sm"
+              title={
+                !canRefresh
+                  ? row.business_status === "212"
+                    ? "Facture déjà encaissée"
+                    : "Impossible de rafraîchir : statut PDP non reçu ou validé"
+                  : "Rafraîchir le cycle de vie métier"
               }
-            }}
-          >
-            📧
-          </button>
+              style={{
+                pointerEvents: canRefresh ? "auto" : "none",
+                border: "none",
+                opacity: canRefresh ? 1 : 0.5,
+              }}
+              disabled={!canRefresh}
+              onClick={async () => {
+                if (!row?.id) return;
 
-          {/* Bouton rafraîchir statut métier */}
-          <button
-            className="btn btn-sm"
-            title={
-              !["received", "validated"].includes(row.technical_status)
-                ? "Impossible de rafraîchir : statut PDP non reçu ou validé"
-                : "Rafraîchir le cycle de vie métier"
-            }
-            style={{
-              pointerEvents: !["received", "validated"].includes(row.technical_status) ? "none" : "auto",
-              opacity: !["received", "validated"].includes(row.technical_status) ? 0.6 : 1,
-            }}
-            onClick={async () => {
-              if (!row?.id) return;
+                try {
+                  const response = await invoiceService.refreshInvoiceLifecycle(row.id, row.submission_id);
+                  onBusinessStatusChange?.(row.id, response.lastStatus.code, response.lastStatus.label);
+                } catch (err) {
+                  console.error("❌ Erreur rafraîchissement cycle métier :", err);
+                  alert("Erreur lors du rafraîchissement du cycle métier");
+                }
+              }}
+            >
+              🔄
+            </button>
 
-              try {
-                console.log("🔄 Demande rafraîchissement cycle métier invoice id:", row.id);
-                await invoiceService.refreshInvoiceLifecycle(row.id);
-
-                // ⚡ Récupération du dernier statut
-                const lifecycle = await invoiceService.getInvoiceLifecycle(row.id);
-                const lastStatusRaw = lifecycle?.lifecycle?.[lifecycle.lifecycle.length - 1];
-                if (!lastStatusRaw) return;
-
-                console.log(`📤 Nouveau statut métier pour invoice ${row.id}: ${lastStatusRaw.label}`);
-                onBusinessStatusChange?.(row.id, lastStatusRaw.code, lastStatusRaw.label);
-
-              } catch (err) {
-                console.error("❌ Erreur rafraîchissement cycle métier :", err);
-                alert("Erreur lors du rafraîchissement du cycle métier");
-              }
-            }}
-          >
-            🔄
-          </button>
-        </div>
-      ),
-      ignoreRowClick: true,
-      width: '140px',
+            {/* Bouton encaissement */}
+            <button
+              className="btn btn-sm"
+              style={{
+                background: "transparent",
+                border: "none",
+                padding: "2px 6px",
+                cursor: canCash ? "pointer" : "not-allowed",
+                opacity: canCash ? 1 : 0.5,
+              }}
+              title={canCash ? "Encaisser la facture" : "Encaissement possible uniquement si Paiement transmis"}
+              disabled={!canCash}
+              onClick={async () => {
+                if (!row?.id || !canCash) return;
+                try {
+                  console.log(`💰 Encaissement invoice id: ${row.id}`);
+                  await invoiceService.cashInvoice(row.id);
+                  const lifecycle = await invoiceService.getInvoiceLifecycle(row.id);
+                  const lastStatusRaw = lifecycle?.lifecycle?.[lifecycle.lifecycle.length - 1];
+                  if (!lastStatusRaw) return;
+                  onBusinessStatusChange?.(row.id, lastStatusRaw.code, lastStatusRaw.label);
+                  alert("Facture encaissée !");
+                } catch (err) {
+                  console.error("❌ Erreur encaissement :", err);
+                  alert("Erreur lors de l'encaissement de la facture");
+                }
+              }}
+            >
+              💰
+            </button>
+          </div>
+        );
+      },
     },
     {
       name: 'Référence',

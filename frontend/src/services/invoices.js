@@ -139,6 +139,15 @@ export function useInvoiceService() {
     [getInvoiceLifecycle]
   );
 
+  const cashInvoice = useCallback(
+    (id) =>
+      request(`${API_BASE}/${id}/paid`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      }),
+    [request]
+  );
+
   return {
     fetchInvoicesBySeller,
     fetchInvoice,
@@ -152,5 +161,6 @@ export function useInvoiceService() {
     refreshInvoiceLifecycle,
     getInvoiceLifecycle,
     pollInvoiceLifecycle,
+    cashInvoice
   };
 }
