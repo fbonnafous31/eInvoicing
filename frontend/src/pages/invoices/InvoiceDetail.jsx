@@ -100,7 +100,8 @@ export default function InvoiceDetail() {
     if (!invoice) return null;
     return {
       id: invoice.id,
-      status: invoice.status,
+      technical_status: invoice.technical_status,
+      business_status: invoice.business_status,
       header: {
         invoice_number: invoice.invoice_number,
         issue_date: invoice.issue_date,

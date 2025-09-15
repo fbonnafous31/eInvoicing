@@ -8,12 +8,7 @@ export function useSellerService() {
 
   return useMemo(() => {
     const request = async (url, options = {}) => {
-      console.log("[Service] → request URL:", url);
-      console.log("[Service] → options avant token:", options);
-
       const token = await getToken();
-      console.log("[Service] → token obtenu:", token?.substring(0, 10) + "..."); // on ne log pas tout
-
       const res = await fetch(url, {
         ...options,
         headers: {
@@ -21,11 +16,7 @@ export function useSellerService() {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      console.log("[Service] ← status:", res.status, res.statusText);
-
       const text = await res.text();
-      console.log("[Service] ← raw response text:", text);
 
       if (!res.ok) {
         throw new Error(`Erreur ${res.status}: ${text}`);

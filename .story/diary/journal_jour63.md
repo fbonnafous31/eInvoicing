@@ -23,7 +23,7 @@ Aujourd’hui, pas grand-chose de concret côté dev, juste un **update rapide**
   - **Ne plus permettre de modifications** dès que la facture a été **transmise et réceptionnée côté PDP**.  
   - **Autoriser uniquement l’ajout de justificatifs** si la facture est en **suspension**.  
 
-- [ ] [Optionnel] Préparer le terrain pour la **synchronisation temps réel complète** via WebSocket pour les statuts métiers.  
+- [ ] [Optionnel] Gérer la recherche pour les tags traduits en français.  
 
 ---
 

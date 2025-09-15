@@ -98,6 +98,21 @@ async function deleteInvoice(req, res) {
  */
 async function updateInvoice(req, res, next) {
   try {
+    // Vérifier si la facture existe et son technical_status
+    const existingInvoice = await InvoicesService.getInvoiceById(req.params.id);
+    if (!existingInvoice) {
+      return res.status(404).json({ message: "Facture introuvable" });
+    }
+
+    const ts = existingInvoice.technical_status?.toLowerCase();
+    const bs = existingInvoice.business_status;
+    if (ts && !["draft", "pending"].includes(ts)) {
+      if (bs !== "208") {
+        // Bloc classique : interdiction de modifier
+        return res.status(403).json({ message: "Cette facture ne peut pas être modifiée." });
+      }
+    }
+
     // Parser les champs JSON en toute sécurité
     let invoiceData = null;
     let client = null;

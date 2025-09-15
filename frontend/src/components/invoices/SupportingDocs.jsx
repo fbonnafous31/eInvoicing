@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { SmallDeleteButton } from "@/components/ui/buttons";
 import { useAuth } from "@/hooks/useAuth";
 
-export default function SupportingDocs({ data, onChange, disabled, hideLabelsInView, invoice }) {
+export default function SupportingDocs({ data, onChange, disabled, hideLabelsInView, invoice, canEditAdditional }) {
   const { getToken } = useAuth();
 
   useEffect(() => {
@@ -126,7 +126,7 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
             type="file"
             onChange={handleMainChange}
             className="form-control"
-            disabled={disabled}
+            disabled={canEditAdditional}
           />
         )}
 
@@ -134,7 +134,10 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
           <div className="mt-1 d-flex justify-content-between align-items-center">
             <span>{mainAttachment.file_name}</span>
             {!hideLabelsInView && (
-              <SmallDeleteButton onClick={() => removeFile(0, "main")} disabled={disabled} />
+              <SmallDeleteButton
+                onClick={() => removeFile(0, "main")}
+                disabled={canEditAdditional || disabled} // interdit en mode suspension
+              />
             )}
           </div>
         )}
@@ -157,7 +160,10 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
             <li key={index} className="d-flex justify-content-between align-items-center mb-2">
               <span>{file.file_name || "Nom non disponible"}</span>
               {!hideLabelsInView && (
-                <SmallDeleteButton onClick={() => removeFile(index, "additional")} disabled={disabled} />
+                <SmallDeleteButton
+                  onClick={() => removeFile(index, "additional")}
+                  disabled={canEditAdditional} 
+                />
               )}
             </li>
           ))}

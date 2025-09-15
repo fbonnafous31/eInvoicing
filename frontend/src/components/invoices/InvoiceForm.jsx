@@ -13,6 +13,7 @@ import { EditButton, CancelButton, DeleteButton, SaveButton } from '@/components
 import { useInvoiceService } from "@/services/invoices";
 
 export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly = false }) {
+  console.log("InvoiceForm initialData:", initialData);
   const navigate = useNavigate();
   const [invoiceData, setInvoiceData] = useState({
     header: {
@@ -283,7 +284,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
       
       if (initialData) {
         // Mise à jour
-        if (isDraft) {
+        if (canEdit) {
           await updateInvoice(initialData.id, formData);
           setSuccessMessage("Facture mise à jour avec succès ! 🎉");
         } else {
@@ -327,10 +328,14 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
     return fields.some(f => currentErrors[f]);
   };
 
-  const isDraft = useMemo(() => {
-    const status = initialData?.status;
-    if (!status) return false;
-    return status.toString().trim().toLowerCase() === "draft";
+  const canEdit = useMemo(() => {
+    const ts = initialData?.technical_status?.toLowerCase();
+    const bs = initialData?.business_status;
+    return !ts || ["draft", "pending"].includes(ts) || bs === "208";
+  }, [initialData]);
+
+  const canEditAttachments = useMemo(() => {
+    return initialData?.business_status === "208";
   }, [initialData]);
 
   return (
@@ -389,9 +394,8 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
         data={invoiceData.attachments}
         invoice={invoiceData} 
         onChange={val => handleChange("attachments", val)}
-        disabled={!isEditing}
         hideLabelsInView={readOnly}
-        allowPrincipal
+        canEditAdditional={canEditAttachments} 
       />
 
       <div className="card p-3 mb-3">
@@ -402,28 +406,31 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
       </div>
 
       <div className="mt-4 mb-5 d-flex justify-content-end gap-2">
-        {!readOnly && (
+        {!readOnly && initialData && (
           <>
-            {initialData ? (
+            {canEditAttachments ? (
+              // Mode suspension : uniquement Annuler / Enregistrer
               <>
-                {isDraft && (
-                  !isEditing ? (
-                    <>
-                      <EditButton onClick={() => setIsEditing(true)}>Modifier</EditButton>
-                      <DeleteButton onClick={onDelete} />
-                    </>
-                  ) : (
-                    <>
-                      <CancelButton onClick={() => setIsEditing(false)} />
-                      <SaveButton />
-                    </>
-                  )
-                )}
+                <CancelButton onClick={() => setIsEditing(false)} />
+                <SaveButton />
               </>
-            ) : (
-              <button type="submit" className="btn btn-primary">Créer la facture</button>
-            )}
+            ) : canEdit ? (
+              !isEditing ? (
+                <>
+                  <EditButton onClick={() => setIsEditing(true)}>Modifier</EditButton>
+                  <DeleteButton onClick={onDelete} />
+                </>
+              ) : (
+                <>
+                  <CancelButton onClick={() => setIsEditing(false)} />
+                  <SaveButton />
+                </>
+              )
+            ) : null}
           </>
+        )}
+        {!readOnly && !initialData && (
+          <button type="submit" className="btn btn-primary">Créer la facture</button>
         )}
       </div>
 
