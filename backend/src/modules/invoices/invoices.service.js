@@ -4,6 +4,8 @@ const InvoicesModel = require('./invoices.model');
 const { generateFacturXXML } = require('../../utils/facturx-generator');
 const { embedFacturXInPdf } = require('../../utils/pdf-generator');
 const InvoicesAttachmentsModel = require('./invoiceAttachments.model');
+const SellersModel = require('../sellers/sellers.service');
+const ClientsModel = require('../clients/clients.service'); 
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
@@ -196,8 +198,35 @@ async function sendInvoice(invoiceId) {
   const fileStats = fs.statSync(facturXPath);
   const fileName = path.basename(facturXPath);
 
+  // 🔹 Récupérer la facture complète avec seller et client
+  const invoice = await InvoicesModel.getInvoiceById(invoiceId);
+  if (!invoice) throw new Error(`Facture ${invoiceId} introuvable`);
+
+  const sellerId = invoice.seller_id;
+  const clientId = invoice.client_id;
+
+  // 🔹 Récupérer seller et client depuis la DB
+  const seller = await SellersModel.getSellerById(sellerId);
+  const client = await ClientsModel.getClientById(clientId);
+
+  // 🔹 Construire les métadatas réalistes
+  const metadata = {
+    senderId: seller?.legal_identifier || seller?.id || 'unknown',
+    receiverId: client?.legal_identifier || client?.siret || client?.id || 'unknown',
+    invoiceId: invoice.invoice_number
+  };
+
+  // 🔹 Construire le FormData avec Factur-X et métadatas
   const form = new FormData();
   form.append('invoice', fs.createReadStream(facturXPath));
+  form.append('metadata', JSON.stringify(metadata));
+
+  // 🔹 Logging léger avant envoi
+  console.log(`📤 Envoi facture ${invoiceId} au PDP avec :`, {
+    fileName,
+    size: fileStats.size,
+    metadata
+  });
 
   const response = await axios.post(PDP_URL, form, {
     headers: {
@@ -207,7 +236,7 @@ async function sendInvoice(invoiceId) {
 
   const { status: initialStatus, submissionId } = response.data;
 
-  // ⚡ Mettre à jour immédiatement le status “received”
+  // ⚡ Mettre à jour immédiatement le statut technique
   await InvoicesModel.updateTechnicalStatus(invoiceId, { technicalStatus: initialStatus, submissionId });
 
   console.log(`✅ Facture ${invoiceId} envoyée :`, response.data);
@@ -219,6 +248,7 @@ async function sendInvoice(invoiceId) {
     invoiceId,
     filename: fileName,
     size: fileStats.size,
+    metadata,
     pdpResponse: response.data,
     submissionId
   };
