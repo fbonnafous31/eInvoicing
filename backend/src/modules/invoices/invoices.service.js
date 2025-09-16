@@ -281,19 +281,21 @@ async function pollInvoiceStatusPDP(invoiceId, submissionId) {
         finalStatus = true;
         console.log(`✅ Invoice ${invoiceId} reached final status: ${technicalStatus}`);
 
-        // 🔹 Déterminer le code spec et le label métier
         const businessData = technicalStatus === 'validated'
           ? { statusCode: 202, statusLabel: 'Facture conforme' }
           : { statusCode: 400, statusLabel: 'Rejetée par le PDP' };
 
-        // Mettre à jour l'historique et le statut courant (via statusCode)
         await InvoicesModel.updateBusinessStatus(invoiceId, businessData);
         console.log(`📌 Statut métier mis à jour pour invoice ${invoiceId}`);
       } else {
         await new Promise(res => setTimeout(res, POLLING_INTERVAL));
       }
     } catch (err) {
-      console.error(`❌ Polling failed for invoice ${invoiceId}:`, err.message);
+      if (err.response && (err.response.status === 400 || err.response.status === 500)) {
+        console.error(`❌ Polling failed for invoice ${invoiceId} with HTTP ${err.response.status}:`, err.message);
+      } else {
+        // Autres erreurs, on ignore pour continuer le polling
+      }
       await new Promise(res => setTimeout(res, POLLING_INTERVAL));
     }
   }
