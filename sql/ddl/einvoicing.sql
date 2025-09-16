@@ -38,6 +38,15 @@ CREATE SEQUENCE invoicing.invoice_lines_id_seq
 	START 1
 	CACHE 1
 	NO CYCLE;
+-- DROP SEQUENCE invoicing.invoice_status_id_seq;
+
+CREATE SEQUENCE invoicing.invoice_status_id_seq
+	INCREMENT BY 1
+	MINVALUE 1
+	MAXVALUE 2147483647
+	START 1
+	CACHE 1
+	NO CYCLE;
 -- DROP SEQUENCE invoicing.invoice_taxes_id_seq;
 
 CREATE SEQUENCE invoicing.invoice_taxes_id_seq
@@ -194,6 +203,10 @@ CREATE TABLE invoicing.invoices (
 	updated_at timestamp DEFAULT now() NULL, -- Date de mise à jour
 	fiscal_year int4 NOT NULL, -- Année fiscale (année de l'émission de la facture)
 	payment_method varchar(50) NULL -- Moyen de paiement utilisé pour la facture,
+	technical_status varchar(20) DEFAULT 'pending'::character varying NULL,
+	submission_id varchar(50) NULL,
+	last_technical_update timestamp DEFAULT now() NULL,
+	business_status varchar(50) DEFAULT 'pending'::character varying NULL,
 	CONSTRAINT chk_fiscal_year_range CHECK (((fiscal_year >= 2000) AND (fiscal_year <= 2100))),
 	CONSTRAINT chk_fiscal_year_reasonable CHECK (((fiscal_year >= ((EXTRACT(year FROM issue_date))::integer - 1)) AND (fiscal_year <= ((EXTRACT(year FROM issue_date))::integer + 1)))),
 	CONSTRAINT invoices_pkey PRIMARY KEY (id),
@@ -344,6 +357,33 @@ create trigger invoice_lines_totals_trigger_delete after
 delete
     on
     invoicing.invoice_lines for each row execute function update_invoice_totals();
+
+
+-- invoicing.invoice_status definition
+
+-- Drop table
+
+-- DROP TABLE invoicing.invoice_status;
+
+CREATE TABLE invoicing.invoice_status (
+	id serial4 NOT NULL, -- Identifiant unique interne du statut
+	invoice_id int4 NOT NULL, -- Référence vers la facture concernée
+	status_code int4 NOT NULL, -- Code du statut remonté par le PDP (200, 201, ... )
+	status_label varchar(100) NOT NULL, -- Libellé du statut correspondant
+	created_at timestamp DEFAULT now() NOT NULL, -- Date et heure d’enregistrement du statut
+	CONSTRAINT invoice_status_pkey PRIMARY KEY (id),
+	CONSTRAINT invoice_status_invoice_id_fkey FOREIGN KEY (invoice_id) REFERENCES invoicing.invoices(id) ON DELETE CASCADE
+);
+CREATE INDEX idx_invoice_status_invoice_id ON invoicing.invoice_status USING btree (invoice_id);
+COMMENT ON TABLE invoicing.invoice_status IS 'Historique des statuts liés au cycle de vie des factures (PDP)';
+
+-- Column comments
+
+COMMENT ON COLUMN invoicing.invoice_status.id IS 'Identifiant unique interne du statut';
+COMMENT ON COLUMN invoicing.invoice_status.invoice_id IS 'Référence vers la facture concernée';
+COMMENT ON COLUMN invoicing.invoice_status.status_code IS 'Code du statut remonté par le PDP (200, 201, ... )';
+COMMENT ON COLUMN invoicing.invoice_status.status_label IS 'Libellé du statut correspondant';
+COMMENT ON COLUMN invoicing.invoice_status.created_at IS 'Date et heure d’enregistrement du statut';
 
 
 -- invoicing.invoice_taxes definition

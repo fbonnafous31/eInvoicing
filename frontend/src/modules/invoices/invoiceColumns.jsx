@@ -113,9 +113,24 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
       name: 'Envoyer / Statut',
       width: '150px',
       cell: row => {
-        const isFinalStatus = ["210", "212"].includes(row.business_status); // Refusée ou Encaissée
-        const canRefresh = !isFinalStatus && ["received", "validated"].includes(row.technical_status);
-        const canCash = row.business_status === "211";
+        const isFinalStatus = ["210", "212"].includes(String(row.business_status));
+
+        const canRefresh =
+          !isFinalStatus &&
+          !["rejected", "draft", "created"].includes(row.technical_status);
+
+        const canCash = String(row.business_status) === "211";
+
+
+        // 🪵 Logs pour debug
+        console.log("DEBUG invoice row:", {
+          id: row.id,
+          business_status: row.business_status,
+          technical_status: row.technical_status,
+          isFinalStatus,
+          canCash,
+          canRefresh,
+        });  
 
         return (
           <div className="flex gap-1 justify-end">
@@ -190,7 +205,7 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
                 border: "none",
                 opacity: canRefresh ? 1 : 0.5,
               }}
-              disabled={!canRefresh}
+              disabled={isFinalStatus || !canRefresh}
               onClick={async () => {
                 if (!row?.id) return;
 
@@ -217,7 +232,7 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
                 opacity: canCash ? 1 : 0.5,
               }}
               title={canCash ? "Encaisser la facture" : "Encaissement possible uniquement si Paiement transmis"}
-              disabled={!canCash}
+              disabled={isFinalStatus || !canCash}
               onClick={async () => {
                 if (!row?.id || !canCash) return;
                 try {
