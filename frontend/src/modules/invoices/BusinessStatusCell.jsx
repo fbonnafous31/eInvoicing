@@ -1,5 +1,4 @@
-// BusinessStatusCell.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BUSINESS_STATUSES } from '../../constants/businessStatuses';
 
 export default function BusinessStatusCell({ row, invoiceService, onBusinessStatusChange }) {
@@ -7,6 +6,14 @@ export default function BusinessStatusCell({ row, invoiceService, onBusinessStat
     code: row.business_status || 100,
     label: BUSINESS_STATUSES[row.business_status || 100]?.label || 'Non renseigné',
   });
+
+  // ⚡ Sync avec la prop row.business_status
+  useEffect(() => {
+    setStatus({
+      code: row.business_status || 100,
+      label: BUSINESS_STATUSES[row.business_status || 100]?.label || 'Non renseigné',
+    });
+  }, [row.business_status]);
 
   const fetchLatestStatus = async () => {
     try {
@@ -26,16 +33,11 @@ export default function BusinessStatusCell({ row, invoiceService, onBusinessStat
   };
 
   const refreshStatus = async () => {
-    if (!row.submission_id) {
-      console.log(`[BusinessStatusCell] Pas de submission_id pour invoice ${row.id}, pas de rafraîchissement`);
-      return;
-    }
+    if (!row.submission_id) return;
 
-    console.log(`[BusinessStatusCell] Rafraîchissement statut pour invoice ${row.id}...`);
     const lastStatus = await fetchLatestStatus();
     if (!lastStatus) return;
 
-    console.log(`[BusinessStatusCell] Nouveau statut pour invoice ${row.id}: ${lastStatus.status_label}`);
     setStatus({
       code: lastStatus.status_code,
       label: lastStatus.status_label,

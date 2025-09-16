@@ -365,27 +365,37 @@ async function getInvoiceLifecycle(req, res, next) {
 async function markInvoicePaid(req, res, next) {
   try {
     const invoiceId = req.params.id;
+
     const invoice = await InvoicesService.getInvoiceById(invoiceId);
+    if (!invoice) return res.status(404).json({ message: 'Facture introuvable' });
 
-    if (!invoice) {
-      return res.status(404).json({ message: 'Facture introuvable' });
-    }
+    // Forcer le statut 212 en DB
+    const newStatus = {
+      code: '212',
+      label: 'Encaissement constaté',
+      date: new Date(),
+    };
 
-    if (!invoice.submission_id) {
-      return res.status(400).json({ message: 'Facture non encore envoyée au PDP' });
-    }
+    const lifecycle = Array.isArray(invoice.lifecycle) ? [...invoice.lifecycle] : [];
+    lifecycle.push(newStatus);
 
-    // Appel au mock PDP pour simuler le paiement encaissé
-    const pduResponse = await axios.post(`http://localhost:4000/invoices/${invoice.submission_id}/lifecycle/request`);
+    await InvoicesService.updateInvoiceLifecycle(invoiceId, lifecycle);
 
-    // Mettre à jour la DB avec le nouveau cycle métier
-    await InvoicesService.updateInvoiceLifecycle(invoiceId, pduResponse.data.lifecycle);
-
-    res.json({
-      message: 'Facture marquée comme encaissée',
-      invoiceId,
-      lifecycle: pduResponse.data.lifecycle
+    // Envoyer la request au mock, sans contrôle de sa réponse
+    axios.post(
+      `http://localhost:4000/invoices/sub_${invoiceId}_${invoice.timestamp}/lifecycle/request`,
+      { status: newStatus.code, label: newStatus.label },
+      { headers: { 'Content-Type': 'application/json' } }
+    )
+    .then(() => {
+      console.log(`📤 Envoi mock PDP - invoice ${invoiceId} : status=${newStatus.code}, label="${newStatus.label}"`);
+    })
+    .catch(() => {
+      console.log(`ℹ️ Mock PDP invoqué pour invoice ${invoiceId}, réponse ignorée`);
     });
+
+    res.json({ message: 'Facture encaissée', invoiceId, lifecycle, newStatus });
+
   } catch (err) {
     console.error('Erreur markInvoicePaid:', err);
     next(err);

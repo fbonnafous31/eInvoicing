@@ -116,8 +116,9 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
         const isFinalStatus = ["210", "212"].includes(String(row.business_status));
 
         const canRefresh =
-          !isFinalStatus &&
-          !["rejected", "draft", "created"].includes(row.technical_status);
+          !isFinalStatus &&                 // Pas final
+          ["received", "validated"].includes(row.technical_status); // Statut PDP valide pour rafraîchir
+
 
         const canCash = String(row.business_status) === "211";
 
@@ -149,7 +150,7 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
                     return;
                   }
                   console.log(`[InvoiceColumns] Facture ${row.id} envoyée, submissionId:`, res.submissionId);
-                  alert("Facture transmise.");
+                  alert("Facture transmise à la plateforme de facturation.");
 
                   // 2️⃣ Polling du statut technique
                   const finalStatus = await pollStatus(row.id);
@@ -157,17 +158,19 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
                   onTechnicalStatusChange?.(row.id, finalStatus.technicalStatus);
 
                   // 3️⃣ Rafraîchissement du cycle métier (business_status)
-                  console.log(`[InvoiceColumns] Rafraîchissement cycle métier pour invoice ${row.id}`);
-                  const lifecycleResp = await invoiceService.refreshInvoiceLifecycle(row.id, res.submissionId);
-                  if (lifecycleResp?.lastStatus) {
-                    console.log(`[InvoiceColumns] Nouveau business_status pour invoice ${row.id}:`, lifecycleResp.lastStatus);
+                  console.log(`[InvoiceColumns] Récupération cycle métier pour invoice ${row.id}`);
+                  const lifecycleResp = await invoiceService.getInvoiceLifecycle(row.id, res.submissionId);
+                  const lastStatus = lifecycleResp?.lifecycle?.[lifecycleResp.lifecycle.length - 1];
+
+                  if (lastStatus) {
+                    console.log(`[InvoiceColumns] Statut métier actuel pour invoice ${row.id}:`, lastStatus);
                     onBusinessStatusChange?.(
                       row.id,
-                      lifecycleResp.lastStatus.code,
-                      lifecycleResp.lastStatus.label
+                      lastStatus.code,   
+                      lastStatus.label
                     );
                   } else {
-                    console.log(`[InvoiceColumns] Aucun nouveau business_status pour invoice ${row.id}`);
+                    console.log(`[InvoiceColumns] Aucun statut métier trouvé pour invoice ${row.id}`);
                   }
 
                 } catch (err) {
@@ -199,8 +202,16 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
                 if (!row?.id) return;
 
                 try {
-                  const response = await invoiceService.refreshInvoiceLifecycle(row.id, row.submission_id);
-                  onBusinessStatusChange?.(row.id, response.lastStatus.code, response.lastStatus.label);
+                  // 1️⃣ On demande au backend de rafraîchir le cycle
+                  await invoiceService.refreshInvoiceLifecycle(row.id, row.submission_id);
+
+                  // 2️⃣ On récupère le statut métier exact depuis la DB
+                  const lifecycleData = await invoiceService.getInvoiceLifecycle(row.id);
+                  const lifecycle = Array.isArray(lifecycleData.lifecycle) ? lifecycleData.lifecycle : [];
+                  if (lifecycle.length > 0) {
+                    const lastStatusRaw = lifecycle[lifecycle.length - 1];
+                    onBusinessStatusChange?.(row.id, lastStatusRaw.code, lastStatusRaw.label);
+                  }
                 } catch (err) {
                   console.error("❌ Erreur rafraîchissement cycle métier :", err);
                   alert("Erreur lors du rafraîchissement du cycle métier");
@@ -224,14 +235,26 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
               disabled={isFinalStatus || !canCash}
               onClick={async () => {
                 if (!row?.id || !canCash) return;
+
                 try {
                   console.log(`💰 Encaissement invoice id: ${row.id}`);
-                  await invoiceService.cashInvoice(row.id);
-                  const lifecycle = await invoiceService.getInvoiceLifecycle(row.id);
-                  const lastStatusRaw = lifecycle?.lifecycle?.[lifecycle.lifecycle.length - 1];
-                  if (!lastStatusRaw) return;
-                  onBusinessStatusChange?.(row.id, lastStatusRaw.code, lastStatusRaw.label);
-                  alert("Facture encaissée !");
+
+                  // 1️⃣ Appel backend pour marquer la facture comme payée
+                  const newStatus = await invoiceService.cashInvoice(row.id);
+
+                  // 2️⃣ Récupération du dernier statut métier directement depuis la réponse
+                  const lastStatusRaw = newStatus?.lifecycle?.[newStatus.lifecycle.length - 1];
+
+                  if (lastStatusRaw) {
+                    // 3️⃣ Mise à jour immédiate dans le tableau
+                    onBusinessStatusChange?.(row.id, lastStatusRaw.code, lastStatusRaw.label);
+                    console.log(`[InvoiceColumns] Statut métier mis à jour pour invoice ${row.id}:`, lastStatusRaw);
+
+                    alert("Envoi du statut encaissement à la plateforme de facturation.");
+                  } else {
+                    console.warn(`[InvoiceColumns] Aucun statut métier trouvé pour invoice ${row.id}`);
+                    alert("Facture encaissée, mais pas de statut métier trouvé !");
+                  }
                 } catch (err) {
                   console.error("❌ Erreur encaissement :", err);
                   alert("Erreur lors de l'encaissement de la facture");
@@ -304,13 +327,17 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
       selector: row => row.business_status || row.status,
       sortable: true,
       width: '160px',
-      cell: row => (
-        <BusinessStatusCell
-          row={row}
-          invoiceService={invoiceService}
-          onBusinessStatusChange={onBusinessStatusChange}
-        />
-      )
+      cell: row => {
+        // Si la facture est rejetée, on force "Non renseigné"
+        const status = row.technical_status === "rejected" ? "Non renseigné" : row.business_status;
+        return (
+          <BusinessStatusCell
+            row={{ ...row, business_status: status }}
+            invoiceService={invoiceService}
+            onBusinessStatusChange={onBusinessStatusChange}
+          />
+        );
+      }
     },
     {
       name: 'Statut PDP',
