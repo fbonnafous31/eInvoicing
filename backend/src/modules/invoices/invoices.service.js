@@ -81,6 +81,7 @@ async function updateInvoice(id, data) {
   const { invoice, client, lines, taxes, attachments } = data;
 
   console.log("=== updateInvoice called for id:", id, "===");
+
   const updatedInvoice = await InvoicesModel.updateInvoice(id, {
     invoice,
     client,
@@ -93,19 +94,51 @@ async function updateInvoice(id, data) {
 
   const clientForXML = prepareClientForXML(updatedInvoice.client);
 
-  const xmlPath = saveFacturXXML(id, {
-    header: invoice,
-    seller: updatedInvoice.seller,
-    client: clientForXML,
-    lines,
-    taxes,
-    attachments,
-  });
+  let xmlPath = null;
+  let pdfA3Path = null;
 
-  const mainPdfPath = await getMainPdfPath(updatedInvoice.id);
-  const additionalAttachments = await InvoicesAttachmentsModel.getAdditionalAttachments(updatedInvoice.id);
-  const pdfA3Path = await embedFacturXInPdf(mainPdfPath, xmlPath, additionalAttachments, updatedInvoice.id);
-  console.log("📄 PDF/A-3 generated at:", pdfA3Path);
+  // -------------------- Génération XML --------------------
+  if (!invoice || !invoice.invoice_number || !lines || lines.length === 0 || !taxes || taxes.length === 0) {
+      console.warn(`⚠️ Facture ${id} incomplète, XML non généré`);
+  } else {
+      try {
+          xmlPath = saveFacturXXML(id, {
+              header: invoice,
+              seller: updatedInvoice.seller,
+              client: clientForXML,
+              lines,
+              taxes,
+              attachments,
+          });
+          console.log("📄 Factur-X saved at:", xmlPath);
+      } catch (err) {
+          console.error(`❌ Erreur génération XML pour invoice ${id}:`, err);
+      }
+  }
+
+  // -------------------- Génération PDF/A-3 --------------------
+  if (updatedInvoice.technical_status === 'rejected') {
+      console.warn(`⚠️ Facture ${id} rejetée, PDF/A-3 non généré`);
+  } else if (!xmlPath) {
+      console.warn(`⚠️ XML non généré pour invoice ${id}, PDF/A-3 non généré`);
+  } else {
+      try {
+          let mainPdfPath;
+          try {
+              mainPdfPath = await getMainPdfPath(updatedInvoice.id);
+          } catch (err) {
+              console.warn(`⚠️ Pas de PDF principal pour invoice ${updatedInvoice.id}, skipping PDF/A-3`);
+          }
+
+          if (mainPdfPath) {
+              const additionalAttachments = await InvoicesAttachmentsModel.getAdditionalAttachments(updatedInvoice.id);
+              pdfA3Path = await embedFacturXInPdf(mainPdfPath, xmlPath, additionalAttachments, updatedInvoice.id);
+              console.log("📄 PDF/A-3 generated at:", pdfA3Path);
+          }
+      } catch (err) {
+          console.error(`❌ Erreur génération PDF/A-3 pour invoice ${id}:`, err);
+      }
+  }
 
   return { ...updatedInvoice, facturxPath: xmlPath, pdfPath: pdfA3Path };
 }
@@ -275,28 +308,31 @@ async function refreshInvoiceLifecycle(invoiceId, submissionId) {
 
 
 async function updateInvoiceLifecycle(invoiceId, lifecycle) {
-  // Récupérer la facture depuis le modèle
   const invoice = await InvoicesModel.getInvoiceById(invoiceId);
-  if (!invoice) {
-    throw new Error("Facture introuvable");
-  }
+  if (!invoice) throw new Error("Facture introuvable");
 
-  // Récupérer le dernier statut métier du tableau lifecycle
   const lastStatus = Array.isArray(lifecycle) && lifecycle.length > 0
     ? lifecycle[lifecycle.length - 1]
     : null;
 
-    // Préparer les données à mettre à jour
+  // Préparer les données à mettre à jour
   const updatedData = {
     lifecycle,
     status_code: lastStatus?.code || invoice.status_code,
     business_status_label: lastStatus?.label || invoice.business_status_label
   };
 
-  // Appeler la méthode update de ton modèle
-  const result = await InvoicesModel.updateBusinessStatus(invoiceId, { businessStatus: lastStatus.code, statusCode: lastStatus.code, statusLabel: lastStatus.label});
+  // ⚠️ Protéger la mise à jour si lastStatus est null
+  if (lastStatus) {
+    await InvoicesModel.updateBusinessStatus(invoiceId, {
+      businessStatus: lastStatus.code,
+      statusCode: lastStatus.code,
+      statusLabel: lastStatus.label
+    });
+  } else {
+    console.log(`⚠️ Invoice ${invoiceId} : pas de statut métier à appliquer`);
+  }
 
-  // Retourner l'objet mis à jour (optionnel)
   return { ...invoice, ...updatedData };
 }
 

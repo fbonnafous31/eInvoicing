@@ -121,17 +121,6 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
 
         const canCash = String(row.business_status) === "211";
 
-
-        // 🪵 Logs pour debug
-        console.log("DEBUG invoice row:", {
-          id: row.id,
-          business_status: row.business_status,
-          technical_status: row.technical_status,
-          isFinalStatus,
-          canCash,
-          canRefresh,
-        });  
-
         return (
           <div className="flex gap-1 justify-end">
             {/* Bouton envoi facture */}

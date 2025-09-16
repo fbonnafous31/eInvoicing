@@ -21,10 +21,13 @@ app.post('/invoices', upload.single('invoice'), (req, res) => {
   const invoiceId = req.file.originalname.split('-')[0];
   const submissionId = `sub_${invoiceId}_${Date.now()}`;
 
+  // ✅ Initialisation du cycle métier avec 202
   submissions[submissionId] = {
     invoiceId,
     technicalStatus: 'received',
-    lifecycle: []
+    lifecycle: [
+      { code: 202, label: 'Créée', createdAt: new Date().toISOString() }
+    ]
   };
 
   console.log(`📥 Facture reçue : ${invoiceId}, submissionId: ${submissionId}`);
@@ -59,31 +62,51 @@ app.post('/invoices/:submissionId/lifecycle/request', (req, res) => {
   const sub = submissions[submissionId];
   if (!sub) return res.status(404).json({ error: 'Submission non trouvée' });
 
-  // Si la facture est rejetée techniquement, ne pas avancer le cycle métier
+  // Blocage si rejetée techniquement
   if (sub.technicalStatus === 'rejected') {
     console.log(`⚠️ Facture ${submissionId} rejetée, pas de statut métier ajouté`);
+    return res.json({ invoiceId: sub.invoiceId, lifecycle: [] });
+  }
+
+  // Blocage si suspendue
+  const lastStatus = sub.lifecycle[sub.lifecycle.length - 1];
+  if (lastStatus?.code === 208) {
+    console.log(`⚠️ Facture ${submissionId} suspendue, progression bloquée`);
     return res.json({ invoiceId: sub.invoiceId, lifecycle: sub.lifecycle });
   }
 
+  const lastCode = lastStatus ? lastStatus.code : 202;
+
   const possibleStatuses = [
-    { code: 202, label: 'Reçue par la plateforme' },
-    { code: 203, label: 'Mise à disposition' },
-    { code: 204, label: 'Prise en charge' },
-    { code: 205, label: 'Approuvée' },
-    { code: 206, label: 'Approuvée partiellement' },
-    { code: 207, label: 'En litige' },
-    { code: 208, label: 'Suspendue' },
-    { code: 210, label: 'Refusée' },
-    { code: 211, label: 'Paiement transmis' },
-    { code: 212, label: 'Encaissement constaté' }
+    { code: 203, label: 'Mise à disposition', probability: 1.0 },
+    { code: 204, label: 'Prise en charge', probability: 0.6 },
+    { code: 205, label: 'Approuvée', probability: 0.6 },
+    { code: 206, label: 'Approuvée partiellement', probability: 0.2 },
+    { code: 207, label: 'En litige', probability: 0.2 },
+    { code: 208, label: 'Suspendue', probability: 0.2 },
+    { code: 210, label: 'Refusée', probability: 0.1 },
+    { code: 211, label: 'Paiement transmis', probability: 1.0 },
   ];
 
-  const lastCode = sub.lifecycle.length ? sub.lifecycle[sub.lifecycle.length - 1].code : 201;
+  // Boucle automatique pour garantir qu’un statut passe
+  for (let i = 0; i < possibleStatuses.length; i++) {
+    const candidate = possibleStatuses[i];
+    if (candidate.code <= lastCode) continue; // déjà passé
 
-  const nextStatus = possibleStatuses.find(s => s.code > lastCode);
-  if (nextStatus) {
-    sub.lifecycle.push({ ...nextStatus, createdAt: new Date().toISOString() });
-    console.log(`📊 Cycle métier avancé pour ${submissionId} : ${nextStatus.label}`);
+    // Tirage aléatoire
+    const rand = Math.random();
+    if (rand <= candidate.probability) {
+      // 211 : ajouter seulement si pas suspendue/refusée
+      if (candidate.code === 211 && [208, 210].includes(lastStatus?.code)) {
+        continue;
+      }
+
+      sub.lifecycle.push({ ...candidate, createdAt: new Date().toISOString() });
+      console.log(`📊 Cycle métier avancé pour ${submissionId} : ${candidate.label}`);
+      break; // on sort dès qu’un statut est tiré
+    } else {
+      console.log(`📊 Facture ${submissionId} : statut ${candidate.label} non tiré (probabilité)`);
+    }
   }
 
   res.json({ invoiceId: sub.invoiceId, lifecycle: sub.lifecycle });

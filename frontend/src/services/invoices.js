@@ -104,15 +104,18 @@ export function useInvoiceService() {
   const pollInvoiceLifecycle = useCallback(
     (invoiceId, interval = 2000, timeout = 20000) =>
       new Promise((resolve, reject) => {
-        console.log("⏱️ Start polling lifecycle for invoice", invoiceId); // <-- log ici
+        console.log("⏱️ Start polling lifecycle for invoice", invoiceId);
         const startTime = Date.now();
 
         const check = async () => {
           try {
             const data = await getInvoiceLifecycle(invoiceId);
             const lifecycle = Array.isArray(data.lifecycle) ? data.lifecycle : [];
+
+            // Facture rejetée → aucun statut métier
             if (lifecycle.length === 0) {
-              reject(new Error("Aucun statut métier trouvé"));
+              console.log(`[pollInvoiceLifecycle] Aucun statut métier trouvé pour invoice ${invoiceId} (probablement rejetée)`);
+              resolve(null); // <-- on résout avec null au lieu de rejeter
               return;
             }
 
@@ -122,6 +125,7 @@ export function useInvoiceService() {
               status_label: lastStatusRaw.label
             };
 
+            // Cas statut final ou timeout
             if ([201, 299].includes(lastStatus.status_code)) {
               resolve(lastStatus);
             } else if (Date.now() - startTime > timeout) {

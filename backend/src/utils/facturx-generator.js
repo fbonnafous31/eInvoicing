@@ -2,18 +2,22 @@
 import { create } from 'xmlbuilder2';
 
 export function generateFacturXXML(invoice) {
-  const header = invoice.header;
-  const seller = invoice.seller;
-  const buyer = invoice.client;
-  const lines = invoice.lines;
-  const taxes = invoice.taxes;
+  if (!invoice) throw new Error("invoice undefined");
+  const header = invoice.header || {};
+  const seller = invoice.seller || {};
+  const buyer = invoice.client || {};
+  const lines = Array.isArray(invoice.lines) ? invoice.lines : [];
+  const taxes = Array.isArray(invoice.taxes) ? invoice.taxes : [];
   const currency = "EUR";
 
-  // Calculs
+  if (!header.invoice_number) {
+    throw new Error(`Facture ${invoice.id || 'inconnue'} : invoice_number manquant`);
+  }
+
   let lineTotalAmount = 0;
+  lines.forEach(line => { lineTotalAmount += parseFloat(line.line_net || 0); });
   let taxTotalAmount = 0;
-  lines.forEach(line => { lineTotalAmount += parseFloat(line.line_net); });
-  taxes.forEach(tax => { taxTotalAmount += parseFloat(tax.tax_amount); });
+  taxes.forEach(tax => { taxTotalAmount += parseFloat(tax.tax_amount || 0); });
   const grandTotalAmount = lineTotalAmount + taxTotalAmount;
 
   // XML root
