@@ -1,4 +1,5 @@
 const InvoicesService = require('./invoices.service');
+const pool = require('../../config/db');
 const { getInvoiceById } = require('./invoices.model');
 const { generateInvoicePdf, generateInvoicePdfBuffer: generatePdfUtil } = require('../../utils/invoice-pdf/generateInvoicePdf');
 const path = require("path");
@@ -402,6 +403,35 @@ async function markInvoicePaid(req, res, next) {
   }
 }
 
+async function getInvoiceStatusComment(req, res) {
+  const { id, statusCode } = req.params;
+  const invoiceId = parseInt(id);
+  const code = parseInt(statusCode);
+
+  console.log(`[getInvoiceStatusComment] invoiceId=${invoiceId}, statusCode=${code}`);
+
+  try {
+    const rows = await pool.query(
+      `SELECT client_comment 
+       FROM invoice_status 
+       WHERE invoice_id = $1 AND status_code = $2 
+       ORDER BY created_at DESC 
+       LIMIT 1`,
+      [invoiceId, code]
+    );
+
+    console.log(`[getInvoiceStatusComment] rows returned:`, rows.rows);
+
+    if (rows.rowCount === 0) return res.json({ comment: null });
+
+    res.json({ comment: rows.rows[0].client_comment });
+  } catch (err) {
+    console.error(`[getInvoiceStatusComment] Erreur serveur:`, err);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+}
+
+
 module.exports = {
   listInvoices,
   getInvoice,
@@ -415,5 +445,6 @@ module.exports = {
   getInvoiceStatus,
   refreshInvoiceStatus,
   getInvoiceLifecycle,
-  markInvoicePaid
+  markInvoicePaid,
+  getInvoiceStatusComment
 };

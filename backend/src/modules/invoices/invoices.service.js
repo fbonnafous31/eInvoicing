@@ -308,34 +308,47 @@ async function pollInvoiceStatusPDP(invoiceId, submissionId) {
 // Récupérer le cycle de vie métier d'une facture auprès du PDP
 async function requestInvoiceLifecycle(invoiceId) {
   const response = await axios.post(`${PDP_URL}/${invoiceId}/request-lifecycle`);
-  const { submissionId, status: initialStatus } = response.data;
+  const { submissionId, status: initialStatus, comment } = response.data;
 
-  // Stocker submissionId et statut initial dans la DB
-  await InvoicesModel.updateBusinessStatus(invoiceId, { businessStatus: initialStatus, submissionId });
+  // On ne prend le commentaire que s'il existe
+  const clientComment = comment || null;
 
-  console.log(`📤 Lifecycle requested for invoice ${invoiceId}: submissionId = ${submissionId}, status = ${initialStatus}`);
-  return { invoiceId, submissionId, initialStatus };
+  // Mise à jour en DB
+  await InvoicesModel.updateBusinessStatus(invoiceId, { 
+    businessStatus: initialStatus,
+    submissionId,
+    clientComment
+  });
+
+  console.log(`📤 Lifecycle requested for invoice ${invoiceId}: submissionId = ${submissionId}, status = ${initialStatus}, comment = ${clientComment || 'aucun'}`);
+
+  return { invoiceId, submissionId, initialStatus, clientComment };
 }
 
 // Rafraîchir le cycle de vie métier depuis le PDP
 async function refreshInvoiceLifecycle(invoiceId, submissionId) {
   try {
     const response = await axios.get(`${PDP_URL}/${submissionId}/lifecycle`);
-    const { businessStatus } = response.data;
+    const { businessStatus, comment } = response.data;
 
-    console.log(`📡 Lifecycle refresh for invoice ${invoiceId}: status = ${businessStatus}`);
+    const clientComment = comment || null;
 
-    // Mettre à jour la DB
-    await InvoicesModel.updateBusinessStatus(invoiceId, { businessStatus, submissionId });
+    console.log(`📡 Lifecycle refresh for invoice ${invoiceId}: status = ${businessStatus}, comment = ${clientComment || 'aucun'}`);
+
+    // Mise à jour en DB
+    await InvoicesModel.updateBusinessStatus(invoiceId, { 
+      businessStatus, 
+      submissionId, 
+      clientComment 
+    });
 
     // Retourner directement le nouveau statut pour que le front l'applique immédiatement
-    return businessStatus;
+    return { businessStatus, clientComment };
   } catch (err) {
     console.error(`❌ Erreur refreshInvoiceLifecycle invoice ${invoiceId}:`, err);
     throw new Error("Erreur serveur");
   }
 }
-
 
 async function updateInvoiceLifecycle(invoiceId, lifecycle) {
   const invoice = await InvoicesModel.getInvoiceById(invoiceId);
@@ -345,19 +358,22 @@ async function updateInvoiceLifecycle(invoiceId, lifecycle) {
     ? lifecycle[lifecycle.length - 1]
     : null;
 
+  const clientComment = lastStatus?.comment || null;
+
   // Préparer les données à mettre à jour
   const updatedData = {
     lifecycle,
     status_code: lastStatus?.code || invoice.status_code,
-    business_status_label: lastStatus?.label || invoice.business_status_label
+    business_status_label: lastStatus?.label || invoice.business_status_label,
+    clientComment
   };
 
-  // ⚠️ Protéger la mise à jour si lastStatus est null
   if (lastStatus) {
     await InvoicesModel.updateBusinessStatus(invoiceId, {
       businessStatus: lastStatus.code,
       statusCode: lastStatus.code,
-      statusLabel: lastStatus.label
+      statusLabel: lastStatus.label,
+      clientComment
     });
   } else {
     console.log(`⚠️ Invoice ${invoiceId} : pas de statut métier à appliquer`);

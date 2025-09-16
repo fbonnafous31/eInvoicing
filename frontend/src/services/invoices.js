@@ -152,6 +152,12 @@ export function useInvoiceService() {
     [request]
   );
 
+  const getInvoiceStatusComment = useCallback(
+    (invoiceId, statusCode) =>
+      request(`${API_BASE}/${invoiceId}/status/${statusCode}/comment`),
+    [request]
+  );
+
   return {
     fetchInvoicesBySeller,
     fetchInvoice,
@@ -165,6 +171,7 @@ export function useInvoiceService() {
     refreshInvoiceLifecycle,
     getInvoiceLifecycle,
     pollInvoiceLifecycle,
-    cashInvoice
+    cashInvoice,
+    getInvoiceStatusComment
   };
 }

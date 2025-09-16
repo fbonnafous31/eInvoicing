@@ -38,6 +38,9 @@ router.post('/:id/paid', InvoicesController.markInvoicePaid);
 // Récupérer le cycle métier complet d'une facture
 router.get('/:id/lifecycle', InvoicesController.getInvoiceLifecycle);
 
+// Nouvelle route pour récupérer le commentaire d’un statut précis
+router.get('/:id/status/:statusCode/comment', InvoicesController.getInvoiceStatusComment);
+
 router.post('/generate-pdf', InvoicesController.generateInvoicePdfBuffer);
 
 router.put(

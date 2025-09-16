@@ -499,9 +499,10 @@ async function updateTechnicalStatus(invoiceId, { technicalStatus, submissionId 
 /**
  * Met à jour le statut métier courant et stocke dans l'historique
  * @param {number} invoiceId 
- * @param {Object} data - { businessStatus?, statusCode, statusLabel, submissionId? }
+ * @param {Object} data - { businessStatus?, statusCode, statusLabel, submissionId?, clientComment? }
  */
 async function updateBusinessStatus(invoiceId, data) {
+  // 🔹 Mise à jour du statut métier sur la facture
   const queryUpdateInvoice = `
     UPDATE invoicing.invoices
     SET business_status = $1,
@@ -512,23 +513,29 @@ async function updateBusinessStatus(invoiceId, data) {
   const valuesUpdateInvoice = [data.statusCode, invoiceId];
   const { rows } = await pool.query(queryUpdateInvoice, valuesUpdateInvoice);
 
+  // 🔹 Ajout dans l'historique avec éventuellement le commentaire client
   const queryInsertStatus = `
-    INSERT INTO invoicing.invoice_status(invoice_id, status_code, status_label)
-    VALUES ($1, $2, $3)
+    INSERT INTO invoicing.invoice_status(invoice_id, status_code, status_label, client_comment)
+    VALUES ($1, $2, $3, $4)
     RETURNING *;
   `;
-  const valuesInsertStatus = [invoiceId, data.statusCode, data.statusLabel];
+  const valuesInsertStatus = [
+    invoiceId,
+    data.statusCode,
+    data.statusLabel,
+    data.clientComment || null
+  ];
   await pool.query(queryInsertStatus, valuesInsertStatus);
 
   return rows[0] || null;
 }
 
 /**
- * Récupère l'historique des statuts d'une facture
+ * Récupère l'historique des statuts d'une facture, avec commentaires clients
  */
 async function getInvoiceStatusHistory(invoiceId) {
   const query = `
-    SELECT id, status_code, status_label, created_at
+    SELECT id, status_code, status_label, client_comment, created_at
     FROM invoicing.invoice_status
     WHERE invoice_id = $1
     ORDER BY created_at ASC;
@@ -536,6 +543,7 @@ async function getInvoiceStatusHistory(invoiceId) {
   const { rows } = await db.query(query, [invoiceId]);
   return rows;
 }
+
 
 module.exports = {
   getAllInvoices,

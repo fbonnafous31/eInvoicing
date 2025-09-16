@@ -330,11 +330,27 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
       cell: row => {
         // Si la facture est rejetée, on force "Non renseigné"
         const status = row.technical_status === "rejected" ? "Non renseigné" : row.business_status;
+
+        // On stocke le statusCode pour lequel on veut le commentaire
+        const statusCodeForComment = ["206","207","208","210"].includes(String(row.business_status))
+          ? row.business_status
+          : null;
+
         return (
           <BusinessStatusCell
             row={{ ...row, business_status: status }}
             invoiceService={invoiceService}
             onBusinessStatusChange={onBusinessStatusChange}
+            getStatusComment={async () => {
+              if (!statusCodeForComment) return null;
+              try {
+                const data = await invoiceService.getInvoiceStatusComment(row.id, statusCodeForComment);
+                return data.comment || null;
+              } catch (err) {
+                console.error(`Erreur récupération commentaire pour invoice ${row.id}:`, err);
+                return null;
+              }
+            }}
           />
         );
       }

@@ -87,19 +87,16 @@ app.post('/invoices/:submissionId/lifecycle/request', (req, res) => {
   const sub = submissions[submissionId];
   if (!sub) return res.status(404).json({ error: 'Submission non trouvée' });
 
+  // Si la facture est rejetée, aucun statut métier
   if (sub.technicalStatus === 'rejected') {
     console.log(`⚠️ Facture ${submissionId} rejetée, pas de statut métier ajouté`);
-    return res.json({ invoiceId: sub.invoiceId, lifecycle: [] });
-  }
-
-  const lastStatus = sub.lifecycle[sub.lifecycle.length - 1];
-  if (lastStatus?.code === 208) {
-    console.log(`⚠️ Facture ${submissionId} suspendue, progression bloquée`);
     return res.json({ invoiceId: sub.invoiceId, lifecycle: sub.lifecycle });
   }
 
+  const lastStatus = sub.lifecycle[sub.lifecycle.length - 1];
   const lastCode = lastStatus ? lastStatus.code : 202;
 
+  // Statuts possibles
   const possibleStatuses = [
     { code: 203, label: 'Mise à disposition', probability: 1.0 },
     { code: 204, label: 'Prise en charge', probability: 0.6 },
@@ -111,41 +108,65 @@ app.post('/invoices/:submissionId/lifecycle/request', (req, res) => {
     { code: 211, label: 'Paiement transmis', probability: 1.0 },
   ];
 
+  const statusesWithComment = [206, 207, 208, 210]; // codes nécessitant un commentaire
+
+  const commentsByStatus = {
+    206: [
+      "Approbation partielle : montant inférieur à la facture",
+      "Facture validée partiellement suite contrôle manuel"
+    ],
+    207: [
+      "Litige : incohérence détectée sur le montant",
+      "Litige client, vérification nécessaire"
+    ],
+    208: [
+      "Facture suspendue pour vérification interne",
+      "Suspension temporaire : documents manquants"
+    ],
+    210: [
+      "Refusée : facture non conforme",
+      "Refus PDP : erreur sur la référence client"
+    ]
+  };
+
+  let newStatusAdded = false;
+
   for (let i = 0; i < possibleStatuses.length; i++) {
     const candidate = possibleStatuses[i];
+
     if (candidate.code <= lastCode) continue;
 
-    const rand = Math.random();
-    if (rand <= candidate.probability) {
+    if (Math.random() <= candidate.probability) {
       if (candidate.code === 211 && [208, 210].includes(lastStatus?.code)) continue;
 
-      sub.lifecycle.push({ ...candidate, createdAt: new Date().toISOString() });
-      console.log(`📊 Cycle métier avancé pour ${submissionId} : ${candidate.label}`);
+      // Ajouter un commentaire réaliste uniquement si le code est dans la liste
+      const comment = statusesWithComment.includes(candidate.code)
+        ? commentsByStatus[candidate.code][Math.floor(Math.random() * commentsByStatus[candidate.code].length)]
+        : null;
+
+      sub.lifecycle.push({
+        ...candidate,
+        createdAt: new Date().toISOString(),
+        comment
+      });
+
+      console.log(`📊 Cycle métier avancé pour ${submissionId} : ${candidate.label} (${comment || 'aucun commentaire'})`);
+      newStatusAdded = true;
       break;
     } else {
       console.log(`📊 Facture ${submissionId} : statut ${candidate.label} non tiré (probabilité)`);
     }
   }
 
-  res.json({ invoiceId: sub.invoiceId, lifecycle: sub.lifecycle });
-});
+  // Si aucun statut nouveau n’a été tiré, renvoyer quand même le dernier existant
+  const last = sub.lifecycle[sub.lifecycle.length - 1] || { code: lastCode, comment: null };
 
-// -------------------------------
-// Encaissement spécifique
-// -------------------------------
-app.post('/invoices/:submissionId/paid', (req, res) => {
-  const { submissionId } = req.params;
-  const sub = submissions[submissionId];
-  if (!sub) return res.status(404).json({ error: 'Submission non trouvée' });
-
-  const lastCode = sub.lifecycle.length ? sub.lifecycle[sub.lifecycle.length - 1].code : 0;
-  if (lastCode < 212) {
-    sub.lifecycle.push({ code: 212, label: 'Encaissement constaté', createdAt: new Date().toISOString() });
-    console.log(`💰 Facture ${submissionId} : encaissement constaté`);
-  }
-
-  sub.technicalStatus = 'validated';
-  res.json({ invoiceId: sub.invoiceId, lifecycle: sub.lifecycle });
+  res.json({
+    invoiceId: sub.invoiceId,
+    businessStatus: last.code,
+    comment: last.comment,
+    lifecycle: sub.lifecycle
+  });
 });
 
 // -------------------------------
