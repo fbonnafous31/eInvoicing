@@ -265,6 +265,10 @@ async function pollInvoiceStatusPDP(invoiceId, submissionId) {
   const startTime = Date.now();
   let finalStatus = false;
 
+  // 🔹 Récupérer l'état métier courant
+  const invoice = await InvoicesModel.getInvoiceById(invoiceId);
+  const currentBusinessStatus = Number(invoice.business_status);
+
   while (!finalStatus && Date.now() - startTime < POLLING_TIMEOUT) {
     try {
       // Requête au mock PDP
@@ -281,9 +285,19 @@ async function pollInvoiceStatusPDP(invoiceId, submissionId) {
         finalStatus = true;
         console.log(`✅ Invoice ${invoiceId} reached final status: ${technicalStatus}`);
 
-        const businessData = technicalStatus === 'validated'
-          ? { statusCode: 202, statusLabel: 'Facture conforme' }
-          : { statusCode: 400, statusLabel: 'Rejetée par le PDP' };
+        let businessData;
+
+        if (technicalStatus === 'validated') {
+          // 🔹 Si la facture était suspendue (208), passer à 209
+          if (currentBusinessStatus === 208) {
+            businessData = { statusCode: 209, statusLabel: 'Réémission après suspension' };
+            console.log(`🔄 Statut métier de la facture ${invoiceId} mis à jour à 209 après réception PDP`);
+          } else {
+            businessData = { statusCode: 202, statusLabel: 'Facture conforme' };
+          }
+        } else {
+          businessData = { statusCode: 400, statusLabel: 'Rejetée par le PDP' };
+        }
 
         await InvoicesModel.updateBusinessStatus(invoiceId, businessData);
         console.log(`📌 Statut métier mis à jour pour invoice ${invoiceId}`);
@@ -291,18 +305,7 @@ async function pollInvoiceStatusPDP(invoiceId, submissionId) {
         await new Promise(res => setTimeout(res, POLLING_INTERVAL));
       }
     } catch (err) {
-      if (err.response?.status) {
-        const status = err.response.status;
-        const message = err.response.data?.error || err.message;
-
-        if (status >= 400 && status < 600) {
-          console.error(`❌ Polling failed for invoice ${invoiceId} with HTTP ${status}: ${message}`);
-        }
-      } else {
-        // Erreurs réseau (timeout, PDP inaccessible, etc.)
-        console.error(`❌ Polling failed for invoice ${invoiceId}:`, err.message);
-      }
-
+      console.error(`❌ Polling failed for invoice ${invoiceId}:`, err.message);
       await new Promise(res => setTimeout(res, POLLING_INTERVAL));
     }
   }

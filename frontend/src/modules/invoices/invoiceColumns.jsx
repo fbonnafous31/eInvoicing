@@ -140,48 +140,47 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
                 if (!row?.id) return;
 
                 try {
-                  console.log("📤 Envoi facture id:", row.id);
+                  console.log("📤 [Envoyer] Début envoi facture id:", row.id);
 
-                  // 1️⃣ Envoi de la facture
+                  // 1️⃣ Envoi de la facture au PDP
                   const res = await invoiceService.sendInvoice(row.id);
                   if (!res.submissionId) {
+                    console.warn(`[Envoyer] Facture ${row.id} envoyée mais pas de submissionId pour suivi`);
                     alert("Facture envoyée mais le statut technique ne peut pas être suivi pour l'instant.");
-                    console.log(`[InvoiceColumns] Pas de submissionId pour invoice ${row.id}`);
                     return;
                   }
-                  console.log(`[InvoiceColumns] Facture ${row.id} envoyée, submissionId:`, res.submissionId);
+                  console.log(`[Envoyer] Facture ${row.id} envoyée, submissionId:`, res.submissionId);
                   alert("Facture transmise à la plateforme de facturation.");
 
-                  // 2️⃣ Polling du statut technique
+                  // 2️⃣ Polling du statut technique jusqu'au statut final
+                  console.log(`[Envoyer] Démarrage polling statut technique pour invoice ${row.id}`);
                   const finalStatus = await pollStatus(row.id);
-                  console.log(`[InvoiceColumns] Technical status final pour invoice ${row.id}:`, finalStatus.technicalStatus);
+                  console.log(`[Envoyer] Statut technique final pour invoice ${row.id}:`, finalStatus.technicalStatus);
                   onTechnicalStatusChange?.(row.id, finalStatus.technicalStatus);
 
-                  // 3️⃣ Rafraîchissement du cycle métier (business_status)
-                  console.log(`[InvoiceColumns] Récupération cycle métier pour invoice ${row.id}`);
+                  // 3️⃣ Récupération du dernier statut métier depuis le backend
+                  console.log(`[Envoyer] Récupération cycle métier pour invoice ${row.id}`);
                   const lifecycleResp = await invoiceService.getInvoiceLifecycle(row.id, res.submissionId);
-                  const lastStatus = lifecycleResp?.lifecycle?.[lifecycleResp.lifecycle.length - 1];
+                  const lifecycle = Array.isArray(lifecycleResp.lifecycle) ? lifecycleResp.lifecycle : [];
+                  const lastStatus = lifecycle[lifecycle.length - 1];
 
                   if (lastStatus) {
-                    console.log(`[InvoiceColumns] Statut métier actuel pour invoice ${row.id}:`, lastStatus);
-                    onBusinessStatusChange?.(
-                      row.id,
-                      lastStatus.code,   
-                      lastStatus.label
-                    );
-                  } else {
-                    console.log(`[InvoiceColumns] Aucun statut métier trouvé pour invoice ${row.id}`);
-                  }
+                    console.log(`[Envoyer] Statut métier actuel pour invoice ${row.id}:`, lastStatus);
 
+                    // 4️⃣ Mise à jour immédiate via callback parent
+                    onBusinessStatusChange?.(row.id, lastStatus.code, lastStatus.label);
+                    console.log(`[Envoyer] Ligne mise à jour pour invoice ${row.id}`);
+                  } else {
+                    console.warn(`[Envoyer] Aucun statut métier trouvé pour invoice ${row.id}`);
+                  }
                 } catch (err) {
-                  console.error("❌ Erreur envoi, polling ou rafraîchissement :", err);
+                  console.error("❌ [Envoyer] Erreur envoi / polling / refresh :", err);
                   alert("Impossible de communiquer avec le serveur de facturation, réessayez plus tard.");
                 }
               }}
             >
               📧
             </button>
-
             {/* Bouton rafraîchissement cycle métier */}
             <button
               className="btn btn-sm"
@@ -328,17 +327,18 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
       sortable: true,
       width: '160px',
       cell: row => {
-        // Si la facture est rejetée, on force "Non renseigné"
-        const status = row.technical_status === "rejected" ? "Non renseigné" : row.business_status;
+        // Déterminer le statut affiché : si la facture est rejetée côté technique, afficher "Non renseigné"
+        const displayedStatus = row.technical_status === "rejected" ? "Non renseigné" : row.business_status;
 
-        // On stocke le statusCode pour lequel on veut le commentaire
-        const statusCodeForComment = ["206","207","208","210"].includes(String(row.business_status))
+        // Liste des codes pour lesquels on souhaite récupérer un commentaire
+        const statusCodesWithComment = ["206", "207", "208", "210"];
+        const statusCodeForComment = statusCodesWithComment.includes(String(row.business_status))
           ? row.business_status
           : null;
 
         return (
           <BusinessStatusCell
-            row={{ ...row, business_status: status }}
+            row={{ ...row, business_status: displayedStatus }}
             invoiceService={invoiceService}
             onBusinessStatusChange={onBusinessStatusChange}
             getStatusComment={async () => {
