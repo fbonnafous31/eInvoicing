@@ -257,7 +257,7 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
                   }
                 } catch (err) {
                   console.error("❌ Erreur encaissement :", err);
-                  alert("Erreur lors de l'encaissement de la facture");
+                  alert("Impossible de communiquer avec le serveur de facturation, réessayez plus tard.");
                 }
               }}
             >

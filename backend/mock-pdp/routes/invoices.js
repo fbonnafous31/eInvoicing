@@ -5,18 +5,14 @@ const { createSubmission, getSubmission, updateSubmission } = require('../servic
 
 const router = express.Router();
 
-// -------------------------------
 // Multer : stockage avec nom original
-// -------------------------------
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads/'),
   filename: (req, file, cb) => cb(null, file.originalname)
 });
 const upload = multer({ storage });
 
-// -------------------------------
 // POST /invoices : envoi facture
-// -------------------------------
 router.post('/', upload.single('invoice'), (req, res) => {
   // 🔥 Simule une erreur critique serveur
   // return res.status(500).json({ error: 'Erreur critique PDP simulée' });
@@ -51,18 +47,14 @@ router.post('/', upload.single('invoice'), (req, res) => {
   res.json({ status: 'received', submissionId });
 });
 
-// -------------------------------
 // GET /invoices/:submissionId/status
-// -------------------------------
 router.get('/:submissionId/status', (req, res) => {
   const sub = getSubmission(req.params.submissionId);
   if (!sub) return res.status(404).json({ error: 'Submission non trouvée' });
   res.json({ invoiceId: sub.invoiceId, technicalStatus: sub.technicalStatus });
 });
 
-// -------------------------------
 // POST /invoices/:submissionId/lifecycle/request
-// -------------------------------
 router.post('/:submissionId/lifecycle/request', (req, res) => {
   // 🔥 Simule une erreur critique serveur
   // return res.status(500).json({ error: 'Erreur critique PDP simulée' });
@@ -116,10 +108,11 @@ router.post('/:submissionId/lifecycle/request', (req, res) => {
   res.json({ invoiceId: sub.invoiceId, businessStatus: last.code, comment: last.comment, lifecycle: sub.lifecycle });
 });
 
-// -------------------------------
 // GET /invoices/:submissionId/lifecycle
-// -------------------------------
 router.get('/:submissionId/lifecycle', (req, res) => {
+  // 🔥 Simule une erreur critique serveur
+  // return res.status(500).json({ error: 'Erreur critique PDP simulée' });
+
   const sub = getSubmission(req.params.submissionId);
   if (!sub) return res.status(404).json({ error: 'Submission non trouvée' });
   res.json({ invoiceId: sub.invoiceId, lifecycle: sub.lifecycle });

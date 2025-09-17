@@ -370,30 +370,45 @@ async function markInvoicePaid(req, res, next) {
     const invoice = await InvoicesService.getInvoiceById(invoiceId);
     if (!invoice) return res.status(404).json({ message: 'Facture introuvable' });
 
-    // Forcer le statut 212 en DB
+    // Nouveau statut encaissement
     const newStatus = {
       code: '212',
       label: 'Encaissement constaté',
       date: new Date(),
     };
 
+    // Identifier le submissionId pour la PDP
+    const submissionId = invoice.submission_id;;
+
+    // 🔹 Appel PDP et attendre la réponse
+    try {
+      const response = await axios.post(
+        `http://localhost:4000/invoices/${submissionId}/lifecycle/request`,
+        { status: newStatus.code, label: newStatus.label },
+        { headers: { 'Content-Type': 'application/json' }, timeout: 5000 } // timeout 5s
+      );
+
+      const pdpData = response.data;
+
+      // Vérifier que PDP a bien accepté le statut
+      if (!pdpData || pdpData.businessStatus !== 211) {
+        return res.status(502).json({ 
+          message: 'La plateforme de facturation n’a pas accepté l’encaissement, réessayez plus tard' 
+        });
+      }
+
+    } catch (err) {
+      console.error(`❌ Erreur PDP pour invoice ${invoiceId}:`, err.message);
+      return res.status(502).json({ 
+        message: 'La plateforme de facturation est indisponible, réessayez plus tard' 
+      });
+    }
+
+    // 🔹 Mise à jour DB uniquement si PDP OK
     const lifecycle = Array.isArray(invoice.lifecycle) ? [...invoice.lifecycle] : [];
     lifecycle.push(newStatus);
 
     await InvoicesService.updateInvoiceLifecycle(invoiceId, lifecycle);
-
-    // Envoyer la request au mock, sans contrôle de sa réponse
-    axios.post(
-      `http://localhost:4000/invoices/sub_${invoiceId}_${invoice.timestamp}/lifecycle/request`,
-      { status: newStatus.code, label: newStatus.label },
-      { headers: { 'Content-Type': 'application/json' } }
-    )
-    .then(() => {
-      console.log(`📤 Envoi mock PDP - invoice ${invoiceId} : status=${newStatus.code}, label="${newStatus.label}"`);
-    })
-    .catch(() => {
-      console.log(`ℹ️ Mock PDP invoqué pour invoice ${invoiceId}, réponse ignorée`);
-    });
 
     res.json({ message: 'Facture encaissée', invoiceId, lifecycle, newStatus });
 

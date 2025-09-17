@@ -1,0 +1,10 @@
+.
+├── architecture.txt
+├── routes
+│   └── invoices.js
+├── server.js
+├── services
+│   └── submissions.js
+└── uploads
+
+4 directories, 4 files
