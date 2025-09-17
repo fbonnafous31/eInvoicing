@@ -1,0 +1,22 @@
+.
+├── architeture.txt
+├── clients
+│   ├── clients.controller.js
+│   ├── clients.model.js
+│   ├── clients.route.js
+│   └── clients.service.js
+├── invoices
+│   ├── invoiceAttachments.model.js
+│   ├── invoiceClient.model.js
+│   ├── invoiceClient.service.js
+│   ├── invoices.controller.js
+│   ├── invoices.model.js
+│   ├── invoices.route.js
+│   └── invoices.service.js
+└── sellers
+    ├── sellers.controller.js
+    ├── sellers.model.js
+    ├── sellers.route.js
+    └── sellers.service.js
+
+4 directories, 16 files

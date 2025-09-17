@@ -38,8 +38,11 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
   return [
     {
       name: 'Voir / Modifier / PDF ',
+      style: { textAlign: 'left', paddingLeft: '20px' },
+      ignoreRowClick: true,
+      width: '150px',      
       cell: row => (
-        <div className="d-flex align-items-center gap-2">
+        <div className="d-flex justify-content-end align-items-center gap-2">
           {/* Voir */}
           <button
             className="btn btn-sm btn-link p-0 m-0 align-middle text-decoration-none"
@@ -106,18 +109,17 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
           </button>
         </div>
       ),
-      ignoreRowClick: true,
-      width: '170px',
     },
     {
       name: 'Envoyer / Statut',
+      style: { textAlign: 'left', paddingLeft: '20px' },
       width: '150px',
       cell: row => {
         const isFinalStatus = ["210", "212"].includes(String(row.business_status));
 
         const canRefresh =
-          !isFinalStatus &&                 // Pas final
-          ["received", "validated"].includes(row.technical_status); // Statut PDP valide pour rafraîchir
+          !isFinalStatus &&                
+          ["received", "validated"].includes(row.technical_status); 
 
 
         const canCash = String(row.business_status) === "211";
@@ -304,22 +306,23 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
       name: 'HT',
       selector: row => row.subtotal,
       sortable: true,
-      style: { justifyContent: 'flex-end', textAlign: 'right' },
-      format: row => formatCurrency(row.subtotal)
+      style: { textAlign: 'center' },
+      cell: row => <div style={{ textAlign: 'center' }}>{formatCurrency(row.subtotal)}</div>
     },
     {
       name: 'TVA',
       selector: row => row.total_taxes,
       sortable: true,
-      style: { justifyContent: 'flex-end', textAlign: 'right' },
-      format: row => formatCurrency(row.total_taxes)
+      style: { textAlign: 'center' },
+      cell: row => <div style={{ textAlign: 'center' }}>{formatCurrency(row.total_taxes)}</div>
     },
+
     {
       name: 'TTC',
       selector: row => row.total,
       sortable: true,
-      style: { justifyContent: 'flex-end', textAlign: 'right' },
-      format: row => formatCurrency(row.total)
+      style: { textAlign: 'center' },
+      cell: row => <div style={{ textAlign: 'center' }}>{formatCurrency(row.total)}</div>
     },
     {
       name: 'Statut facture',
@@ -357,6 +360,7 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
     },
     {
       name: 'Statut PDP',
+      style: { textAlign: 'left', paddingLeft: '20px' },
       selector: row => row.technical_status || '',
       sortable: true,
       width: '120px',

@@ -8,30 +8,48 @@ const { saveAttachment, cleanupAttachments } = require("./invoiceAttachments.mod
  * Récupère toutes les factures avec leurs lignes, taxes et justificatifs
  */
 async function getAllInvoices() {
+  // 1. Récupérer toutes les factures de base avec le nom du client joint
   const invoicesResult = await pool.query(
-    `SELECT * FROM invoicing.invoices ORDER BY created_at DESC`
+    `SELECT i.*, ic.legal_name as client_legal_name
+     FROM invoicing.invoices i
+     LEFT JOIN invoicing.invoice_client ic ON i.id = ic.invoice_id
+     ORDER BY i.created_at DESC`
   );
-
-  const invoices = [];
-
-  for (const invoice of invoicesResult.rows) {
-    const [linesResult, taxesResult, attachmentsResult, clientResult] = await Promise.all([
-      pool.query('SELECT * FROM invoicing.invoice_lines WHERE invoice_id = $1', [invoice.id]),
-      pool.query('SELECT * FROM invoicing.invoice_taxes WHERE invoice_id = $1', [invoice.id]),
-      pool.query('SELECT * FROM invoicing.invoice_attachments WHERE invoice_id = $1', [invoice.id]),
-      pool.query('SELECT legal_name FROM invoicing.invoice_client WHERE invoice_id = $1', [invoice.id])
-    ]);
-
-    invoices.push({
-      ...invoice,
-      lines: linesResult.rows,
-      taxes: taxesResult.rows,
-      attachments: attachmentsResult.rows,
-      client_legal_name: clientResult.rows[0]?.legal_name || '' // ici le champ attendu par ta table
-    });
+  if (invoicesResult.rows.length === 0) {
+    return [];
   }
 
-  return invoices;
+  const invoices = invoicesResult.rows;
+  const invoiceIds = invoices.map(inv => inv.id);
+
+  // 2. Récupérer toutes les données liées en 3 requêtes au lieu de N*3
+  const [linesResult, taxesResult, attachmentsResult] = await Promise.all([
+    pool.query('SELECT * FROM invoicing.invoice_lines WHERE invoice_id = ANY($1::int[])', [invoiceIds]),
+    pool.query('SELECT * FROM invoicing.invoice_taxes WHERE invoice_id = ANY($1::int[])', [invoiceIds]),
+    pool.query('SELECT * FROM invoicing.invoice_attachments WHERE invoice_id = ANY($1::int[])', [invoiceIds])
+  ]);
+
+  // 3. Mapper les données pour un accès rapide
+  const linesByInvoiceId = linesResult.rows.reduce((acc, line) => {
+    (acc[line.invoice_id] = acc[line.invoice_id] || []).push(line);
+    return acc;
+  }, {});
+  const taxesByInvoiceId = taxesResult.rows.reduce((acc, tax) => {
+    (acc[tax.invoice_id] = acc[tax.invoice_id] || []).push(tax);
+    return acc;
+  }, {});
+  const attachmentsByInvoiceId = attachmentsResult.rows.reduce((acc, attachment) => {
+    (acc[attachment.invoice_id] = acc[attachment.invoice_id] || []).push(attachment);
+    return acc;
+  }, {});
+
+  // 4. Assembler le résultat final
+  return invoices.map(invoice => ({
+    ...invoice,
+    lines: linesByInvoiceId[invoice.id] || [],
+    taxes: taxesByInvoiceId[invoice.id] || [],
+    attachments: attachmentsByInvoiceId[invoice.id] || [],
+  }));
 }
 
 /**
@@ -42,7 +60,7 @@ async function getInvoiceById(id) {
   if (invoiceResult.rows.length === 0) return null;
   const invoice = invoiceResult.rows[0];  
 
-  const [linesResult, taxesResult, attachmentsResult, clientResult] = await Promise.all([
+  const [linesResult, taxesResult, attachmentsResult, clientResult, seller] = await Promise.all([
     pool.query('SELECT * FROM invoicing.invoice_lines WHERE invoice_id = $1', [id]),
     pool.query('SELECT * FROM invoicing.invoice_taxes WHERE invoice_id = $1', [id]),
     pool.query('SELECT * FROM invoicing.invoice_attachments WHERE invoice_id = $1', [id]),
@@ -50,20 +68,13 @@ async function getInvoiceById(id) {
     invoice.seller_id ? getSellerById(invoice.seller_id) : Promise.resolve(null)
   ]);
 
-  const client = clientResult.rows[0] || null;
-
-  let seller = null;
-  if (invoice.seller_id) {
-    seller = await getSellerById(invoice.seller_id);
-  }
-  
   return {
     ...invoice,
     lines: linesResult.rows,
     taxes: taxesResult.rows,
     attachments: attachmentsResult.rows,
-    client,
-    seller
+    client: clientResult.rows[0] || null,
+    seller // Utilise le seller récupéré via Promise.all
   };
 }
 
@@ -221,8 +232,6 @@ async function deleteInvoice(id) {
   );
   return result.rows[0] || null;
 }
-
-module.exports = { createInvoice, deleteInvoice };
 
 /**
  * Met à jour une facture complète (facture, client, lignes, taxes, attachments)
@@ -540,11 +549,28 @@ async function getInvoiceStatusHistory(invoiceId) {
     WHERE invoice_id = $1
     ORDER BY created_at ASC;
   `;
-  const { rows } = await db.query(query, [invoiceId]);
+  const { rows } = await pool.query(query, [invoiceId]);
   return rows;
 }
 
+/**
+ * Récupère le commentaire pour un statut de facture spécifique.
+ */
+async function getInvoiceStatusComment(invoiceId, statusCode) {
+  const query = `
+    SELECT client_comment
+    FROM invoicing.invoice_status
+    WHERE invoice_id = $1 AND status_code = $2
+    ORDER BY created_at DESC
+    LIMIT 1;
+  `;
+  const { rows } = await pool.query(query, [invoiceId, statusCode]);
+  // Note: Cette requête suppose que la colonne 'client_comment' existe.
+  // Pensez à l'ajouter à votre table 'invoicing.invoice_status'.
+  return rows[0]?.client_comment || null;
+}
 
+// Export de toutes les fonctions du modèle
 module.exports = {
   getAllInvoices,
   getInvoiceById,
@@ -555,4 +581,5 @@ module.exports = {
   updateTechnicalStatus,
   updateBusinessStatus,
   getInvoiceStatusHistory,
+  getInvoiceStatusComment,
 };
