@@ -175,7 +175,7 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
 
                 } catch (err) {
                   console.error("❌ Erreur envoi, polling ou rafraîchissement :", err);
-                  alert("Erreur lors de l'envoi, du polling ou du rafraîchissement du cycle métier");
+                  alert("Impossible de communiquer avec le serveur de facturation, réessayez plus tard.");
                 }
               }}
             >
@@ -214,7 +214,7 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
                   }
                 } catch (err) {
                   console.error("❌ Erreur rafraîchissement cycle métier :", err);
-                  alert("Erreur lors du rafraîchissement du cycle métier");
+                  alert("Impossible de communiquer avec le serveur de facturation, réessayez plus tard.");
                 }
               }}
             >

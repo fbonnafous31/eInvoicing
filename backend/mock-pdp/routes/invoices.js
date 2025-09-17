@@ -18,6 +18,9 @@ const upload = multer({ storage });
 // POST /invoices : envoi facture
 // -------------------------------
 router.post('/', upload.single('invoice'), (req, res) => {
+  // 🔥 Simule une erreur critique serveur
+  // return res.status(500).json({ error: 'Erreur critique PDP simulée' });
+  
   if (!req.file) return res.status(400).json({ error: 'Fichier manquant' });
 
   let metadata = null;
@@ -61,6 +64,9 @@ router.get('/:submissionId/status', (req, res) => {
 // POST /invoices/:submissionId/lifecycle/request
 // -------------------------------
 router.post('/:submissionId/lifecycle/request', (req, res) => {
+  // 🔥 Simule une erreur critique serveur
+  // return res.status(500).json({ error: 'Erreur critique PDP simulée' });
+
   const sub = getSubmission(req.params.submissionId);
   if (!sub) return res.status(404).json({ error: 'Submission non trouvée' });
 

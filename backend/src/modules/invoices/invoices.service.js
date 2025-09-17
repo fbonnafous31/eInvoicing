@@ -291,11 +291,18 @@ async function pollInvoiceStatusPDP(invoiceId, submissionId) {
         await new Promise(res => setTimeout(res, POLLING_INTERVAL));
       }
     } catch (err) {
-      if (err.response && (err.response.status === 400 || err.response.status === 500)) {
-        console.error(`❌ Polling failed for invoice ${invoiceId} with HTTP ${err.response.status}:`, err.message);
+      if (err.response?.status) {
+        const status = err.response.status;
+        const message = err.response.data?.error || err.message;
+
+        if (status >= 400 && status < 600) {
+          console.error(`❌ Polling failed for invoice ${invoiceId} with HTTP ${status}: ${message}`);
+        }
       } else {
-        // Autres erreurs, on ignore pour continuer le polling
+        // Erreurs réseau (timeout, PDP inaccessible, etc.)
+        console.error(`❌ Polling failed for invoice ${invoiceId}:`, err.message);
       }
+
       await new Promise(res => setTimeout(res, POLLING_INTERVAL));
     }
   }
