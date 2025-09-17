@@ -1,0 +1,8 @@
+/* Make react-datepicker fit with Bootstrap */
+.react-datepicker-wrapper {
+  display: block; /* Take full width like other form controls */
+}
+
+.react-datepicker__input-container .form-control {
+  width: 100%;
+}

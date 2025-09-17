@@ -1,6 +1,7 @@
 // invoices.service.js
 const InvoicesModel = require('./invoices.model');
 const InvoiceArtifactService = require('./invoiceArtifact.service');
+const InvoiceStatusModel = require('./invoiceStatus.model');
 
 async function listInvoices() {
   return await InvoicesModel.getAllInvoices();
@@ -56,7 +57,7 @@ async function getInvoiceById(id) {
 }
 
 async function getInvoiceStatusComment(invoiceId, statusCode) {
-  return await InvoicesModel.getInvoiceStatusComment(invoiceId, statusCode);
+  return await InvoiceStatusModel.getInvoiceStatusComment(invoiceId, statusCode);
 }
 
 module.exports = {

@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const InvoicesModel = require('./invoices.model');
+const InvoiceStatusModel = require('./invoiceStatus.model');
 const SellersModel = require('../sellers/sellers.service');
 const ClientsModel = require('../clients/clients.service');
 
@@ -70,7 +71,7 @@ async function sendInvoice(invoiceId) {
 
   const { status: initialStatus, submissionId } = response.data;
 
-  await InvoicesModel.updateTechnicalStatus(invoiceId, { technicalStatus: initialStatus, submissionId });
+  await InvoiceStatusModel.updateTechnicalStatus(invoiceId, { technicalStatus: initialStatus, submissionId });
   console.log(`✅ Facture ${invoiceId} envoyée :`, response.data);
 
   // Lancer le polling en arrière-plan
@@ -100,7 +101,7 @@ async function pollInvoiceStatusPDP(invoiceId, submissionId) {
 
       console.log(`📡 Polling invoice ${invoiceId}: status = ${technicalStatus}`);
 
-      await InvoicesModel.updateTechnicalStatus(invoiceId, { technicalStatus, submissionId });
+      await InvoiceStatusModel.updateTechnicalStatus(invoiceId, { technicalStatus, submissionId });
 
       if (technicalStatus === 'validated' || technicalStatus === 'rejected') {
         finalStatus = true;
@@ -118,7 +119,7 @@ async function pollInvoiceStatusPDP(invoiceId, submissionId) {
           businessData = { statusCode: 400, statusLabel: 'Rejetée par le PDP' };
         }
 
-        await InvoicesModel.updateBusinessStatus(invoiceId, businessData);
+        await InvoiceStatusModel.updateBusinessStatus(invoiceId, businessData);
         console.log(`📌 Statut métier mis à jour pour invoice ${invoiceId}`);
       } else {
         await new Promise(res => setTimeout(res, POLLING_INTERVAL));
@@ -141,7 +142,7 @@ async function requestInvoiceLifecycle(invoiceId) {
   const { submissionId, status: initialStatus, comment } = response.data;
   const clientComment = comment || null;
 
-  await InvoicesModel.updateBusinessStatus(invoiceId, { 
+  await InvoiceStatusModel.updateBusinessStatus(invoiceId, { 
     businessStatus: initialStatus,
     submissionId,
     clientComment
@@ -159,7 +160,7 @@ async function refreshInvoiceLifecycle(invoiceId, submissionId) {
 
     console.log(`📡 Lifecycle refresh for invoice ${invoiceId}: status = ${businessStatus}, comment = ${clientComment || 'aucun'}`);
 
-    await InvoicesModel.updateBusinessStatus(invoiceId, { 
+    await InvoiceStatusModel.updateBusinessStatus(invoiceId, { 
       businessStatus, 
       submissionId, 
       clientComment 
@@ -180,7 +181,7 @@ async function updateInvoiceLifecycle(invoiceId, lifecycle) {
   const clientComment = lastStatus?.comment || null;
 
   if (lastStatus) {
-    await InvoicesModel.updateBusinessStatus(invoiceId, {
+    await InvoiceStatusModel.updateBusinessStatus(invoiceId, {
       businessStatus: lastStatus.code,
       statusCode: lastStatus.code,
       statusLabel: lastStatus.label,

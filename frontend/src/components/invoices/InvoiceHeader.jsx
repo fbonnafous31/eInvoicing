@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { paymentTermsOptions } from "../../constants/paymentTerms";
 import { paymentMethodsOptions } from '../../constants/paymentMethods';
-import { FormSection, InputField, SelectField } from '@/components/form';
+import { FormSection, InputField, SelectField, DatePickerField } from '@/components/form';
 import { useSellerService } from "../../services/sellers";
 import { validateInvoiceField } from "../../utils/validators/invoice";
 import { validateIssueDate } from "../../utils/validators/issueDate";
@@ -99,9 +99,8 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
           disabled={disabled} 
         />
 
-        <InputField
+        <DatePickerField
           id="issue_date"
-          type="date"
           label="Date émission"
           value={data.issue_date || ""}
           onChange={val => handleChange("issue_date", val)}
@@ -174,9 +173,8 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
       </FormSection>
 
       {/* Date de livraison */}
-      <InputField
+      <DatePickerField
         id="supply_date"
-        type="date"
         label="Date de livraison"
         value={data.supply_date || ""}
         onChange={val => handleChange("supply_date", val)}
