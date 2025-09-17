@@ -372,8 +372,8 @@ async function updateInvoiceLifecycle(invoiceId, lifecycle) {
   // Préparer les données à mettre à jour
   const updatedData = {
     lifecycle,
-    status_code: lastStatus?.code || invoice.status_code,
-    business_status_label: lastStatus?.label || invoice.business_status_label,
+    status_code: lastStatus?.code ?? invoice.status_code,
+    business_status_label: lastStatus?.label ?? invoice.business_status_label,
     clientComment
   };
 
@@ -388,6 +388,7 @@ async function updateInvoiceLifecycle(invoiceId, lifecycle) {
     console.log(`⚠️ Invoice ${invoiceId} : pas de statut métier à appliquer`);
   }
 
+  // Retourner toujours l’état mis à jour
   return { ...invoice, ...updatedData };
 }
 

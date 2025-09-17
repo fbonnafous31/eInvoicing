@@ -301,29 +301,20 @@ async function refreshInvoiceStatus(req, res, next) {
     if (!invoice) return res.status(404).json({ message: 'Facture introuvable' });
     if (!invoice.submission_id) return res.status(400).json({ message: 'Facture non encore envoyée au PDP' });
 
-    // Avancer le cycle métier côté mock PDP
+    // 🔹 Appel PDP pour avancer le cycle métier
     const pduResponse = await axios.post(
       `http://localhost:4000/invoices/${invoice.submission_id}/lifecycle/request`
     );
-    const lifecycle = pduResponse.data.lifecycle || [];
+    let lifecycle = pduResponse.data.lifecycle || [];
 
-    // Mettre à jour le cycle complet dans la DB
-    await InvoicesService.updateInvoiceLifecycle(invoiceId, lifecycle);
-
-    // Dernier statut métier
-    const lastStatus = lifecycle[lifecycle.length - 1] || { code: null, label: 'Non renseigné' };
-
-    // Si le dernier code est 211 (Paiement transmis), passer à 212
-    if (lastStatus.code === 211) {
-      await InvoicesService.updateInvoice(invoiceId, { business_status: 212 });
-      lastStatus.code = 212;
-      lastStatus.label = 'Encaissée';
-    }
+    // 🔹 Mise à jour du lifecycle complet dans la DB (model gère le status et l’historique)
+    const updatedInvoice = await InvoicesService.updateInvoiceLifecycle(invoiceId, lifecycle);
 
     res.json({
       invoiceId,
-      lastStatus,
-      lifecycle
+      lastStatus: lifecycle[lifecycle.length - 1] || { code: null, label: 'Non renseigné' },
+      lifecycle,
+      updatedInvoice
     });
   } catch (err) {
     console.error('Erreur refreshInvoiceStatus:', err);
@@ -372,25 +363,24 @@ async function markInvoicePaid(req, res, next) {
 
     // Nouveau statut encaissement
     const newStatus = {
-      code: '212',
+      code: 212, // garder en number pour cohérence
       label: 'Encaissement constaté',
       date: new Date(),
     };
 
-    // Identifier le submissionId pour la PDP
-    const submissionId = invoice.submission_id;;
+    const submissionId = invoice.submission_id;
 
     // 🔹 Appel PDP et attendre la réponse
     try {
       const response = await axios.post(
         `http://localhost:4000/invoices/${submissionId}/lifecycle/request`,
         { status: newStatus.code, label: newStatus.label },
-        { headers: { 'Content-Type': 'application/json' }, timeout: 5000 } // timeout 5s
+        { headers: { 'Content-Type': 'application/json' }, timeout: 5000 }
       );
 
       const pdpData = response.data;
 
-      // Vérifier que PDP a bien accepté le statut
+      // Vérifier que PDP a bien accepté le statut 211 avant encaissement
       if (!pdpData || pdpData.businessStatus !== 211) {
         return res.status(502).json({ 
           message: 'La plateforme de facturation n’a pas accepté l’encaissement, réessayez plus tard' 
@@ -404,11 +394,12 @@ async function markInvoicePaid(req, res, next) {
       });
     }
 
-    // 🔹 Mise à jour DB uniquement si PDP OK
+    // 🔹 Mise à jour uniquement du lifecycle et du statut métier
     const lifecycle = Array.isArray(invoice.lifecycle) ? [...invoice.lifecycle] : [];
     lifecycle.push(newStatus);
 
-    await InvoicesService.updateInvoiceLifecycle(invoiceId, lifecycle);
+    // Update business_status et lifecycle sans toucher aux attachments, lines ou taxes
+    await InvoicesService.updateInvoiceLifecycle(invoiceId, newStatus);
 
     res.json({ message: 'Facture encaissée', invoiceId, lifecycle, newStatus });
 
