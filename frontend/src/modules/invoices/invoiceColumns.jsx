@@ -6,7 +6,7 @@ import TechnicalStatusCell from './TechnicalStatusCell';
 import BusinessStatusCell from './BusinessStatusCell';
 import { FaFilePdf } from "react-icons/fa";
 import { canSendInvoice } from '../../utils/businessRules/invoiceStatus';
-export default function useInvoiceColumns(invoiceService, onTechnicalStatusChange, onBusinessStatusChange) {
+export default function useInvoiceColumns(invoiceService, onTechnicalStatusChange, onBusinessStatusChange, onInvoiceUpdate) {
   const navigate = useNavigate();
 
   // -------------------- Polling du statut technique --------------------
@@ -185,44 +185,50 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
             >
               📧
             </button>
-            {/* Bouton rafraîchissement cycle métier */}
-            <button
-              className="btn btn-sm"
-              title={
-                !canRefresh
-                  ? row.business_status === "212"
-                    ? "Facture déjà encaissée"
-                    : "Impossible de rafraîchir : statut PDP non reçu ou validé"
-                  : "Rafraîchir le cycle de vie métier"
-              }
-              style={{
-                pointerEvents: canRefresh ? "auto" : "none",
-                border: "none",
-                opacity: canRefresh ? 1 : 0.5,
-              }}
-              disabled={isFinalStatus || !canRefresh}
-              onClick={async () => {
-                if (!row?.id) return;
+{/* Bouton rafraîchissement cycle métier */}
+<button
+  className="btn btn-sm"
+  title={
+    !canRefresh
+      ? row.business_status === "212"
+        ? "Facture déjà encaissée"
+        : "Impossible de rafraîchir : statut PDP non reçu ou validé"
+      : "Rafraîchir le cycle de vie métier"
+  }
+  style={{
+    pointerEvents: canRefresh ? "auto" : "none",
+    border: "none",
+    opacity: canRefresh ? 1 : 0.5,
+  }}
+  disabled={isFinalStatus || !canRefresh}
+  onClick={async () => {
+    if (!row?.id) return;
 
-                try {
-                  // 1️⃣ On demande au backend de rafraîchir le cycle
-                  await invoiceService.refreshInvoiceLifecycle(row.id, row.submission_id);
+    try {
+      // 1️⃣ On demande au backend de rafraîchir le cycle PDP si nécessaire
+      await invoiceService.refreshInvoiceLifecycle(row.id, row.submission_id);
 
-                  // 2️⃣ On récupère le statut métier exact depuis la DB
-                  const lifecycleData = await invoiceService.getInvoiceLifecycle(row.id);
-                  const lifecycle = Array.isArray(lifecycleData.lifecycle) ? lifecycleData.lifecycle : [];
-                  if (lifecycle.length > 0) {
-                    const lastStatusRaw = lifecycle[lifecycle.length - 1];
-                    onBusinessStatusChange?.(row.id, lastStatusRaw.code, lastStatusRaw.label);
-                  }
-                } catch (err) {
-                  console.error("❌ Erreur rafraîchissement cycle métier :", err);
-                  alert("Impossible de communiquer avec le serveur de facturation, réessayez plus tard.");
-                }
-              }}
-            >
-              🔄
-            </button>
+      // 2️⃣ On récupère la facture complète depuis la DB
+      const invoice = await invoiceService.fetchInvoice(row.id);
+      if (!invoice) return;
+
+      // ⚡ Met à jour le cycle métier
+      const lifecycle = Array.isArray(invoice.lifecycle) ? invoice.lifecycle : [];
+      if (lifecycle.length > 0) {
+        const lastStatusRaw = lifecycle[lifecycle.length - 1];
+        onBusinessStatusChange?.(row.id, lastStatusRaw.code, lastStatusRaw.label);
+      }
+
+      // ⚡ Met à jour le statut principal / technique pour le front (activation boutons)
+      onInvoiceUpdate?.(invoice); // <-- callback à définir dans ton state pour mettre à jour la ligne
+    } catch (err) {
+      console.error("❌ Erreur rafraîchissement cycle métier :", err);
+      alert("Impossible de communiquer avec le serveur de facturation, réessayez plus tard.");
+    }
+  }}
+>
+  🔄
+</button>
 
             {/* Bouton encaissement */}
             <button

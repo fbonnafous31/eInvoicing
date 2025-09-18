@@ -34,13 +34,21 @@ export default function InvoicesList() {
     );
   };
 
+  const onInvoiceUpdate = (updatedInvoice) => {
+    setInvoices((prev) =>
+      prev.map((inv) => (inv.id === updatedInvoice.id ? updatedInvoice : inv))
+    );
+  };
+
+
   // -------------------------------
   // Colonnes avec callbacks
   // -------------------------------
   const columns = useInvoiceColumns(
     invoiceService,
     handleTechnicalStatusChange,
-    handleBusinessStatusChange
+    handleBusinessStatusChange,
+    onInvoiceUpdate 
   );
 
   // -------------------------------
