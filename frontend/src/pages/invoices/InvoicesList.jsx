@@ -12,7 +12,6 @@ import { BUSINESS_STATUSES } from '../../constants/businessStatuses';
 export default function InvoicesList() {
   const [invoices, setInvoices] = useState([]);
   const [filterText, setFilterText] = useState('');
-  const [version, setVersion] = useState(0); // compteur pour forcer re-render
 
   const invoiceService = useInvoiceService();
 
@@ -23,7 +22,6 @@ export default function InvoicesList() {
     setInvoices(prev =>
       prev.map(inv => (inv.id === invoiceId ? { ...inv, technical_status: newStatus } : inv))
     );
-    setVersion(v => v + 1); 
   };
 
   const handleBusinessStatusChange = (invoiceId, statusCode, statusLabel) => {
@@ -34,7 +32,6 @@ export default function InvoicesList() {
           : inv
       )
     );
-    setVersion(v => v + 1); 
   };
 
   // -------------------------------
@@ -73,24 +70,26 @@ export default function InvoicesList() {
     };
   }, [fetchInvoicesBySeller]);
 
-  const filteredItems = invoices.filter(item =>
-    Object.entries(item).some(([key, val]) => {
-      // Business status
-      if (key === 'business_status' || key === 'status') {
-        const code = parseInt(val, 10);
-        if (!isNaN(code) && BUSINESS_STATUSES[code]) {
-          val = BUSINESS_STATUSES[code].label;
+  const filteredItems = React.useMemo(() => {
+    return invoices.filter(item =>
+      Object.entries(item).some(([key, val]) => {
+        // Business status
+        if (key === 'business_status' || key === 'status') {
+          const code = parseInt(val, 10);
+          if (!isNaN(code) && BUSINESS_STATUSES[code]) {
+            val = BUSINESS_STATUSES[code].label;
+          }
         }
-      }
 
-      // Technical status
-      if (key === 'technical_status') {
-        val = FR.technicalStatus[val?.toLowerCase()] || val;
-      }
+        // Technical status
+        if (key === 'technical_status') {
+          val = FR.technicalStatus[val?.toLowerCase()] || val;
+        }
 
-      return val && val.toString().toLowerCase().includes(filterText.toLowerCase());
-    })
-  );
+        return val && val.toString().toLowerCase().includes(filterText.toLowerCase());
+      })
+    );
+  }, [invoices, filterText]);
 
   // -------------------------------
   // Breadcrumb
@@ -118,7 +117,6 @@ export default function InvoicesList() {
       />
 
       <DataTable
-        key={version} // forcer re-render à chaque changement de statut
         style={{ width: '100vw' }}
         columns={columns}
         data={filteredItems}

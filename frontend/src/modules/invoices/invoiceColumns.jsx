@@ -5,7 +5,7 @@ import { formatCurrency, formatDate } from '../../utils/formatters/formatters';
 import TechnicalStatusCell from './TechnicalStatusCell';
 import BusinessStatusCell from './BusinessStatusCell';
 import { FaFilePdf } from "react-icons/fa";
-
+import { canSendInvoice } from '../../utils/businessRules/invoiceStatus';
 export default function useInvoiceColumns(invoiceService, onTechnicalStatusChange, onBusinessStatusChange) {
   const navigate = useNavigate();
 
@@ -42,6 +42,7 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
       ignoreRowClick: true,
       width: '150px',      
       cell: row => (
+        // console.log("Rendering action cell for row:", row),
         <div className="d-flex justify-content-end align-items-center gap-2">
           {/* Voir */}
           <button
@@ -116,6 +117,7 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
       width: '150px',
       cell: row => {
         const isFinalStatus = ["210", "212"].includes(String(row.business_status));
+        const canSend = canSendInvoice(row);
 
         const canRefresh =
           !isFinalStatus &&                
@@ -133,13 +135,13 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
                 background: "transparent",
                 border: "none",
                 padding: "2px 6px",
-                cursor: isFinalStatus ? "not-allowed" : "pointer",
-                opacity: isFinalStatus ? 0.5 : 1,
+                cursor: canSend ? "pointer" : "not-allowed",
+                opacity: canSend ? 1 : 0.5,
               }}
-              title={isFinalStatus ? "Action impossible : statut final" : "Envoyer la facture"}
-              disabled={isFinalStatus}
+              title={canSend ? "Envoyer la facture" : "Action impossible : statut non valide"}
+              disabled={!canSend}
               onClick={async () => {
-                if (!row?.id) return;
+                if (!row?.id || !canSend) return;
 
                 try {
                   console.log("📤 [Envoyer] Début envoi facture id:", row.id);
@@ -240,25 +242,19 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
                 try {
                   console.log(`💰 Encaissement invoice id: ${row.id}`);
 
-                  // 1️⃣ Appel backend pour marquer la facture comme payée
-                  const newStatus = await invoiceService.cashInvoice(row.id);
+                  // Appel backend pour marquer la facture comme payée
+                  const res = await invoiceService.cashInvoice(row.id);
 
-                  // 2️⃣ Récupération du dernier statut métier directement depuis la réponse
-                  const lastStatusRaw = newStatus?.lifecycle?.[newStatus.lifecycle.length - 1];
-
-                  if (lastStatusRaw) {
-                    // 3️⃣ Mise à jour immédiate dans le tableau
-                    onBusinessStatusChange?.(row.id, lastStatusRaw.code, lastStatusRaw.label);
-                    console.log(`[InvoiceColumns] Statut métier mis à jour pour invoice ${row.id}:`, lastStatusRaw);
-
-                    alert("Envoi du statut encaissement à la plateforme de facturation.");
-                  } else {
-                    console.warn(`[InvoiceColumns] Aucun statut métier trouvé pour invoice ${row.id}`);
-                    alert("Facture encaissée, mais pas de statut métier trouvé !");
+                  // Mise à jour immédiate côté front
+                  if (res?.newStatus) {
+                    onBusinessStatusChange?.(row.id, res.newStatus.code, res.newStatus.label);
+                    console.log(`[InvoiceColumns] Facture ${row.id} encaissée, statut:`, res.newStatus);
                   }
+
+                  alert("Encaissement effectué !");
                 } catch (err) {
                   console.error("❌ Erreur encaissement :", err);
-                  alert("Impossible de communiquer avec le serveur de facturation, réessayez plus tard.");
+                  alert("Impossible de communiquer avec le serveur, réessayez plus tard.");
                 }
               }}
             >

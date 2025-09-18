@@ -68,98 +68,95 @@
 
 
 ## 📌 Prochaines étapes
-- **Finalisation de la conformité PDF/A-3** : Résoudre les derniers points techniques (ex: profils de couleur, `AFRelationship`) pour obtenir une validation ISO 19005-3 complète.
 - **Industrialisation** :
   - Mise en place de tests unitaires et d'intégration (`Vitest`).
   - Logging et monitoring des API.
   - Préparation au déploiement (CI/CD).
-
-## Architecture projet
-project/
-│
-├── frontend/
-│ ├── public/
-│ ├── src/
-│ │ ├── components/
-│ │ ├── pages/
-│ │ ├── modules/
-│ │ │ ├── sellers/
-│ │ │ ├── buyers/
-│ │ │ └── invoices/
-│ │ └── utils/
-│ └── package.json
-│
-├── backend/
-│ ├── src/
-│ │ ├── config/
-│ │ ├── modules/
-│ │ │ ├── sellers/
-│ │ │ │ ├── sellers.model.js
-│ │ │ │ ├── sellers.controller.js
-│ │ │ │ ├── sellers.routes.js
-│ │ │ │ └── sellers.service.js
-│ │ │ ├── buyers/
-│ │ │ └── invoices/
-│ │ ├── middlewares/
-│ │ └── utils/
-│ ├── package.json
-│ └── server.js
-│
-├── docs/
-├── scripts/
-└── README.md
+- **Finalisation de la conformité PDF/A-3** : Résoudre les derniers points techniques (ex: profils de couleur, `AFRelationship`) pour obtenir une validation ISO 19005-3 complète.
 
 ## Architecture backend
+
 .
-├── architecture.txt
 ├── config
 │   └── db.js
 ├── middlewares
+│   ├── attachSeller.js
+│   ├── auth.js
 │   ├── errorHandler.js
 │   └── upload.js
 ├── modules
-│   ├── clients
-│   │   ├── clients.controller.js
-│   │   ├── clients.model.js
-│   │   ├── clients.route.js
-│   │   └── clients.service.js
-│   ├── invoices
-│   │   ├── invoiceAttachments.model.js
-│   │   ├── invoiceClient.model.js
-│   │   ├── invoiceClient.service.js
-│   │   ├── invoices.controller.js
-│   │   ├── invoices.model.js
-│   │   ├── invoices.route.js
-│   │   └── invoices.service.js
-│   └── sellers
-│       ├── sellers.controller.js
-│       ├── sellers.model.js
-│       ├── sellers.route.js
-│       └── sellers.service.js
+│   ├── clients
+│   │   ├── clients.controller.js
+│   │   ├── clients.model.js
+│   │   ├── clients.route.js
+│   │   └── clients.service.js
+│   ├── invoices
+│   │   ├── invoiceAttachments.model.js
+│   │   ├── invoiceClient.model.js
+│   │   ├── invoiceClient.service.js
+│   │   ├── invoices.controller.js
+│   │   ├── invoices.model.js
+│   │   ├── invoices.route.js
+│   │   └── invoices.service.js
+│   └── sellers
+│       ├── sellers.controller.js
+│       ├── sellers.model.js
+│       ├── sellers.route.js
+│       └── sellers.service.js
+├── uploads
+│   ├── factur-x
+│   ├── invoices
+│   ├── pdf
+│   ├── pdf-a3
+│   └── pdp
 └── utils
     ├── facturx-generator.js
+    ├── facturx-template.xmp
     ├── fileNaming.js
-    └── invoice-pdf
-        └── generateInvoicePdf.js
+    ├── invoice-pdf
+    │   ├── generateInvoicePdf.js
+    │   ├── logo.png
+    │   └── testGenerate.js
+    ├── pdf-generator.js
+    ├── pdf-postprocess.js
+    ├── siret.js
+    ├── xmp-helper.js
+    └── xmp-injector.js
 
 ## Architecture frontend
 .
 ├── App.css
 ├── App.jsx
 ├── AppRoutes.jsx
-├── architecture.txt
 ├── assets
-│   └── react.svg
+│   ├── pdf.worker.min.mjs
+│   ├── react.svg
+│   └── sample-invoice.pdf
+├── AuthProvider.jsx
 ├── components
-│   ├── Breadcrumb.jsx
+│   ├── architecture.txt
+│   ├── auth
+│   │   ├── LoginButton.jsx
+│   │   ├── LogoutButton.jsx
+│   │   └── PrivateRoute.jsx
 │   ├── common
 │   │   ├── AuditPanel.jsx
 │   │   └── EllipsisCell.jsx
 │   ├── form
+│   │   ├── DatePickerField.css
+│   │   ├── DatePickerField.jsx
 │   │   ├── FormSection.jsx
+│   │   ├── index.js
+│   │   ├── InputEmail.jsx
 │   │   ├── InputField.jsx
+│   │   ├── InputPhone.jsx
+│   │   ├── InputPostalCode.jsx
+│   │   ├── InputSiret.jsx
 │   │   ├── SelectField.jsx
 │   │   └── TextAreaField.jsx
+│   ├── guard
+│   │   ├── RequireNoSeller.jsx
+│   │   └── RequireSeller.jsx
 │   ├── invoices
 │   │   ├── InvoiceClient.jsx
 │   │   ├── InvoiceForm.jsx
@@ -168,12 +165,25 @@ project/
 │   │   ├── InvoiceTabs.jsx
 │   │   ├── PdfViewer.jsx
 │   │   ├── SupportingDocs.jsx
-│   │   └── TaxBases.jsx
-│   └── NavBar.jsx
+│   │   ├── TaxBases.jsx
+│   │   └── TestPdfViewer.jsx
+│   ├── layout
+│   │   ├── Breadcrumb.jsx
+│   │   ├── NavBar.css
+│   │   └── NavBar.jsx
+│   └── ui
+│       └── buttons
 ├── constants
+│   ├── businessStatuses.js
 │   ├── companyTypes.js
-│   └── paymentTerms.js
+│   ├── paymentMethods.js
+│   ├── paymentTerms.js
+│   └── translations.js
+├── hooks
+│   └── useAuth.js
 ├── index.css
+├── LoginPage.css
+├── LoginPage.jsx
 ├── main.jsx
 ├── modules
 │   ├── clients
@@ -183,12 +193,15 @@ project/
 │   ├── common
 │   │   └── datatableStyles.js
 │   ├── invoices
-│   │   └── invoiceColumns.jsx
+│   │   ├── BusinessStatusCell.jsx
+│   │   ├── invoiceColumns.jsx
+│   │   └── TechnicalStatusCell.jsx
 │   └── sellers
 │       ├── sellerColumns.jsx
 │       ├── useSellerForm.js
 │       └── useSellers.js
 ├── pages
+│   ├── AuthTest.jsx
 │   ├── clients
 │   │   ├── ClientDetail.jsx
 │   │   ├── ClientForm.jsx
@@ -196,13 +209,17 @@ project/
 │   │   ├── ClientsPage.jsx
 │   │   ├── fields
 │   │   └── NewClient.jsx
+│   ├── Home.jsx
 │   ├── invoices
+│   │   ├── InvoiceDetail.jsx
 │   │   ├── InvoicesList.jsx
+│   │   ├── InvoiceView.jsx
 │   │   └── NewInvoice.jsx
 │   ├── NotFound.jsx
 │   └── sellers
 │       ├── fields
 │       ├── NewSeller.jsx
+│       ├── ProfilePage.jsx
 │       ├── SellerDetail.jsx
 │       ├── SellerForm.jsx
 │       ├── SellersList.jsx
@@ -215,9 +232,17 @@ project/
     ├── architecture.txt
     ├── formatters
     │   └── formatters.js
+    ├── formatters.js
     └── validators
         ├── client.js
         ├── contact.js
+        ├── email.js
         ├── invoice.js
+        ├── issueDate.js
+        ├── phone_number.js
+        ├── postal_code.js
         ├── seller.js
         └── siret.js
+
+28 directories, 92 files
+
