@@ -33,7 +33,7 @@ export function DatePickerField({ id, label, value, onChange, onBlur, error, req
   return (
     <div className="mb-3">
       <label htmlFor={id} className="form-label">
-        {label} {required && <span className="text-danger">*</span>}
+        {label} {required && <span className="required">*</span>}
       </label>
       <DatePicker
         id={id}

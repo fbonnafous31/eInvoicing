@@ -6,3 +6,7 @@
 .react-datepicker__input-container .form-control {
   width: 100%;
 }
+
+label .required {
+  color: black !important;
+}
