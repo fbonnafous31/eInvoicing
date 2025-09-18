@@ -37,8 +37,8 @@ export function useSellerService() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
         }),
-      updateSeller: (data) =>
-        request(`${API_BASE}`, { // on met à jour le vendeur connecté
+      updateSeller: (id, data) =>
+        request(`${API_BASE}/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
