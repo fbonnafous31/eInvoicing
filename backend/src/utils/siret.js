@@ -1,5 +1,5 @@
-// utils/validators/siret.js
-export function isValidSiret(siret) {
+// src/utils/siret.js
+function isValidSiret(siret) {
   if (!/^\d{14}$/.test(siret)) return false;
 
   // Algorithme de Luhn
@@ -14,3 +14,5 @@ export function isValidSiret(siret) {
   }
   return sum % 10 === 0;
 }
+
+module.exports = { isValidSiret };
