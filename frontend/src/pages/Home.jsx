@@ -66,10 +66,15 @@ export default function Home() {
 
   // Statuts des factures
   const statusCounts = Object.entries(BUSINESS_STATUSES).map(([code, s]) => ({
+    code,
     name: s.label,
     count: filteredInvoices.filter(inv => inv.business_status === code).length,
     color: s.color,
   }));
+
+  // Statuts "en cours" pour le graphique
+  const activeStatusCodes = ["204", "205", "206", "207", "208", "210"];
+  const activeStatusCounts = statusCounts.filter(s => activeStatusCodes.includes(s.code));
 
   // Top 5 clients
   const clientTotals = {};
@@ -95,9 +100,14 @@ export default function Home() {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([month, total]) => ({ month, total }));
 
+  // Factures en retard
+  const overdueInvoices = invoices.filter(inv => inv.business_status === "overdue");
+
   return (
-    <div className="container-fluid mt-4 px-2">
-      <h2 className="mb-4">Dashboard Factures</h2>
+    <div className="container-fluid mt-4" style={{ paddingLeft: '4rem', paddingRight: '4rem' }}>
+      <h2 className="mb-4 text-2xl font-bold text-gray-700">
+        📈 <span className="text-blue-600">Tableau de bord</span> des factures
+      </h2>
 
       {/* Top clients et montant mensuel */}
       <div className="row mb-4">
@@ -106,7 +116,7 @@ export default function Home() {
             className="p-3 rounded-xl shadow bg-white flex-fill"
             style={{ height: '360px', minHeight: '192px', overflow: 'auto' }}
           >
-            <h4 className="mb-3">Top 5 clients</h4>
+            <h4 className="mb-3">🏆 Top 5 clients</h4>
             <table className="table table-sm">
               <thead>
                 <tr>
@@ -130,12 +140,13 @@ export default function Home() {
             </table>
           </div>
         </div>
+
         <div className="col-md-6">
           <div
             className="p-3 rounded-xl shadow bg-white flex-fill"
             style={{ height: '360px', minHeight: '192px', overflow: 'auto' }}
           >
-            <h4 className="mb-3">Montant facturé par mois</h4>
+            <h4 className="mb-3">💵 Montant facturé par mois</h4>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={monthlyData}>
                 <XAxis dataKey="month" />
@@ -155,14 +166,15 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Statuts + graphique */}
+      {/* Statuts + Graphique actifs + Factures en retard */}
       <div className="row d-flex">
         {/* Colonne Statuts */}
-        <div className="col-md-6 d-flex">
+        <div className="col-md-4 d-flex">
           <div
             className="p-3 rounded-xl shadow bg-white flex-fill"
-            style={{ height: '360px', minHeight: '192px', overflow: 'auto' }}
+            style={{ height: '380px', minHeight: '192px', overflow: 'auto' }}
           >
+            <h4 className="mb-3">📊 Statuts des factures</h4>
             <table className="table table-sm">
               <thead>
                 <tr>
@@ -176,7 +188,8 @@ export default function Home() {
                     <td>
                       <span
                         className="px-2 py-1 rounded text-white"
-                        style={{ backgroundColor: s.color }}
+                        style={{ backgroundColor: s.color, cursor: 'pointer' }}
+                        onClick={() => navigate(`/invoices?filter=${encodeURIComponent(s.name)}`)}
                       >
                         {s.name}
                       </span>
@@ -189,25 +202,66 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Colonne Graphique */}
-        <div className="col-md-6 d-flex">
+        {/* Colonne Graphique (statuts actifs) */}
+        <div className="col-md-4 d-flex">
           <div
             className="p-3 rounded-xl shadow bg-white flex-fill"
-            style={{ height: '360px', minHeight: '192px' }}
+            style={{ height: '380px', minHeight: '192px' }}
           >
-            <h4 className="mb-3">Visualisation des statuts</h4>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={statusCounts}>
-                  <XAxis dataKey="name" tick={false} axisLine={true} />
-                  <YAxis allowDecimals={false} />
-                  <Tooltip />
-                  <Bar dataKey="count">
-                    {statusCounts.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+            <h4 className="mb-4 text-2xl font-bold text-gray-700 flex items-center gap-2">
+              🧾 <span className="title-blue">Factures en cours</span>
+            </h4>
+            <ResponsiveContainer width="100%" height="90%">
+              <BarChart data={activeStatusCounts}>
+                <XAxis dataKey="name" tick={false} axisLine={true} />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="count">
+                  {activeStatusCounts.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Colonne Factures en retard */}
+        <div className="col-md-4 d-flex">
+          <div
+            className="p-3 rounded-xl shadow bg-white flex-fill"
+            style={{ height: '380px', minHeight: '192px', overflow: 'auto' }}
+          >
+            <h4 className="mb-3">🔴 Factures en retard</h4>
+            {overdueInvoices.length === 0 ? (
+              <p>Aucune facture en retard !</p>
+            ) : (
+              <table className="table table-sm mb-0">
+                <thead>
+                  <tr>
+                    <th>Facture</th>
+                    <th>Client</th>
+                    <th>Montant</th>
+                    <th>Échéance</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {overdueInvoices.map(inv => (
+                    <tr key={inv.id}>
+                      <td>{inv.number || inv.id}</td>
+                      <td>{inv.client?.legal_name || `${inv.client?.firstname} ${inv.client?.lastname}`}</td>
+                      <td>
+                        {Number(inv.total).toLocaleString("fr-FR", {
+                          style: "currency",
+                          currency: "EUR",
+                        })}
+                      </td>
+                      <td>{inv.due_date}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 // frontend/src/pages/invoices/InvoicesList.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
 import Breadcrumb from '../../components/layout/Breadcrumb';
 import AuditPanel from '../../components/common/AuditPanel';
@@ -10,10 +11,15 @@ import { useInvoiceService } from '@/services/invoices';
 import { BUSINESS_STATUSES } from '../../constants/businessStatuses';
 
 export default function InvoicesList() {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const initialFilter = params.get('filter') || '';
+
   const [invoices, setInvoices] = useState([]);
-  const [filterText, setFilterText] = useState('');
+  const [filterText, setFilterText] = useState(initialFilter);
 
   const invoiceService = useInvoiceService();
+  const { fetchInvoicesBySeller } = invoiceService;
 
   // -------------------------------
   // Callbacks pour mise à jour du tableau
@@ -34,12 +40,11 @@ export default function InvoicesList() {
     );
   };
 
-  const onInvoiceUpdate = (updatedInvoice) => {
-    setInvoices((prev) =>
-      prev.map((inv) => (inv.id === updatedInvoice.id ? updatedInvoice : inv))
+  const onInvoiceUpdate = updatedInvoice => {
+    setInvoices(prev =>
+      prev.map(inv => (inv.id === updatedInvoice.id ? updatedInvoice : inv))
     );
   };
-
 
   // -------------------------------
   // Colonnes avec callbacks
@@ -48,26 +53,21 @@ export default function InvoicesList() {
     invoiceService,
     handleTechnicalStatusChange,
     handleBusinessStatusChange,
-    onInvoiceUpdate 
+    onInvoiceUpdate
   );
 
   // -------------------------------
   // Chargement initial des factures
   // -------------------------------
-  const { fetchInvoicesBySeller } = invoiceService;
   useEffect(() => {
     let isMounted = true;
 
     const loadInvoices = async () => {
       try {
-        console.log('[InvoiceList] Chargement des factures...');
         const data = await fetchInvoicesBySeller();
-        if (isMounted) {
-          setInvoices(data);
-          console.log('[InvoiceList] Factures chargées:', data.map(i => `${i.id}:${i.business_status}`));
-        }
+        if (isMounted) setInvoices(data);
       } catch (err) {
-        console.error("[InvoiceList] Erreur chargement factures :", err);
+        console.error('Erreur chargement factures :', err);
       }
     };
 
@@ -78,10 +78,15 @@ export default function InvoicesList() {
     };
   }, [fetchInvoicesBySeller]);
 
-  const filteredItems = React.useMemo(() => {
+  // -------------------------------
+  // Filtrage
+  // -------------------------------
+  const filteredItems = useMemo(() => {
+    if (!filterText) return invoices;
+
     return invoices.filter(item =>
       Object.entries(item).some(([key, val]) => {
-        // Business status
+        // Convertir le code business_status en label
         if (key === 'business_status' || key === 'status') {
           const code = parseInt(val, 10);
           if (!isNaN(code) && BUSINESS_STATUSES[code]) {
@@ -94,7 +99,7 @@ export default function InvoicesList() {
           val = FR.technicalStatus[val?.toLowerCase()] || val;
         }
 
-        return val && val.toString().toLowerCase().includes(filterText.toLowerCase());
+        return val?.toString().toLowerCase().includes(filterText.toLowerCase());
       })
     );
   }, [invoices, filterText]);

@@ -45,6 +45,7 @@ function App() {
           "ClientsList",
           "SellersList",
           "InvoicesList",
+          "Home",
         ].includes(componentName);
 
         return (
