@@ -61,21 +61,22 @@ export default function Home() {
     );
   }
 
-  // Filtrer les factures encaissées (par exemple "paid" ou "canceled")
-  const filteredInvoices = invoices.filter(inv => inv.business_status !== "paid");
+  // Filtrer les factures non payées
+  const filteredInvoices = invoices.filter(inv => inv.business_status !== "none");
 
-  // Préparer les données des statuts
-  const statusCounts = Object.entries(BUSINESS_STATUSES)
-    .map(([code, s]) => ({
-      name: s.label,
-      count: filteredInvoices.filter(inv => inv.business_status === code).length,
-      color: s.color,
-    }));
+  // Statuts des factures
+  const statusCounts = Object.entries(BUSINESS_STATUSES).map(([code, s]) => ({
+    name: s.label,
+    count: filteredInvoices.filter(inv => inv.business_status === code).length,
+    color: s.color,
+  }));
 
   // Top 5 clients
   const clientTotals = {};
   filteredInvoices.forEach(inv => {
-    const name = inv.client?.legal_name || `${inv.client?.firstname || ""} ${inv.client?.lastname || ""}`.trim();
+    const name =
+      inv.client?.legal_name ||
+      `${inv.client?.firstname || ""} ${inv.client?.lastname || ""}`.trim();
     if (name) clientTotals[name] = (clientTotals[name] || 0) + Number(inv.total || 0);
   });
   const topClients = Object.entries(clientTotals)
@@ -101,7 +102,10 @@ export default function Home() {
       {/* Top clients et montant mensuel */}
       <div className="row mb-4">
         <div className="col-md-6">
-          <div className="p-3 rounded-xl shadow bg-white">
+          <div
+            className="p-3 rounded-xl shadow bg-white flex-fill"
+            style={{ height: '360px', minHeight: '192px', overflow: 'auto' }}
+          >
             <h4 className="mb-3">Top 5 clients</h4>
             <table className="table table-sm">
               <thead>
@@ -114,7 +118,12 @@ export default function Home() {
                 {topClients.map(c => (
                   <tr key={c.client}>
                     <td>{c.client}</td>
-                    <td>{c.total.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })}</td>
+                    <td>
+                      {c.total.toLocaleString("fr-FR", {
+                        style: "currency",
+                        currency: "EUR",
+                      })}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -122,13 +131,23 @@ export default function Home() {
           </div>
         </div>
         <div className="col-md-6">
-          <div className="p-3 rounded-xl shadow bg-white">
+          <div
+            className="p-3 rounded-xl shadow bg-white flex-fill"
+            style={{ height: '360px', minHeight: '192px', overflow: 'auto' }}
+          >
             <h4 className="mb-3">Montant facturé par mois</h4>
-            <ResponsiveContainer width="100%" height={214}>
+            <ResponsiveContainer width="100%" height={300}>
               <BarChart data={monthlyData}>
                 <XAxis dataKey="month" />
                 <YAxis />
-                <Tooltip formatter={(value) => value.toLocaleString("fr-FR", { style: "currency", currency: "EUR" })} />
+                <Tooltip
+                  formatter={value =>
+                    value.toLocaleString("fr-FR", {
+                      style: "currency",
+                      currency: "EUR",
+                    })
+                  }
+                />
                 <Bar dataKey="total" fill="#3B82F6" />
               </BarChart>
             </ResponsiveContainer>
@@ -137,10 +156,13 @@ export default function Home() {
       </div>
 
       {/* Statuts + graphique */}
-      <div className="row">
-        <div className="col-md-6">
-          <div className="p-3 rounded-xl shadow bg-white ">
-            <h4 className="mb-3">Statuts des factures</h4>
+      <div className="row d-flex">
+        {/* Colonne Statuts */}
+        <div className="col-md-6 d-flex">
+          <div
+            className="p-3 rounded-xl shadow bg-white flex-fill"
+            style={{ height: '360px', minHeight: '192px', overflow: 'auto' }}
+          >
             <table className="table table-sm">
               <thead>
                 <tr>
@@ -166,21 +188,26 @@ export default function Home() {
             </table>
           </div>
         </div>
-        <div className="col-md-6">
-          <div className="p-3 rounded-xl shadow bg-white">
+
+        {/* Colonne Graphique */}
+        <div className="col-md-6 d-flex">
+          <div
+            className="p-3 rounded-xl shadow bg-white flex-fill"
+            style={{ height: '360px', minHeight: '192px' }}
+          >
             <h4 className="mb-3">Visualisation des statuts</h4>
-            <ResponsiveContainer width="100%" height={480}>
-              <BarChart data={statusCounts}>
-                <XAxis dataKey="name" />
-                <YAxis allowDecimals={false} />
-                <Tooltip />
-                <Bar dataKey="count">
-                  {statusCounts.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={statusCounts}>
+                  <XAxis dataKey="name" tick={false} axisLine={true} />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip />
+                  <Bar dataKey="count">
+                    {statusCounts.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
           </div>
         </div>
       </div>

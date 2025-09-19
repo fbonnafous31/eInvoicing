@@ -7,16 +7,35 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      react: fileURLToPath(new URL('./node_modules/react', import.meta.url)),
+      'react-dom': fileURLToPath(new URL('./node_modules/react-dom', import.meta.url)),
     },
   },
   server: {
     proxy: {
-      '/api': 'http://localhost:3000', 
+      '/api': 'http://localhost:3000',
     },
   },
   test: {
     globals: true,
     environment: 'jsdom',
     setupFiles: './tests/setupTests.js',
+    include: [
+      'src/**/*.{test,spec}.{js,ts,jsx,tsx}',
+      'tests/**/*.{test,spec}.{js,ts,jsx,tsx}',
+    ],
+    coverage: {
+      provider: 'istanbul',
+      reporter: ['text', 'lcov'],
+      all: true,
+      include: ['src/**/*.{js,ts,jsx,tsx}'],
+      exclude: ['node_modules/', 'tests/'],
+    },
+    environmentOptions: {
+      jsdom: {
+        resources: 'usable',
+        runScripts: 'dangerously',
+      },
+    },
   },
 });
