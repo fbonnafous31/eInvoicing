@@ -101,7 +101,23 @@ export default function Home() {
     .map(([month, total]) => ({ month, total }));
 
   // Factures en retard
-  const overdueInvoices = invoices.filter(inv => inv.business_status === "overdue");
+  const overdueInvoices = filteredInvoices.filter(inv => {
+    if (inv.technical_status === 'pending' && inv.business_status !== 'rejected') return false;
+
+    const statusCode = parseInt(inv.business_status, 10);
+    if (isNaN(statusCode) || statusCode >= 211) return false;
+
+    const dueDate = new Date(inv.issue_date);
+    dueDate.setDate(dueDate.getDate() + 30); // délai 30 jours
+    return dueDate < new Date();
+  }).map(inv => ({
+    ...inv,
+    due_date: (() => {
+      const d = new Date(inv.issue_date);
+      d.setDate(d.getDate() + 30);
+      return d.toLocaleDateString("fr-FR");
+    })()
+  }));
 
   return (
     <div className="container-fluid mt-4" style={{ paddingLeft: '4rem', paddingRight: '4rem' }}>
@@ -248,7 +264,25 @@ export default function Home() {
                 <tbody>
                   {overdueInvoices.map(inv => (
                     <tr key={inv.id}>
-                      <td>{inv.number || inv.id}</td>
+                      <td
+                        className="cursor-pointer"
+                        onClick={() =>
+                          navigate(`/invoices?filter=${encodeURIComponent(inv.invoice_number)}`)
+                        }
+                      >
+                        {inv.business_status && BUSINESS_STATUSES[inv.business_status] && (
+                        <span
+                          className="px-2 py-1 rounded text-white"
+                          style={{
+                            backgroundColor: BUSINESS_STATUSES[inv.business_status].color,
+                            color: BUSINESS_STATUSES[inv.business_status].color, 
+                          }}
+                        >
+                          🔗
+                        </span>
+                        )}
+                        <span> . {inv.invoice_number}</span>
+                      </td>
                       <td>{inv.client?.legal_name || `${inv.client?.firstname} ${inv.client?.lastname}`}</td>
                       <td>
                         {Number(inv.total).toLocaleString("fr-FR", {

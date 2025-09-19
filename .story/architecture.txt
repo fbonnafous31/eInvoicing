@@ -1,81 +1,10 @@
 .
 ├── architecture
-│   ├── back_architecture.txt
-│   ├── front_architecture.txt
-│   └── project_architecture.txt
 ├── architecture.txt
+├── diary
 ├── friendly
-│   ├── bilan-40h.md
-│   └── 🧭-boussole.md
 ├── images
-│   ├── jour13
-│   │   └── invoiceList.png
-│   ├── jour14
-│   │   └── createInvoice.png
-│   ├── jour2
-│   │   ├── DBeaver.png
-│   │   └── einvoicing_db.png
-│   ├── jour3
-│   │   └── project_architecture.png
-│   ├── jour32
-│   │   ├── checkInvoice.png
-│   │   └── createInvoice.png
-│   ├── jour4
-│   │   ├── backend.png
-│   │   └── frontend.png
-│   ├── jour5
-│   │   └── sellers.png
-│   └── jour6
-│       ├── NewSeller.png
-│       └── success.png
 ├── linkedIn
-│   └── Projet-de-facturation-electronique.pdf
-├── markdown
-│   ├── journal_jour0.md
-│   ├── journal_jour10.md
-│   ├── journal_jour11.md
-│   ├── journal_jour12.md
-│   ├── journal_jour13.md
-│   ├── journal_jour14.md
-│   ├── journal_jour15.md
-│   ├── journal_jour16.md
-│   ├── journal_jour17.md
-│   ├── journal_jour18.md
-│   ├── journal_jour19.md
-│   ├── journal_jour1.md
-│   ├── journal_jour20.md
-│   ├── journal_jour21.md
-│   ├── journal_jour22.md
-│   ├── journal_jour23.md
-│   ├── journal_jour24.md
-│   ├── journal_jour25.md
-│   ├── journal_jour26.md
-│   ├── journal_jour27.md
-│   ├── journal_jour28.md
-│   ├── journal_jour29.md
-│   ├── journal_jour2.md
-│   ├── journal_jour30.md
-│   ├── journal_jour31.md
-│   ├── journal_jour32.md
-│   ├── journal_jour33.md
-│   ├── journal_jour34.md
-│   ├── journal_jour35.md
-│   ├── journal_jour36.md
-│   ├── journal_jour37.md
-│   ├── journal_jour38.md
-│   ├── journal_jour39.md
-│   ├── journal_jour3.md
-│   ├── journal_jour40.md
-│   ├── journal_jour41.md
-│   ├── journal_jour42.md
-│   ├── journal_jour43.md
-│   ├── journal_jour44.md
-│   ├── journal_jour4.md
-│   ├── journal_jour5.md
-│   ├── journal_jour6.md
-│   ├── journal_jour7.md
-│   ├── journal_jour8.md
-│   └── journal_jour9.md
 └── projet_eInvoicing.md
 
-14 directories, 65 files
+6 directories, 2 files
