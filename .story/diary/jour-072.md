@@ -10,6 +10,7 @@ L’idée est que dès sa connexion, il dispose d’une **vue globale** de son a
 - **Montant facturé par mois** : histogramme interactif pour visualiser l’évolution du CA dans le temps.  
 - **Statuts de factures** : tableau récapitulatif du nombre de factures par statut métier (draft, issued, late, etc.).  
 - **Graphique des statuts** : visualisation claire via un bar chart coloré (codes couleurs cohérents avec les statuts métiers).  
+![DashBoard](../images/jour72/dashBoard.png)
 
 ## Résultat  
 

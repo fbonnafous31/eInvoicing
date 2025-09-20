@@ -21,6 +21,7 @@ Ensuite, j’ai commencé à tester des composants plus complexes comme `Clients
 - **Mocks** pour les hooks et composants tiers (`useClients`, `DataTable`, `Breadcrumb`) afin d’isoler le composant testé.
 
 Ces tests permettent de vérifier rapidement le comportement attendu sans lancer toute l’application.
+![Exécution des tests](../images/jour74/frontendTests.png)
 
 ## Pourquoi penser à une CI maintenant 🤖
 

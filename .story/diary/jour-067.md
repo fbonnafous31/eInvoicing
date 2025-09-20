@@ -15,11 +15,11 @@ Cela permet de :
 ## Feedback et messages d’erreurs côté frontend
 
 J’ai ajouté des **messages d’erreurs métier** directement sur l’interface :
-
 - Bulles d’aide pour chaque statut particulier (refus, approbation partielle, suspension, litige)  
+![Retour client suite au retour de traitement de la facture](../images/jour67/clientComment.png)
 - Gestion de la suspension côté interface : le cycle est bloqué et le message informe l’utilisateur de l’action requise  
 - Messages dynamiques pour les cas de statut technique (ex. rejection ou erreur 500 côté PDP)  
-
+![Facture suspendue, justificatif additionnel attendu](../images/jour67/suspendedInvoice.png)
 Ces ajouts permettent de tester l’expérience utilisateur dans des scénarios réalistes, sans avoir à simuler manuellement chaque erreur.
 
 ---

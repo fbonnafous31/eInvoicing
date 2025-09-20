@@ -8,6 +8,7 @@ Aujourd’hui, pas grand-chose de concret côté dev, juste un **update rapide**
 
 - Les **boutons PDF/A-3** et PDF standard sont maintenant alignés, propres et cliquables directement depuis la liste des factures.  
 - L’UI des actions de facture est **uniforme et sans cadres**, prête pour tous les tests.  
+![Demande de statut facture](../images/jour63/invoiceList.png)
 
 ---
 

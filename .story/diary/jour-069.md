@@ -9,6 +9,8 @@ Aujourd’hui, j’ai travaillé sur la **gestion des factures suspendues et de 
 - Une fois que le PDP confirme la réception de la facture complétée :  
   - Le **statut métier passe à “complété”**  
   - Le **cycle de vie de la facture reprend normalement**, jusqu’à l’encaissement  
+![Facture suspendue, facture à compléter en ajoutant le justificatif additionnel demandé par le client](../images/jour69/suspendedInvoice.png)
+![Facture complétée](../images/jour69/CompletedInvoice.png)
 - Tous les événements sont **loggés côté backend** pour garder une trace précise de chaque étape  
 - Côté frontend, l’utilisateur reçoit un **retour clair et immédiat** sur le statut de la facture complétée
 

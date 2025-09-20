@@ -16,10 +16,14 @@ Nous avons ajouté un **bouton 💰 “Encaisser”** directement dans le tablea
   * `setVersion` force le re-render du DataTable pour que les boutons se mettent à jour instantanément.
   * Le bouton 💰 appelle `cashInvoice`, puis récupère le **dernier statut du cycle métier** pour actualiser le tableau.
 
+    ![Encaisser la facture](../images/jour65/cashInvoice.png)
+
 * **Backend** :
 
   * Route `cashInvoice` renvoyant le statut final de la facture après encaissement.
   * Les statuts finaux (`210`, `212`) bloquent les actions suivantes pour assurer la cohérence réglementaire.
+  ![Paiement transmis](../images/jour65/submittedPayment.png)
+  ![Facture encaissée](../images/jour65/collectedInvoice.png)
 
 * **Mock PDP** :
 

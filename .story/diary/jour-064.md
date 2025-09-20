@@ -9,6 +9,7 @@ Aujourd’hui, la session a été consacrée à **la protection réglementaire d
 ### 1. Protection des factures transmises
 
 * **Règle métier essentielle** : une fois qu’une facture est transmise au PDP, son contenu **ne peut plus être modifié** pour garantir la **conservation des données initialement transmises**, conformément aux obligations réglementaires.  
+![Facture transmise non modifiable](../images/jour64/submitedInvoice.png)
 * Backend : la route `updateInvoice` bloque toute modification si `technical_status` est final (`validated`, `received`, etc.), avec un retour **403** si tentative de modification.  
 * Frontend : les boutons **Modifier / Supprimer** sont désactivés pour ces factures, assurant que l’utilisateur ne puisse pas altérer les données transmises.
 
@@ -17,6 +18,9 @@ Aujourd’hui, la session a été consacrée à **la protection réglementaire d
 ### 2. Mode suspension pour compléter la facture
 
 * Mise en place d’un **mode `canEditAdditional`** déclenché si `business_status = "208"`.  
+![Facture suspendue](../images/jour64/suspendedInvoice.png)
+![Ajout d'un justificatif additionnel](../images/jour64/additionalsAllowed.png)
+
 * Objectif : permettre uniquement l’**ajout de justificatifs additionnels**, sans toucher au justificatif principal ni aux lignes de facture existantes.  
 * UI :  
   - Les boutons **Enregistrer / Annuler** remplacent **Modifier / Supprimer** dans ce mode.  

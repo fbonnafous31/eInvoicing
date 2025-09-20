@@ -16,10 +16,14 @@ Vérifier la logique métier des controllers et services indépendamment des rou
 Exemple : calcul du montant total facturé, génération de statuts ou transformation de données.  
 ✅ On a déjà commencé à initier les tests unitaires côté backend, notamment pour la validation de **SIRET** et certaines **routes invoices**.
 
+![Tests unitaires](../images/jour73/unitTest.png)
+
 **Tests d’intégration 🔗**  
 Vérifier que les routes REST fonctionnent correctement et retournent les bonnes réponses JSON.  
 Assurer que les middlewares, même si mockés temporairement, s’intègrent correctement avec les routes.  
 Pour ces tests, on peut utiliser des outils comme **Vitest** ou **Jest**, qui permettent de lancer facilement des tests unitaires et d’intégration et de s’assurer que tout le backend répond comme prévu.
+
+![Tests d'intégration](../images/jour73/integrationTest.png)
 
 **Tests end-to-end (E2E) 🏁**  
 Simuler le parcours complet d’un utilisateur (connexion, création de facture, génération PDF).  
@@ -28,6 +32,8 @@ Prévoir ces tests pour les étapes critiques avant le déploiement.
 **Tests automatiques en CI/CD 🤖**  
 Chaque push déclenche les tests pour s’assurer qu’aucune modification ne casse l’existant.  
 Les tests deviennent un outil de confiance pour continuer à faire évoluer le produit rapidement.
+
+![Exécution des tests](../images/jour73/backendTests.png)
 
 ## Avantages attendus 🌟
 

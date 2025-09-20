@@ -5,6 +5,18 @@ Aujourd’hui, j’ai travaillé à rendre le mock PDP encore plus réaliste et 
 ## Pondération des cycles de vie
 
 Chaque statut métier (mise à disposition, prise en charge, approuvée, litige, suspension, refus, paiement transmis) dispose désormais d’une probabilité d’occurrence.
+```js
+  const possibleStatuses = [
+    { code: 203, label: 'Mise à disposition', probability: 1.0 },
+    { code: 204, label: 'Prise en charge', probability: 0.6 },
+    { code: 205, label: 'Approuvée', probability: 0.6 },
+    { code: 206, label: 'Approuvée partiellement', probability: 0.2 },
+    { code: 207, label: 'En litige', probability: 0.2 },
+    { code: 208, label: 'Suspendue', probability: 0.2 },
+    { code: 210, label: 'Refusée', probability: 0.1 },
+    { code: 211, label: 'Paiement transmis', probability: 1.0 },
+  ];
+```
 
 Cela permet de simuler des flux plus proches de la réalité, avec des parcours non linéaires et des probabilités différentes pour chaque événement.
 
