@@ -2,6 +2,24 @@
 const { PDFName } = require('pdf-lib');
 
 /**
+ * Échappe les caractères XML spéciaux et certains accents
+ */
+function escapeXml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;')
+    // Accents les plus fréquents
+    .replace(/é/g, '&#233;')
+    .replace(/è/g, '&#232;')
+    .replace(/à/g, '&#224;')
+    .replace(/ê/g, '&#234;')
+    .replace(/ç/g, '&#231;');
+}
+
+/**
  * Génère un XMP complet pour Factur-X / PDF/A-3
  * @param {Object} options
  * @param {string|number} options.invoiceId
@@ -23,15 +41,15 @@ function generateXmpContent({ invoiceId, xmlFileName, title }) {
         pdfaid:part="3"
         pdfaid:conformance="B"
         fx:DocumentType="INVOICE"
-        fx:DocumentFileName="${xmlFileName}"
+        fx:DocumentFileName="${escapeXml(xmlFileName)}"
         fx:Version="1.0"
         fx:ConformanceLevel="BASIC">
       <xmp:CreateDate>${now}</xmp:CreateDate>
       <xmp:ModifyDate>${now}</xmp:ModifyDate>
       <xmp:CreatorTool>eInvoicing</xmp:CreatorTool>
-      <xapMM:DocumentID>INV-${invoiceId}</xapMM:DocumentID>
+      <xapMM:DocumentID>INV-${escapeXml(invoiceId.toString())}</xapMM:DocumentID>
       <dc:title>
-        <rdf:Alt><rdf:li xml:lang="x-default">${title}</rdf:li></rdf:Alt>
+        <rdf:Alt><rdf:li xml:lang="x-default">${escapeXml(title)}</rdf:li></rdf:Alt>
       </dc:title>
       <dc:description>Facture électronique avec Factur-X</dc:description>
       <dc:format>application/pdf</dc:format>
@@ -43,6 +61,7 @@ function generateXmpContent({ invoiceId, xmlFileName, title }) {
 
 /**
  * Crée un stream PDF pour injection dans le catalogue du PDF/A-3
+ * Encode en UTF-8
  * @param {PDFDocument} pdfDoc
  * @param {Object} options
  * @param {string|number} options.invoiceId
@@ -52,7 +71,7 @@ function generateXmpContent({ invoiceId, xmlFileName, title }) {
  */
 function injectXmpToPdfLib(pdfDoc, { invoiceId, xmlFileName, title }) {
   const xmpContent = generateXmpContent({ invoiceId, xmlFileName, title });
-  const metadataStream = pdfDoc.context.stream(xmpContent, {
+  const metadataStream = pdfDoc.context.stream(Buffer.from(xmpContent, 'utf8'), {
     Type: PDFName.of('Metadata'),
     Subtype: PDFName.of('XML'),
   });
