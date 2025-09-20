@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs/promises');
 const path = require('path');
 const { generateFacturXXML } = require('../../utils/facturx-generator');
 const { embedFacturXInPdf } = require('../../utils/pdf-generator');
@@ -27,13 +27,12 @@ function _prepareClientForXML(client) {
  * Sauvegarde le fichier XML Factur-X sur le disque.
  * @private
  */
-function _saveFacturXXML(id, invoiceData) {
-  if (!fs.existsSync(FACTURX_DIR)) {
-    fs.mkdirSync(FACTURX_DIR, { recursive: true });
-  }
+async function _saveFacturXXML(id, invoiceData) {
+  // Utilisation de fs/promises pour la cohérence
+  await fs.mkdir(FACTURX_DIR, { recursive: true });
   const xml = generateFacturXXML(invoiceData);
   const xmlPath = path.join(FACTURX_DIR, `${id}-factur-x.xml`);
-  fs.writeFileSync(xmlPath, xml, 'utf-8');
+  await fs.writeFile(xmlPath, xml, 'utf-8');
   return xmlPath;
 }
 
@@ -57,7 +56,7 @@ async function generateInvoiceArtifacts(invoice) {
       attachments: invoice.attachments,
     };
 
-    xmlPath = _saveFacturXXML(invoice.id, invoiceDataForXML);
+    xmlPath = await _saveFacturXXML(invoice.id, invoiceDataForXML);
     console.log(`📄 Factur-X généré pour la facture ${invoice.id} à :`, xmlPath);
 
     const mainPdfAttachment = await InvoicesAttachmentsModel.getAttachment(invoice.id, 'main');

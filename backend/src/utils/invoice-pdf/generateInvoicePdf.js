@@ -1,8 +1,9 @@
 const fs = require("fs");
 const path = require("path");
-const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
+const { PDFDocument, StandardFonts, rgb, PDFName } = require("pdf-lib");
 const { paymentMethodsOptions } = require("../../../constants/paymentMethods");
 const { paymentTermsOptions } = require("../../../constants/paymentTerms");
+const fontkit = require('@pdf-lib/fontkit');
 
 // ---------------- wrapText ----------------
 function wrapText(text, font, size, maxWidth) {
@@ -31,16 +32,102 @@ function formatDateFr(dateStr) {
   return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
 }
 
-
 async function generateInvoicePdf(invoice) {
   console.log("invoice:", invoice);
   const pdfDoc = await PDFDocument.create();
+
+  // --- Début des modifications pour conformité PDF/A ---
+
+  // 1. Enregistrer fontkit pour la gestion des polices .ttf
+  pdfDoc.registerFontkit(fontkit);
+
+  // 2. Définir les métadonnées XMP pour l'identification PDF/A-3B
+const now = new Date();
+const nowIso = now.toISOString();
+const title = `Facture ${invoice.invoice_number || invoice.id}`;
+const author = invoice.seller?.legal_name || 'eInvoicing App';
+// Le nom du fichier XML est requis pour les métadonnées Factur-X
+const xmlFileName = "factur-x.xml";
+
+const xmpMetadata = `<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/">
+  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <rdf:Description rdf:about=""
+        xmlns:dc="http://purl.org/dc/elements/1.1/"
+        xmlns:xmp="http://ns.adobe.com/xap/1.0/"
+        xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/"
+        xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#">
+      <!-- Dublin Core -->
+      <dc:title><rdf:Alt><rdf:li xml:lang="x-default">${title}</rdf:li></rdf:Alt></dc:title>
+      <dc:creator><rdf:Seq><rdf:li>${author}</rdf:li></rdf:Seq></dc:creator>
+      <!-- XMP Basic -->
+      <xmp:CreateDate>${nowIso}</xmp:CreateDate>
+      <xmp:ModifyDate>${nowIso}</xmp:ModifyDate>
+      <xmp:CreatorTool>eInvoicing App</xmp:CreatorTool>
+      <!-- PDF/A ID -->
+      <pdfaid:part>3</pdfaid:part>
+      <pdfaid:conformance>B</pdfaid:conformance>
+      <!-- Factur-X -->
+      <fx:DocumentType>INVOICE</fx:DocumentType>
+      <fx:DocumentFileName>${xmlFileName}</fx:DocumentFileName>
+      <fx:Version>1.0</fx:Version>
+      <fx:ConformanceLevel>BASIC</fx:ConformanceLevel>
+    </rdf:Description>
+  </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>`;
+
+  const metadataStream = pdfDoc.context.stream(xmpMetadata, {
+    Type: PDFName.of('Metadata'),
+    Subtype: PDFName.of('XML'),
+  });
+
+  pdfDoc.catalog.set(PDFName.of('Metadata'), pdfDoc.context.register(metadataStream));
+
+  // 3. Ajouter un "OutputIntent" pour la gestion des couleurs (corrige l'erreur DeviceRGB)
+  const iccProfilePath = path.join(__dirname, "color-profiles/sRGB_IEC61966-2-1_black_scaled.icc");
+  if (fs.existsSync(iccProfilePath)) {
+    const iccProfileBytes = fs.readFileSync(iccProfilePath);
+    const outputIntent = pdfDoc.context.stream(iccProfileBytes);
+    pdfDoc.catalog.set(
+      PDFName.of('OutputIntents'),
+      pdfDoc.context.obj([{
+        Type: 'OutputIntent', S: 'GTS_PDFA1',
+        OutputConditionIdentifier: 'sRGB IEC61966-2.1',
+        DestOutputProfile: outputIntent,
+      }])
+    );
+  } else {
+    console.warn("Profil ICC manquant pour la conformité PDF/A. Le PDF généré ne sera pas conforme.");
+  }
+
+  // 4. Synchroniser le dictionnaire d'informations du document
+  pdfDoc.setTitle(title);
+  pdfDoc.setAuthor(author);
+  pdfDoc.setCreator('eInvoicing App');
+  pdfDoc.setProducer('pdf-lib');
+  pdfDoc.setCreationDate(now);
+  pdfDoc.setModificationDate(now);
+
   const page = pdfDoc.addPage([595, 842]); // A4 portrait
   const { width, height } = page.getSize();
 
   // Polices
-  const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  // 5. Embarquer les polices pour la conformité PDF/A (corrige l'erreur sur les polices non-embarquées)
+  const fontPath = path.join(__dirname, "fonts/DejaVuSans.ttf");
+  const fontBoldPath = path.join(__dirname, "fonts/DejaVuSans-Bold.ttf");
+
+  if (!fs.existsSync(fontPath) || !fs.existsSync(fontBoldPath)) {
+    console.error("Fichiers de police manquants ! Assurez-vous que DejaVuSans.ttf et DejaVuSans-Bold.ttf existent dans le dossier 'src/utils/invoice-pdf/fonts/'.");
+    throw new Error("Fichiers de police requis pour la génération de PDF non trouvés.");
+  }
+
+  const fontBytes = fs.readFileSync(fontPath);
+  const fontBoldBytes = fs.readFileSync(fontBoldPath);
+  const fontRegular = await pdfDoc.embedFont(fontBytes, { subset: true });
+  const fontBold = await pdfDoc.embedFont(fontBoldBytes, { subset: true });
+
+  // --- Fin des modifications pour conformité PDF/A ---
 
   const margin = 50;
 
@@ -53,6 +140,7 @@ async function generateInvoicePdf(invoice) {
   let yLogoTop = height - margin;
 
   if (fs.existsSync(logoPath)) {
+    // NOTE: Pour éviter les problèmes de transparence (erreur SMask), assurez-vous que votre logo.png n'a pas de canal alpha.
     const logoBytes = await fs.promises.readFile(logoPath);
     const logoImage = await pdfDoc.embedPng(logoBytes);
     const logoDims = logoImage.scale(1);
@@ -352,8 +440,7 @@ async function generateInvoicePdf(invoice) {
   const uploadDir = path.join(__dirname, "../../uploads/pdf");
   if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-  const fileName = `${invoice.id}_invoice.pdf`;
-  const filePath = path.join(uploadDir, fileName);
+  const filePath = path.join(uploadDir, `${invoice.id}_invoice.pdf`);
   const pdfBytes = await pdfDoc.save();
   await fs.promises.writeFile(filePath, pdfBytes);
 
@@ -363,10 +450,85 @@ async function generateInvoicePdf(invoice) {
 
 async function generateInvoicePdfBuffer(invoice) {
   const pdfDoc = await PDFDocument.create();
+
+  // --- Début des modifications pour conformité PDF/A ---
+
+  // 1. Enregistrer fontkit pour la gestion des polices .ttf
+  pdfDoc.registerFontkit(fontkit);
+
+  // 2. Définir les métadonnées XMP pour l'identification PDF/A-3B
+  const now = new Date();
+  const nowIso = now.toISOString();
+  const title = `Facture ${invoice.header?.invoice_number || 'Preview'}`;
+  const author = invoice.seller?.legal_name || 'eInvoicing App';
+
+  // Le nom du fichier XML est requis pour les métadonnées Factur-X
+  const xmlFileName = "factur-x.xml";
+
+  // --- Définir les métadonnées XMP correctement pour PDF/A-3 et Factur-X ---
+  const xmpMetadata = `<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>
+  <x:xmpmeta xmlns:x="adobe:ns:meta/">
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <rdf:Description rdf:about=""
+          xmlns:dc="http://purl.org/dc/elements/1.1/"
+          xmlns:xmp="http://ns.adobe.com/xap/1.0/"
+          xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/"
+          xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#">
+        <dc:title><rdf:Alt><rdf:li xml:lang="x-default">${title}</rdf:li></rdf:Alt></dc:title>
+        <dc:creator><rdf:Seq><rdf:li>${author}</rdf:li></rdf:Seq></dc:creator>
+        <xmp:CreateDate>${nowIso}</xmp:CreateDate>
+        <xmp:ModifyDate>${nowIso}</xmp:ModifyDate>
+        <xmp:CreatorTool>eInvoicing App</xmp:CreatorTool>
+        <pdfaid:part>3</pdfaid:part>
+        <pdfaid:conformance>B</pdfaid:conformance>
+        <fx:DocumentType>INVOICE</fx:DocumentType>
+        <fx:DocumentFileName>${xmlFileName}</fx:DocumentFileName>
+        <fx:Version>1.0</fx:Version>
+        <fx:ConformanceLevel>BASIC</fx:ConformanceLevel>
+      </rdf:Description>
+    </rdf:RDF>
+  </x:xmpmeta>
+  <?xpacket end="w"?>`;
+
+  // Utiliser un flux XML non compressé
+  const metadataStream = pdfDoc.context.stream(xmpMetadata, {
+    Type: PDFName.of('Metadata'),
+    Subtype: PDFName.of('XML'),
+  });
+
+  // Enregistrer dans le catalogue PDF
+  pdfDoc.catalog.set(PDFName.of('Metadata'), pdfDoc.context.register(metadataStream));
+
+  // 3. Ajouter un "OutputIntent" pour la gestion des couleurs
+  const iccProfilePath = path.join(__dirname, "color-profiles/sRGB_IEC61966-2-1_black_scaled.icc");
+  if (fs.existsSync(iccProfilePath)) {
+    const iccProfileBytes = fs.readFileSync(iccProfilePath);
+    const outputIntent = pdfDoc.context.stream(iccProfileBytes);
+    pdfDoc.catalog.set(PDFName.of('OutputIntents'), pdfDoc.context.obj([{ Type: 'OutputIntent', S: 'GTS_PDFA1', OutputConditionIdentifier: 'sRGB IEC61966-2.1', DestOutputProfile: outputIntent }]));
+  }
+
+  // 4. Synchroniser le dictionnaire d'informations du document
+  pdfDoc.setTitle(title);
+  pdfDoc.setAuthor(author);
+  pdfDoc.setCreator('eInvoicing App');
+  pdfDoc.setProducer('pdf-lib');
+  pdfDoc.setCreationDate(now);
+  pdfDoc.setModificationDate(now);
+
   const page = pdfDoc.addPage([595, 842]); // A4 portrait
   const { width, height } = page.getSize();
-  const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const fontPath = path.join(__dirname, "fonts/DejaVuSans.ttf");
+  const fontBoldPath = path.join(__dirname, "fonts/DejaVuSans-Bold.ttf");
+
+  if (!fs.existsSync(fontPath) || !fs.existsSync(fontBoldPath)) {
+    console.error("Fichiers de police manquants ! Assurez-vous que DejaVuSans.ttf et DejaVuSans-Bold.ttf existent dans le dossier 'src/utils/invoice-pdf/fonts/'.");
+    throw new Error("Fichiers de police requis pour la génération de PDF non trouvés.");
+  }
+
+  const fontBytes = fs.readFileSync(fontPath);
+  const fontBoldBytes = fs.readFileSync(fontBoldPath);
+  const fontRegular = await pdfDoc.embedFont(fontBytes, { subset: true });
+  const fontBold = await pdfDoc.embedFont(fontBoldBytes, { subset: true });
   const margin = 50;
   let y = height - margin;
 
@@ -381,6 +543,7 @@ async function generateInvoicePdfBuffer(invoice) {
   // ---------------- Logo ----------------
   const logoPath = path.join(__dirname, "logo.png");
   let logoHeight = 0;
+  // NOTE: Pour éviter les problèmes de transparence (erreur SMask), assurez-vous que votre logo.png n'a pas de canal alpha.
   if (fs.existsSync(logoPath)) {
     const logoBytes = await fs.promises.readFile(logoPath);
     const logoImage = await pdfDoc.embedPng(logoBytes);

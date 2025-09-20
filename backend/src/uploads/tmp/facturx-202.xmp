@@ -1,0 +1,28 @@
+<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/">
+  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <rdf:Description rdf:about=""
+        xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/"
+        xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#"
+        xmlns:xmp="http://ns.adobe.com/xap/1.0/"
+        xmlns:xapMM="http://ns.adobe.com/xap/1.0/mm/"
+        xmlns:dc="http://purl.org/dc/elements/1.1/"
+        pdfaid:part="3"
+        pdfaid:conformance="B"
+        fx:DocumentType="INVOICE"
+        fx:DocumentFileName="202-factur-x.xml"
+        fx:Version="1.0"
+        fx:ConformanceLevel="BASIC">
+      <xmp:CreateDate>2025-09-20T21:47:05.513Z</xmp:CreateDate>
+      <xmp:ModifyDate>2025-09-20T21:47:05.514Z</xmp:ModifyDate>
+      <xmp:CreatorTool>eInvoicing</xmp:CreatorTool>
+      <xapMM:DocumentID>INV-202</xapMM:DocumentID>
+      <dc:title>
+        <rdf:Alt><rdf:li xml:lang="x-default">Invoice 202</rdf:li></rdf:Alt>
+      </dc:title>
+      <dc:description>Facture électronique avec Factur-X</dc:description>
+      <dc:format>application/pdf</dc:format>
+    </rdf:Description>
+  </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>

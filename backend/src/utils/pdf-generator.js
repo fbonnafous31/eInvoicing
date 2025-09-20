@@ -1,9 +1,7 @@
 // utils/pdf-generator.js
 const fs = require('fs');
 const path = require('path');
-const { PDFDocument } = require('pdf-lib');
-const { generateFilledXmp } = require('./xmp-helper');
-const { injectXmpIntoPdf } = require('./xmp-injector');
+const { PDFDocument, PDFName, PDFString } = require('pdf-lib');
 const { patchPdfA3 } = require('./pdf-postprocess');
 
 const PDF_A3_DIR = path.resolve('src/uploads/pdf-a3');
@@ -16,13 +14,44 @@ function ensurePdfDirExists() {
 }
 
 /**
- * Transforme un PDF existant en PDF/A-3 avec le XML Factur-X et les attachments
- * @param {string} pdfPath - Chemin vers le PDF principal existant
- * @param {string} facturxPath - Chemin vers le XML Factur-X
- * @param {Array<{file_path: string, file_name: string, mimeType?: string}>} attachments - Liste des attachments à embarquer
- * @param {string|number} invoiceId - ID de la facture pour nommer le PDF/A-3
- * @returns {string} Chemin du PDF/A-3 généré
+ * Injecte un XMP Factur-X dans un PDFDocument pdf-lib
  */
+function injectXmpToPdfLib(pdfDoc, { invoiceId, xmlFileName, title }) {
+  const xmpContent = `<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/">
+  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <rdf:Description rdf:about=""
+        xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/"
+        xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#"
+        xmlns:xmp="http://ns.adobe.com/xap/1.0/"
+        xmlns:xapMM="http://ns.adobe.com/xap/1.0/mm/"
+        xmlns:dc="http://purl.org/dc/elements/1.1/"
+        pdfaid:part="3"
+        pdfaid:conformance="B"
+        fx:DocumentType="INVOICE"
+        fx:DocumentFileName="${xmlFileName}"
+        fx:Version="1.0"
+        fx:ConformanceLevel="BASIC">
+      <xmp:CreateDate>${new Date().toISOString()}</xmp:CreateDate>
+      <xmp:ModifyDate>${new Date().toISOString()}</xmp:ModifyDate>
+      <xmp:CreatorTool>eInvoicing</xmp:CreatorTool>
+      <xapMM:DocumentID>INV-${invoiceId}</xapMM:DocumentID>
+      <dc:title>
+        <rdf:Alt><rdf:li xml:lang="x-default">${title}</rdf:li></rdf:Alt>
+      </dc:title>
+      <dc:description>Facture électronique avec Factur-X</dc:description>
+      <dc:format>application/pdf</dc:format>
+    </rdf:Description>
+  </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>`;
+
+  const metadataStream = pdfDoc.context.stream(xmpContent, {
+    Type: PDFName.of('Metadata'),
+    Subtype: PDFName.of('XML'),
+  });
+  pdfDoc.catalog.set(PDFName.of('Metadata'), pdfDoc.context.register(metadataStream));
+}
 
 async function embedFacturXInPdf(pdfPath, facturxPath, attachments = [], invoiceId) {
   // Charger PDF principal
@@ -45,38 +74,29 @@ async function embedFacturXInPdf(pdfPath, facturxPath, attachments = [], invoice
     });
   }
 
-  // Métadonnées PDF standards (compatibles pdf-lib)
+  // Métadonnées PDF standards
   pdfDoc.setTitle(`Invoice ${invoiceId}`);
   pdfDoc.setSubject('Facture électronique PDF/A-3 avec Factur-X et attachments');
   pdfDoc.setCreator('eInvoicing');
   pdfDoc.setProducer('eInvoicing');
 
-  // Sauvegarder PDF/A-3
+  // Injection XMP directe
+  injectXmpToPdfLib(pdfDoc, {
+    invoiceId,
+    xmlFileName: path.basename(facturxPath),
+    title: `Invoice ${invoiceId}`,
+  });
+
+  // Sauvegarde PDF/A-3
   ensurePdfDirExists();
   const pdfA3Path = path.join(PDF_A3_DIR, `${invoiceId}_pdf-a3.pdf`);
   const pdfBytes = await pdfDoc.save();
   fs.writeFileSync(pdfA3Path, pdfBytes);
 
-  // ✅ Injection XMP avec exiftool (optionnel, non bloquant)
-  try {
-    const xmlFileName = path.basename(facturxPath); 
-    const xmpPath = generateFilledXmp({
-      invoiceId,
-      xmlFileName,
-      title: `Invoice ${invoiceId}`,
-    });
+  // Patch post-process si nécessaire
+  patchPdfA3(pdfA3Path, 'factur-x.xml');
 
-    await injectXmpIntoPdf(pdfA3Path, xmpPath);
-    patchPdfA3(pdfA3Path, 'factur-x.xml');
-    
-    // Nettoyer le fichier XMP temporaire
-    try { fs.unlinkSync(xmpPath); } catch (_) {}
-
-    console.log(`✅ XMP injecté dans ${pdfA3Path}`);
-  } catch (err) {
-    console.warn(`⚠️ Impossible d'injecter le XMP (PDF généré quand même): ${err.message}`);
-  }
-
+  console.log(`✅ PDF/A-3 avec XMP injecté généré à : ${pdfA3Path}`);
   return pdfA3Path;
 }
 

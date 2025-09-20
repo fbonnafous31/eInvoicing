@@ -1,3 +1,4 @@
+const fs = require('fs');
 const InvoicesService = require('./invoices.service');
 const InvoicePdpService = require('./invoicePdp.service');
 const { getInvoiceById } = require('./invoices.model');
@@ -177,12 +178,21 @@ const sendInvoice = asyncHandler(async (req, res) => {
     return res.status(404).json({ error: 'Facture introuvable' });
   }
 
-  const result = await InvoicePdpService.sendInvoice(invoiceId);
+  // 1. Le PDF/A-3 a été généré lors de la création/mise à jour. On reconstruit son chemin.
+  const finalPdfPath = path.join(__dirname, `../../uploads/pdf-a3/${invoiceId}_pdf-a3.pdf`);
+
+  if (!fs.existsSync(finalPdfPath)) {
+    return res.status(404).json({ 
+      error: `Le fichier PDF/A-3 final pour la facture ${invoiceId} est introuvable. Veuillez essayer de mettre à jour la facture pour le régénérer.` 
+    });
+  }
+
+  // 2. Envoyer le PDF final au PDP
+  const result = await InvoicePdpService.sendInvoice(invoiceId, finalPdfPath);
 
   res.json({
     message: 'Facture envoyée avec succès',
     invoiceId,
-    submissionId: result.submissionId,
     result,
   });
 });

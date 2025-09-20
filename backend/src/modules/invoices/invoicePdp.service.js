@@ -32,14 +32,13 @@ axios.interceptors.request.use(request => {
   return request;
 });
 
-async function sendInvoice(invoiceId) {
-  const facturXPath = path.join(FACTURX_DIR, `${invoiceId}-factur-x.xml`);
-  if (!fs.existsSync(facturXPath)) {
-    throw new Error(`Factur-X non trouvé pour invoice ${invoiceId}`);
+async function sendInvoice(invoiceId, pdfPath) {
+  if (!fs.existsSync(pdfPath)) {
+    throw new Error(`Fichier PDF Factur-X non trouvé pour la facture ${invoiceId} à l'emplacement : ${pdfPath}`);
   }
 
-  const fileStats = fs.statSync(facturXPath);
-  const fileName = path.basename(facturXPath);
+  const fileStats = fs.statSync(pdfPath);
+  const fileName = path.basename(pdfPath);
 
   const invoice = await InvoicesModel.getInvoiceById(invoiceId);
   if (!invoice) throw new Error(`Facture ${invoiceId} introuvable`);
@@ -54,7 +53,7 @@ async function sendInvoice(invoiceId) {
   };
 
   const form = new FormData();
-  form.append('invoice', fs.createReadStream(facturXPath));
+  form.append('invoice', fs.createReadStream(pdfPath));
   form.append('metadata', JSON.stringify(metadata));
 
   console.log(`📤 Envoi facture ${invoiceId} au PDP avec :`, {
