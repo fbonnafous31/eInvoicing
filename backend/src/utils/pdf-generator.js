@@ -61,7 +61,7 @@ async function embedFacturXInPdf(pdfPath, facturxPath, attachments = [], invoice
   // Attacher le XML Factur-X
   const xmlBytes = fs.readFileSync(facturxPath);
   await pdfDoc.attach(xmlBytes, 'factur-x.xml', {
-    mimeType: 'application/xml',
+    mimeType: 'text/xml',
     description: 'Factur-X XML',
   });
 
@@ -91,7 +91,7 @@ async function embedFacturXInPdf(pdfPath, facturxPath, attachments = [], invoice
   ensurePdfDirExists();
   const pdfA3Path = path.join(PDF_A3_DIR, `${invoiceId}_pdf-a3.pdf`);
   const pdfBytes = await pdfDoc.save();
-  fs.writeFileSync(pdfA3Path, pdfBytes);
+  fs.writeFileSync(pdfA3Path, pdfBytes, { encoding: 'binary' });
 
   // Patch post-process si nécessaire
   patchPdfA3(pdfA3Path, 'factur-x.xml');
