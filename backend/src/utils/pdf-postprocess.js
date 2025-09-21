@@ -1,45 +1,62 @@
 // utils/pdf-postprocess.js
 const fs = require('fs');
+const crypto = require('crypto');
 
 /**
- * Patch AFRelationship pour tous les fichiers attachés dans un PDF/A-3
+ * Patch AFRelationship et trailer /ID pour PDF/A-3
  * @param {string} pdfPath - Chemin du PDF à corriger
+ * @param {string} facturxName - Nom du fichier Factur-X (ex: factur-x.xml)
  */
-function patchPdfA3(pdfPath) {
-  let data = fs.readFileSync(pdfPath); // Buffer binaire
+function patchPdfA3(pdfPath, facturxName = 'factur-x.xml') {
+  let data = fs.readFileSync(pdfPath);
+  let text = data.toString('latin1'); // préserve les octets originaux
 
-  // Regex pour trouver chaque fichier attaché : /Type /Filespec suivi de /F (nom)
-  const filespecRegex = /\/Type\s*\/Filespec\s*\/F\s*\((.*?)\)/g;
-
-  let match;
   let modified = false;
 
-  while ((match = filespecRegex.exec(data)) !== null) {
-    const fullMatch = match[0];
-    const fileName = match[1];
+  // --- 1) Patch AFRelationship ---
+  const filespecRegex = /\/Type\s*\/Filespec\s*\/F\s*\((.*?)\)/g;
+  let match;
 
-    // Vérifier si /AFRelationship déjà présent après le Filespec
-    const afterMatchIndex = match.index + fullMatch.length;
-    const afterBytes = data.slice(afterMatchIndex, afterMatchIndex + 50).toString();
-    if (!/\/AFRelationship/.test(afterBytes)) {
-      const insert = Buffer.from(`\n/AFRelationship /Data`);
-      data = Buffer.concat([
-        data.slice(0, afterMatchIndex),
-        insert,
-        data.slice(afterMatchIndex),
-      ]);
+  while ((match = filespecRegex.exec(text)) !== null) {
+    const fileName = match[1];
+    const afterMatchIndex = match.index + match[0].length;
+    const afterSlice = text.slice(afterMatchIndex, afterMatchIndex + 80);
+
+    if (!/\/AFRelationship/.test(afterSlice)) {
+      const relation =
+        fileName === facturxName ? '/AFRelationship /Source' : '/AFRelationship /Data';
+      text =
+        text.slice(0, afterMatchIndex) +
+        `\n${relation}` +
+        text.slice(afterMatchIndex);
       modified = true;
       console.log(`✅ AFRelationship ajouté pour ${fileName}`);
-      // Ajuster l'index pour ne pas passer par-dessus ce qu'on vient d'insérer
-      filespecRegex.lastIndex += insert.length;
+      filespecRegex.lastIndex += relation.length;
     }
   }
 
-  if (modified) {
-    fs.writeFileSync(pdfPath, data);
-    console.log(`✅ PDF patché avec AFRelationship`);
+  // --- 2) Patch trailer /ID ---
+  if (!/trailer[\s\r\n]*<<[^>]*\/ID/.test(text)) {
+    const id1 = crypto.randomBytes(16).toString('hex');
+    const id2 = crypto.randomBytes(16).toString('hex');
+
+    // Insérer le /ID dans le trailer principal
+    text = text.replace(/trailer\s*<<([\s\S]*?)>>/, (match, inner) => {
+      return `trailer\n<<${inner}\n/ID [<${id1}> <${id2}>] >>`;
+    });
+
+    modified = true;
+    console.log(`✅ /ID ajouté dans le trailer`);
   } else {
-    console.log(`⚠️ Aucun Filespec modifié`);
+    console.log(`⚠️ Trailer contient déjà un /ID`);
+  }
+
+  // --- 3) Sauvegarde ---
+  if (modified) {
+    fs.writeFileSync(pdfPath, Buffer.from(text, 'latin1'));
+    console.log(`✅ PDF patché avec succès`);
+  } else {
+    console.log(`ℹ️ Aucun patch nécessaire`);
   }
 }
 

@@ -11,7 +11,6 @@ function escapeXml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&apos;')
-    // Accents les plus fréquents
     .replace(/é/g, '&#233;')
     .replace(/è/g, '&#232;')
     .replace(/à/g, '&#224;')
@@ -27,23 +26,39 @@ function escapeXml(str) {
  * @param {string} options.title
  * @returns {string} XMP prêt à injecter dans le PDF
  */
+/**
+ * Échappe les caractères XML spéciaux et quelques accents pour PDF/A
+ */
+function escapeXml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;')
+    .replace(/é/g, '&#233;')
+    .replace(/è/g, '&#232;')
+    .replace(/à/g, '&#224;');
+}
+
+/**
+ * Génère le XMP strict PDF/A-3 + Factur-X
+ */
 function generateXmpContent({ invoiceId, xmlFileName, title }) {
   const now = new Date().toISOString();
+
   return `<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>
 <x:xmpmeta xmlns:x="adobe:ns:meta/">
   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+
+    <!-- Description standard PDF/A -->
     <rdf:Description rdf:about=""
         xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/"
-        xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#"
         xmlns:xmp="http://ns.adobe.com/xap/1.0/"
         xmlns:xapMM="http://ns.adobe.com/xap/1.0/mm/"
         xmlns:dc="http://purl.org/dc/elements/1.1/"
         pdfaid:part="3"
-        pdfaid:conformance="B"
-        fx:DocumentType="INVOICE"
-        fx:DocumentFileName="${escapeXml(xmlFileName)}"
-        fx:Version="1.0"
-        fx:ConformanceLevel="BASIC">
+        pdfaid:conformance="B">
       <xmp:CreateDate>${now}</xmp:CreateDate>
       <xmp:ModifyDate>${now}</xmp:ModifyDate>
       <xmp:CreatorTool>eInvoicing</xmp:CreatorTool>
@@ -51,9 +66,19 @@ function generateXmpContent({ invoiceId, xmlFileName, title }) {
       <dc:title>
         <rdf:Alt><rdf:li xml:lang="x-default">${escapeXml(title)}</rdf:li></rdf:Alt>
       </dc:title>
-      <dc:description>Facture électronique avec Factur-X</dc:description>
+      <dc:description>${escapeXml('Facture electronique avec Factur-X')}</dc:description>
       <dc:format>application/pdf</dc:format>
     </rdf:Description>
+
+    <!-- Extension Factur-X -->
+    <rdf:Description rdf:about=""
+        xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#">
+      <fx:DocumentType>INVOICE</fx:DocumentType>
+      <fx:DocumentFileName>${escapeXml(xmlFileName)}</fx:DocumentFileName>
+      <fx:Version>1.0</fx:Version>
+      <fx:ConformanceLevel>BASIC</fx:ConformanceLevel>
+    </rdf:Description>
+
   </rdf:RDF>
 </x:xmpmeta>
 <?xpacket end="w"?>`;
