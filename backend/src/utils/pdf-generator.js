@@ -1,14 +1,15 @@
 // utils/pdf-generator.js
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { PDFDocument, PDFName, PDFString } = require('pdf-lib');
 const { patchPdfA3 } = require('./pdf-postprocess');
 const { generateXmpContent } = require('./xmp-helper');
+const { execSync } = require('child_process');
 
 const PDF_A3_DIR = path.resolve('src/uploads/pdf-a3');
 const ICC_DIR = path.resolve(__dirname, 'icc');
 const SRGB_PROFILE = path.join(ICC_DIR, 'sRGB.icc');
-console.log('SRGB_PROFILE :', SRGB_PROFILE);
 
 function ensurePdfDirExists() {
   if (!fs.existsSync(PDF_A3_DIR)) {
@@ -18,9 +19,21 @@ function ensurePdfDirExists() {
   return PDF_A3_DIR;
 }
 
-/**
- * Injecte un XMP Factur-X dans le PDF
- */
+function uncompressPdf(pdfPath) {
+  const tmpPath = pdfPath.replace(/\.pdf$/, '_uncompressed.pdf');
+  console.log(`[PDF] Décompression des streams avec qpdf : ${pdfPath} -> ${tmpPath}`);
+  execSync(`qpdf --qdf --stream-data=uncompress "${pdfPath}" "${tmpPath}"`, { stdio: 'inherit' });
+  return tmpPath;
+}
+
+function linearizePdf(pdfPath) {
+  const tmpPath = pdfPath.replace(/\.pdf$/, '_linearized.pdf');
+  console.log(`[PDF] Linearisation avec qpdf : ${pdfPath} -> ${tmpPath}`);
+  execSync(`qpdf --linearize "${pdfPath}" "${tmpPath}"`, { stdio: 'inherit' });
+  fs.renameSync(tmpPath, pdfPath);
+  console.log(`[PDF] PDF linéarisé et remplacé : ${pdfPath}`);
+}
+
 function injectXmpToPdfLib(pdfDoc, { invoiceId, title }) {
   console.log('[PDF] Injection XMP dans le PDF...');
   const xmpContent = generateXmpContent({
@@ -38,9 +51,6 @@ function injectXmpToPdfLib(pdfDoc, { invoiceId, title }) {
   console.log('[PDF] XMP injecté avec succès.');
 }
 
-/**
- * Injecte un OutputIntent sRGB pour corriger l'erreur DeviceRGB PDF/A-3
- */
 async function injectOutputIntent(pdfDoc) {
   console.log('[PDF] Injection de l\'OutputIntent sRGB...');
   const iccBytes = fs.readFileSync(SRGB_PROFILE);
@@ -59,7 +69,6 @@ async function injectOutputIntent(pdfDoc) {
   });
 
   const outputIntentRef = pdfDoc.context.register(outputIntentDict);
-
   pdfDoc.catalog.set(
     PDFName.of('OutputIntents'),
     pdfDoc.context.obj([outputIntentRef])
@@ -68,11 +77,23 @@ async function injectOutputIntent(pdfDoc) {
   console.log('[PDF] OutputIntent sRGB injecté avec succès.');
 }
 
-/**
- * Génère un PDF/A-3 avec Factur-X et fichiers attachés
- */
+function injectPdfID(pdfDoc) {
+  const id1 = Buffer.from(crypto.randomBytes(16)).toString('hex');
+  const id2 = Buffer.from(crypto.randomBytes(16)).toString('hex');
+
+  const idArray = pdfDoc.context.obj([
+    PDFString.of(id1),
+    PDFString.of(id2),
+  ]);
+
+  pdfDoc.catalog.set(PDFName.of('ID'), idArray);
+  console.log(`✅ /ID injecté dans le catalogue PDF : [<${id1}> <${id2}>]`);
+}
+
 async function embedFacturXInPdf(pdfPath, facturxPath, attachments = [], invoiceId) {
-  console.log(`[PDF] Chargement du PDF principal : ${pdfPath}`);
+  ensurePdfDirExists();
+
+  console.log(`[PDF] Chargement du PDF original : ${pdfPath}`);
   const existingPdfBytes = fs.readFileSync(pdfPath);
   const pdfDoc = await PDFDocument.load(existingPdfBytes);
   console.log('[PDF] PDF chargé.');
@@ -80,10 +101,7 @@ async function embedFacturXInPdf(pdfPath, facturxPath, attachments = [], invoice
   // Attacher le XML Factur-X
   console.log('[PDF] Ajout du fichier Factur-X XML...');
   const xmlBytes = fs.readFileSync(facturxPath);
-  await pdfDoc.attach(xmlBytes, 'factur-x.xml', {
-    mimeType: 'text/xml',
-    description: 'Factur-X XML',
-  });
+  await pdfDoc.attach(xmlBytes, 'factur-x.xml', { mimeType: 'text/xml', description: 'Factur-X XML' });
   console.log('[PDF] Factur-X XML attaché.');
 
   // Attacher les fichiers supplémentaires
@@ -103,28 +121,32 @@ async function embedFacturXInPdf(pdfPath, facturxPath, attachments = [], invoice
   pdfDoc.setCreator('eInvoicing');
   pdfDoc.setProducer('eInvoicing');
 
-  // Injection XMP
-  injectXmpToPdfLib(pdfDoc, {
-    invoiceId,
-    title: `Invoice ${invoiceId}`,
-  });
-
-  // Injection OutputIntent sRGB
+  // Injection XMP et OutputIntent
+  injectXmpToPdfLib(pdfDoc, { invoiceId, title: `Invoice ${invoiceId}` });
   await injectOutputIntent(pdfDoc);
 
-  // Sauvegarde PDF/A-3
-  ensurePdfDirExists();
+  // Sauvegarde temporaire avant qpdf
   const pdfA3Path = path.join(PDF_A3_DIR, `${invoiceId}_pdf-a3.pdf`);
-  const pdfBytes = await pdfDoc.save();
-  fs.writeFileSync(pdfA3Path, pdfBytes);
-  console.log(`[PDF] PDF/A-3 sauvegardé à : ${pdfA3Path}`);
+  let finalPdfBytes = await pdfDoc.save();
+  fs.writeFileSync(pdfA3Path, finalPdfBytes);
+  console.log(`[PDF] PDF temporaire sauvegardé : ${pdfA3Path}`);
 
   // Patch post-process
-  console.log('[PDF] Application du patch post-process...');
+  console.log('[PDF] Application du patch post-process pour AFRelationship / EF...');
   patchPdfA3(pdfA3Path, 'factur-x.xml');
-  console.log('[PDF] Patch post-process terminé.');
 
-  console.log(`✅ PDF/A-3 final avec XMP, OutputIntent et /ID généré : ${pdfA3Path}`);
+  // Décompression et linearisation pour corriger endstream et trailer
+  const uncompressedPath = uncompressPdf(pdfA3Path);
+  fs.copyFileSync(uncompressedPath, pdfA3Path); // remplacer le PDF d'origine
+  linearizePdf(pdfA3Path);
+
+  // Injection finale du /ID après qpdf
+  const finalPdfDoc = await PDFDocument.load(fs.readFileSync(pdfA3Path));
+  injectPdfID(finalPdfDoc);
+  finalPdfBytes = await finalPdfDoc.save();
+  fs.writeFileSync(pdfA3Path, finalPdfBytes);
+
+  console.log(`✅ PDF/A-3 final prêt avec /ID intact : ${pdfA3Path}`);
   return pdfA3Path;
 }
 
