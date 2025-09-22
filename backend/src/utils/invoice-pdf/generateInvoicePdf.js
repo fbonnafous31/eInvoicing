@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { PDFDocument, StandardFonts, rgb, PDFName } = require("pdf-lib");
+const { PDFDocument, rgb, PDFName } = require("pdf-lib");
 const { paymentMethodsOptions } = require("../../../constants/paymentMethods");
 const { paymentTermsOptions } = require("../../../constants/paymentTerms");
 const fontkit = require('@pdf-lib/fontkit');

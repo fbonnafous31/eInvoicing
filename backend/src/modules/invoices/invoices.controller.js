@@ -24,7 +24,8 @@ function _parseMultipartBody(body) {
     if (body[key]) {
       try {
         parsed[key] = JSON.parse(body[key]);
-      } catch (e) {
+      } catch (e) {       
+        console.error(`Erreur parsing ${key}:`, e.message); 
         const err = new Error(`Le champ '${key}' contient du JSON invalide.`);
         err.statusCode = 400;
         throw err;

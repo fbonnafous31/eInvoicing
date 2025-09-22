@@ -7,7 +7,6 @@ const InvoiceStatusModel = require('./invoiceStatus.model');
 const SellersModel = require('../sellers/sellers.service');
 const ClientsModel = require('../clients/clients.service');
 
-const FACTURX_DIR = path.resolve('src/uploads/factur-x');
 const PDP_URL = process.env.PDP_BASE_URL || 'http://localhost:4000/invoices';
 const POLLING_INTERVAL = 2000; // 2 secondes
 const POLLING_TIMEOUT = 60000; // 60 secondes max

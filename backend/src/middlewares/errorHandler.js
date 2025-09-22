@@ -1,6 +1,6 @@
 // backend/src/middlewares/errorHandler.js
 
-function errorHandler(err, req, res, next) {
+function errorHandler(err, res) {
   console.error(err); // log complet pour debug
 
   // Cas PostgreSQL - violation contrainte d'unicité

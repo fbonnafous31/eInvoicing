@@ -88,8 +88,6 @@ router.post('/:submissionId/lifecycle/request', (req, res) => {
     210: ["Refusée : facture non conforme", "Refus PDP : erreur sur la référence client"]
   };
 
-  let newStatusAdded = false;
-
   for (const candidate of possibleStatuses) {
     if (candidate.code <= lastCode) continue;
     if (Math.random() <= candidate.probability) {
@@ -99,7 +97,6 @@ router.post('/:submissionId/lifecycle/request', (req, res) => {
         : null;
       sub.lifecycle.push({ ...candidate, createdAt: new Date().toISOString(), comment });
       console.log(`📊 Cycle métier avancé pour ${req.params.submissionId} : ${candidate.label} (${comment || 'aucun commentaire'})`);
-      newStatusAdded = true;
       break;
     }
   }

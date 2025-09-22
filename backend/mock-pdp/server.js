@@ -11,7 +11,7 @@ app.use(express.json());
 app.use('/invoices', invoicesRouter);
 
 // Middleware global pour catcher les erreurs non attrapées
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   // Log complet pour le dev
   console.error('🔥 ERREUR SERVER:', err.message);
   console.error(err.stack);

@@ -350,7 +350,7 @@ async function updateInvoice(
     await conn.query("DELETE FROM invoicing.invoice_lines WHERE invoice_id = $1", [id]);
     if (lines?.length) {
       for (const line of lines) {
-        const { id: lineId, invoice_id, ...lineData } = line;
+        const { id: lineId, invoice_id, ...lineData } = line; // eslint-disable-line no-unused-vars
         const cols = Object.keys(lineData).join(", ");
         const vals = Object.values(lineData);
         const placeholdersLine = vals.map((_, i) => `$${i + 1}`).join(", ");
@@ -366,7 +366,7 @@ async function updateInvoice(
     await conn.query("DELETE FROM invoicing.invoice_taxes WHERE invoice_id = $1", [id]);
     if (taxes?.length) {
       for (const tax of taxes) {
-        const { id: taxId, invoice_id, ...taxData } = tax;
+        const { id: taxId, invoice_id, ...taxData } = tax; // eslint-disable-line no-unused-vars
         const cols = Object.keys(taxData).join(", ");
         const vals = Object.values(taxData);
         const placeholdersTax = vals.map((_, i) => `$${i + 1}`).join(", ");

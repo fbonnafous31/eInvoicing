@@ -2,23 +2,6 @@
 const { PDFName } = require('pdf-lib');
 
 /**
- * Échappe les caractères XML spéciaux et certains accents
- */
-function escapeXml(str) {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;')
-    .replace(/é/g, '&#233;')
-    .replace(/è/g, '&#232;')
-    .replace(/à/g, '&#224;')
-    .replace(/ê/g, '&#234;')
-    .replace(/ç/g, '&#231;');
-}
-
-/**
  * Génère un XMP complet pour Factur-X / PDF/A-3
  * @param {Object} options
  * @param {string|number} options.invoiceId
