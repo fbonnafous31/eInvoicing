@@ -15,21 +15,21 @@ describe('ClientsList complet', () => {
   it('affiche le loader quand loading = true', () => {
     useClients.mockReturnValue({ clients: [], loading: true, error: null });
     render(<ClientsList />);
-    /* eslint-disable-next-line no-undef */
+     
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
   });
 
   it('affiche la table quand loading = false', () => {
     useClients.mockReturnValue({ clients: [{ id: 1, name: 'Test Client' }], loading: false, error: null });
     render(<ClientsList />);
-    /* eslint-disable-next-line no-undef */
+     
     expect(screen.getByText(/Test Client/i)).toBeInTheDocument();
   });
 
   it('affiche un message d’erreur', () => {
     useClients.mockReturnValue({ clients: [], loading: false, error: 'Erreur !' });
     render(<ClientsList />);
-    /* eslint-disable-next-line no-undef */
+     
     expect(screen.getByText(/Erreur/i)).toBeInTheDocument();
   });
 
@@ -48,10 +48,10 @@ describe('ClientsList complet', () => {
     const input = screen.getByPlaceholderText(/rechercher/i);
     fireEvent.change(input, { target: { value: 'Alice' } });
 
-    /* eslint-disable-next-line no-undef */
+     
     expect(screen.getByText(/Alice/i)).toBeInTheDocument();
 
-    /* eslint-disable-next-line no-undef */
+     
     expect(screen.queryByText(/Bob/i)).not.toBeInTheDocument();
   });
 });
