@@ -1,5 +1,7 @@
 # eInvoicing – Application Web de Gestion des Factures
 
+[![codecov](https://codecov.io/gh/TON_USER/TON_REPO/branch/main/graph/badge.svg?token=TON_TOKEN)](https://codecov.io/gh/TON_USER/TON_REPO)
+
 ## 📖 Contexte
 
 Après avoir travaillé dans le domaine de la gestion financière, et plus spécifiquement sur la facturation électronique et la conformité ERP, j’ai décidé de développer un outil personnel permettant de **créer, suivre et gérer des factures électroniques**.  

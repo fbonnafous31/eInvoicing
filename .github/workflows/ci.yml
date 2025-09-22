@@ -47,6 +47,14 @@ jobs:
           name: backend-coverage
           path: backend/coverage
 
+      - name: Upload backend coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: backend/coverage/lcov.info
+          flags: backend
+          fail_ci_if_error: true
+
       # --- Cache Frontend ---
       - name: Cache frontend node modules
         uses: actions/cache@v3
@@ -70,3 +78,11 @@ jobs:
         with:
           name: frontend-coverage
           path: frontend/coverage
+
+      - name: Upload frontend coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: frontend/coverage/lcov.info
+          flags: frontend
+          fail_ci_if_error: true
