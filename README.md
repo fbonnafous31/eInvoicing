@@ -1,6 +1,6 @@
 # eInvoicing – Application Web de Gestion des Factures
 
-[![codecov](https://codecov.io/gh/TON_USER/TON_REPO/branch/main/graph/badge.svg?token=TON_TOKEN)](https://codecov.io/gh/TON_USER/TON_REPO)
+[![codecov](https://codecov.io/gh/fbonnafous31/eInvoicing/branch/main/graph/badge.svg)](https://codecov.io/gh/fbonnafous31/eInvoicing)
 
 ## 📖 Contexte
 
