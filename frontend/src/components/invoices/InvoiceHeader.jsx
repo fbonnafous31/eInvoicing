@@ -14,16 +14,32 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
 
   const { fetchMySeller } = useSellerService();
 
+  // --- Initial header avec valeurs par défaut ---
+  const initialHeader = {
+    invoice_number: data?.invoice_number || "",
+    issue_date: data?.issue_date || new Date().toISOString().split("T")[0],
+    fiscal_year: data?.fiscal_year || new Date().getFullYear(),
+    seller_id: data?.seller_id || "",
+    contract_number: data?.contract_number || "",
+    purchase_order_number: data?.purchase_order_number || "",
+    payment_method: data?.payment_method || "",
+    payment_terms: data?.payment_terms || "",
+  };
+
   // --- Validation ---
   const validateField = useCallback((field, value) => {
+    // Ne pas valider à l'ouverture si le champ n'a pas été touché et pas de soumission
+    if (!touchedFields[field] && !submitted) return;
+
     let error = null;
+    const fullData = { ...data, ...initialHeader };
     if (field === "issue_date") {
       error = validateIssueDate(value);
     } else {
-      error = validateInvoiceField(field, value, data);
+      error = validateInvoiceField(field, fullData[field], fullData);
     }
     setFieldErrors(prev => ({ ...prev, [field]: error }));
-  }, [data]);
+  }, [data, touchedFields, submitted, initialHeader]);
 
   // --- Gestion du changement ---
   const handleChange = useCallback((field, value) => {
@@ -32,10 +48,13 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
       newData.fiscal_year = new Date(value).getFullYear();
     }
     onChange(newData);
-    validateField(field, value);
-    if (!touchedFields[field]) {
+
+    // Marquer comme touché uniquement si l'utilisateur modifie (pas pour auto-fill seller_id)
+    if (field !== "seller_id" && !touchedFields[field]) {
       setTouchedFields(prev => ({ ...prev, [field]: true }));
     }
+
+    validateField(field, value);
   }, [data, onChange, touchedFields, validateField]);
 
   const handleBlur = (field) => {
@@ -57,19 +76,19 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
     return fields.some(f => currentErrors[f]);
   };
 
+  // --- Auto-fill seller_id si vide ---
   useEffect(() => {
     const fetchData = async () => {
       try {
         const seller = await fetchMySeller();
         if (seller && !data.seller_id) {
-          handleChange("seller_id", seller.id);
+          handleChange("seller_id", seller.id); // auto-fill, pas touché donc pas de warning
         }
       } catch (err) {
         console.error("Erreur fetch my seller:", err);
       }
     };
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchMySeller]);
 
   const issueYear = data.issue_date ? new Date(data.issue_date).getFullYear() : new Date().getFullYear();

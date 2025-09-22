@@ -4,7 +4,7 @@ export function validateInvoiceField(field, value, data = {}) {
 
   switch(field) {
     case "invoice_number":
-      if (!value) error = "Ce champ est obligatoire";
+      if (!value) error = "Ce champ est obligatoire.";
       break;
     case "issue_date":
       if (!value) error = "Ce champ est obligatoire";

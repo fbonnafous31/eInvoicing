@@ -26,8 +26,7 @@ function withLogging(req, res, next) {
     const rawToken = authHeader.split(" ")[1];
     if (rawToken) {
       try {
-        const payload = JSON.parse(Buffer.from(rawToken.split(".")[1], "base64").toString("utf8"));
-        console.log("Token payload:", payload);
+        JSON.parse(Buffer.from(rawToken.split(".")[1], "base64").toString("utf8"));
       } catch (err) {
         console.error("❌ Impossible de décoder le token :", err.message);
       }
