@@ -77,3 +77,8 @@
 - [Jour 74 – Premiers tests front et bases pour la CI 🧪💻](jour-074.md)
 - [Jour 75 – Ma méthodologie *Agile Solo* 🚀👨‍💻  ](jour-075.md)
 - [Jour 76 – Dashboard vendeur opérationnel 🚀📊](jour-076.md)
+- [📅 Bilan Hebdomadaire eInvoicing – Jour 64 à 76 🚀](jour-077.md)
+- [Jour 78 – Avancée sur le PDF/A-3 et XMP 📄✨](jour-078.md)
+- [Jour 79 – Mise en place de la CI pour eInvoicing 🚀](jour-079.md)
+- [Jour 80 – Intégration de Codecov 📊✨](jour-080.md)
+- [Jour 81 – Linter partout : backend et frontend 🧹✨](jour-081.md)
