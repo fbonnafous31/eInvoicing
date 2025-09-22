@@ -7,7 +7,9 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start:all": "concurrently -k -n \"BACKEND,FRONTEND,MOCK-PDP\" -c \"cyan,green,yellow\" \"cd ../backend && node server.js\" \"npm run dev\" \"cd ../backend && node mock-pdp/server.js\""
+    "start:all": "concurrently -k -n \"BACKEND,FRONTEND,MOCK-PDP\" -c \"cyan,green,yellow\" \"cd ../backend && node server.js\" \"npm run dev\" \"cd ../backend && node mock-pdp/server.js\"",
+    "test": "vitest run",
+    "test:dev": "vitest"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.4.0",
@@ -22,18 +24,13 @@
     "recharts": "^3.2.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.32.0",
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^14.3.1",
     "@testing-library/user-event": "^14.6.1",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
     "@vitejs/plugin-react": "^4.7.0",
-    "eslint": "^9.32.0",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.20",
-    "eslint-plugin-vitest": "^0.5.4",
-    "globals": "^16.3.0",
+    "@vitest/coverage-istanbul": "^3.2.4",
     "jsdom": "^27.0.0",
     "msw": "^2.11.2",
     "vite": "^7.1.0",

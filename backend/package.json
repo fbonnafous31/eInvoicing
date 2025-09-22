@@ -2,9 +2,11 @@
   "dependencies": {
     "@pdf-lib/fontkit": "^1.1.1",
     "axios": "^1.11.0",
+    "express": "^5.1.0",
     "express-fileupload": "^1.5.2",
     "express-jwt": "^8.5.1",
     "jwks-rsa": "^3.2.0",
+    "multer": "^2.0.2",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
@@ -13,7 +15,7 @@
     "vitest": "^3.2.4"
   },
   "scripts": {
-    "test": "jest",
+    "test": "jest --coverage",
     "test:watch": "jest --watch",
     "vitest": "vitest"
   }
