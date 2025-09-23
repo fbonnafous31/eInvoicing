@@ -1,20 +1,18 @@
-# Utiliser Node 20 pour cohérence avec le frontend
 FROM node:20-alpine
 
-# Répertoire de travail dans le conteneur
 WORKDIR /app
 
-# Copier uniquement package.json et package-lock.json pour optimiser le cache
+# Copier package.json pour installer dépendances
 COPY package*.json ./
-
-# Installer les dépendances (production seulement)
 RUN npm install --production
 
-# Copier tout le code source
-COPY . .
+# Copier dossiers root nécessaires
+COPY ./constants /app/constants
+COPY ./src/config /app/config
 
-# Exposer le port sur lequel ton serveur écoute
+# Copier le reste du code
+COPY ./src /app/src
+COPY server.js ./
+
 EXPOSE 3000
-
-# Définir la commande de démarrage
 CMD ["node", "server.js"]
