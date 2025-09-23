@@ -1,0 +1,88 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "iteration": 1695500000000,
+  "links": [],
+  "panels": [
+    {
+      "type": "graph",
+      "title": "CPU Usage",
+      "targets": [
+        {
+          "expr": "process_cpu_seconds_total",
+          "legendFormat": "{{mode}}",
+          "refId": "A"
+        }
+      ],
+      "xaxis": {"show": true},
+      "yaxis": {"format": "s", "show": true}
+    },
+    {
+      "type": "graph",
+      "title": "Memory Usage",
+      "targets": [
+        {"expr": "process_resident_memory_bytes", "legendFormat": "resident", "refId": "A"},
+        {"expr": "process_virtual_memory_bytes", "legendFormat": "virtual", "refId": "B"},
+        {"expr": "nodejs_heap_size_used_bytes", "legendFormat": "heap used", "refId": "C"},
+        {"expr": "nodejs_heap_size_total_bytes", "legendFormat": "heap total", "refId": "D"}
+      ],
+      "xaxis": {"show": true},
+      "yaxis": {"format": "bytes", "show": true}
+    },
+    {
+      "type": "graph",
+      "title": "Event Loop Lag",
+      "targets": [
+        {"expr": "nodejs_eventloop_lag_seconds", "legendFormat": "lag", "refId": "A"},
+        {"expr": "nodejs_eventloop_lag_max_seconds", "legendFormat": "max", "refId": "B"},
+        {"expr": "nodejs_eventloop_lag_mean_seconds", "legendFormat": "mean", "refId": "C"}
+      ],
+      "xaxis": {"show": true},
+      "yaxis": {"format": "s", "show": true}
+    },
+    {
+      "type": "graph",
+      "title": "HTTP Request Duration",
+      "targets": [
+        {
+          "expr": "http_request_duration_seconds",
+          "legendFormat": "{{method}} {{route}} {{status_code}}",
+          "refId": "A"
+        }
+      ],
+      "xaxis": {"show": true},
+      "yaxis": {"format": "s", "show": true}
+    },
+    {
+      "type": "stat",
+      "title": "Active Handles",
+      "targets": [
+        {"expr": "nodejs_active_handles_total", "refId": "A"}
+      ],
+      "options": {"unit": "none"}
+    },
+    {
+      "type": "stat",
+      "title": "Active Requests",
+      "targets": [
+        {"expr": "nodejs_active_requests_total", "refId": "A"}
+      ],
+      "options": {"unit": "none"}
+    }
+  ],
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": ["Node.js", "eInvoicing", "Backend"],
+  "templating": {"list": []},
+  "time": {"from": "now-5m", "to": "now"},
+  "timepicker": {},
+  "timezone": "",
+  "title": "eInvoicing Backend Node.js",
+  "uid": "eInvoicing-backend",
+  "version": 1
+}

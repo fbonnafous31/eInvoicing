@@ -1,16 +1,20 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const errorHandler = require('./src/middlewares/errorHandler');
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
+const errorHandler = require("./src/middlewares/errorHandler");
 
-const sellersRoutes = require('./src/modules/sellers/sellers.route');
-const clientsRoutes = require('./src/modules/clients/clients.route');
-const invoicesRoutes = require('./src/modules/invoices/invoices.route');
+// 🔹 Import monitoring
+const { register, metricsMiddleware } = require("./src/monitoring/metrics");
 
-const app = express(); 
+// Routes métier
+const sellersRoutes = require("./src/modules/sellers/sellers.route");
+const clientsRoutes = require("./src/modules/clients/clients.route");
+const invoicesRoutes = require("./src/modules/invoices/invoices.route");
+
+const app = express();
 
 app.use((req, res, next) => {
-  console.log('⚡ Requête reçue :', req.method, req.originalUrl);
+  console.log("⚡ Requête reçue :", req.method, req.originalUrl);
   next();
 });
 
@@ -19,32 +23,28 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.use('/api/sellers', sellersRoutes);
-app.use('/api/clients', clientsRoutes);
-app.use('/api/invoices', invoicesRoutes);
+// Ajout du middleware Prometheus AVANT les routes
+app.use(metricsMiddleware);
 
-// Route /health pour vérifier que le serveur est OK
-app.get('/health', async (req, res) => {
-  try {
-    console.log('Endpoint /health appelé');
-    // Ici tu pourrais tester la DB si besoin
-    // await testDbConnection(); 
-    res.json({ status: 'ok' });
-  } catch (err) {
-    console.error('Erreur dans /health:', err);
-    res.status(500).json({ error: 'Erreur serveur' });
-  }
+// Routes API
+app.use("/api/sellers", sellersRoutes);
+app.use("/api/clients", clientsRoutes);
+app.use("/api/invoices", invoicesRoutes);
+
+// Route /health
+app.get("/health", async (req, res) => {
+  res.json({ status: "ok" });
 });
 
-// 📂 Rendre accessible tout le répertoire uploads
-app.use('/uploads', express.static(path.join(__dirname, 'src/uploads')));
+// Endpoint Prometheus
+app.get("/metrics", async (req, res) => {
+  res.set("Content-Type", register.contentType);
+  res.end(await register.metrics());
+});
 
-// 📂 Rendre accessible directement le sous-dossier pdf-a3
-app.use(
-  '/pdf-a3',
-  express.static(path.join(__dirname, 'src/uploads/pdf-a3'))
-);
+// 📂 Rendre accessible le répertoire uploads
+app.use("/uploads", express.static(path.join(__dirname, "src/uploads")));
+app.use("/pdf-a3", express.static(path.join(__dirname, "src/uploads/pdf-a3")));
 
 // Middleware global d'erreurs
 app.use(errorHandler);

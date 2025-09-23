@@ -71,9 +71,8 @@
 
 ## 📌 Prochaines étapes
 - **Industrialisation** :
-  - Logging et monitoring des API.
-  - Préparation au déploiement (CI/CD).
-- **Finalisation de la conformité PDF/A-3** : Résoudre les derniers points techniques (pour obtenir une validation ISO 19005-3 complète.
+  - Logging et monitoring
+- **Finalisation de la conformité PDF/A-3** : Résoudre les derniers points techniques (pour obtenir une validation ISO 19005-3 complète).
 
 ## Architecture 
 
