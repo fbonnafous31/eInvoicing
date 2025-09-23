@@ -1,19 +1,19 @@
-# Utiliser Node.js officiel
+# Utiliser l'image Node officielle
 FROM node:18-alpine
 
-# Répertoire de travail dans le container
+# Définir le dossier de travail
 WORKDIR /app
 
-# Copier package.json et package-lock.json
+# Copier uniquement package.json et package-lock.json pour installer les dépendances d'abord (cache Docker)
 COPY package*.json ./
 
-# Installer toutes les dépendances
+# Installer les dépendances
 RUN npm install --production
 
-# Copier tout le code (src + server.js + constants + autres fichiers)
+# Copier tout le reste du code (src, constants, server.js, etc.)
 COPY . .
 
-# Exposer le port de l'API
+# Exposer le port utilisé par le backend
 EXPOSE 3000
 
 # Lancer le serveur
