@@ -1,0 +1,42 @@
+.
+├── backend
+│   ├── constants
+│   ├── coverage
+│   │   └── lcov-report
+│   ├── mock-pdp
+│   │   ├── routes
+│   │   ├── services
+│   │   └── uploads
+│   ├── src
+│   │   ├── config
+│   │   ├── middlewares
+│   │   ├── modules
+│   │   ├── uploads
+│   │   └── utils
+│   ├── tests
+│   └── uploads
+├── frontend
+│   ├── coverage
+│   │   └── lcov-report
+│   ├── public
+│   ├── src
+│   │   ├── assets
+│   │   ├── components
+│   │   ├── constants
+│   │   ├── hooks
+│   │   ├── modules
+│   │   ├── pages
+│   │   ├── services
+│   │   └── utils
+│   └── tests
+├── scripts
+│   └── factur-x
+│       ├── js
+│       ├── sh
+│       └── xsd
+└── sql
+    ├── dataset
+    ├── ddl
+    └── scripts
+
+40 directories

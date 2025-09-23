@@ -59,6 +59,8 @@
 - **Évolution fonctionnelle** :
   - Gestion du cycle de vie des factures (statuts : `draft`, `issued`, `paid`...).
   - Connexion à des plateformes de dématérialisation partenaires (PDP).
+- **Industrialisation** :
+  - Mise en place de tests unitaires et d'intégration (`Vitest`).
 
 ---
 ## Rappel – Composants et services réutilisables
@@ -69,180 +71,52 @@
 
 ## 📌 Prochaines étapes
 - **Industrialisation** :
-  - Mise en place de tests unitaires et d'intégration (`Vitest`).
   - Logging et monitoring des API.
   - Préparation au déploiement (CI/CD).
-- **Finalisation de la conformité PDF/A-3** : Résoudre les derniers points techniques (ex: profils de couleur, `AFRelationship`) pour obtenir une validation ISO 19005-3 complète.
+- **Finalisation de la conformité PDF/A-3** : Résoudre les derniers points techniques (pour obtenir une validation ISO 19005-3 complète.
 
-## Architecture backend
+## Architecture 
 
 .
-├── config
-│   └── db.js
-├── middlewares
-│   ├── attachSeller.js
-│   ├── auth.js
-│   ├── errorHandler.js
-│   └── upload.js
-├── modules
-│   ├── clients
-│   │   ├── clients.controller.js
-│   │   ├── clients.model.js
-│   │   ├── clients.route.js
-│   │   └── clients.service.js
-│   ├── invoices
-│   │   ├── invoiceAttachments.model.js
-│   │   ├── invoiceClient.model.js
-│   │   ├── invoiceClient.service.js
-│   │   ├── invoices.controller.js
-│   │   ├── invoices.model.js
-│   │   ├── invoices.route.js
-│   │   └── invoices.service.js
-│   └── sellers
-│       ├── sellers.controller.js
-│       ├── sellers.model.js
-│       ├── sellers.route.js
-│       └── sellers.service.js
-├── uploads
-│   ├── factur-x
-│   ├── invoices
-│   ├── pdf
-│   ├── pdf-a3
-│   └── pdp
-└── utils
-    ├── facturx-generator.js
-    ├── facturx-template.xmp
-    ├── fileNaming.js
-    ├── invoice-pdf
-    │   ├── generateInvoicePdf.js
-    │   ├── logo.png
-    │   └── testGenerate.js
-    ├── pdf-generator.js
-    ├── pdf-postprocess.js
-    ├── siret.js
-    ├── xmp-helper.js
-    └── xmp-injector.js
+├── backend
+│   ├── constants
+│   ├── coverage
+│   │   └── lcov-report
+│   ├── mock-pdp
+│   │   ├── routes
+│   │   ├── services
+│   │   └── uploads
+│   ├── src
+│   │   ├── config
+│   │   ├── middlewares
+│   │   ├── modules
+│   │   ├── uploads
+│   │   └── utils
+│   ├── tests
+│   └── uploads
+├── frontend
+│   ├── coverage
+│   │   └── lcov-report
+│   ├── public
+│   ├── src
+│   │   ├── assets
+│   │   ├── components
+│   │   ├── constants
+│   │   ├── hooks
+│   │   ├── modules
+│   │   ├── pages
+│   │   ├── services
+│   │   └── utils
+│   └── tests
+├── scripts
+│   └── factur-x
+│       ├── js
+│       ├── sh
+│       └── xsd
+└── sql
+    ├── dataset
+    ├── ddl
+    └── scripts
 
-## Architecture frontend
-.
-├── App.css
-├── App.jsx
-├── AppRoutes.jsx
-├── assets
-│   ├── pdf.worker.min.mjs
-│   ├── react.svg
-│   └── sample-invoice.pdf
-├── AuthProvider.jsx
-├── components
-│   ├── architecture.txt
-│   ├── auth
-│   │   ├── LoginButton.jsx
-│   │   ├── LogoutButton.jsx
-│   │   └── PrivateRoute.jsx
-│   ├── common
-│   │   ├── AuditPanel.jsx
-│   │   └── EllipsisCell.jsx
-│   ├── form
-│   │   ├── DatePickerField.css
-│   │   ├── DatePickerField.jsx
-│   │   ├── FormSection.jsx
-│   │   ├── index.js
-│   │   ├── InputEmail.jsx
-│   │   ├── InputField.jsx
-│   │   ├── InputPhone.jsx
-│   │   ├── InputPostalCode.jsx
-│   │   ├── InputSiret.jsx
-│   │   ├── SelectField.jsx
-│   │   └── TextAreaField.jsx
-│   ├── guard
-│   │   ├── RequireNoSeller.jsx
-│   │   └── RequireSeller.jsx
-│   ├── invoices
-│   │   ├── InvoiceClient.jsx
-│   │   ├── InvoiceForm.jsx
-│   │   ├── InvoiceHeader.jsx
-│   │   ├── InvoiceLines.jsx
-│   │   ├── InvoiceTabs.jsx
-│   │   ├── PdfViewer.jsx
-│   │   ├── SupportingDocs.jsx
-│   │   ├── TaxBases.jsx
-│   │   └── TestPdfViewer.jsx
-│   ├── layout
-│   │   ├── Breadcrumb.jsx
-│   │   ├── NavBar.css
-│   │   └── NavBar.jsx
-│   └── ui
-│       └── buttons
-├── constants
-│   ├── businessStatuses.js
-│   ├── companyTypes.js
-│   ├── paymentMethods.js
-│   ├── paymentTerms.js
-│   └── translations.js
-├── hooks
-│   └── useAuth.js
-├── index.css
-├── LoginPage.css
-├── LoginPage.jsx
-├── main.jsx
-├── modules
-│   ├── clients
-│   │   ├── clientColumns.jsx
-│   │   ├── useClientForm.js
-│   │   └── useClients.js
-│   ├── common
-│   │   └── datatableStyles.js
-│   ├── invoices
-│   │   ├── BusinessStatusCell.jsx
-│   │   ├── invoiceColumns.jsx
-│   │   └── TechnicalStatusCell.jsx
-│   └── sellers
-│       ├── sellerColumns.jsx
-│       ├── useSellerForm.js
-│       └── useSellers.js
-├── pages
-│   ├── AuthTest.jsx
-│   ├── clients
-│   │   ├── ClientDetail.jsx
-│   │   ├── ClientForm.jsx
-│   │   ├── ClientsList.jsx
-│   │   ├── ClientsPage.jsx
-│   │   ├── fields
-│   │   └── NewClient.jsx
-│   ├── Home.jsx
-│   ├── invoices
-│   │   ├── InvoiceDetail.jsx
-│   │   ├── InvoicesList.jsx
-│   │   ├── InvoiceView.jsx
-│   │   └── NewInvoice.jsx
-│   ├── NotFound.jsx
-│   └── sellers
-│       ├── fields
-│       ├── NewSeller.jsx
-│       ├── ProfilePage.jsx
-│       ├── SellerDetail.jsx
-│       ├── SellerForm.jsx
-│       ├── SellersList.jsx
-│       └── SellersPage.jsx
-├── services
-│   ├── clients.js
-│   ├── invoices.js
-│   └── sellers.js
-└── utils
-    ├── architecture.txt
-    ├── formatters
-    │   └── formatters.js
-    ├── formatters.js
-    └── validators
-        ├── client.js
-        ├── contact.js
-        ├── email.js
-        ├── invoice.js
-        ├── issueDate.js
-        ├── phone_number.js
-        ├── postal_code.js
-        ├── seller.js
-        └── siret.js
 
-28 directories, 92 files
 
