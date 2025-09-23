@@ -1,18 +1,20 @@
-FROM node:20-alpine
+# Utiliser Node.js officiel
+FROM node:18-alpine
 
+# Répertoire de travail dans le container
 WORKDIR /app
 
-# Copier package.json pour installer dépendances
+# Copier package.json et package-lock.json
 COPY package*.json ./
+
+# Installer toutes les dépendances
 RUN npm install --production
 
-# Copier dossiers root nécessaires
-COPY ./constants /app/constants
-COPY ./src/config /app/config
+# Copier tout le code (src + server.js + constants + autres fichiers)
+COPY . .
 
-# Copier le reste du code
-COPY ./src /app/src
-COPY server.js ./
-
+# Exposer le port de l'API
 EXPOSE 3000
+
+# Lancer le serveur
 CMD ["node", "server.js"]

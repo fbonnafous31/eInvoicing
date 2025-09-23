@@ -24,6 +24,19 @@ app.use('/api/sellers', sellersRoutes);
 app.use('/api/clients', clientsRoutes);
 app.use('/api/invoices', invoicesRoutes);
 
+// Route /health pour vérifier que le serveur est OK
+app.get('/health', async (req, res) => {
+  try {
+    console.log('Endpoint /health appelé');
+    // Ici tu pourrais tester la DB si besoin
+    // await testDbConnection(); 
+    res.json({ status: 'ok' });
+  } catch (err) {
+    console.error('Erreur dans /health:', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 // 📂 Rendre accessible tout le répertoire uploads
 app.use('/uploads', express.static(path.join(__dirname, 'src/uploads')));
 
