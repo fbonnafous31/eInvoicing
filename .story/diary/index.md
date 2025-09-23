@@ -82,3 +82,5 @@
 - [Jour 79 – Mise en place de la CI pour eInvoicing 🚀](jour-079.md)
 - [Jour 80 – Intégration de Codecov 📊✨](jour-080.md)
 - [Jour 81 – Linter partout : backend et frontend 🧹✨](jour-081.md)
+- [Jour 82 – Mise en place de la CD pour backend et frontend 🚀🐳](jour-082.md)
+- [Jour 83 – CD frontend & backend 🎯🐳](jour-083.md)
