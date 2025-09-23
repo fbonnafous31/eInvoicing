@@ -1,5 +1,5 @@
 // src/constants/paymentMethods.js
-export const paymentMethodsOptions = [
+const paymentMethodsOptions = [
   { value: 'bank_transfer', label: 'Virement bancaire' },
   { value: 'direct_debit', label: 'Prélèvement automatique' },
   { value: 'credit_card', label: 'Carte bancaire' },
@@ -9,3 +9,5 @@ export const paymentMethodsOptions = [
   { value: 'advance', label: 'Paiement anticipé' },
   { value: 'upon_receipt', label: 'À réception de la marchandise' },
 ];
+
+module.exports = { paymentMethodsOptions };

@@ -1,7 +1,7 @@
 // backend/src/utils/facturx-generator.js
-import { create } from 'xmlbuilder2';
+const { create } = require('xmlbuilder2');
 
-export function generateFacturXXML(invoice) {
+function generateFacturXXML(invoice) {
   if (!invoice) throw new Error("invoice undefined");
   const header = invoice.header || {};
   const seller = invoice.seller || {};
@@ -178,3 +178,5 @@ export function generateFacturXXML(invoice) {
     
   return root.end({ prettyPrint: true });
 }
+
+module.exports = { generateFacturXXML };

@@ -1,5 +1,5 @@
 // src/constants/paymentTerms.js
-export const paymentTermsOptions = [
+const paymentTermsOptions = [
   { value: '30_df', label: 'Paiement à 30 jours date de facture' },
   { value: 'immediate', label: 'Paiement comptant' },
   { value: '45_df', label: 'Paiement à 45 jours date de facture' },
@@ -16,3 +16,5 @@ export const paymentTermsOptions = [
   { value: 'cash', label: 'Paiement en espèces' },
   { value: 'online_platform', label: 'Paiement via plateforme électronique' },
 ];
+
+module.exports = { paymentTermsOptions };
