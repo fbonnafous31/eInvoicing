@@ -84,3 +84,4 @@
 - [Jour 81 – Linter partout : backend et frontend 🧹✨](jour-081.md)
 - [Jour 82 – Mise en place de la CD pour backend et frontend 🚀🐳](jour-082.md)
 - [Jour 83 – CD frontend & backend 🎯🐳](jour-083.md)
+- [Jour 84 – Monitoring backend avec Prometheus & Grafana 📊🚀](jour-084.md)
