@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
-const API_BASE = `${window.__ENV?.VITE_API_URL ?? 'http://localhost:3000'}/api/clients`;
+const API_BASE = `${window.__ENV__?.VITE_API_URL ?? 'http://localhost:3000'}/api/clients`;
 
 export function useClientService() {
   const { getToken } = useAuth();
