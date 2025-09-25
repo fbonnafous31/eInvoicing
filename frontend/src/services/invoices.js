@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
-const API_BASE = "http://localhost:3000/api/invoices";
+const API_BASE = `${window.__ENV?.VITE_API_URL ?? 'http://localhost:3000'}/api/invoices`;
 
 export function useInvoiceService() {
   const { getToken } = useAuth();
