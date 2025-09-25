@@ -70,9 +70,16 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
     if (!invoice) return console.error("❌ invoice missing");
 
     try {
+      // 🔹 Récupération audience selon l'environnement
+      const env = import.meta.env.DEV
+        ? import.meta.env
+        : window.__ENV__ || {};
+      
       const token = await getToken({
-        audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+        audience: env.VITE_AUTH0_AUDIENCE,
       });
+
+      console.log("[Auth] Token pour génération PDF:", token);
 
       console.log("➡️ Génération PDF pour facture:", invoice.id);
 

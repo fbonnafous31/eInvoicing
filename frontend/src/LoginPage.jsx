@@ -7,11 +7,16 @@ const LoginPage = () => {
   const [isSignup, setIsSignup] = useState(false);
 
   const handleAuth = () => {
+    // 🔹 Récupération des variables selon l'environnement
+    const env = import.meta.env.DEV
+      ? import.meta.env       // dev → .env Vite
+      : window.__ENV__ || {};  // prod → config.js injecté par Nginx
+
     loginWithRedirect({
       screen_hint: isSignup ? "signup" : "login",
       authorizationParams: {
-        audience: import.meta.env.VITE_AUTH0_AUDIENCE, 
-        scope: "openid profile email", 
+        audience: env.VITE_AUTH0_AUDIENCE, // ← utilise les variables runtime
+        scope: "openid profile email",
       },
     });
   };

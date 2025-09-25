@@ -7,17 +7,23 @@ export function useAuth() {
 
   const getToken = useCallback(async () => {
     try {
+      // 🔹 Récupération des variables selon l'environnement
+      const env = import.meta.env.DEV
+        ? import.meta.env          // dev → variables Vite
+        : window.__ENV__ || {};     // prod → config.js injecté par Nginx
+
+      const audience = env.VITE_AUTH0_AUDIENCE;
+
+      // 🔹 Log debug pour vérifier les variables
+      console.log("[Auth] Audience demandée:", audience);
+
       const token = await getAccessTokenSilently({
-        authorizationParams: {
-          audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-        },
+        authorizationParams: { audience },
       });
 
-      // 🔹 Ajout log debug
-      console.log("[Auth] Audience demandée:", import.meta.env.VITE_AUTH0_AUDIENCE);
       console.log("[Auth] Token reçu:", token);
 
-      // Pour voir si c’est un JWT (3 parties) ou un JWE (5 parties)
+      // Vérification du format du token
       const parts = token.split(".");
       console.log("[Auth] Token parts:", parts.length);
 

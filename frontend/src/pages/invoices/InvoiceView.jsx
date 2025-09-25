@@ -11,7 +11,11 @@ const InvoiceView = () => {
   const { id } = useParams();
   const [invoice, setInvoice] = useState(null);
 
-  const BACKEND_URL = import.meta.env.VITE_API_URL;
+  const BACKEND_URL = import.meta.env.DEV
+    ? import.meta.env.VITE_API_URL
+    : (window.__ENV__?.VITE_API_URL || "");
+
+  console.log("[InvoiceView] BACKEND_URL :", BACKEND_URL);
 
   // Chargement des données
   const { fetchClient } = useClientService();
