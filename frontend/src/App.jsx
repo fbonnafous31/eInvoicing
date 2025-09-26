@@ -29,24 +29,16 @@ const getComponentName = (element) => {
   return element.type.name;
 };
 
+const fullWidthRoutes = ["/invoices/view", "/clients", "/sellers", "/invoices", "/"];
 function App() {
   return (
     <Routes>
-      {/* Page publique */}
       <Route path="/login" element={<LoginPage />} />
 
-      {/* Toutes les autres routes protégées */}
       {routes.map(({ path, element }) => {
         if (path === "/login") return null;
 
-        const componentName = getComponentName(element);
-        const isFullWidth = [
-          "InvoiceView",
-          "ClientsList",
-          "SellersList",
-          "InvoicesList",
-          "Home",
-        ].includes(componentName);
+        const isFullWidth = fullWidthRoutes.includes(path);
 
         return (
           <Route

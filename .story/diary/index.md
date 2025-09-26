@@ -85,3 +85,6 @@
 - [Jour 82 – Mise en place de la CD pour backend et frontend 🚀🐳](jour-082.md)
 - [Jour 83 – CD frontend & backend 🎯🐳](jour-083.md)
 - [Jour 84 – Monitoring backend avec Prometheus & Grafana 📊🚀](jour-084.md)
+- [Jour 85 – Initialisation automatique de la DB et procédure de démarrage 🐳💾](jour-085.md)
+- [Jour 86 – Finalisation du déploiement et réflexions sur la production 🛠️🚀](jour-086.md)
+- [Jour 87 – Déploiement finalisé en local et premières réussites 🎉🐳](jour-087.md)
