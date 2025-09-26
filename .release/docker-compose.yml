@@ -1,0 +1,60 @@
+# Paramètre DB et Auth0 à configurer
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16
+    container_name: einvoicing-db
+    restart: always
+    environment:
+      POSTGRES_DB: 
+      POSTGRES_USER: 
+      POSTGRES_PASSWORD: 
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
+      - ./scripts/einvoicing.sql:/docker-entrypoint-initdb.d/einvoicing.sql:ro
+    networks:
+      - einvoicing-net
+    ports:
+      - "5433:5432"
+
+  backend:
+    image: ghcr.io/fbonnafous31/e-invoicing-backend:latest
+    container_name: einvoicing-backend
+    restart: always
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - db
+    networks:
+      - einvoicing-net
+    ports:
+      - "3000:3000"
+    environment:
+      - backend/.env     
+    volumes:
+      - uploads:/app/src/uploads      
+
+  frontend:
+    image: ghcr.io/fbonnafous31/e-invoicing-frontend:latest
+    container_name: einvoicing-frontend
+    restart: always
+    depends_on:
+      - backend
+    networks:
+      - einvoicing-net
+    ports:
+      - "8080:80"
+    environment:
+      - API_URL=
+      - AUTH0_DOMAIN=
+      - AUTH0_CLIENT_ID=
+      - AUTH0_AUDIENCE=
+
+networks:
+  einvoicing-net:
+
+volumes:
+  pgdata:
+  uploads:
