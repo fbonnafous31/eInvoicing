@@ -14,18 +14,12 @@ export function useAuth() {
 
       const audience = env.VITE_AUTH0_AUDIENCE;
 
-      // 🔹 Log debug pour vérifier les variables
-      console.log("[Auth] Audience demandée:", audience);
-
       const token = await getAccessTokenSilently({
         authorizationParams: { audience },
       });
 
-      console.log("[Auth] Token reçu:", token);
-
       // Vérification du format du token
       const parts = token.split(".");
-      console.log("[Auth] Token parts:", parts.length);
 
       if (parts.length === 3) {
         console.log("[Auth] Format JWT RS256 clair ✅");

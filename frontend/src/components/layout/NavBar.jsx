@@ -7,6 +7,9 @@ import "./NavBar.css";
 
 export default function NavBar() {
   const { isAuthenticated, loginWithRedirect, logout, user } = useAuth0();
+  const logoutUrl = import.meta.env.PROD
+    ? (window.__ENV__.VITE_APP_URL || window.location.origin) + "/login"
+    : "http://localhost:5173/login";  
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm">
@@ -98,9 +101,7 @@ export default function NavBar() {
                 <li className="nav-item">
                   <button
                     className="btn btn-outline-light"
-                    onClick={() =>
-                      logout({ returnTo: window.location.origin + "/login" })
-                    }
+                    onClick={() => logout({ returnTo: logoutUrl })}
                   >
                     Logout
                   </button>

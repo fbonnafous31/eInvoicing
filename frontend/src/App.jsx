@@ -29,16 +29,29 @@ const getComponentName = (element) => {
   return element.type.name;
 };
 
-const fullWidthRoutes = ["/invoices/view", "/clients", "/sellers", "/invoices", "/"];
 function App() {
+  const fullWidthStaticRoutes = ["/clients", "/sellers", "/invoices", "/"];
+
   return (
     <Routes>
+      {/* Page publique */}
       <Route path="/login" element={<LoginPage />} />
 
+      {/* Routes protégées */}
       {routes.map(({ path, element }) => {
         if (path === "/login") return null;
 
-        const isFullWidth = fullWidthRoutes.includes(path);
+        let isFullWidth = false;
+
+        // Routes statiques
+        if (fullWidthStaticRoutes.includes(path)) {
+          isFullWidth = true;
+        }
+
+        // Routes dynamiques ciblées
+        if (path === "/invoices/:id/view") {
+          isFullWidth = true;
+        }
 
         return (
           <Route
