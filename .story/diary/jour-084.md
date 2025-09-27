@@ -57,6 +57,8 @@ docker-compose up -d
   * Test de la connexion réussie.
 * Vérification que les métriques du backend remontent correctement dans Prometheus.
 
+![Dashboard Grafana](../images/jour84/grafana-dashboard.png)
+
 ### 5️⃣ Points clés appris
 
 * Les métriques Node.js sont cruciales pour **observer la santé et les performances** du serveur.

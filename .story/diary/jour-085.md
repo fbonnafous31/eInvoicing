@@ -46,7 +46,6 @@ psql -U einvoicing -d einvoicing_local -f /docker-entrypoint-initdb.d/einvoicing
 
 ## 🔹 Prochaines étapes
 
-- Étendre le guide de démarrage pour inclure **Prometheus** et **Grafana** si nécessaire.  
 - Automatiser la restauration conditionnelle du dump selon l’état du volume, pour simplifier l’installation sur une machine vierge.  
 - Documenter la procédure complète de démarrage local dans le `README` du projet.  
 - Intégrer éventuellement la restauration DB dans le pipeline **CD** pour tests automatisés.  

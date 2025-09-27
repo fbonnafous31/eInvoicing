@@ -22,6 +22,7 @@ Aujourd’hui, j’ai travaillé sur la **Continuous Deployment** de **tout le p
   - Configuration pour que l’application écoute sur le port défini.  
 * Possibilité de **lancer backend et frontend ensemble via Docker Compose** pour simuler un environnement complet.  
 * Objectif : générer une image prête pour déploiement et intégrable dans un pipeline CD.
+![Lancement de la CD](../images/jour82/cd.png)
 
 ## Problèmes rencontrés ⚠️
 

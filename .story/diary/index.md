@@ -88,3 +88,6 @@
 - [Jour 85 – Initialisation automatique de la DB et procédure de démarrage 🐳💾](jour-085.md)
 - [Jour 86 – Finalisation du déploiement et réflexions sur la production 🛠️🚀](jour-086.md)
 - [Jour 87 – Déploiement finalisé en local et premières réussites 🎉🐳](jour-087.md)
+- [Jour 88 – Progrès sur la stabilité et la fiabilité du frontend et Nginx 🚀🛠️](jour-088.md)
+- [📝 Journal de bord eInvoicing – Déploiement & apprentissage DevOps](jour-089.md)
+- [📝 Bilan eInvoicing – Semaine PDF/A3, CI/CD, monitoring & déploiement 🚀](jour-090.md)

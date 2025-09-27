@@ -17,6 +17,7 @@ Le workflow CI a été configuré pour couvrir **backend et frontend** :
 * La CI est désormais capable de **tester automatiquement** le backend et le frontend à chaque push ou pull request sur `main`.
 * Les artefacts de couverture sont stockés et prêts à être utilisés pour un suivi de la qualité du code.
 * Le workflow est structuré pour être facilement **étendu** à linting, Codecov, et d’autres vérifications automatiques à l’avenir.
+![Lancement de l'intégration](../images/jour79/ci.png)
 
 ## 📌 Prochaines étapes
 

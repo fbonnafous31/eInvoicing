@@ -5,6 +5,8 @@ Aujourd’hui, j’ai consolidé la qualité du code sur **eInvoicing** en ajout
 ## Frontend ✅
 
 Le lint côté frontend était déjà opérationnel. Après quelques ajustements sur les règles et suppression des avertissements inutiles, le pipeline CI détecte maintenant les problèmes de manière fiable avant même le merge.
+![Lint frontend](../images/jour81/lint-frontend.png)
+
 
 ## Backend ✅
 

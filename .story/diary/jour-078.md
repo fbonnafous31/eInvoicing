@@ -44,3 +44,5 @@ En pratique, on a corrigé **10 points bloquants** qui empêchaient la validatio
 - Tester avec plusieurs validateurs pour s’assurer de la compatibilité totale.  
 - Préparer une **version stable PDF/A‑3 + Factur‑X** utilisable pour toutes les factures futures.  
 - Documenter la méthode pour que le processus soit **réutilisable et maintenable**.
+
+![Validation du PDF/A‑3](../images/jour78/pdfa3-validation.png)
