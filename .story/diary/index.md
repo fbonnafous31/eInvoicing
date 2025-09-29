@@ -91,3 +91,4 @@
 - [Jour 88 – Progrès sur la stabilité et la fiabilité du frontend et Nginx 🚀🛠️](jour-088.md)
 - [📝 Journal de bord eInvoicing – Déploiement & apprentissage DevOps](jour-089.md)
 - [📝 Bilan eInvoicing – Semaine PDF/A3, CI/CD, monitoring & déploiement 🚀](jour-090.md)
+- [Jour 91 – Finalisation de l’environnement de production et génération de PDF 📄🚀](jour-091.md)

@@ -1,4 +1,3 @@
-# Paramètre DB et Auth0 à configurer
 version: '3.8'
 
 services:
@@ -7,9 +6,9 @@ services:
     container_name: einvoicing-db
     restart: always
     environment:
-      POSTGRES_DB: 
-      POSTGRES_USER: 
-      POSTGRES_PASSWORD: 
+      POSTGRES_DB: einvoicing_local
+      POSTGRES_USER: einvoicing
+      POSTGRES_PASSWORD: einvoicing
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
@@ -47,11 +46,23 @@ services:
     ports:
       - "8080:80"
     environment:
-      - API_URL=
-      - AUTH0_DOMAIN=
-      - AUTH0_CLIENT_ID=
-      - AUTH0_AUDIENCE=
+      - API_URL=http://backend:3000
+      - AUTH0_DOMAIN=dev-23fb5qvzfnz3oi11.us.auth0.com
+      - AUTH0_CLIENT_ID=a9p2JUoLAvv8Pij8953ESipvWvSVGA3d
+      - AUTH0_AUDIENCE=https://api.einvoicing.local      
 
+  mock-pdp:
+    image: node:20-alpine
+    container_name: einvoicing-mock-pdp
+    working_dir: /app
+    volumes:
+      - ./mock-pdp:/app
+    command: sh -c "npm install && npm start"
+    ports:
+      - "4000:4000"
+    networks:
+      - einvoicing-net
+      
 networks:
   einvoicing-net:
 

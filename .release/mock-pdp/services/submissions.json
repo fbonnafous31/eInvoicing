@@ -1,0 +1,127 @@
+{
+  "sub_190_1758093348140": {
+    "invoiceId": "190",
+    "technicalStatus": "validated",
+    "lifecycle": [
+      {
+        "code": 202,
+        "label": "Créée",
+        "createdAt": "2025-09-17T07:15:48.140Z"
+      },
+      {
+        "code": 203,
+        "label": "Mise à disposition",
+        "probability": 1,
+        "createdAt": "2025-09-17T07:16:01.101Z",
+        "comment": null
+      },
+      {
+        "code": 205,
+        "label": "Approuvée",
+        "probability": 0.6,
+        "createdAt": "2025-09-17T07:16:01.894Z",
+        "comment": null
+      },
+      {
+        "code": 208,
+        "label": "Suspendue",
+        "probability": 0.2,
+        "createdAt": "2025-09-17T07:16:42.831Z",
+        "comment": "Suspension temporaire : documents manquants"
+      }
+    ],
+    "metadata": {
+      "senderId": "35044656700017",
+      "receiverId": "unknown",
+      "invoiceId": "Afternoon 0916.1    "
+    }
+  },
+  "sub_189_1758093364593": {
+    "invoiceId": "189",
+    "technicalStatus": "rejected",
+    "lifecycle": [
+      {
+        "code": 202,
+        "label": "Créée",
+        "createdAt": "2025-09-17T07:16:04.593Z"
+      }
+    ],
+    "metadata": {
+      "senderId": "35044656700017",
+      "receiverId": "unknown",
+      "invoiceId": "Morning 0916.2      "
+    }
+  },
+  "sub_188_1758093380263": {
+    "invoiceId": "188",
+    "technicalStatus": "validated",
+    "lifecycle": [
+      {
+        "code": 202,
+        "label": "Créée",
+        "createdAt": "2025-09-17T07:16:20.263Z"
+      },
+      {
+        "code": 203,
+        "label": "Mise à disposition",
+        "probability": 1,
+        "createdAt": "2025-09-17T07:16:46.123Z",
+        "comment": null
+      },
+      {
+        "code": 204,
+        "label": "Prise en charge",
+        "probability": 0.6,
+        "createdAt": "2025-09-17T07:16:59.907Z",
+        "comment": null
+      },
+      {
+        "code": 212,
+        "label": "Encaissement constaté",
+        "createdAt": "2025-09-17T07:22:54.016Z"
+      }
+    ],
+    "metadata": {
+      "senderId": "35044656700017",
+      "receiverId": "unknown",
+      "invoiceId": "Morning 0916.1      "
+    }
+  },
+  "sub_187_1758093591138": {
+    "invoiceId": "187",
+    "technicalStatus": "validated",
+    "lifecycle": [
+      {
+        "code": 202,
+        "label": "Créée",
+        "createdAt": "2025-09-17T07:19:51.138Z"
+      },
+      {
+        "code": 212,
+        "label": "Encaissement constaté",
+        "createdAt": "2025-09-17T07:22:47.904Z"
+      }
+    ],
+    "metadata": {
+      "senderId": "35044656700017",
+      "receiverId": "unknown",
+      "invoiceId": "Morning 20250916.1  "
+    }
+  },
+  "sub_186_1758093782555": {
+    "invoiceId": "186",
+    "technicalStatus": "validated",
+    "lifecycle": [
+      {
+        "code": 202,
+        "label": "Créée",
+        "createdAt": "2025-09-17T07:23:02.555Z"
+      }
+    ],
+    "metadata": {
+      "senderId": "35044656700017",
+      "receiverId": "unknown",
+      "invoiceId": "Morning 090915      "
+    }
+  }
+}
