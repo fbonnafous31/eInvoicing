@@ -61,6 +61,8 @@
   - Connexion à des plateformes de dématérialisation partenaires (PDP).
 - **Industrialisation** :
   - Mise en place de tests unitaires et d'intégration (`Vitest`).
+  - Logging et monitoring
+
 
 ---
 ## Rappel – Composants et services réutilisables
@@ -70,8 +72,6 @@
 
 
 ## 📌 Prochaines étapes
-- **Industrialisation** :
-  - Logging et monitoring
 - **Finalisation de la conformité PDF/A-3** : Résoudre les derniers points techniques (pour obtenir une validation ISO 19005-3 complète).
 
 ## Architecture 

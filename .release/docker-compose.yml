@@ -30,10 +30,8 @@ services:
       - einvoicing-net
     ports:
       - "3000:3000"
-    environment:
-      - backend/.env     
     volumes:
-      - uploads:/app/src/uploads      
+      - uploads:/app/src/uploads
 
   frontend:
     image: ghcr.io/fbonnafous31/e-invoicing-frontend:latest
@@ -46,10 +44,10 @@ services:
     ports:
       - "8080:80"
     environment:
-      - API_URL=http://backend:3000
-      - AUTH0_DOMAIN=dev-23fb5qvzfnz3oi11.us.auth0.com
-      - AUTH0_CLIENT_ID=a9p2JUoLAvv8Pij8953ESipvWvSVGA3d
-      - AUTH0_AUDIENCE=https://api.einvoicing.local      
+      - API_URL=
+      - AUTH0_DOMAIN=
+      - AUTH0_CLIENT_ID=
+      - AUTH0_AUDIENCE=
 
   mock-pdp:
     image: node:20-alpine
