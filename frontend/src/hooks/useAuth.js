@@ -21,13 +21,12 @@ export function useAuth() {
       // Vérification du format du token
       const parts = token.split(".");
 
-      if (parts.length === 3) {
-        console.log("[Auth] Format JWT RS256 clair ✅");
-      } else if (parts.length === 5) {
+      if (parts.length === 5) {
         console.warn("[Auth] Format JWE (token chiffré) ⚠️");
-      } else {
+      } else if (parts.length !== 3) {
         console.warn("[Auth] Format token inattendu ⚠️");
       }
+
 
       return token;
     } catch (err) {

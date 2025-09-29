@@ -12,6 +12,22 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+// POST /invoices/:id/send
+router.post('/:id/send', (req, res) => {
+  const invoiceId = req.params.id;
+  const submissionId = `mock-sub-${invoiceId}-${Date.now()}`;
+
+  // Crée un mock de submission pour suivi
+  createSubmission(submissionId, {
+    invoiceId,
+    technicalStatus: 'received',
+    lifecycle: [{ code: 202, label: 'Créée', createdAt: new Date().toISOString() }],
+  });
+
+  console.log(`[MOCK-PDP] Facture ${invoiceId} envoyée, submissionId: ${submissionId}`);
+  res.json({ message: 'Facture envoyée', invoiceId, submissionId });
+});
+
 // POST /invoices : envoi facture
 router.post('/', upload.single('invoice'), (req, res) => {
   // 🔥 Simule une erreur critique serveur
