@@ -1,7 +1,6 @@
-// backend/src/middlewares/errorHandler.js
-
-function errorHandler(err, res) {
-  console.error(err); // log complet pour debug
+/* eslint-disable no-unused-vars */
+function errorHandler(err, req, res, next) { 
+  console.error(err); 
 
   // Cas PostgreSQL - violation contrainte d'unicité
   if (err.code === '23505') {
@@ -14,6 +13,13 @@ function errorHandler(err, res) {
     // fallback générique pour d'autres contraintes uniques
     return res.status(400).json({
       error: 'Violation de contrainte d’unicité',
+    });
+  }
+
+  // Cas Error classique avec message (comme ton throw dans le modèle)
+  if (err instanceof Error && err.message) {
+    return res.status(400).json({
+      error: err.message,
     });
   }
 
