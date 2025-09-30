@@ -4,61 +4,66 @@
 
 ## 📖 Contexte
 
-Après avoir travaillé dans le domaine de la gestion financière, et plus spécifiquement sur la facturation électronique et la conformité ERP, j’ai décidé de développer un outil personnel permettant de **créer, suivre et gérer des factures électroniques**.  
-Ce projet a un double objectif :
+Après avoir travaillé dans la gestion financière et la facturation électronique, j’ai décidé de développer un outil simple pour **créer, suivre et gérer des factures électroniques**.  
 
-1. **Pédagogique** : renforcer mes compétences en développement web moderne (React, Node.js, PostgreSQL) et architecture fullstack.  
-2. **Pratique** : créer une application complète et modulable, qui pourrait être utile à d’autres développeurs ou à de futurs partenaires.  
+Le projet a deux objectifs :  
+1. **Apprentissage personnel** : renforcer mes compétences fullstack et en architecture.  
+2. **Utilité concrète** : proposer un outil fonctionnel et modulable pour les petites structures.  
 
-Le projet est conçu **jour après jour**, avec une approche progressive, structurée et documentée à chaque étape.  
-
----
-
-## 🎯 Objectifs du projet
-
-- Développer une application web pour la gestion complète des factures : création, suivi, réception, génération du format standard `Factur-X`, et communication via API.  
-- Implémenter un **CRUD complet pour les vendeurs, clients et factures**.  
-- Générer automatiquement des factures au format **PDF** et assurer leur conformité **PDF/A-3**.  
-- Préparer l’application à communiquer avec un **Plateforme de Dématérialisation Partenaire (PDP)**.  
+Chaque étape du développement est documentée et réfléchie pour rester **progressive et solide**.
 
 ---
 
-## 🛠 Technologies utilisées
+## 🎯 Objectifs
+
+- Gérer des factures de manière complète : création, suivi, génération PDF/Factur-X, communication avec des plateformes de dématérialisation partenaires (PDP).  
+- Fournir un **CRUD complet** pour vendeurs, clients et factures.  
+- Générer des PDF conformes **PDF/A-3**, avec XML intégré et métadonnées XMP valides.  
+- Rester simple, sobre et compréhensible pour les petites structures et les freelances.  
+
+---
+
+## 🛠 Technologies
 
 ### Frontend
-- **React 18 + Vite** : interface moderne et réactive.  
-- **Bootstrap** : mise en forme rapide et homogène.  
-- **react-data-table-component** : tableaux interactifs.  
-- **react-pdf** : visionneuse PDF intégrée.  
-- **i18n-iso-countries** : gestion normalisée des codes pays.  
+- React 18 + Vite  
+- Bootstrap  
+- react-data-table-component  
+- react-pdf  
+- i18n-iso-countries  
 
 ### Backend
-- **Node.js + Express** : API REST structurée et modulaire.  
-- **PostgreSQL** : base de données relationnelle robuste.  
-- **multer** : upload et gestion des pièces jointes.  
-- **xmlbuilder2** : génération du XML Factur-X.  
-- **dotenv** : gestion sécurisée des variables d’environnement.  
+- Node.js + Express  
+- PostgreSQL  
+- multer (upload fichiers)  
+- xmlbuilder2 (Factur-X)  
+- dotenv  
 
-### Outils complémentaires
-- **Vitest + Codecov** : tests unitaires et couverture.  
-- **Github Actions** : CI/CD et déploiement automatisé.  
-- **Prometheus + Grafana** : logging et monitoring.  
-- **DBeaver** : gestion de la base.  
-- **ESLint / Prettier** : standardisation du code.  
-- **VSCode** : IDE principal.  
+### Outils
+- Vitest + Codecov (tests)  
+- Github Actions (CI/CD)  
+- Prometheus + Grafana (monitoring)  
+- DBeaver, ESLint, Prettier, VSCode  
 
 ---
 
-## 🏗 Architecture du projet
+## 🏗 Architecture
 
-- Séparation **frontend / backend** pour clarifier le rôle de chaque couche.  
-- Découpage **par domaine métier** : vendeurs, clients, factures.  
-- **Pattern backend** : Model → Service → Controller → Route.  
-- **Composants frontend réutilisables**.  
+**backend** : config, middlewares, modules (buyers, invoices, sellers), utils  
+**frontend** : App.jsx, components, pages (buyers, invoices, sellers), utils  
 
+- Pattern backend : Model → Service → Controller → Route  
+- Découpage par domaine métier et composants frontend réutilisables pour cohérence  
+
+## 📌 Méthodologie de développement
+
+- **Approche progressive et pédagogique** : chaque module est développé puis documenté.  
+- Utilisation de **ChatGPT comme collaborateur technique** pour accélérer le développement.  
+- Priorité à la **maintenabilité** : composants et services réutilisables, validations cohérentes.  
+- Tests réguliers pour sécuriser la base de code.  
 ---
 
-## ✅ Fonctionnalités développées
+## ✅ Fonctionnalités
 
 ### 1. Gestion des vendeurs et clients
 - **CRUD complet** avec validations (SIRET, formats bancaires, adresses).  
@@ -95,33 +100,44 @@ Le projet est conçu **jour après jour**, avec une approche progressive, struct
 
 ---
 
-## 📌 Méthodologie de développement
+## 📜 Vision
 
-- **Approche progressive et pédagogique** : chaque module est développé puis documenté.  
-- Utilisation de **ChatGPT comme collaborateur technique** pour accélérer le développement.  
-- Priorité à la **maintenabilité** : composants et services réutilisables, validations cohérentes.  
-- Tests réguliers pour sécuriser la base de code.  
+### Ma vision
+La facturation électronique ne doit pas être une contrainte.  
+Elle doit être simple, transparente et conforme dès le premier jour.  
+
+Les petites structures n’ont pas besoin d’ERP lourds ou de SaaS fermés.  
+Elles ont besoin d’un outil **sobre, moderne et maîtrisable**, que je construis pour elles.
+
+### Mes principes
+1. **Simplicité** : interface claire, parcours fluides, moins de clics.  
+2. **Conformité native** : Factur-X, PDF/A-3, communication avec PDP intégrés au cœur de l’application.  
+3. **Transparence et indépendance** : open-source, hébergeable, pas de dépendances cachées.  
+4. **Architecture saine et évolutive** : modulaire, testable, facile à améliorer.  
+5. **Focus utilisateur** : outil conçu pour ceux qui facturent, pas pour compliquer leur quotidien.  
+
+### Différenciateur
+- French-native et conforme à la réglementation française  
+- Sobre et moderne, alternative crédible aux ERP lourds  
+- Indépendant et open-source, pas de verrou propriétaire  
+
+### Ambition
+Faire d’eInvoicing un compagnon fiable et simple pour toutes les petites structures qui veulent rester en conformité, **sans complexité inutile**.  
 
 ---
 
 ## 🚀 Prochaines étapes
 
-### Fonctionnelles
-- Finalisation de la conformité **PDF/A-3** pour validation ISO 19005-3 complète.  
-- Mise en place d’un environnement de **staging** sans authentification (RGPD-friendly).  
-  
-### Techniques
-- Amélioration de la couverture de tests.  
-- Renforcement du monitoring en production.  
-- Communication sur le projet (LinkedIn, articles).  
+- Finaliser la conformité PDF/A-3 ISO 19005-3  
+- Mise en place d’un environnement de staging simple et respectueux du RGPD  
+- Améliorer les échanges avec les PDP via Swagger  
+- Renforcer la couverture de tests et le monitoring  
 
 ---
 
 ## 📄 Licence
 
-- **Licence pédagogique / open source** : MIT (ou équivalent).  
-
----
+- MIT (ou équivalent) – partage pédagogique et possibilité de contributions
 
 ## 💡 Notes pédagogiques
 
