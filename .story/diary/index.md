@@ -92,3 +92,4 @@
 - [📝 Journal de bord eInvoicing – Déploiement & apprentissage DevOps](jour-089.md)
 - [📝 Bilan eInvoicing – Semaine PDF/A3, CI/CD, monitoring & déploiement 🚀](jour-090.md)
 - [Jour 91 – Finalisation de l’environnement de production et génération de PDF 📄🚀](jour-091.md)
+- [Jour 92 -- Automatisation du déploiement et intégration du mock-PDP ⚙️📦](jour-092.md)
