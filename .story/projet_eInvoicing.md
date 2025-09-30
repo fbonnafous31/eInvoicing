@@ -3,7 +3,7 @@
 ## 🎯 Objectif du projet
 
 - Développer une application web pour la **gestion complète des factures** :  
-  création, suivi, réception, génération de formats standards (**UBL**, **Factur-X**) et communication via **API**.  
+  création, suivi, réception, génération du format standard `Factur-X` et communication via `API`.  
 - À terme, tendre vers un **opérateur de dématérialisation**.  
 - Application progressive, construite pas à pas avec un **découpage clair entre frontend et backend**.
 
@@ -11,13 +11,13 @@
 
 ## 🛠 Technologies choisies
 
-- **Frontend** : React + Vite  
-- **Backend** : Node.js + Express  
-- **Base de données** : PostgreSQL  
+- **Frontend** : `React` + `Vite`  
+- **Backend** : `Node.js` + `Express`  
+- **Base de données** : `PostgreSQL`  
 - **Outils et bibliothèques clés** :
   - **Frontend** : `axios` pour les appels API, `react-data-table-component` pour les tableaux, `react-pdf` pour l'affichage de documents, `Bootstrap` pour le style.
   - **Backend** : `multer` pour l'upload de fichiers, `xmlbuilder2` pour la génération Factur-X, `pg` pour l'accès à la base de données.
-- **Gestion environnement** : Variables d’environnement pour sécuriser les accès sensibles (ex : mot de passe DB)  
+- **Gestion environnement** : Variables d’environnement pour sécuriser les accès sensibles 
 
 ---
 
@@ -27,21 +27,18 @@
   **Vendeurs**, **Acheteurs**, **Factures**.  
 - Modules backend isolés pour chaque domaine :  
   `models`, `services`, `controllers` et `routes`.  
-- Frontend basé sur des **composants réutilisables** (`SellerForm`, `SellersList`, etc.) et navigation claire via une **barre de menu**.
+- Frontend basé sur des **composants réutilisables** (`SellerForm`, `SellersList`, ...) et navigation claire via une **barre de menu**.
 
 ---
 
 ## ✅ Fonctionnalités développées
 
-- **CRUD Vendeurs** :  
-  création, lecture (liste et fiche détail), modification, suppression.  
-- **CRUD Clients** :  
-  création, lecture (liste et fiche détail), modification, suppression.    
-- **CRUD complet des Factures** : Création, lecture, mise à jour et suppression des factures, avec gestion des lignes de facture, des taxes et des informations du client associé.
-- **Génération de PDF de facture** : Création automatique du visuel de la facture au format PDF à partir des données (vendeur, client, lignes, totaux), éliminant le besoin d'un justificatif externe.
-- **Génération Factur-X finalisée** : Création d'un fichier XML Factur-X (profil MINIMUM) validé, contenant toutes les données structurées de la facture.
+- **CRUD Clients et Vendeurs** : création, lecture (liste et fiche détail), modification, suppression.  
+- **CRUD Factures** : Création, lecture, mise à jour et suppression des factures, avec gestion des lignes de facture, des taxes et des informations du client associé.
+- **Génération de PDF de facture** : Création automatique du visuel de la facture au format PDF à partir des données (vendeur, client, lignes, totaux), éliminant le besoin d'un justificatif externe (`pdf-lib`).
+- **Génération Factur-X finalisée** : Création d'un fichier XML Factur-X (profil BASIC) validé, contenant toutes les données structurées de la facture.
 - **Intégration PDF/A-3** : Le XML Factur-X et les pièces jointes sont embarqués dans le PDF généré, qui est préparé pour la conformité PDF/A-3 (métadonnées XMP incluses).
-- **Gestion des pièces jointes** : Upload de fichiers (via `multer`) avec distinction entre le document principal (si uploadé) et les documents additionnels.
+- **Gestion des pièces jointes** : Upload de fichiers (`multer`) avec distinction entre le document principal et les documents additionnels.
 - **Formulaires complets et validations** :  
   - Pré-remplissage intelligent des formulaires (client existant, vendeur par défaut).
   - tous les champs nécessaires  
@@ -50,19 +47,24 @@
 - **Feedback utilisateur** : messages succès/erreur, redirection fluide.  
 - **UX et design** : tableaux stylés, Bootstrap, navigation intuitive.  
 - **Visionneuse PDF intégrée** : Affichage des PDF (factures, pièces jointes) directement dans l'interface avec des contrôles de navigation, zoom et téléchargement.
-- **Intégrité des données** : Utilisation de transactions PostgreSQL pour garantir la cohérence des opérations complexes sur la base de données.
+- **Intégrité des données** : Utilisation de transactions `PostgreSQL` pour garantir la cohérence des opérations complexes sur la base de données.
+- **Authentification et gestion des utilisateurs** : 
+  - Mise en place un système de comptes pour sécuriser l'accès aux données par vendeur (`Auth0`).
+  - Sécutisation des transactions frontend / backend (`JWT`)
+- **Simulation de PDP** :
+  - Connexion à des plateformes de dématérialisation partenaires (PDP).
+  - Emission de factures
+  - Réception du cycle de vie des factures
+  - Emission de cycle de vie des factures (encaissement)
+- **Industrialisation** :
+  - Mise en place de tests unitaires et d'intégration (`Vitest`).
+  - Couverture de test (`Codecov`).
+  - Pipeline d'intégration continue et déploiement (`Github Actions`).
+  - Logging et monitoring (`Promotheus`, `Grafana`).
 - **Gestion du projet** :  
   - suivi quotidien  
   - documentation en Markdown  
   - utilisation de ChatGPT comme collaborateur technique pour accélérer le développement et assurer la qualité du code.
-- **Authentification et gestion des utilisateurs** : Mettre en place un système de comptes pour sécuriser l'accès aux données par vendeur.
-- **Évolution fonctionnelle** :
-  - Gestion du cycle de vie des factures (statuts : `draft`, `issued`, `paid`...).
-  - Connexion à des plateformes de dématérialisation partenaires (PDP).
-- **Industrialisation** :
-  - Mise en place de tests unitaires et d'intégration (`Vitest`).
-  - Logging et monitoring
-
 
 ---
 ## Rappel – Composants et services réutilisables
@@ -72,10 +74,12 @@
 
 
 ## 📌 Prochaines étapes
+- **Mise en place d'un environnement de staging** : Sans authentification et respectant le RGPD
 - **Finalisation de la conformité PDF/A-3** : Résoudre les derniers points techniques (pour obtenir une validation ISO 19005-3 complète).
+- **Communication sur le projet** : LinkedIn
+
 
 ## Architecture 
-
 .
 ├── backend
 │   ├── constants
