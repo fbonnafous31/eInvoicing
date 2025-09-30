@@ -19,7 +19,7 @@ Le projet est conçu **jour après jour**, avec une approche progressive, struct
 - Développer une application web pour la gestion complète des factures : création, suivi, réception, génération du format standard `Factur-X`, et communication via API.  
 - Implémenter un **CRUD complet pour les vendeurs, clients et factures**.  
 - Générer automatiquement des factures au format **PDF** et assurer leur conformité **PDF/A-3**.  
-- Préparer l’application à évoluer vers une **Plateforme de Dématérialisation Partenaire (PDP)**.  
+- Préparer l’application à communiquer avec un **Plateforme de Dématérialisation Partenaire (PDP)**.  
 
 ---
 
@@ -109,8 +109,7 @@ Le projet est conçu **jour après jour**, avec une approche progressive, struct
 ### Fonctionnelles
 - Finalisation de la conformité **PDF/A-3** pour validation ISO 19005-3 complète.  
 - Mise en place d’un environnement de **staging** sans authentification (RGPD-friendly).  
-- Amélioration des échanges avec les PDP (interopérabilité via Swagger officiel).  
-
+  
 ### Techniques
 - Amélioration de la couverture de tests.  
 - Renforcement du monitoring en production.  
