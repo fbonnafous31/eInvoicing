@@ -95,3 +95,5 @@
 - [Jour 92 -- Automatisation du déploiement et intégration du mock-PDP ⚙️📦](jour-092.md)
 - [Jour 93 – Mise en route de l’environnement de staging 🌱✨](jour-093.md)
 - [Jour 94 – Consolidation et finalisation de l’environnement de staging 🛠️🚀  ](jour-094.md)
+- [Jour 95 – Déploiement et stabilisation du backend sur Render 🌐🛠️](jour-095.md)
+- [Jour 96 – Frontend et services Auth0 / Sellers en staging 🌐🔧](jour-096.md)

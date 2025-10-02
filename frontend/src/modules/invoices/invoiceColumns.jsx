@@ -99,7 +99,7 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
           {/* PDF/A-3 */}
           <button
             className="btn btn-sm btn-link p-0 m-0 align-middle"
-            title="Voir le PDF/A-3 de la facture"
+            title="Télécharger le PDF/A-3 de la facture"
             onClick={() => {
               if (!row?.id) return;
               const pdfUrl = `http://localhost:3000/pdf-a3/${row.id}_pdf-a3.pdf`;
