@@ -43,6 +43,8 @@ Aujourd’hui, la session a été centrée sur **la mise en place du frontend en
 * Routes `/clients`, `/invoices`, `/sellers` testées depuis le frontend.
 * Logs clairs pour toutes les requêtes et tokens.
 
+![App en mode staging déployée en remote](../images/jour96/frontendStaging.png)
+
 ## 🔹 Réflexion du jour
 
 * Le frontend staging est maintenant **connecté et fonctionnel** avec le backend.

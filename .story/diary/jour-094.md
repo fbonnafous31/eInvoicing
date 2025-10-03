@@ -6,6 +6,7 @@ L’objectif était de proposer un espace de démo **RGPD-friendly**, utilisable
 ## 🔹 Objectif du jour  
 
 * Bloquer toutes les actions sensibles (création/mise à jour de clients et vendeurs) pour le mode staging.  
+  ![Fonctionnalités restreintes](../images/jour94/restrictedFeature.png)
 * Finaliser la génération des documents (PDF, Factur-X XML, PDF/A3).  
 * Mettre en place un **mock PDP** pour simuler l’envoi des factures et la réception des statuts.  
 

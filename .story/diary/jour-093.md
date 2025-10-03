@@ -1,12 +1,12 @@
 # Jour 93 – Mise en route de l’environnement de staging 🌱✨
 
-Aujourd’hui, j’ai commencé à poser les bases d’un **environnement de staging**, l’idée étant d’avoir un espace de démo **sans authentification** pour que l’on puisse tester l’application facilement, tout en gardant une approche **RGPD-friendly**.
+Aujourd’hui, j’ai commencé à poser les bases d’un **environnement de staging**, l’idée étant d’avoir un espace de démo pour que l’on puisse tester l’application facilement, tout en gardant une approche **RGPD-friendly**.
 
 ## 🔹 Objectif du jour
 
 * Créer une **base de données dédiée au staging**.
 * Repartir de l’environnement de développement et l’adapter pour en faire un vrai espace **accessible et simple à utiliser**.
-* Préparer le terrain pour que toute personne intéressée puisse naviguer dans l’app sans passer par Auth0, mais avec un cadre conforme et sécurisé.
+* Préparer le terrain pour que toute personne intéressée puisse naviguer dans l’app avec un cadre conforme et sécurisé.
 
 ## 🔹 Avancement
 

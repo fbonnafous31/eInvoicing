@@ -31,6 +31,8 @@ Aujourd’hui, la session a été entièrement dédiée à **mettre en place un 
   * `prom-client` → installé et testé
   * `express-jwt` → vérifié et résolu
 * Suppression temporaire de la route `/metrics` pour éviter les erreurs en mode staging.
+  
+  ![Déploiement Render](../images/jour95/renderDashboard.png)
 
 ### 3️⃣ Backend et routes ✅
 
