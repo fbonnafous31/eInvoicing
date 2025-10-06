@@ -1,0 +1,15 @@
+🚀 Ces dernières semaines, j’ai travaillé sur un projet de facturation électronique, de l’idée à une solution concrète et fonctionnelle.
+
+💡 Objectif : créer une application robuste et moderne, qui respecte les standards français et européens (Factur-X, PDF/A-3) et prépare le terrain pour une industrialisation future.
+
+⏳ Quelques points clés :
+🗸 Gestion complète des factures et suivi intelligent
+🗸 Documents conformes et facilement accessibles
+🗸 Authentification sécurisée et isolation des utilisateurs
+🗸 Tests automatisés, CI/CD et monitoring pour fiabilité
+
+🤖 L’IA m’a aidé comme copilote technique, mais toutes les décisions importantes et la cohérence globale sont restées entre mes mains.
+
+🔗 Pour suivre le projet et consulter le code : github.com/fbonnafous31/eInvoicing
+
+#WebDevelopment #FacturX #PDFa3 #ProductDevelopment #TechExploration #LearningByDoing
