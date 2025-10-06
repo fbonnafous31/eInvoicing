@@ -98,3 +98,6 @@
 - [Jour 95 – Déploiement et stabilisation du backend sur Render 🌐🛠️](jour-095.md)
 - [Jour 96 – Frontend et services Auth0 / Sellers en staging 🌐🔧](jour-096.md)
 - [Jour 97 – Staging remote et simplification du workflow PDF / PDP 🌐📄](jour-097.md)
+- [📅 Jour 98 – Bilan Complet du Projet eInvoicing 🚀✨](jour-098.md)
+- [📅 Jour 99 – Bilan Humain et Ressenti du Développeur Solo 🌱✨](jour-099.md)
+- [📅 Jour 100 – Perspectives et prochains axes pour eInvoicing 🔭✨](jour-100.md)
