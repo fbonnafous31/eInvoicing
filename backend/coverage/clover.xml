@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1758536998328" clover="3.2.0">
-  <project timestamp="1758536998328" name="All files">
-    <metrics statements="45" coveredstatements="41" conditionals="8" coveredconditionals="6" methods="3" coveredmethods="1" elements="56" coveredelements="48" complexity="0" loc="45" ncloc="45" packages="3" files="3" classes="3"/>
+<coverage generated="1759761099782" clover="3.2.0">
+  <project timestamp="1759761099782" name="All files">
+    <metrics statements="71" coveredstatements="67" conditionals="8" coveredconditionals="6" methods="3" coveredmethods="1" elements="82" coveredelements="74" complexity="0" loc="71" ncloc="71" packages="5" files="5" classes="5"/>
     <package name="middlewares">
       <metrics statements="12" coveredstatements="8" conditionals="2" coveredconditionals="1" methods="2" coveredmethods="0"/>
       <file name="upload.js" path="/home/francois/dev/eInvoicing/backend/src/middlewares/upload.js">
@@ -18,6 +18,26 @@
         <line num="18" count="0" type="stmt"/>
         <line num="22" count="1" type="stmt"/>
         <line num="24" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="modules.clients">
+      <metrics statements="14" coveredstatements="14" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="clients.route.js" path="/home/francois/dev/eInvoicing/backend/src/modules/clients/clients.route.js">
+        <metrics statements="14" coveredstatements="14" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="5" count="1" type="stmt"/>
+        <line num="9" count="1" type="stmt"/>
+        <line num="12" count="1" type="stmt"/>
+        <line num="13" count="1" type="stmt"/>
+        <line num="15" count="1" type="stmt"/>
+        <line num="16" count="1" type="stmt"/>
+        <line num="17" count="1" type="stmt"/>
+        <line num="18" count="1" type="stmt"/>
+        <line num="19" count="1" type="stmt"/>
+        <line num="21" count="1" type="stmt"/>
       </file>
     </package>
     <package name="modules.invoices">
@@ -47,6 +67,24 @@
         <line num="47" count="1" type="stmt"/>
         <line num="53" count="1" type="stmt"/>
         <line num="55" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="modules.sellers">
+      <metrics statements="12" coveredstatements="12" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="sellers.route.js" path="/home/francois/dev/eInvoicing/backend/src/modules/sellers/sellers.route.js">
+        <metrics statements="12" coveredstatements="12" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="5" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="12" count="1" type="stmt"/>
+        <line num="15" count="1" type="stmt"/>
+        <line num="18" count="1" type="stmt"/>
+        <line num="21" count="1" type="stmt"/>
+        <line num="23" count="1" type="stmt"/>
       </file>
     </package>
     <package name="utils">
