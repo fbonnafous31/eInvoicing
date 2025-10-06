@@ -1,6 +1,6 @@
 
 <!doctype html>
-<html lang="fr">
+<html lang="en">
 
 <head>
     <title>Code coverage report for src/utils/validators/contact.js</title>
@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/10</span>
+                <span class='fraction'>10/10</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/12</span>
+                <span class='fraction'>12/12</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/1</span>
+                <span class='fraction'>1/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/9</span>
+                <span class='fraction'>9/9</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -96,58 +96,58 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// utils/validators/contact.js
 import { validateEmail, validateOptionalEmail } from "./email";
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >validateContact(</span>data, options = <span class="branch-0 cbranch-no" title="branch not covered" >{})</span> {
-  const errors = <span class="cstat-no" title="statement not covered" >{};</span>
+export function validateContact(data, options = {}) {
+  const errors = {};
   const {
-    emailField = <span class="branch-0 cbranch-no" title="branch not covered" >"email",</span>
-    emailRequired = <span class="branch-0 cbranch-no" title="branch not covered" >false,</span>
-    phoneField = <span class="branch-0 cbranch-no" title="branch not covered" >"phone",</span>
-  } = <span class="cstat-no" title="statement not covered" >options;</span>
+    emailField = "email",
+    emailRequired = false,
+    phoneField = "phone",
+  } = options;
 &nbsp;
-  const emailValue = <span class="cstat-no" title="statement not covered" >data[emailField];</span>
-  const phoneValue = <span class="cstat-no" title="statement not covered" >data[phoneField];</span>
+  const emailValue = data[emailField];
+  const phoneValue = data[phoneField];
 &nbsp;
   // Email
-  const emailError = <span class="cstat-no" title="statement not covered" >emailRequired</span>
+  const emailError = emailRequired
     ? validateEmail(emailValue)
     : validateOptionalEmail(emailValue);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  if (emailError) <span class="cstat-no" title="statement not covered" >errors[emailField] = emailError;</span></span>
+  if (emailError) errors[emailField] = emailError;
 &nbsp;
   // Téléphone
-<span class="cstat-no" title="statement not covered" >  if (phoneValue &amp;&amp; !/^\+?[0-9\s-]{6,20}$/.test(phoneValue)) {</span>
-<span class="cstat-no" title="statement not covered" >    errors[phoneField] = "Numéro de téléphone invalide";</span>
+  if (phoneValue &amp;&amp; !/^\+?[0-9\s-]{6,20}$/.test(phoneValue)) {
+    errors[phoneField] = "Numéro de téléphone invalide";
   }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return errors;</span>
+  return errors;
 }
 &nbsp;
 &nbsp;</pre></td></tr></table></pre>
@@ -157,7 +157,7 @@ export function <span class="fstat-no" title="function not covered" >validateCon
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-09-22T08:42:25.232Z
+                at 2025-10-06T14:54:24.953Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

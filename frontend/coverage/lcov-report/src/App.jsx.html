@@ -1,6 +1,6 @@
 
 <!doctype html>
-<html lang="fr">
+<html lang="en">
 
 <head>
     <title>Code coverage report for src/App.jsx</title>
@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/11</span>
+                <span class='fraction'>0/15</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/7</span>
+                <span class='fraction'>0/11</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/10</span>
+                <span class='fraction'>0/14</span>
             </div>
         
             
@@ -130,7 +130,12 @@
 <a name='L65'></a><a href='#L65'>65</a>
 <a name='L66'></a><a href='#L66'>66</a>
 <a name='L67'></a><a href='#L67'>67</a>
-<a name='L68'></a><a href='#L68'>68</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -164,6 +169,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -172,12 +179,15 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -229,23 +239,28 @@ const getComponentName = <span class="cstat-no" title="statement not covered" ><
 };
 &nbsp;
 function <span class="fstat-no" title="function not covered" >App() {</span>
+  const fullWidthStaticRoutes = <span class="cstat-no" title="statement not covered" >["/clients", "/sellers", "/invoices", "/"];</span>
+&nbsp;
 <span class="cstat-no" title="statement not covered" >  return (</span>
     &lt;Routes&gt;
       {/* Page publique */}
       &lt;Route path="/login" element={&lt;LoginPage /&gt;} /&gt;
 &nbsp;
-      {/* Toutes les autres routes protégées */}
+      {/* Routes protégées */}
       {routes.map(<span class="fstat-no" title="function not covered" >({</span> path, element }) =&gt; {
 <span class="cstat-no" title="statement not covered" >        if (path === "/login") <span class="cstat-no" title="statement not covered" >return null;</span></span>
 &nbsp;
-        const componentName = <span class="cstat-no" title="statement not covered" >getComponentName(element);</span>
-        const isFullWidth = <span class="cstat-no" title="statement not covered" >[</span>
-          "InvoiceView",
-          "ClientsList",
-          "SellersList",
-          "InvoicesList",
-          "Home",
-        ].includes(componentName);
+        let isFullWidth = <span class="cstat-no" title="statement not covered" >false;</span>
+&nbsp;
+        // Routes statiques
+<span class="cstat-no" title="statement not covered" >        if (fullWidthStaticRoutes.includes(path)) {</span>
+<span class="cstat-no" title="statement not covered" >          isFullWidth = true;</span>
+        }
+&nbsp;
+        // Routes dynamiques ciblées
+<span class="cstat-no" title="statement not covered" >        if (path === "/invoices/:id/view") {</span>
+<span class="cstat-no" title="statement not covered" >          isFullWidth = true;</span>
+        }
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        return (</span>
           &lt;Route
@@ -271,7 +286,7 @@ export default App;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-09-22T08:42:25.232Z
+                at 2025-10-06T14:54:24.953Z
             </div>
         <script src="../prettify.js"></script>
         <script>

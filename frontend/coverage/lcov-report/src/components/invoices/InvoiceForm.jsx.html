@@ -1,6 +1,6 @@
 
 <!doctype html>
-<html lang="fr">
+<html lang="en">
 
 <head>
     <title>Code coverage report for src/components/invoices/InvoiceForm.jsx</title>
@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/194</span>
+                <span class='fraction'>0/195</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/121</span>
+                <span class='fraction'>0/142</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/174</span>
+                <span class='fraction'>0/175</span>
             </div>
         
             
@@ -501,7 +501,22 @@
 <a name='L436'></a><a href='#L436'>436</a>
 <a name='L437'></a><a href='#L437'>437</a>
 <a name='L438'></a><a href='#L438'>438</a>
-<a name='L439'></a><a href='#L439'>439</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L439'></a><a href='#L439'>439</a>
+<a name='L440'></a><a href='#L440'>440</a>
+<a name='L441'></a><a href='#L441'>441</a>
+<a name='L442'></a><a href='#L442'>442</a>
+<a name='L443'></a><a href='#L443'>443</a>
+<a name='L444'></a><a href='#L444'>444</a>
+<a name='L445'></a><a href='#L445'>445</a>
+<a name='L446'></a><a href='#L446'>446</a>
+<a name='L447'></a><a href='#L447'>447</a>
+<a name='L448'></a><a href='#L448'>448</a>
+<a name='L449'></a><a href='#L449'>449</a>
+<a name='L450'></a><a href='#L450'>450</a>
+<a name='L451'></a><a href='#L451'>451</a>
+<a name='L452'></a><a href='#L452'>452</a>
+<a name='L453'></a><a href='#L453'>453</a>
+<a name='L454'></a><a href='#L454'>454</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -530,6 +545,19 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -848,7 +876,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -968,6 +998,19 @@ export default function <span class="fstat-no" title="function not covered" >Inv
     seller: [],
     attachments: [],
   });
+&nbsp;
+  const initialHeader = <span class="cstat-no" title="statement not covered" >{</span>
+    invoice_number: invoiceData.header?.invoice_number || initialData?.header?.invoice_number || "",
+    issue_date: invoiceData.header?.issue_date || "",
+    fiscal_year: invoiceData.header?.fiscal_year || "",
+    contract_number: invoiceData.header?.contract_number || "",
+    purchase_order_number: invoiceData.header?.purchase_order_number || "",
+    payment_method: invoiceData.header?.payment_method || "",
+    payment_terms: invoiceData.header?.payment_terms || "",
+    supply_date: invoiceData.header?.supply_date || "",
+    seller_id: invoiceData.header?.seller_id || "",
+  };
+&nbsp;
   const [isEditing, setIsEditing] = <span class="cstat-no" title="statement not covered" >useState(!initialData &amp;&amp; !readOnly);</span>
   const [errors, setErrors] = <span class="cstat-no" title="statement not covered" >useState({});</span>
   const [submitted, setSubmitted] = <span class="cstat-no" title="statement not covered" >useState(false);</span>
@@ -1284,16 +1327,18 @@ export default function <span class="fstat-no" title="function not covered" >Inv
       {successMessage &amp;&amp; &lt;div className="alert alert-success"&gt;{successMessage}&lt;/div&gt;}
       {errorMessage &amp;&amp; &lt;div className="alert alert-danger"&gt;{errorMessage}&lt;/div&gt;}
 &nbsp;
-      &lt;InvoiceHeader
-        data={invoiceData.header}
-        onChange={<span class="fstat-no" title="function not covered" >val =&gt; <span class="cstat-no" title="statement not covered" >h</span>andleChange("header", val)}</span>
-        disabled={!isEditing}
-        submitted={submitted}
-        errors={errors}
-        touchedFields={headerTouched}
-        setTouchedFields={setHeaderTouched}
-      /&gt;
-&nbsp;
+      {invoiceData.header &amp;&amp; (
+        &lt;InvoiceHeader
+          data={initialHeader}
+          onChange={<span class="fstat-no" title="function not covered" >val =&gt; <span class="cstat-no" title="statement not covered" >h</span>andleChange("header", val)}   </span>
+          disabled={!isEditing}
+          submitted={submitted}
+          errors={errors}
+          touchedFields={headerTouched}
+          setTouchedFields={setHeaderTouched}
+        /&gt;
+      )}
+      
       &lt;FormSection
         title="Client"
         sectionKey="client"
@@ -1384,7 +1429,7 @@ export default function <span class="fstat-no" title="function not covered" >Inv
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-09-22T08:42:25.232Z
+                at 2025-10-06T14:54:24.953Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>
