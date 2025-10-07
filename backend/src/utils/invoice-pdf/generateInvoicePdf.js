@@ -42,40 +42,61 @@ async function generateInvoicePdf(invoice) {
   pdfDoc.registerFontkit(fontkit);
 
   // 2. Définir les métadonnées XMP pour l'identification PDF/A-3B
-const now = new Date();
-const nowIso = now.toISOString();
-const title = `Facture ${invoice.invoice_number || invoice.id}`;
-const author = invoice.seller?.legal_name || 'eInvoicing App';
-// Le nom du fichier XML est requis pour les métadonnées Factur-X
-const xmlFileName = "factur-x.xml";
+  const now = new Date();
+  const nowIso = now.toISOString();
+  const title = `Facture ${invoice.invoice_number || invoice.id}`;
+  const author = invoice.seller?.legal_name || 'eInvoicing App';
+  // Le nom du fichier XML est requis pour les métadonnées Factur-X
+  const xmlFileName = "factur-x.xml";
 
-const xmpMetadata = `<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>
-<x:xmpmeta xmlns:x="adobe:ns:meta/">
-  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-    <rdf:Description rdf:about=""
-        xmlns:dc="http://purl.org/dc/elements/1.1/"
-        xmlns:xmp="http://ns.adobe.com/xap/1.0/"
-        xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/"
-        xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#">
-      <!-- Dublin Core -->
-      <dc:title><rdf:Alt><rdf:li xml:lang="x-default">${title}</rdf:li></rdf:Alt></dc:title>
-      <dc:creator><rdf:Seq><rdf:li>${author}</rdf:li></rdf:Seq></dc:creator>
-      <!-- XMP Basic -->
-      <xmp:CreateDate>${nowIso}</xmp:CreateDate>
-      <xmp:ModifyDate>${nowIso}</xmp:ModifyDate>
-      <xmp:CreatorTool>eInvoicing App</xmp:CreatorTool>
-      <!-- PDF/A ID -->
-      <pdfaid:part>3</pdfaid:part>
-      <pdfaid:conformance>B</pdfaid:conformance>
-      <!-- Factur-X -->
-      <fx:DocumentType>INVOICE</fx:DocumentType>
-      <fx:DocumentFileName>${xmlFileName}</fx:DocumentFileName>
-      <fx:Version>1.0</fx:Version>
-      <fx:ConformanceLevel>BASIC</fx:ConformanceLevel>
-    </rdf:Description>
-  </rdf:RDF>
-</x:xmpmeta>
-<?xpacket end="w"?>`;
+  const xmpMetadata = `<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>
+  <x:xmpmeta xmlns:x="adobe:ns:meta/">
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+
+      <!-- Description principale PDF/A-3 -->
+      <rdf:Description rdf:about=""
+          xmlns:dc="http://purl.org/dc/elements/1.1/"
+          xmlns:xmp="http://ns.adobe.com/xap/1.0/"
+          xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/"
+          xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#"
+          pdfaid:part="3"
+          pdfaid:conformance="B"
+      >
+        <!-- Dublin Core -->
+        <dc:title><rdf:Alt><rdf:li xml:lang="x-default">${title}</rdf:li></rdf:Alt></dc:title>
+        <dc:creator><rdf:Seq><rdf:li>${author}</rdf:li></rdf:Seq></dc:creator>
+
+        <!-- XMP Basic -->
+        <xmp:CreateDate>${nowIso}</xmp:CreateDate>
+        <xmp:ModifyDate>${nowIso}</xmp:ModifyDate>
+        <xmp:CreatorTool>eInvoicing App</xmp:CreatorTool>
+
+        <!-- Factur-X -->
+        <fx:DocumentType>INVOICE</fx:DocumentType>
+        <fx:DocumentFileName>${xmlFileName}</fx:DocumentFileName>
+        <fx:Version>1.0</fx:Version>
+        <fx:ConformanceLevel>BASIC</fx:ConformanceLevel>
+      </rdf:Description>
+
+      <!-- Ajout de la description pour les fichiers attachés -->
+      <rdf:Description rdf:about=""
+          xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#"
+      >
+        <fx:AttachedFiles>
+          <rdf:Bag>
+            <rdf:li rdf:parseType="Resource">
+              <fx:DocumentFileName>${xmlFileName}</fx:DocumentFileName>
+              <fx:MimeType>application/xml</fx:MimeType>
+              <fx:Description>Factur-X invoice</fx:Description>
+              <fx:AFRelationship>Source</fx:AFRelationship>
+            </rdf:li>
+          </rdf:Bag>
+        </fx:AttachedFiles>
+      </rdf:Description>
+
+    </rdf:RDF>
+  </x:xmpmeta>
+  <?xpacket end="w"?>`;
 
   const metadataStream = pdfDoc.context.stream(xmpMetadata, {
     Type: PDFName.of('Metadata'),
@@ -469,23 +490,48 @@ async function generateInvoicePdfBuffer(invoice) {
   const xmpMetadata = `<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>
   <x:xmpmeta xmlns:x="adobe:ns:meta/">
     <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+
+      <!-- Description principale PDF/A-3 -->
       <rdf:Description rdf:about=""
           xmlns:dc="http://purl.org/dc/elements/1.1/"
           xmlns:xmp="http://ns.adobe.com/xap/1.0/"
           xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/"
-          xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#">
+          xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#"
+          pdfaid:part="3"
+          pdfaid:conformance="B"
+      >
+        <!-- Dublin Core -->
         <dc:title><rdf:Alt><rdf:li xml:lang="x-default">${title}</rdf:li></rdf:Alt></dc:title>
         <dc:creator><rdf:Seq><rdf:li>${author}</rdf:li></rdf:Seq></dc:creator>
+
+        <!-- XMP Basic -->
         <xmp:CreateDate>${nowIso}</xmp:CreateDate>
         <xmp:ModifyDate>${nowIso}</xmp:ModifyDate>
         <xmp:CreatorTool>eInvoicing App</xmp:CreatorTool>
-        <pdfaid:part>3</pdfaid:part>
-        <pdfaid:conformance>B</pdfaid:conformance>
+
+        <!-- Factur-X -->
         <fx:DocumentType>INVOICE</fx:DocumentType>
         <fx:DocumentFileName>${xmlFileName}</fx:DocumentFileName>
         <fx:Version>1.0</fx:Version>
         <fx:ConformanceLevel>BASIC</fx:ConformanceLevel>
       </rdf:Description>
+
+      <!-- Ajout de la description pour les fichiers attachés -->
+      <rdf:Description rdf:about=""
+          xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#"
+      >
+        <fx:AttachedFiles>
+          <rdf:Bag>
+            <rdf:li rdf:parseType="Resource">
+              <fx:DocumentFileName>${xmlFileName}</fx:DocumentFileName>
+              <fx:MimeType>application/xml</fx:MimeType>
+              <fx:Description>Factur-X invoice</fx:Description>
+              <fx:AFRelationship>Source</fx:AFRelationship>
+            </rdf:li>
+          </rdf:Bag>
+        </fx:AttachedFiles>
+      </rdf:Description>
+
     </rdf:RDF>
   </x:xmpmeta>
   <?xpacket end="w"?>`;

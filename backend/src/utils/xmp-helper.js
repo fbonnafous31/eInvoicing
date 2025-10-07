@@ -60,6 +60,19 @@ function generateXmpContent({ invoiceId, xmlFileName, title }) {
       <fx:DocumentFileName>${escapeXml(xmlFileName)}</fx:DocumentFileName>
       <fx:Version>1.0</fx:Version>
       <fx:ConformanceLevel>BASIC</fx:ConformanceLevel>
+
+      <!-- Description du fichier attaché pour le validator -->
+      <fx:AttachedFiles>
+        <rdf:Bag>
+          <rdf:li rdf:parseType="Resource">
+            <fx:DocumentFileName>${escapeXml(xmlFileName)}</fx:DocumentFileName>
+            <fx:MimeType>application/xml</fx:MimeType>
+            <fx:Description>Factur-X invoice</fx:Description>
+            <fx:AFRelationship>Source</fx:AFRelationship>
+          </rdf:li>
+        </rdf:Bag>
+      </fx:AttachedFiles>
+
     </rdf:Description>
 
   </rdf:RDF>
