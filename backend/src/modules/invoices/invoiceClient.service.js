@@ -1,5 +1,5 @@
 // backend/src/modules/invoices/invoiceClient.service.js
-import InvoiceClientModel from "./invoiceClient.model.js";
+const InvoiceClientModel = require("./invoiceClient.model.js");
 
 const InvoiceClientService = {
   async create(invoiceId, clientData) {
@@ -19,4 +19,5 @@ const InvoiceClientService = {
   },
 };
 
-export default InvoiceClientService;
+// ✅ Ici on exporte avec CommonJS
+module.exports = InvoiceClientService;

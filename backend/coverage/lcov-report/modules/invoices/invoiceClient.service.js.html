@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for modules/clients/clients.route.js</title>
+    <title>Code coverage report for modules/invoices/invoiceClient.service.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,13 +19,13 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">modules/clients</a> clients.route.js</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">modules/invoices</a> invoiceClient.service.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>14/14</span>
+                <span class='fraction'>7/7</span>
             </div>
         
             
@@ -39,14 +39,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/0</span>
+                <span class='fraction'>4/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>14/14</span>
+                <span class='fraction'>7/7</span>
             </div>
         
             
@@ -83,10 +83,14 @@
 <a name='L18'></a><a href='#L18'>18</a>
 <a name='L19'></a><a href='#L19'>19</a>
 <a name='L20'></a><a href='#L20'>20</a>
-<a name='L21'></a><a href='#L21'>21</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -94,36 +98,41 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">const express = require('express');
-const router = express.Router();
-const ClientsController = require('./clients.controller');
-const attachSeller = require('../../middlewares/attachSeller'); 
-const checkJwt = require('../../middlewares/auth'); 
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// backend/src/modules/invoices/invoiceClient.service.js
+const InvoiceClientModel = require("./invoiceClient.model.js");
 &nbsp;
+const InvoiceClientService = {
+  async create(invoiceId, clientData) {
+    return await InvoiceClientModel.create(invoiceId, clientData);
+  },
 &nbsp;
-// Vérification SIRET (pas besoin d'être authentifié)
-router.get('/check-siret/:siret', ClientsController.checkSiret);
+  async getByInvoiceId(invoiceId) {
+    return await InvoiceClientModel.findByInvoiceId(invoiceId);
+  },
 &nbsp;
-// Routes protégées par Auth0
-router.use(checkJwt);
-router.use(attachSeller);
+  async update(invoiceId, clientData) {
+    return await InvoiceClientModel.update(invoiceId, clientData);
+  },
 &nbsp;
-router.get('/', ClientsController.getClients);
-router.post('/', ClientsController.createClient);
-router.get('/:id', ClientsController.getClientById);
-router.delete('/:id', ClientsController.deleteClient);
-router.put('/:id', ClientsController.updateClient);
+  async delete(invoiceId) {
+    return await InvoiceClientModel.delete(invoiceId);
+  },
+};
 &nbsp;
-module.exports = router;</pre></td></tr></table></pre>
+// ✅ Ici on exporte avec CommonJS
+module.exports = InvoiceClientService;
+&nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
