@@ -8,6 +8,7 @@ const crypto = require('crypto');
  *  - EF (EmbeddedFile) pour la référence dans le PDF
  *  - trailer /ID
  *  - Subtype des fichiers attachés (MIME type)
+ *  - Params /ModDate manquant
  * @param {string} pdfPath - Chemin du PDF à corriger
  * @param {string} facturxName - Nom du fichier Factur-X (ex: factur-x.xml)
  */
@@ -16,13 +17,13 @@ function patchPdfA3(pdfPath, facturxName = 'factur-x.xml') {
   let text = data.toString('latin1'); // préserve les octets originaux
   let modified = false;
 
-  // --- 1) Patch AFRelationship et EF avec Subtype ---
+  // --- 1) Patch AFRelationship et EF ---
   const filespecRegex = /\/Type\s*\/Filespec\s*\/F\s*\((.*?)\)/g;
   let match;
   while ((match = filespecRegex.exec(text)) !== null) {
     const fileName = match[1];
     const afterMatchIndex = match.index + match[0].length;
-    const afterSlice = text.slice(afterMatchIndex, afterMatchIndex + 200);
+    const afterSlice = text.slice(afterMatchIndex, afterMatchIndex + 300);
 
     // AFRelationship
     if (!/\/AFRelationship/.test(afterSlice)) {
@@ -39,28 +40,14 @@ function patchPdfA3(pdfPath, facturxName = 'factur-x.xml') {
 
     // EF (EmbeddedFile)
     if (!/\/EF\s*<</.test(afterSlice)) {
-      const efRef = '/F 5 0 R'; // placeholder
+      const efRef = '/F 5 0 R'; // placeholder, remplacé par la réf correcte au besoin
       text =
         text.slice(0, afterMatchIndex) +
-        `\n/EF << ${efRef} /Subtype ${fileName === facturxName ? '/text#2Fxml' : '/application#2Foctet-stream'} >>` +
+        `\n/EF << ${efRef} >>` +
         text.slice(afterMatchIndex);
       modified = true;
-      console.log(`✅ /EF avec Subtype ajouté pour ${fileName}`);
+      console.log(`✅ /EF ajouté pour ${fileName}`);
       filespecRegex.lastIndex += efRef.length;
-    } else {
-      // Si /EF existe déjà, ajouter Subtype si absent
-      const efSliceMatch = text.slice(afterMatchIndex, afterMatchIndex + 200);
-      if (!/\/Subtype/.test(efSliceMatch)) {
-        const subTypeInsert =
-          fileName === facturxName ? ' /Subtype /text#2Fxml' : ' /Subtype /application#2Foctet-stream';
-        const efIndex = afterMatchIndex + efSliceMatch.indexOf('<<') + 2;
-        text =
-          text.slice(0, efIndex) +
-          subTypeInsert +
-          text.slice(efIndex);
-        modified = true;
-        console.log(`✅ Subtype ajouté dans /EF pour ${fileName}`);
-      }
     }
   }
 
@@ -79,9 +66,52 @@ function patchPdfA3(pdfPath, facturxName = 'factur-x.xml') {
     console.log(`⚠️ Trailer contient déjà un /ID`);
   }
 
-  // --- 3) Sauvegarde ---
+  // --- 3) Patch EmbeddedFile /Subtype manquant ---
+  const embeddedFileRegex1 = /\/Type\s*\/EmbeddedFile(?![\s\S]{0,300}?\/Subtype)/gi;
+  let efMatch1;
+  while ((efMatch1 = embeddedFileRegex1.exec(text)) !== null) {
+    const insertPos = efMatch1.index + efMatch1[0].length;
+
+    const nearbySlice = text.slice(Math.max(0, efMatch1.index - 500), efMatch1.index + 500);
+    const mime =
+      nearbySlice.includes(facturxName)
+        ? '(application/xml)'
+        : '(application/octet-stream)';
+
+    const subtypeInsert = `\n/Subtype ${mime}`;
+    text = text.slice(0, insertPos) + subtypeInsert + text.slice(insertPos);
+    modified = true;
+    console.log(`✅ Subtype ajouté dans EmbeddedFile ${mime}`);
+  }
+
+  // --- 4) Patch EmbeddedFile /Params /ModDate manquant ---
+  const embeddedFileRegex2 = /\/Type\s*\/EmbeddedFile/gi;
+  let efMatch2;
+  while ((efMatch2 = embeddedFileRegex2.exec(text)) !== null) {
+    const afterMatchIndex = efMatch2.index + efMatch2[0].length;
+    const slice = text.slice(afterMatchIndex, afterMatchIndex + 500);
+
+    if (/\/Params\s*<</.test(slice)) {
+      text = text.replace(/(\/Params\s*<<)([\s\S]*?)(>>)/, (m, start, inner, end) => {
+        if (/\/ModDate/.test(inner)) return m;
+        const modDate = new Date().toISOString().replace(/[-:TZ.]/g, '').slice(0, 14);
+        return `${start}${inner}\n/ModDate (D:${modDate})${end}`;
+      });
+      modified = true;
+      console.log(`✅ /ModDate ajouté dans /Params existant`);
+    } else {
+      const modDate = new Date().toISOString().replace(/[-:TZ.]/g, '').slice(0, 14);
+      const insertPos = afterMatchIndex;
+      const paramsInsert = `\n/Params << /ModDate (D:${modDate}) >>`;
+      text = text.slice(0, insertPos) + paramsInsert + text.slice(insertPos);
+      modified = true;
+      console.log(`✅ /Params avec /ModDate créé`);
+    }
+  }
+
+  // --- 5) Sauvegarde ---
   if (modified) {
-    fs.writeFileSync(pdfPath, Buffer.from(text, 'latin1'));
+    fs.writeFileSync(pdfPath, Buffer.from(text, 'latin1'), { flag: 'w' });
     console.log(`✅ PDF patché avec succès`);
   } else {
     console.log(`ℹ️ Aucun patch nécessaire`);
