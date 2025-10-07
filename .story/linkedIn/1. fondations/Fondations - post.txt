@@ -1,6 +1,6 @@
 🚀 Ces dernières semaines, je me suis lancé un petit défi perso… et j’ai vraiment pris plaisir à créer.
 
-💡 J’ai développé une application complète d’eInvoicing avec React, Node et PostgreSQL.
+💡 J’ai développé une application complète de facturation électronique avec React, Node et PostgreSQL.
 
 ⏳ Quelques heures par jour m’ont permis de :
 🔹 explorer de nouvelles technos,
