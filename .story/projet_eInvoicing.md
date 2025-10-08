@@ -65,6 +65,7 @@
   - suivi quotidien  
   - documentation en Markdown  
   - utilisation de ChatGPT comme collaborateur technique pour accélérer le développement et assurer la qualité du code.
+- **Mise en place d'un environnement de staging** : Sans authentification et respectant le RGPD
 
 ---
 ## Rappel – Composants et services réutilisables
@@ -74,7 +75,6 @@
 
 
 ## 📌 Prochaines étapes
-- **Mise en place d'un environnement de staging** : Sans authentification et respectant le RGPD
 - **Finalisation de la conformité PDF/A-3** : Résoudre les derniers points techniques (pour obtenir une validation ISO 19005-3 complète).
 - **Communication sur le projet** : LinkedIn
 

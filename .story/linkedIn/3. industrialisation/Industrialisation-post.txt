@@ -1,15 +1,14 @@
-🚀 Faire passer une application du simple prototype à un produit industrialisé n’est jamais trivial.
+Aller jusqu’au bout du projet ⚙️
 
-💡 Avec eInvoicing, j’ai exploré les étapes clés de l’industrialisation :
+Ce projet m’a fait découvrir tout ce qui va au-delà du développement : fiabilité, conformité, sécurité, et la manière dont un logiciel doit fonctionner pour être vraiment utile.
 
-🗸 Stratégie de tests complète (unitaires, intégration, End-to-End)
-🗸 CI/CD automatisée avec GitHub Actions pour sécuriser chaque commit
-🗸 Docker pour rendre l’application portable et reproductible
-🗸 Monitoring avec Prometheus et Grafana pour suivre la santé du système
-🗸 Déploiement automatisé et environnement de staging sécurisé 🌱
+Pour que le produit puisse être utilisé et montré en toute sécurité, j’ai progressivement mis en place :
+🗸 une stratégie de tests complète ✅ pour garantir que tout fonctionne correctement
+🗸 des processus automatisés ⚙️ pour simplifier les mises à jour
+🗸 un environnement de staging 🌱 pour présenter le produit tout en respectant le RGPD
+🗸 une pipeline CI/CD 🚀 pour déployer facilement et de manière reproductible
+🗸 des outils pour suivre la santé du système et détecter les problèmes 📊
 
-⏳ Chaque étape a été une leçon de rigueur et de persévérance, et m’a permis de mieux comprendre ce qu’implique la production d’un logiciel fiable.
+Chaque étape a été une leçon sur la rigueur et la cohérence, et m’a fait mieux comprendre ce qui fait qu’un logiciel est fiable et prêt à être utilisé, pas seulement développé.
 
-🤖 L’IA a servi de copilote pour accélérer certains aspects techniques, mais toutes les décisions importantes sont restées entre mes mains.
-
-#WebDevelopment #ProductDevelopment #FacturX #PDFa3 #CI_CD #Docker #Monitoring #LearningByDoing
+#WebDevelopment #ProductDevelopment #FacturX #PDFa3 #SoftwareCraftsmanship #LearningByDoing

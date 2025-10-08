@@ -1,14 +1,17 @@
-🚀 Ces dernières semaines, je me suis lancé un petit défi perso… et j’ai vraiment pris plaisir à créer.
+Le plaisir de construire à son rythme 🚀
 
-💡 J’ai développé une application complète de facturation électronique avec React, Node et PostgreSQL.
+🚀 Ces dernières semaines, je me suis lancé un défi personnel… et j’y ai pris un vrai plaisir.
+
+💡 J’ai développé une application complète de facturation électronique avec React, Node.js et PostgreSQL — un projet construit pas à pas, à mon rythme.
 
 ⏳ Quelques heures par jour m’ont permis de :
 🔹 explorer de nouvelles technos,
-🔹 construire l’architecture backend et frontend,
-🔹 intégrer des normes comme Factur-X et PDF/A-3.
+🔹 bâtir une architecture claire entre frontend et backend,
+🔹 intégrer des standards comme Factur-X et PDF/A-3.
 
-⚙️ C’était exigeant par moments, mais aussi très stimulant. Retrouver cette liberté de construire à mon rythme, de tester, d’apprendre et de voir le projet avancer… c’est exactement ce que j’aime dans mon métier.
+⚙️ C’était parfois exigeant, souvent passionnant.
+Retrouver cette liberté de créer, d’expérimenter, d’apprendre… c’est exactement ce que j’aime dans ce métier.
 
-🤖 L’IA m’a aidé en copilote : pratique pour tester et accélérer, mais toutes les décisions importantes et la cohérence générale sont restées entre mes mains.
+🤖 L’IA m’a accompagné en copilote : un vrai gain de temps pour tester et affiner, mais la vision et les choix sont restés 100 % humains.
 
 #eInvoicing #FacturX #WebDevelopment #ProductDevelopment

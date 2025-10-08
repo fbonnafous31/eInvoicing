@@ -101,3 +101,4 @@
 - [📅 Jour 98 – Bilan Complet du Projet eInvoicing 🚀✨](jour-098.md)
 - [📅 Jour 99 – Bilan Humain et Ressenti du Développeur Solo 🌱✨](jour-099.md)
 - [📅 Jour 100 – Perspectives et prochains axes pour eInvoicing 🔭✨](jour-100.md)
+- [🧭 Jour 101 – Continuer, même quand tout semble accompli ✨](jour-101.md)
