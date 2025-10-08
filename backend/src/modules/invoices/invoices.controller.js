@@ -3,6 +3,7 @@ const InvoicesService = require('./invoices.service');
 const InvoicePdpService = require('./invoicePdp.service');
 const { getInvoiceById } = require('./invoices.model');
 const { generateInvoicePdf, generateInvoicePdfBuffer: generatePdfUtil } = require('../../utils/invoice-pdf/generateInvoicePdf');
+const InvoiceStatusModel = require('../invoices/invoiceStatus.model');
 const path = require("path");
 
 /**
@@ -175,35 +176,57 @@ const getInvoices = asyncHandler(async (req, res) => {
 const sendInvoice = asyncHandler(async (req, res) => {
   const invoiceId = req.params.id;
   const invoice = await InvoicesService.getInvoiceById(invoiceId);
-  if (!invoice) {
-    return res.status(404).json({ error: 'Facture introuvable' });
-  }
+  if (!invoice) return res.status(404).json({ error: 'Facture introuvable' });
 
-  // 1. Le PDF/A-3 a été généré lors de la création/mise à jour. On reconstruit son chemin.
   const finalPdfPath = path.join(__dirname, `../../uploads/pdf-a3/${invoiceId}_pdf-a3.pdf`);
-
   if (!fs.existsSync(finalPdfPath)) {
     return res.status(404).json({ 
-      error: `Le fichier PDF/A-3 final pour la facture ${invoiceId} est introuvable. Veuillez essayer de mettre à jour la facture pour le régénérer.` 
+      error: `Le fichier PDF/A-3 final pour la facture ${invoiceId} est introuvable.` 
     });
   }
 
-  // 2. Envoyer le PDF final au PDP
-  const result = await InvoicePdpService.sendInvoice(invoiceId, finalPdfPath);
+  const PDPService = require('../pdp/PDPService');
+  const provider = process.env.PDP_PROVIDER || 'mock';
+  const pdp = new PDPService(provider);
+
+  const result = await pdp.sendInvoice({ invoiceLocalId: invoiceId, filePath: finalPdfPath });
+
+  // Mise à jour DB
+  if (result.submissionId) {
+    if (provider === 'mock') {
+      await InvoiceStatusModel.updateTechnicalStatus(invoiceId, {
+        technicalStatus: 'validated', // le mock simule le suivi
+        submissionId: result.submissionId
+      });
+    } else {
+      await InvoiceStatusModel.updateTechnicalStatus(invoiceId, {
+        technicalStatus: 'sent', // réel PDP, pas de suivi pour l'instant
+        submissionId: result.submissionId
+      });
+    }
+  }
 
   res.json({
-    message: 'Facture envoyée avec succès',
+    message: provider === 'mock'
+      ? 'Facture envoyée et suivie via mock'
+      : 'Facture envoyée mais le statut technique ne peut pas être suivi pour l’instant',
     invoiceId,
-    result,
+    result
   });
 });
 
+
 const getInvoiceStatus = asyncHandler(async (req, res) => {
   const invoiceId = req.params.id;
+  console.log(`[getInvoiceStatus] Récupération statut pour facture ${invoiceId}`);
+
   const invoice = await InvoicesService.getInvoiceById(invoiceId);
   if (!invoice) {
+    console.warn(`[getInvoiceStatus] Facture ${invoiceId} introuvable`);
     return res.status(404).json({ message: 'Facture introuvable' });
   }
+
+  console.log(`[getInvoiceStatus] Statut technique en DB pour ${invoiceId}: ${invoice.technical_status}`);
   res.json({ technicalStatus: invoice.technical_status || 'pending' });
 });
 

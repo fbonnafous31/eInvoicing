@@ -69,7 +69,9 @@ export function useInvoiceService() {
         const checkStatus = async () => {
           try {
             const data = await request(`${API_BASE}/pdp-status/${submissionId}`);
-            if (["validated", "rejected"].includes(data.technicalStatus)) {
+            const statusNormalized = data.technicalStatus?.toLowerCase();
+
+            if (["validated", "rejected"].includes(statusNormalized)) {
               resolve(data);
             } else if (Date.now() - startTime > timeout) {
               reject(new Error("Timeout récupération statut PDP"));

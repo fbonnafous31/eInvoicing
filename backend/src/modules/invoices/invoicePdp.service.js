@@ -95,18 +95,23 @@ async function pollInvoiceStatusPDP(invoiceId, submissionId) {
   while (!finalStatus && Date.now() - startTime < POLLING_TIMEOUT) {
     try {
       const response = await axios.get(`${PDP_URL}/${submissionId}/status`);
-      const { technicalStatus } = response.data;
+      let { technicalStatus } = response.data;
 
-      console.log(`📡 Polling invoice ${invoiceId}: status = ${technicalStatus}`);
+      // Normalisation de la casse
+      const normalizedStatus = technicalStatus?.toLowerCase() || 'pending';
 
+      console.log(`📡 Polling invoice ${invoiceId}: technicalStatus = ${technicalStatus} (normalized = ${normalizedStatus})`);
+
+      // Mise à jour du statut technique en DB
       await InvoiceStatusModel.updateTechnicalStatus(invoiceId, { technicalStatus, submissionId });
 
-      if (technicalStatus === 'validated' || technicalStatus === 'rejected') {
+      // Vérification si le statut est final
+      if (normalizedStatus === 'validated' || normalizedStatus === 'rejected') {
         finalStatus = true;
         console.log(`✅ Invoice ${invoiceId} reached final status: ${technicalStatus}`);
 
         let businessData;
-        if (technicalStatus === 'validated') {
+        if (normalizedStatus === 'validated') {
           if (currentBusinessStatus === 208) {
             businessData = { statusCode: 209, statusLabel: 'Réémission après suspension' };
             console.log(`🔄 Statut métier de la facture ${invoiceId} mis à jour à 209 après réception PDP`);
@@ -120,6 +125,7 @@ async function pollInvoiceStatusPDP(invoiceId, submissionId) {
         await InvoiceStatusModel.updateBusinessStatus(invoiceId, businessData);
         console.log(`📌 Statut métier mis à jour pour invoice ${invoiceId}`);
       } else {
+        // Attente avant le prochain poll
         await new Promise(res => setTimeout(res, POLLING_INTERVAL));
       }
     } catch (err) {
@@ -129,7 +135,7 @@ async function pollInvoiceStatusPDP(invoiceId, submissionId) {
   }
 
   if (!finalStatus) {
-    console.warn(`⚠️ Invoice ${invoiceId} polling timeout`);
+    console.warn(`⚠️ Invoice ${invoiceId} polling timeout après ${POLLING_TIMEOUT}ms`);
   }
 
   return finalStatus;

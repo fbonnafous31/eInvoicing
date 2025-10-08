@@ -4,19 +4,44 @@
 │   ├── clients.controller.js
 │   ├── clients.model.js
 │   ├── clients.route.js
-│   └── clients.service.js
+│   ├── clients.service.js
+│   └── __tests__
+│       ├── clients.controller.test.js
+│       ├── clients.model.test.js
+│       ├── clients.route.test.js
+│       └── clients.service.test.js
 ├── invoices
+│   ├── invoiceArtifact.service.js
 │   ├── invoiceAttachments.model.js
 │   ├── invoiceClient.model.js
 │   ├── invoiceClient.service.js
+│   ├── invoicePdp.service.js
 │   ├── invoices.controller.js
 │   ├── invoices.model.js
 │   ├── invoices.route.js
-│   └── invoices.service.js
+│   ├── invoices.service.js
+│   ├── invoiceStatus.model.js
+│   └── __tests__
+│       ├── invoiceArtifact.service.test.js
+│       ├── invoiceAttachments.model.test.js
+│       ├── invoiceClient.model.test.js
+│       ├── invoiceClient.service.test.js
+│       ├── invoices.route.test.js
+│       └── invoices.service.test.js
+├── pdp
+│   ├── IopoleAdapter.js
+│   ├── MockPDPAdapter.js
+│   ├── PDPInterface.js
+│   └── PDPService.js
 └── sellers
     ├── sellers.controller.js
     ├── sellers.model.js
     ├── sellers.route.js
-    └── sellers.service.js
+    ├── sellers.service.js
+    └── __tests__
+        ├── sellers.controller.test.js
+        ├── sellers.model.test.js
+        ├── sellers.route.test.js
+        └── sellers.service.test.js
 
-4 directories, 16 files
+8 directories, 37 files

@@ -66,19 +66,27 @@ router.post('/', upload.single('invoice'), (req, res) => {
 // GET /invoices/:submissionId/status
 router.get('/:submissionId/status', (req, res) => {
   const sub = getSubmission(req.params.submissionId);
-  if (!sub) return res.status(404).json({ error: 'Submission non trouvée' });
+  if (!sub) {
+    console.warn(`[MOCK-PDP] Submission ${req.params.submissionId} non trouvée`);
+    return res.status(404).json({ error: 'Submission non trouvée' });
+  }
+
+  console.log(`[MOCK-PDP] Status check pour ${sub.invoiceId} / ${req.params.submissionId}: ${sub.technicalStatus}`);
   res.json({ invoiceId: sub.invoiceId, technicalStatus: sub.technicalStatus });
 });
 
 // POST /invoices/:submissionId/lifecycle/request
 router.post('/:submissionId/lifecycle/request', (req, res) => {
-  // 🔥 Simule une erreur critique serveur
-  // return res.status(500).json({ error: 'Erreur critique PDP simulée' });
-
   const sub = getSubmission(req.params.submissionId);
-  if (!sub) return res.status(404).json({ error: 'Submission non trouvée' });
+  if (!sub) {
+    console.warn(`[MOCK-PDP] Lifecycle request: submission ${req.params.submissionId} non trouvée`);
+    return res.status(404).json({ error: 'Submission non trouvée' });
+  }
+
+  console.log(`[MOCK-PDP] Lifecycle request pour ${sub.invoiceId}, status actuel: ${sub.technicalStatus}`);
 
   if (sub.technicalStatus === 'rejected') {
+    console.log(`[MOCK-PDP] Facture ${sub.invoiceId} déjà rejetée`);
     return res.json({ invoiceId: sub.invoiceId, lifecycle: sub.lifecycle });
   }
 
@@ -112,12 +120,14 @@ router.post('/:submissionId/lifecycle/request', (req, res) => {
         ? commentsByStatus[candidate.code][Math.floor(Math.random() * commentsByStatus[candidate.code].length)]
         : null;
       sub.lifecycle.push({ ...candidate, createdAt: new Date().toISOString(), comment });
-      console.log(`📊 Cycle métier avancé pour ${req.params.submissionId} : ${candidate.label} (${comment || 'aucun commentaire'})`);
+      console.log(`[MOCK-PDP] Cycle métier avancé pour ${req.params.submissionId} : ${candidate.label} (${comment || 'aucun commentaire'})`);
       break;
     }
   }
 
   const last = sub.lifecycle[sub.lifecycle.length - 1] || { code: lastCode, comment: null };
+  console.log(`[MOCK-PDP] Nouveau statut métier pour ${sub.invoiceId}: ${last.code} (${last.comment || 'aucun commentaire'})`);
+
   res.json({ invoiceId: sub.invoiceId, businessStatus: last.code, comment: last.comment, lifecycle: sub.lifecycle });
 });
 
