@@ -191,19 +191,13 @@ const sendInvoice = asyncHandler(async (req, res) => {
 
   const result = await pdp.sendInvoice({ invoiceLocalId: invoiceId, filePath: finalPdfPath });
 
-  // Mise à jour DB
+  // Mise à jour DB avec statut initial seulement
   if (result.submissionId) {
-    if (provider === 'mock') {
-      await InvoiceStatusModel.updateTechnicalStatus(invoiceId, {
-        technicalStatus: 'validated', // le mock simule le suivi
-        submissionId: result.submissionId
-      });
-    } else {
-      await InvoiceStatusModel.updateTechnicalStatus(invoiceId, {
-        technicalStatus: 'sent', // réel PDP, pas de suivi pour l'instant
-        submissionId: result.submissionId
-      });
-    }
+    const initialStatus = provider === 'mock' ? 'received' : 'sent';
+    await InvoiceStatusModel.updateTechnicalStatus(invoiceId, {
+      technicalStatus: initialStatus,
+      submissionId: result.submissionId
+    });
   }
 
   res.json({
@@ -214,7 +208,6 @@ const sendInvoice = asyncHandler(async (req, res) => {
     result
   });
 });
-
 
 const getInvoiceStatus = asyncHandler(async (req, res) => {
   const invoiceId = req.params.id;

@@ -1,27 +1,43 @@
-const { v4: uuidv4 } = require('uuid');
 const PDPInterface = require('../PDPInterface');
+const InvoiceStatusModel = require('../../invoices/invoiceStatus.model');
 const fs = require('fs');
 
 class MockPDPAdapter extends PDPInterface {
   constructor() {
     super();
-    this.technicalStatusByInvoice = {}; // stocke le statut technique par submissionId
+    this.technicalStatusByInvoice = {}; 
   }
 
   async sendInvoice({ filePath, invoiceLocalId }) {
     if (!fs.existsSync(filePath)) throw new Error('Fichier introuvable');
 
-    // Générer un submissionId factice pour le suivi
-    const submissionId = uuidv4();
-
-    // Initialiser le statut technique à SENT
-    this.technicalStatusByInvoice[submissionId] = 'SENT';
-
-    return {
-      type: 'INVOICE',
-      id: `mock-${invoiceLocalId}`,
-      submissionId
+    const submissionId = `mock_${invoiceLocalId}_${Date.now()}`;
+    // Statut initial uniquement
+    this.technicalStatusByInvoice[submissionId] = {
+      status: 'received',
+      createdAt: new Date(),
+      lifecycle: [{ code: 202, label: 'Créée', createdAt: new Date().toISOString() }],
     };
+
+    console.log(`[MockPDPAdapter] 📥 Facture ${invoiceLocalId} reçue. SubmissionId: ${submissionId}`);
+
+    // Changement final asynchrone
+  setTimeout(async () => {
+    const finalStatus = Math.random() < 0.8 ? 'validated' : 'rejected';
+    this.technicalStatusByInvoice[submissionId].status = finalStatus;
+
+    // Mise à jour DB pour refléter le statut final
+    await InvoiceStatusModel.updateTechnicalStatus(invoiceLocalId, {
+      technicalStatus: finalStatus,
+      submissionId
+    });
+
+    console.log(`[MockPDPAdapter] ⏳ Traitement terminé pour ${submissionId} → ${finalStatus.toUpperCase()}`);
+  }, 4000 + Math.random() * 3000);
+
+
+    // Retour immédiat avec received
+    return { status: 'received', submissionId };
   }
 
   async sendStatus(invoicePdpId, { code }) {

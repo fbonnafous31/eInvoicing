@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">62.68% </span>
+                <span class="strong">63.01% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>42/67</span>
+                <span class='fraction'>46/73</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">43.75% </span>
+                <span class="strong">47.05% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>14/32</span>
+                <span class='fraction'>16/34</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">69.49% </span>
+                <span class="strong">68.65% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>41/59</span>
+                <span class='fraction'>46/67</span>
             </div>
         
             
@@ -197,7 +197,17 @@
 <a name='L132'></a><a href='#L132'>132</a>
 <a name='L133'></a><a href='#L133'>133</a>
 <a name='L134'></a><a href='#L134'>134</a>
-<a name='L135'></a><a href='#L135'>135</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a>
+<a name='L141'></a><a href='#L141'>141</a>
+<a name='L142'></a><a href='#L142'>142</a>
+<a name='L143'></a><a href='#L143'>143</a>
+<a name='L144'></a><a href='#L144'>144</a>
+<a name='L145'></a><a href='#L145'>145</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -267,17 +277,25 @@
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -317,6 +335,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -399,19 +419,27 @@ router.post('/', upload.single('invoice'), <span class="fstat-no" title="functio
 // GET /invoices/:submissionId/status
 router.get('/:submissionId/status', (req, res) =&gt; {
   const sub = getSubmission(req.params.submissionId);
-  if (!sub) return res.status(404).json({ error: 'Submission non trouvée' });
+  if (!sub) {
+    console.warn(`[MOCK-PDP] Submission ${req.params.submissionId} non trouvée`);
+    return res.status(404).json({ error: 'Submission non trouvée' });
+  }
+&nbsp;
+  console.log(`[MOCK-PDP] Status check pour ${sub.invoiceId} / ${req.params.submissionId}: ${sub.technicalStatus}`);
   res.json({ invoiceId: sub.invoiceId, technicalStatus: sub.technicalStatus });
 });
 &nbsp;
 // POST /invoices/:submissionId/lifecycle/request
 router.post('/:submissionId/lifecycle/request', (req, res) =&gt; {
-  // 🔥 Simule une erreur critique serveur
-  // return res.status(500).json({ error: 'Erreur critique PDP simulée' });
-&nbsp;
   const sub = getSubmission(req.params.submissionId);
-  <span class="missing-if-branch" title="if path not taken" >I</span>if (!sub) <span class="cstat-no" title="statement not covered" >return res.status(404).json({ error: 'Submission non trouvée' });</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (!sub) {
+<span class="cstat-no" title="statement not covered" >    console.warn(`[MOCK-PDP] Lifecycle request: submission ${req.params.submissionId} non trouvée`);</span>
+<span class="cstat-no" title="statement not covered" >    return res.status(404).json({ error: 'Submission non trouvée' });</span>
+  }
+&nbsp;
+  console.log(`[MOCK-PDP] Lifecycle request pour ${sub.invoiceId}, status actuel: ${sub.technicalStatus}`);
 &nbsp;
   <span class="missing-if-branch" title="if path not taken" >I</span>if (sub.technicalStatus === 'rejected') {
+<span class="cstat-no" title="statement not covered" >    console.log(`[MOCK-PDP] Facture ${sub.invoiceId} déjà rejetée`);</span>
 <span class="cstat-no" title="statement not covered" >    return res.json({ invoiceId: sub.invoiceId, lifecycle: sub.lifecycle });</span>
   }
 &nbsp;
@@ -445,12 +473,14 @@ router.post('/:submissionId/lifecycle/request', (req, res) =&gt; {
         ? <span class="branch-0 cbranch-no" title="branch not covered" >commentsByStatus[candidate.code][Math.floor(Math.random() * commentsByStatus[candidate.code].length)]</span>
         : null;
       sub.lifecycle.push({ ...candidate, createdAt: new Date().toISOString(), comment });
-      console.log(`📊 Cycle métier avancé pour ${req.params.submissionId} : ${candidate.label} (${comment || 'aucun commentaire'})`);
+      console.log(`[MOCK-PDP] Cycle métier avancé pour ${req.params.submissionId} : ${candidate.label} (${comment || 'aucun commentaire'})`);
       break;
     }
   }
 &nbsp;
   const last = sub.lifecycle[sub.lifecycle.length - 1] || <span class="branch-1 cbranch-no" title="branch not covered" >{ code: lastCode, comment: null };</span>
+  console.log(`[MOCK-PDP] Nouveau statut métier pour ${sub.invoiceId}: ${last.code} (${last.comment || 'aucun commentaire'})`);
+&nbsp;
   res.json({ invoiceId: sub.invoiceId, businessStatus: last.code, comment: last.comment, lifecycle: sub.lifecycle });
 });
 &nbsp;
@@ -472,7 +502,7 @@ module.exports = router;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-07T15:40:48.327Z
+                at 2025-10-08T08:49:22.451Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
