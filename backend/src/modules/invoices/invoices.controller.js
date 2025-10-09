@@ -174,39 +174,61 @@ const getInvoices = asyncHandler(async (req, res) => {
     res.json(invoices);
 });
 
+// invoices.controller.js
 const sendInvoice = asyncHandler(async (req, res) => {
   const invoiceId = req.params.id;
   const invoice = await InvoicesService.getInvoiceById(invoiceId);
-  if (!invoice) return res.status(404).json({ error: 'Facture introuvable' });
+  if (!invoice) {
+    return res.status(404).json({ error: 'Facture introuvable' });
+  }
 
-  const finalPdfPath = path.join(__dirname, `../../uploads/pdf-a3/${invoiceId}_pdf-a3.pdf`);
-  if (!fs.existsSync(finalPdfPath)) {
-    return res.status(404).json({ 
-      error: `Le fichier PDF/A-3 final pour la facture ${invoiceId} est introuvable.` 
+  const finalXmlPath = path.join(__dirname, `../../uploads/factur-x/${invoiceId}-factur-x.xml`);
+  if (!fs.existsSync(finalXmlPath)) {
+    return res.status(404).json({
+      error: `Le fichier XML final pour la facture ${invoiceId} est introuvable.`,
     });
   }
 
   const provider = process.env.PDP_PROVIDER || 'mock';
   const pdp = new PDPService(provider);
 
-  const result = await pdp.sendInvoice({ invoiceLocalId: invoiceId, filePath: finalPdfPath });
+  try {
+    const result = await pdp.sendInvoice({ invoiceLocalId: invoiceId, filePath: finalXmlPath });
 
-  // Mise à jour DB avec statut initial seulement
-  if (result.submissionId) {
-    const initialStatus = provider === 'mock' ? 'received' : 'sent';
+    // ✅ Envoi réussi → statut validated
+    const submissionId = result?.id || result?.submissionId;
     await InvoiceStatusModel.updateTechnicalStatus(invoiceId, {
-      technicalStatus: initialStatus,
-      submissionId: result.submissionId
+      technicalStatus: 'validated',
+      submissionId,
+    });
+
+    console.log(`[IopoleAdapter] 🟢 Facture ${invoiceId} envoyée avec succès → submissionId: ${submissionId}`);
+
+    res.json({
+      success: true,
+      message: 'Facture envoyée avec succès au PDP',
+      invoiceId,
+      submissionId,
+      provider,
+      result,
+    });
+  } catch (error) {
+    console.error(`[IopoleAdapter] 🔴 Erreur envoi facture ${invoiceId}:`, error.message);
+
+    // ❌ Échec → statut rejected
+    await InvoiceStatusModel.updateTechnicalStatus(invoiceId, {
+      technicalStatus: 'rejected',
+      submissionId: null,
+    });
+
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de l’envoi au PDP',
+      invoiceId,
+      provider,
+      error,
     });
   }
-
-  res.json({
-    message: provider === 'mock'
-      ? 'Facture envoyée et suivie via mock'
-      : 'Facture envoyée mais le statut technique ne peut pas être suivi pour l’instant',
-    invoiceId,
-    result
-  });
 });
 
 const getInvoiceStatus = asyncHandler(async (req, res) => {

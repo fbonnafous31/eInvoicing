@@ -102,3 +102,6 @@
 - [📅 Jour 99 – Bilan Humain et Ressenti du Développeur Solo 🌱✨](jour-099.md)
 - [📅 Jour 100 – Perspectives et prochains axes pour eInvoicing 🔭✨](jour-100.md)
 - [🧭 Jour 101 – Continuer, même quand tout semble accompli ✨](jour-101.md)
+- [Jour 102 – PDP Mock & préparation des adapters 🚀🔌](jour-102.md)
+- [Jour 103 – Du mock côté serveur à l’adapter 🛠️✨](jour-103.md)
+- [Jour 104 – Migration Mock → Adapter 📦➡️🔌](jour-104.md)
