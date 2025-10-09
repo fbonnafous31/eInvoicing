@@ -7,7 +7,7 @@
     "build": "vite build",
     "lint": "eslint src --ext .js,.jsx",
     "preview": "vite preview",
-    "start:all": "concurrently -k -n \"BACKEND,FRONTEND,MOCK-PDP\" -c \"cyan,green,yellow\" \"cd ../backend && node server.js\" \"npm run dev\" \"cd ../backend && node mock-pdp/server.js\"",
+    "start:all": "concurrently -k -n \"BACKEND,FRONTEND\" -c \"cyan,green\" \"cd ../backend && node server.js\" \"npm run dev\"",
     "test": "vitest run",
     "test:dev": "vitest"
   },
