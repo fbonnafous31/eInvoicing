@@ -13,20 +13,20 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // POST /invoices/:id/send
-router.post('/:id/send', (req, res) => {
-  const invoiceId = req.params.id;
-  const submissionId = `mock-sub-${invoiceId}-${Date.now()}`;
+// router.post('/:id/send', (req, res) => {
+//   const invoiceId = req.params.id;
+//   const submissionId = `mock-sub-${invoiceId}-${Date.now()}`;
 
-  // Crée un mock de submission pour suivi
-  createSubmission(submissionId, {
-    invoiceId,
-    technicalStatus: 'received',
-    lifecycle: [{ code: 202, label: 'Créée', createdAt: new Date().toISOString() }],
-  });
+//   // Crée un mock de submission pour suivi
+//   createSubmission(submissionId, {
+//     invoiceId,
+//     technicalStatus: 'received',
+//     lifecycle: [{ code: 202, label: 'Créée', createdAt: new Date().toISOString() }],
+//   });
 
-  console.log(`[MOCK-PDP] Facture ${invoiceId} envoyée, submissionId: ${submissionId}`);
-  res.json({ message: 'Facture envoyée', invoiceId, submissionId });
-});
+//   console.log(`[MOCK-PDP] Facture ${invoiceId} envoyée, submissionId: ${submissionId}`);
+//   res.json({ message: 'Facture envoyée', invoiceId, submissionId });
+// });
 
 // POST /invoices : envoi facture
 // router.post('/', upload.single('invoice'), (req, res) => {
@@ -76,69 +76,69 @@ router.get('/:submissionId/status', (req, res) => {
 });
 
 // POST /invoices/:submissionId/lifecycle/request
-router.post('/:submissionId/lifecycle/request', (req, res) => {
-  const sub = getSubmission(req.params.submissionId);
-  if (!sub) {
-    console.warn(`[MOCK-PDP] Lifecycle request: submission ${req.params.submissionId} non trouvée`);
-    return res.status(404).json({ error: 'Submission non trouvée' });
-  }
+// router.post('/:submissionId/lifecycle/request', (req, res) => {
+//   const sub = getSubmission(req.params.submissionId);
+//   if (!sub) {
+//     console.warn(`[MOCK-PDP] Lifecycle request: submission ${req.params.submissionId} non trouvée`);
+//     return res.status(404).json({ error: 'Submission non trouvée' });
+//   }
 
-  console.log(`[MOCK-PDP] Lifecycle request pour ${sub.invoiceId}, status actuel: ${sub.technicalStatus}`);
+//   console.log(`[MOCK-PDP] Lifecycle request pour ${sub.invoiceId}, status actuel: ${sub.technicalStatus}`);
 
-  if (sub.technicalStatus === 'rejected') {
-    console.log(`[MOCK-PDP] Facture ${sub.invoiceId} déjà rejetée`);
-    return res.json({ invoiceId: sub.invoiceId, lifecycle: sub.lifecycle });
-  }
+//   if (sub.technicalStatus === 'rejected') {
+//     console.log(`[MOCK-PDP] Facture ${sub.invoiceId} déjà rejetée`);
+//     return res.json({ invoiceId: sub.invoiceId, lifecycle: sub.lifecycle });
+//   }
 
-  const lastStatus = sub.lifecycle[sub.lifecycle.length - 1];
-  const lastCode = lastStatus ? lastStatus.code : 202;
+//   const lastStatus = sub.lifecycle[sub.lifecycle.length - 1];
+//   const lastCode = lastStatus ? lastStatus.code : 202;
 
-  const possibleStatuses = [
-    { code: 203, label: 'Mise à disposition', probability: 1.0 },
-    { code: 204, label: 'Prise en charge', probability: 0.6 },
-    { code: 205, label: 'Approuvée', probability: 0.6 },
-    { code: 206, label: 'Approuvée partiellement', probability: 0.2 },
-    { code: 207, label: 'En litige', probability: 0.2 },
-    { code: 208, label: 'Suspendue', probability: 0.2 },
-    { code: 210, label: 'Refusée', probability: 0.1 },
-    { code: 211, label: 'Paiement transmis', probability: 1.0 },
-  ];
+//   const possibleStatuses = [
+//     { code: 203, label: 'Mise à disposition', probability: 1.0 },
+//     { code: 204, label: 'Prise en charge', probability: 0.6 },
+//     { code: 205, label: 'Approuvée', probability: 0.6 },
+//     { code: 206, label: 'Approuvée partiellement', probability: 0.2 },
+//     { code: 207, label: 'En litige', probability: 0.2 },
+//     { code: 208, label: 'Suspendue', probability: 0.2 },
+//     { code: 210, label: 'Refusée', probability: 0.1 },
+//     { code: 211, label: 'Paiement transmis', probability: 1.0 },
+//   ];
 
-  const statusesWithComment = [206, 207, 208, 210];
-  const commentsByStatus = {
-    206: ["Approbation partielle : montant inférieur à la facture", "Facture validée partiellement suite contrôle manuel"],
-    207: ["Litige : incohérence détectée sur le montant", "Litige client, vérification nécessaire"],
-    208: ["Facture suspendue pour vérification interne", "Suspension temporaire : documents manquants"],
-    210: ["Refusée : facture non conforme", "Refus PDP : erreur sur la référence client"]
-  };
+//   const statusesWithComment = [206, 207, 208, 210];
+//   const commentsByStatus = {
+//     206: ["Approbation partielle : montant inférieur à la facture", "Facture validée partiellement suite contrôle manuel"],
+//     207: ["Litige : incohérence détectée sur le montant", "Litige client, vérification nécessaire"],
+//     208: ["Facture suspendue pour vérification interne", "Suspension temporaire : documents manquants"],
+//     210: ["Refusée : facture non conforme", "Refus PDP : erreur sur la référence client"]
+//   };
 
-  for (const candidate of possibleStatuses) {
-    if (candidate.code <= lastCode) continue;
-    if (Math.random() <= candidate.probability) {
-      if (candidate.code === 211 && [208, 210].includes(lastStatus?.code)) continue;
-      const comment = statusesWithComment.includes(candidate.code)
-        ? commentsByStatus[candidate.code][Math.floor(Math.random() * commentsByStatus[candidate.code].length)]
-        : null;
-      sub.lifecycle.push({ ...candidate, createdAt: new Date().toISOString(), comment });
-      console.log(`[MOCK-PDP] Cycle métier avancé pour ${req.params.submissionId} : ${candidate.label} (${comment || 'aucun commentaire'})`);
-      break;
-    }
-  }
+//   for (const candidate of possibleStatuses) {
+//     if (candidate.code <= lastCode) continue;
+//     if (Math.random() <= candidate.probability) {
+//       if (candidate.code === 211 && [208, 210].includes(lastStatus?.code)) continue;
+//       const comment = statusesWithComment.includes(candidate.code)
+//         ? commentsByStatus[candidate.code][Math.floor(Math.random() * commentsByStatus[candidate.code].length)]
+//         : null;
+//       sub.lifecycle.push({ ...candidate, createdAt: new Date().toISOString(), comment });
+//       console.log(`[MOCK-PDP] Cycle métier avancé pour ${req.params.submissionId} : ${candidate.label} (${comment || 'aucun commentaire'})`);
+//       break;
+//     }
+//   }
 
-  const last = sub.lifecycle[sub.lifecycle.length - 1] || { code: lastCode, comment: null };
-  console.log(`[MOCK-PDP] Nouveau statut métier pour ${sub.invoiceId}: ${last.code} (${last.comment || 'aucun commentaire'})`);
+//   const last = sub.lifecycle[sub.lifecycle.length - 1] || { code: lastCode, comment: null };
+//   console.log(`[MOCK-PDP] Nouveau statut métier pour ${sub.invoiceId}: ${last.code} (${last.comment || 'aucun commentaire'})`);
 
-  res.json({ invoiceId: sub.invoiceId, businessStatus: last.code, comment: last.comment, lifecycle: sub.lifecycle });
-});
+//   res.json({ invoiceId: sub.invoiceId, businessStatus: last.code, comment: last.comment, lifecycle: sub.lifecycle });
+// });
 
 // GET /invoices/:submissionId/lifecycle
-router.get('/:submissionId/lifecycle', (req, res) => {
-  // 🔥 Simule une erreur critique serveur
-  // return res.status(500).json({ error: 'Erreur critique PDP simulée' });
+// router.get('/:submissionId/lifecycle', (req, res) => {
+//   // 🔥 Simule une erreur critique serveur
+//   // return res.status(500).json({ error: 'Erreur critique PDP simulée' });
 
-  const sub = getSubmission(req.params.submissionId);
-  if (!sub) return res.status(404).json({ error: 'Submission non trouvée' });
-  res.json({ invoiceId: sub.invoiceId, lifecycle: sub.lifecycle });
-});
+//   const sub = getSubmission(req.params.submissionId);
+//   if (!sub) return res.status(404).json({ error: 'Submission non trouvée' });
+//   res.json({ invoiceId: sub.invoiceId, lifecycle: sub.lifecycle });
+// });
 
 module.exports = router;

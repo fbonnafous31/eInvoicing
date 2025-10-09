@@ -271,28 +271,28 @@ const markInvoicePaid = asyncHandler(async (req, res) => {
   const invoiceId = req.params.id;
   const invoice = await InvoicesService.getInvoiceById(invoiceId);
   if (!invoice) {
-      const err = new Error('Facture introuvable');
-      err.statusCode = 404;
-      throw err;
+    const err = new Error('Facture introuvable');
+    err.statusCode = 404;
+    throw err;
   }
   if (!invoice.submission_id) {
-      const err = new Error('La facture n\'a pas encore été soumise au PDP');
-      err.statusCode = 400;
-      throw err;
+    const err = new Error('La facture n\'a pas encore été soumise au PDP');
+    err.statusCode = 400;
+    throw err;
   }
 
   const newStatus = { code: 212, label: 'Encaissement constaté' };
 
-  // 1. Notifier le PDP du nouvel état
-  try {
-    const pdpData = await InvoicePdpService.requestPdpStatusUpdate(
-      invoice.submission_id,
-      { status: newStatus.code, label: newStatus.label }
-    );
+  // 1️⃣ Notifier le PDP (mock ou réel)
+  const pdpProvider = process.env.PDP_PROVIDER || 'mock';
+  const pdp = new PDPService(pdpProvider);
 
-    if (!pdpData || pdpData.businessStatus !== 211) {
+  try {
+    const pdpResponse = await pdp.sendStatus(invoice.submission_id, { code: newStatus.code });
+
+    if (!pdpResponse?.success) {
       const error = new Error('La plateforme de facturation n’a pas accepté l’encaissement, réessayez plus tard');
-      error.statusCode = 502; // Bad Gateway
+      error.statusCode = 502;
       throw error;
     }
   } catch (err) {
@@ -301,11 +301,15 @@ const markInvoicePaid = asyncHandler(async (req, res) => {
       error.statusCode = 502;
       throw error;
     }
-    throw err; // Re-throw other errors
+    throw err;
   }
 
-  // 2. Mettre à jour le statut dans notre base de données
-  await InvoicePdpService.updateInvoiceLifecycle(invoiceId, [newStatus]);
+  // 2️⃣ Mettre à jour uniquement le statut business dans notre DB
+  await InvoiceStatusModel.updateBusinessStatus(invoiceId, {
+    statusCode: newStatus.code,
+    statusLabel: newStatus.label
+  });
+
   res.json({ message: 'Facture encaissée', invoiceId, newStatus });
 });
 

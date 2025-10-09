@@ -43,20 +43,6 @@ class PDPInterface {
   async sendStatus(invoicePdpId, payload) {
     throw new Error('sendStatus() must be implemented');
   }
-
-  /**
-   * Récupère l’historique des statuts d’une facture
-   * @param {string} invoicePdpId - ID de la facture attribué par la PDP
-   * @returns {Promise<Array<{ code: string, label?: string, date: string }>>}
-   * Exemple de retour :
-   * [
-   *   { code: "received", label: "Facture reçue", date: "2025-10-07T12:32:00Z" },
-   *   { code: "validated", label: "Facture validée", date: "2025-10-07T14:10:00Z" }
-   * ]
-   */
-  async fetchStatusHistory(invoicePdpId) {
-    throw new Error('fetchStatusHistory() must be implemented');
-  }
 }
 
 module.exports = PDPInterface;
