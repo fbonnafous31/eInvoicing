@@ -24,6 +24,10 @@ class PDPService {
     return this.adapter.sendInvoice(payload);
   }
 
+  async fetchStatus(submissionId) {
+    return this.adapter.fetchStatus(submissionId);
+  }
+  
   async sendStatus(invoicePdpId, payload) {
     return this.adapter.sendStatus(invoicePdpId, payload);
   }

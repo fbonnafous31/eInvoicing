@@ -20,6 +20,18 @@ class PDPInterface {
   }
 
   /**
+   * Récupère le statut courant d’une facture sur le PDP
+   * @param {string} invoicePdpId - ID de la facture attribué par la PDP
+   * @returns {Promise<{ code: string, label?: string, date: string } | null>}
+   */
+  async fetchStatus(invoicePdpId) {
+    // Utilise l’historique complet par défaut
+    const history = await this.fetchStatusHistory(invoicePdpId);
+    if (!Array.isArray(history) || history.length === 0) return null;
+    return history[history.length - 1];
+  }
+
+  /**
    * Envoie un statut de facture à la PDP (ex: PAYÉ)
    * @param {string} invoicePdpId - ID de la facture attribué par la PDP
    * @param {Object} payload

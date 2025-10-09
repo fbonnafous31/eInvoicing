@@ -29,39 +29,39 @@ router.post('/:id/send', (req, res) => {
 });
 
 // POST /invoices : envoi facture
-router.post('/', upload.single('invoice'), (req, res) => {
-  // 🔥 Simule une erreur critique serveur
-  // return res.status(500).json({ error: 'Erreur critique PDP simulée' });
+// router.post('/', upload.single('invoice'), (req, res) => {
+//   // 🔥 Simule une erreur critique serveur
+//   // return res.status(500).json({ error: 'Erreur critique PDP simulée' });
   
-  if (!req.file) return res.status(400).json({ error: 'Fichier manquant' });
+//   if (!req.file) return res.status(400).json({ error: 'Fichier manquant' });
 
-  let metadata = null;
-  if (req.body.metadata) {
-    try { metadata = JSON.parse(req.body.metadata); } 
-    catch { console.warn("⚠️ Metadata non parsable :", req.body.metadata); }
-  }
+//   let metadata = null;
+//   if (req.body.metadata) {
+//     try { metadata = JSON.parse(req.body.metadata); } 
+//     catch { console.warn("⚠️ Metadata non parsable :", req.body.metadata); }
+//   }
 
-  const invoiceId = req.file.originalname.split('-')[0];
-  const submissionId = `sub_${invoiceId}_${Date.now()}`;
+//   const invoiceId = req.file.originalname.split('-')[0];
+//   const submissionId = `sub_${invoiceId}_${Date.now()}`;
 
-  createSubmission(submissionId, {
-    invoiceId,
-    technicalStatus: 'received',
-    lifecycle: [{ code: 202, label: 'Créée', createdAt: new Date().toISOString() }],
-    metadata
-  });
+//   createSubmission(submissionId, {
+//     invoiceId,
+//     technicalStatus: 'received',
+//     lifecycle: [{ code: 202, label: 'Créée', createdAt: new Date().toISOString() }],
+//     metadata
+//   });
 
-  console.log(`📥 Facture reçue : ${req.file.originalname}, submissionId: ${submissionId}`);
-  if (metadata) console.log("📌 Metadata reçue :", metadata);
+//   console.log(`📥 Facture reçue : ${req.file.originalname}, submissionId: ${submissionId}`);
+//   if (metadata) console.log("📌 Metadata reçue :", metadata);
 
-  setTimeout(() => {
-    const finalStatus = Math.random() < 0.8 ? 'validated' : 'rejected';
-    updateSubmission(submissionId, { technicalStatus: finalStatus });
-    console.log(`✅ Facture ${invoiceId} traitement terminé : ${finalStatus}`);
-  }, 5000 + Math.random() * 5000);
+//   setTimeout(() => {
+//     const finalStatus = Math.random() < 0.8 ? 'validated' : 'rejected';
+//     updateSubmission(submissionId, { technicalStatus: finalStatus });
+//     console.log(`✅ Facture ${invoiceId} traitement terminé : ${finalStatus}`);
+//   }, 5000 + Math.random() * 5000);
 
-  res.json({ status: 'received', submissionId });
-});
+//   res.json({ status: 'received', submissionId });
+// });
 
 // GET /invoices/:submissionId/status
 router.get('/:submissionId/status', (req, res) => {

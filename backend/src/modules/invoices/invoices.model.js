@@ -74,7 +74,7 @@ async function getInvoiceById(id) {
     taxes: taxesResult.rows,
     attachments: attachmentsResult.rows,
     client: clientResult.rows[0] || null,
-    seller // Utilise le seller récupéré via Promise.all
+    seller 
   };
 }
 

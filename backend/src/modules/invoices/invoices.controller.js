@@ -1,6 +1,7 @@
 const fs = require('fs');
 const InvoicesService = require('./invoices.service');
 const InvoicePdpService = require('./invoicePdp.service');
+const PDPService = require('../pdp/PDPService');
 const { getInvoiceById } = require('./invoices.model');
 const { generateInvoicePdf, generateInvoicePdfBuffer: generatePdfUtil } = require('../../utils/invoice-pdf/generateInvoicePdf');
 const InvoiceStatusModel = require('../invoices/invoiceStatus.model');
@@ -185,7 +186,6 @@ const sendInvoice = asyncHandler(async (req, res) => {
     });
   }
 
-  const PDPService = require('../pdp/PDPService');
   const provider = process.env.PDP_PROVIDER || 'mock';
   const pdp = new PDPService(provider);
 
@@ -211,33 +211,43 @@ const sendInvoice = asyncHandler(async (req, res) => {
 
 const getInvoiceStatus = asyncHandler(async (req, res) => {
   const invoiceId = req.params.id;
-  console.log(`[getInvoiceStatus] Récupération statut pour facture ${invoiceId}`);
-
   const invoice = await InvoicesService.getInvoiceById(invoiceId);
+
   if (!invoice) {
-    console.warn(`[getInvoiceStatus] Facture ${invoiceId} introuvable`);
     return res.status(404).json({ message: 'Facture introuvable' });
   }
 
-  console.log(`[getInvoiceStatus] Statut technique en DB pour ${invoiceId}: ${invoice.technical_status}`);
-  res.json({ technicalStatus: invoice.technical_status || 'pending' });
+  const provider = process.env.PDP_PROVIDER || 'mock';
+  const pdp = new PDPService(provider);
+
+  // récupère le statut courant depuis le PDP
+  const pdpStatus = await pdp.fetchStatus(invoice.submission_id); 
+  res.json({
+    technicalStatus: invoice.technical_status || 'pending',
+    pdpStatus: pdpStatus || null
+  });
 });
 
 const refreshInvoiceStatus = asyncHandler(async (req, res) => {
+  console.log(`[refreshInvoiceStatus] invoiceId=${req.params.id}`);
+
   const invoiceId = req.params.id;
   const invoice = await InvoicesService.getInvoiceById(invoiceId);
+
   if (!invoice) return res.status(404).json({ message: 'Facture introuvable' });
   if (!invoice.submission_id) return res.status(400).json({ message: 'Facture non encore envoyée au PDP' });
 
-  const pdpResponse = await InvoicePdpService.requestPdpStatusUpdate(invoice.submission_id);
-  const lifecycle = pdpResponse.lifecycle || [];
-  const updatedInvoice = await InvoicePdpService.updateInvoiceLifecycle(invoiceId, lifecycle);
+  const provider = process.env.PDP_PROVIDER || 'mock';
+  const pdp = new PDPService(provider);
+
+  // Récupère le dernier statut depuis l’adapter (mock ou réel)
+  console.log('[refreshInvoiceStatus] Appel PDPService.fetchStatus pour', invoice.submission_id);
+  const lastStatus = await pdp.fetchStatus(invoice.submission_id);
 
   res.json({
     invoiceId,
-    lastStatus: lifecycle.length > 0 ? lifecycle[lifecycle.length - 1] : null,
-    lifecycle,
-    updatedInvoice
+    lastStatus,
+    technicalStatus: invoice.technical_status,
   });
 });
 

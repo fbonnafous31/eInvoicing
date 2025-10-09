@@ -6,6 +6,7 @@ const InvoicesModel = require('./invoices.model');
 const InvoiceStatusModel = require('./invoiceStatus.model');
 const SellersModel = require('../sellers/sellers.service');
 const ClientsModel = require('../clients/clients.service');
+const PDPService = require('../pdp/PDPService');
 
 const PDP_URL = process.env.PDP_BASE_URL || 'http://localhost:4000/invoices';
 const POLLING_INTERVAL = 2000; // 2 secondes
@@ -199,13 +200,16 @@ async function updateInvoiceLifecycle(invoiceId, lifecycle) {
 }
 
 /**
- * Récupère l'historique du cycle de vie depuis le PDP.
- * @param {string} submissionId - L'ID de soumission au PDP.
- * @returns {Promise<Array>} Le tableau du cycle de vie.
+ * Récupère l'historique du cycle de vie depuis le PDP (mock ou réel)
+ * @param {string} submissionId
+ * @returns {Promise<Array>} Le tableau du cycle de vie
  */
 async function getPdpLifecycle(submissionId) {
-  const response = await axios.get(`${PDP_URL}/${submissionId}/lifecycle`);
-  return response.data.lifecycle;
+  const provider = process.env.PDP_PROVIDER || 'mock';
+  const pdp = new PDPService(provider);
+
+  // appelle l'adapter pour récupérer le cycle de vie
+  return pdp.fetchStatus(submissionId);
 }
 
 /**
