@@ -81,11 +81,13 @@ function generateFacturXXML(invoice) {
   // ApplicableHeaderTradeAgreement
   const agreement = transaction.ele('ram:ApplicableHeaderTradeAgreement');
 
-  // SellerTradeParty (ordre respecté : Name → SpecifiedLegalOrganization → PostalTradeAddress)
+  // SellerTradeParty (ordre respecté : Name → SpecifiedLegalOrganization → PostalTradeAddress)  
   const sellerParty = agreement.ele('ram:SellerTradeParty');
+  const schemeId = process.env.PDP_PROVIDER === 'iopole' ? '0009' : '0007'
+
   sellerParty.ele('ram:Name').txt(seller.legal_name).up();
   sellerParty.ele('ram:SpecifiedLegalOrganization')
-      .ele('ram:ID', { schemeID: '0002' }).txt(seller.legal_identifier).up()
+      .ele('ram:ID', { schemeID: schemeId }).txt(seller.legal_identifier).up()
     .up();
   sellerParty.ele('ram:PostalTradeAddress')
       .ele('ram:PostcodeCode').txt(seller.postal_code.trim()).up()

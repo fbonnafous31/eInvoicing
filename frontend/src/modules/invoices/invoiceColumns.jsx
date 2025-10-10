@@ -128,107 +128,117 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
 
         return (
           <div className="flex gap-1 justify-end">
-{/* Bouton envoi facture */}
-<button
-  className="btn btn-sm"
-  style={{
-    background: "transparent",
-    border: "none",
-    padding: "2px 6px",
-    cursor: canSend ? "pointer" : "not-allowed",
-    opacity: canSend ? 1 : 0.5,
-  }}
-  title={canSend ? "Envoyer la facture" : "Action impossible : statut non valide"}
-  disabled={!canSend}
-  onClick={async () => {
-    if (!row?.id || !canSend) return;
-
-    try {
-      console.log("📤 [Envoyer] Début envoi facture id:", row.id);
-
-      // 1️⃣ Envoi de la facture au PDP
-      const res = await invoiceService.sendInvoice(row.id);
-      const submissionId = res.result?.submissionId;
-      
-      if (!submissionId) {
-        console.warn(`[Envoyer] Facture ${row.id} envoyée mais pas de submissionId pour suivi`);
-        alert("Facture envoyée mais le statut technique ne peut pas être suivi pour l'instant.");
-        return;
-      }
-      console.log(`[Envoyer] Facture ${row.id} envoyée, submissionId:`, res.submissionId);
-      alert("Facture transmise à la plateforme de facturation.");
-
-      // 2️⃣ Polling du statut technique jusqu'au statut final
-      console.log(`[Envoyer] Démarrage polling statut technique pour invoice ${row.id}`);
-      const finalStatus = await pollStatus(row.id);
-      console.log(`[Envoyer] Statut technique final pour invoice ${row.id}:`, finalStatus.technicalStatus);
-      onTechnicalStatusChange?.(row.id, finalStatus.technicalStatus);
-
-      // 3️⃣ Récupération du statut métier **depuis la DB**, pas le PDP
-      const updatedInvoice = await invoiceService.fetchInvoice(row.id);
-      if (updatedInvoice) {
-        onBusinessStatusChange?.(
-          row.id,
-          updatedInvoice.business_status,
-          updatedInvoice.business_status_label
-        );
-        console.log(`[Envoyer] Ligne mise à jour pour invoice ${row.id} avec statut DB:`, updatedInvoice.business_status);
-      } else {
-        console.warn(`[Envoyer] Impossible de récupérer la facture ${row.id} depuis la DB`);
-      }
-    } catch (err) {
-      console.error("❌ [Envoyer] Erreur envoi / polling / refresh :", err);
-      alert("Impossible de communiquer avec le serveur de facturation, réessayez plus tard.");
-    }
-  }}
->
-  📧
-</button>
-            
-            {/* Bouton rafraîchissement cycle métier */}
+            {/* Bouton envoi facture */}
             <button
               className="btn btn-sm"
-              title={
-                !canRefresh
-                  ? row.business_status === "212"
-                    ? "Facture déjà encaissée"
-                    : "Impossible de rafraîchir : statut PDP non reçu ou validé"
-                  : "Rafraîchir le cycle de vie métier"
-              }
               style={{
-                pointerEvents: canRefresh ? "auto" : "none",
+                background: "transparent",
                 border: "none",
-                opacity: canRefresh ? 1 : 0.5,
+                padding: "2px 6px",
+                cursor: canSend ? "pointer" : "not-allowed",
+                opacity: canSend ? 1 : 0.5,
               }}
-              disabled={isFinalStatus || !canRefresh}
+              title={canSend ? "Envoyer la facture" : "Action impossible : statut non valide"}
+              disabled={!canSend}
               onClick={async () => {
-                if (!row?.id) return;
+                if (!row?.id || !canSend) return;
 
                 try {
-                  // 1️⃣ On demande au backend de rafraîchir le cycle PDP si nécessaire
-                  await invoiceService.refreshInvoiceLifecycle(row.id, row.submission_id);
+                  console.log("📤 [Envoyer] Début envoi facture id:", row.id);
 
-                  // 2️⃣ On récupère la facture complète depuis la DB
-                  const invoice = await invoiceService.fetchInvoice(row.id);
-                  if (!invoice) return;
-
-                  // ⚡ Met à jour le cycle métier
-                  const lifecycle = Array.isArray(invoice.lifecycle) ? invoice.lifecycle : [];
-                  if (lifecycle.length > 0) {
-                    const lastStatusRaw = lifecycle[lifecycle.length - 1];
-                    onBusinessStatusChange?.(row.id, lastStatusRaw.code, lastStatusRaw.label);
+                  // 1️⃣ Envoi de la facture au PDP
+                  const res = await invoiceService.sendInvoice(row.id);
+                  const submissionId = res.result?.submissionId;
+                  
+                  if (!submissionId) {
+                    console.warn(`[Envoyer] Facture ${row.id} envoyée mais pas de submissionId pour suivi`);
+                    alert("Facture envoyée mais le statut technique ne peut pas être suivi pour l'instant.");
+                    return;
                   }
+                  console.log(`[Envoyer] Facture ${row.id} envoyée, submissionId:`, res.submissionId);
+                  alert("Facture transmise à la plateforme de facturation.");
 
-                  // ⚡ Met à jour le statut principal / technique pour le front (activation boutons)
-                  onInvoiceUpdate?.(invoice); // <-- callback à définir dans ton state pour mettre à jour la ligne
+                  // 2️⃣ Polling du statut technique jusqu'au statut final
+                  console.log(`[Envoyer] Démarrage polling statut technique pour invoice ${row.id}`);
+                  const finalStatus = await pollStatus(row.id);
+                  console.log(`[Envoyer] Statut technique final pour invoice ${row.id}:`, finalStatus.technicalStatus);
+                  onTechnicalStatusChange?.(row.id, finalStatus.technicalStatus);
+
+                  // 3️⃣ Récupération du statut métier **depuis la DB**, pas le PDP
+                  const updatedInvoice = await invoiceService.fetchInvoice(row.id);
+                  if (updatedInvoice) {
+                    onBusinessStatusChange?.(
+                      row.id,
+                      updatedInvoice.business_status,
+                      updatedInvoice.business_status_label
+                    );
+                    console.log(`[Envoyer] Ligne mise à jour pour invoice ${row.id} avec statut DB:`, updatedInvoice.business_status);
+                  } else {
+                    console.warn(`[Envoyer] Impossible de récupérer la facture ${row.id} depuis la DB`);
+                  }
                 } catch (err) {
-                  console.error("❌ Erreur rafraîchissement cycle métier :", err);
+                  console.error("❌ [Envoyer] Erreur envoi / polling / refresh :", err);
                   alert("Impossible de communiquer avec le serveur de facturation, réessayez plus tard.");
                 }
               }}
             >
-              🔄
+              📧
             </button>
+            
+{/* Bouton rafraîchissement cycle métier */}
+<button
+  className="btn btn-sm"
+  title={
+    !canRefresh
+      ? row.business_status === "212"
+        ? "Facture déjà encaissée"
+        : "Impossible de rafraîchir : statut PDP non reçu ou validé"
+      : "Rafraîchir le cycle de vie métier"
+  }
+  style={{
+    pointerEvents: canRefresh ? "auto" : "none",
+    border: "none",
+    opacity: canRefresh ? 1 : 0.5,
+  }}
+  disabled={isFinalStatus || !canRefresh}
+  onClick={async () => {
+    if (!row?.id) return;
+
+    try {
+      // 1️⃣ On demande au backend de rafraîchir le cycle PDP et on récupère le statut
+      const status = await invoiceService.refreshInvoiceLifecycle(row.id, row.submission_id);
+      console.log(`🔄 [Rafraîchir] Statut rafraîchi pour invoice ${row.id}:`, status);
+
+      // 🔹 Récupération du message de rejet, s’il existe
+      const rejectionMessage = status.lastStatus?.[0]?.rejectionMessage;
+
+      if (rejectionMessage) {
+        // ⚡ Affichage à l'utilisateur avec indication de la source
+        alert(`⚠️ Message reçu de la plateforme PDP : ${rejectionMessage}`);
+      }
+
+      // 2️⃣ On récupère la facture complète depuis la DB
+      const invoice = await invoiceService.fetchInvoice(row.id);
+      if (!invoice) return;
+
+      // ⚡ Met à jour le cycle métier
+      const lifecycle = Array.isArray(invoice.lifecycle) ? invoice.lifecycle : [];
+      if (lifecycle.length > 0) {
+        const lastStatusRaw = lifecycle[lifecycle.length - 1];
+        onBusinessStatusChange?.(row.id, lastStatusRaw.code, lastStatusRaw.label);
+      }
+
+      // ⚡ Met à jour le statut principal / technique pour le front (activation boutons)
+      onInvoiceUpdate?.(invoice);
+    } catch (err) {
+      console.error("❌ Erreur rafraîchissement cycle métier :", err);
+      setStatusMessage("Impossible de communiquer avec le serveur de facturation, réessayez plus tard.");
+    }
+  }}
+>
+  🔄
+</button>
+
 
             {/* Bouton encaissement */}
             <button

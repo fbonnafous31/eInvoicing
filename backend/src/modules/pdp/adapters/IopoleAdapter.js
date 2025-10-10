@@ -137,25 +137,41 @@ export default class IopoleAdapter extends PDPInterface {
     /** 🔍 Récupère l'historique des statuts d’une facture */
     async fetchStatus(invoiceId) {
         const token = await this._getAccessToken();
+        console.log(`[IopoleAdapter] 🔍 Demande des statuts pour la facture PDP ${invoiceId}...`);
 
         try {
             const response = await this.client.get(`/v1/invoice/${invoiceId}/status-history`, {
-                headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${token}` },
             });
 
-            // Retourne l'historique tel quel ou le transforme si besoin
-            return response.data.map(entry => ({
-                statusId: entry.statusId,
-                date: entry.date,
-                destType: entry.destType,
-                code: entry.status?.code || null,
-                networkCode: entry.status?.networkCode || null,
-                invoiceId: entry.invoiceId,
-                xml: entry.xml,
-                json: entry.json,
+            const statuses = response.data.map(entry => ({
+            statusId: entry.statusId,
+            date: entry.date,
+            destType: entry.destType,
+            code: entry.status?.code || null,
+            networkCode: entry.status?.networkCode || null,
+            invoiceId: entry.invoiceId,
+            xml: entry.xml,
+            json: entry.json,
+            rejectionReason: entry.json?.responses?.[0]?.rejectionDetail?.reason || null,
+            rejectionMessage: entry.json?.responses?.[0]?.rejectionDetail?.message || null,
             }));
+
+            console.log(`[IopoleAdapter] ✅ ${statuses.length} statut(s) récupéré(s) pour ${invoiceId}`);
+            statuses.forEach(s => {
+            const extra =
+                s.code === 'REJECTED' && s.rejectionMessage
+                ? ` ⚠️ ${s.rejectionReason}: ${s.rejectionMessage}`
+                : '';
+            console.log(
+                `   → ${s.date} | ${s.code || 'N/A'} (${s.networkCode || '-'}) via ${s.destType}${extra}`
+            );
+            });
+
+            return statuses;
         } catch (err) {
-            console.error('[IopoleAdapter] fetchStatus error:', err.message);
+            console.error(`[IopoleAdapter] ❌ Erreur lors de la récupération des statuts pour ${invoiceId}`);
+            console.error(`[IopoleAdapter] → ${err.message}`);
             throw this._normalizeError(err);
         }
     }
