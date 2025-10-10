@@ -49,18 +49,6 @@ services:
       - AUTH0_CLIENT_ID=
       - AUTH0_AUDIENCE=
 
-  mock-pdp:
-    image: node:20-alpine
-    container_name: einvoicing-mock-pdp
-    working_dir: /app
-    volumes:
-      - ./mock-pdp:/app
-    command: sh -c "npm install && npm start"
-    ports:
-      - "4000:4000"
-    networks:
-      - einvoicing-net
-      
 networks:
   einvoicing-net:
 

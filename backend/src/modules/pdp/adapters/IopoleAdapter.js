@@ -102,20 +102,28 @@ export default class IopoleAdapter extends PDPInterface {
     /** 📥 Envoie un statut de facture (ex: PAYÉ) */
     async sendStatus(invoicePdpId, payload) {
         const token = await this._getAccessToken();
-        try {
-        const response = await this.client.post(
-            `/invoices/${invoicePdpId}/status`,
-            payload,
-            { headers: { Authorization: `Bearer ${token}` } }
-        );
 
-        return {
-            success: true,
-            message: response.data?.message || null,
-        };
+        console.log(`[IopoleAdapter] Envoi du statut pour invoice ${invoicePdpId}:`, payload);
+
+        try {
+            const response = await this.client.post(
+                `/v1/invoice/${invoicePdpId}/status`,
+                payload,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            console.log(`[IopoleAdapter] Réponse PDP pour invoice ${invoicePdpId}:`, response.data);
+
+            return {
+                success: true,
+                message: response.data?.message || null,
+            };
         } catch (error) {
-        console.error('[IopoleAdapter] sendStatus error:', error.message);
-        throw this._normalizeError(error);
+            console.error('[IopoleAdapter] sendStatus error:', error.message);
+            if (error.response) {
+                console.error('[IopoleAdapter] Détails de la réponse PDP:', error.response.data);
+            }
+            throw this._normalizeError(error);
         }
     }
 

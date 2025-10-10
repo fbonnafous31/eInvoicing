@@ -185,60 +185,59 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
               📧
             </button>
             
-{/* Bouton rafraîchissement cycle métier */}
-<button
-  className="btn btn-sm"
-  title={
-    !canRefresh
-      ? row.business_status === "212"
-        ? "Facture déjà encaissée"
-        : "Impossible de rafraîchir : statut PDP non reçu ou validé"
-      : "Rafraîchir le cycle de vie métier"
-  }
-  style={{
-    pointerEvents: canRefresh ? "auto" : "none",
-    border: "none",
-    opacity: canRefresh ? 1 : 0.5,
-  }}
-  disabled={isFinalStatus || !canRefresh}
-  onClick={async () => {
-    if (!row?.id) return;
+            {/* Bouton rafraîchissement cycle métier */}
+            <button
+              className="btn btn-sm"
+              title={
+                !canRefresh
+                  ? row.business_status === "212"
+                    ? "Facture déjà encaissée"
+                    : "Impossible de rafraîchir : statut PDP non reçu ou validé"
+                  : "Rafraîchir le cycle de vie métier"
+              }
+              style={{
+                pointerEvents: canRefresh ? "auto" : "none",
+                border: "none",
+                opacity: canRefresh ? 1 : 0.5,
+              }}
+              disabled={isFinalStatus || !canRefresh}
+              onClick={async () => {
+                if (!row?.id) return;
 
-    try {
-      // 1️⃣ On demande au backend de rafraîchir le cycle PDP et on récupère le statut
-      const status = await invoiceService.refreshInvoiceLifecycle(row.id, row.submission_id);
-      console.log(`🔄 [Rafraîchir] Statut rafraîchi pour invoice ${row.id}:`, status);
+                try {
+                  // 1️⃣ On demande au backend de rafraîchir le cycle PDP et on récupère le statut
+                  const status = await invoiceService.refreshInvoiceLifecycle(row.id, row.submission_id);
+                  console.log(`🔄 [Rafraîchir] Statut rafraîchi pour invoice ${row.id}:`, status);
 
-      // 🔹 Récupération du message de rejet, s’il existe
-      const rejectionMessage = status.lastStatus?.[0]?.rejectionMessage;
+                  // 🔹 Récupération du message de rejet, s’il existe
+                  const rejectionMessage = status.lastStatus?.[0]?.rejectionMessage;
 
-      if (rejectionMessage) {
-        // ⚡ Affichage à l'utilisateur avec indication de la source
-        alert(`⚠️ Message reçu de la plateforme PDP : ${rejectionMessage}`);
-      }
+                  if (rejectionMessage) {
+                    // ⚡ Affichage à l'utilisateur avec indication de la source
+                    alert(`⚠️ Message reçu de la plateforme PDP : ${rejectionMessage}`);
+                  }
 
-      // 2️⃣ On récupère la facture complète depuis la DB
-      const invoice = await invoiceService.fetchInvoice(row.id);
-      if (!invoice) return;
+                  // 2️⃣ On récupère la facture complète depuis la DB
+                  const invoice = await invoiceService.fetchInvoice(row.id);
+                  if (!invoice) return;
 
-      // ⚡ Met à jour le cycle métier
-      const lifecycle = Array.isArray(invoice.lifecycle) ? invoice.lifecycle : [];
-      if (lifecycle.length > 0) {
-        const lastStatusRaw = lifecycle[lifecycle.length - 1];
-        onBusinessStatusChange?.(row.id, lastStatusRaw.code, lastStatusRaw.label);
-      }
+                  // ⚡ Met à jour le cycle métier
+                  const lifecycle = Array.isArray(invoice.lifecycle) ? invoice.lifecycle : [];
+                  if (lifecycle.length > 0) {
+                    const lastStatusRaw = lifecycle[lifecycle.length - 1];
+                    onBusinessStatusChange?.(row.id, lastStatusRaw.code, lastStatusRaw.label);
+                  }
 
-      // ⚡ Met à jour le statut principal / technique pour le front (activation boutons)
-      onInvoiceUpdate?.(invoice);
-    } catch (err) {
-      console.error("❌ Erreur rafraîchissement cycle métier :", err);
-      setStatusMessage("Impossible de communiquer avec le serveur de facturation, réessayez plus tard.");
-    }
-  }}
->
-  🔄
-</button>
-
+                  // ⚡ Met à jour le statut principal / technique pour le front (activation boutons)
+                  onInvoiceUpdate?.(invoice);
+                } catch (err) {
+                  console.error("❌ Erreur rafraîchissement cycle métier :", err);
+                  setStatusMessage("Impossible de communiquer avec le serveur de facturation, réessayez plus tard.");
+                }
+              }}
+            >
+              🔄
+            </button>
 
             {/* Bouton encaissement */}
             <button

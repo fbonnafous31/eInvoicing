@@ -292,13 +292,15 @@ const getInvoiceLifecycle = asyncHandler(async (req, res) => {
 const markInvoicePaid = asyncHandler(async (req, res) => {
   const invoiceId = req.params.id;
   const invoice = await InvoicesService.getInvoiceById(invoiceId);
+
   if (!invoice) {
     const err = new Error('Facture introuvable');
     err.statusCode = 404;
     throw err;
   }
+
   if (!invoice.submission_id) {
-    const err = new Error('La facture n\'a pas encore été soumise au PDP');
+    const err = new Error("La facture n'a pas encore été soumise au PDP");
     err.statusCode = 400;
     throw err;
   }
@@ -309,8 +311,14 @@ const markInvoicePaid = asyncHandler(async (req, res) => {
   const pdpProvider = process.env.PDP_PROVIDER || 'mock';
   const pdp = new PDPService(pdpProvider);
 
+  // Mapper le code interne vers le code attendu par le PDP
+  const pdpPayload = {
+    code: 'PAYMENT_RECEIVED', 
+    message: 'Facture encaissée',
+  };
+
   try {
-    const pdpResponse = await pdp.sendStatus(invoice.submission_id, { code: newStatus.code });
+    const pdpResponse = await pdp.sendStatus(invoice.submission_id, pdpPayload);
 
     if (!pdpResponse?.success) {
       const error = new Error('La plateforme de facturation n’a pas accepté l’encaissement, réessayez plus tard');
@@ -329,7 +337,7 @@ const markInvoicePaid = asyncHandler(async (req, res) => {
   // 2️⃣ Mettre à jour uniquement le statut business dans notre DB
   await InvoiceStatusModel.updateBusinessStatus(invoiceId, {
     statusCode: newStatus.code,
-    statusLabel: newStatus.label
+    statusLabel: newStatus.label,
   });
 
   res.json({ message: 'Facture encaissée', invoiceId, newStatus });
