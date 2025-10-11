@@ -1,7 +1,7 @@
 // pdp/PDPService.js
 const PDPInterface = require('./PDPInterface');
-const IopoleAdapter = require('./adapters/IopoleAdapter').default;
-const MockPDPAdapter = require('./adapters/MockPDPAdapter').default;
+const IopoleAdapter = require('./adapters/IopoleAdapter');
+const MockPDPAdapter = require('./adapters/MockPDPAdapter');
 
 class PDPService {
   constructor() {
