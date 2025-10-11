@@ -1,13 +1,17 @@
 Aller jusqu’au bout du projet ⚙️
 
+Après les premières lignes de code, le vrai défi a été de transformer cette application en un produit fiable et utilisable. ⚙️
+
 Ce projet m’a fait découvrir tout ce qui va au-delà du développement : fiabilité, conformité, sécurité, et la manière dont un logiciel doit fonctionner pour être vraiment utile.
 
-Pour que le produit puisse être utilisé et montré en toute sécurité, j’ai progressivement mis en place :
-🗸 une stratégie de tests complète ✅ pour garantir que tout fonctionne correctement
-🗸 des processus automatisés ⚙️ pour simplifier les mises à jour
-🗸 un environnement de staging 🌱 pour présenter le produit tout en respectant le RGPD
-🗸 une pipeline CI/CD 🚀 pour déployer facilement et de manière reproductible
-🗸 des outils pour suivre la santé du système et détecter les problèmes 📊
+Pour que le produit puisse être testé et présenté en toute sécurité, j’ai progressivement mis en place :
+🗸 Une stratégie de tests complète ✅ pour garantir que tout fonctionne correctement
+🗸 Des processus automatisés ⚙️ pour simplifier les mises à jour
+🗸 Un environnement de démonstration 🌱 accessible à tous : einvoicing-staging-frontend.onrender.com
+(login : francois.bonnafous@hotmail.fr / mot de passe : eInvoice2026)
+🗸 Une connexion à un PDP réel (sandbox Iopole) pour émettre et recevoir des factures
+🗸 Une pipeline CI/CD 🚀 pour déployer facilement et de manière reproductible
+🗸 Des outils de monitoring 📊 pour suivre la santé du système et détecter les problèmes
 
 Chaque étape a été une leçon sur la rigueur et la cohérence, et m’a fait mieux comprendre ce qui fait qu’un logiciel est fiable et prêt à être utilisé, pas seulement développé.
 

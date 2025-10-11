@@ -67,6 +67,7 @@
   - utilisation de ChatGPT comme collaborateur technique pour accélérer le développement et assurer la qualité du code.
 - **Mise en place d'un environnement de staging** : Sans authentification et respectant le RGPD
 - **Communication sur le projet** : LinkedIn (prévu en Décembre 2025)
+- **Connexion et communication avec une Sandbox PDP** : Iopole comme PDP choisi (pour la qualité de sa documentation)
 
 ---
 ## Rappel – Composants et services réutilisables
@@ -77,7 +78,6 @@
 
 ## 📌 Prochaines étapes
 - **Finalisation de la conformité PDF/A-3** : Résoudre les derniers points techniques (pour obtenir une validation ISO 19005-3 complète).
-- **Se connecter à une Sandbox d'une vrai PDP** : Iopole comme PDP choisi (pour la qualité de sa documentation)
 
 
 ## Architecture 

@@ -106,3 +106,5 @@
 - [Jour 103 – Du mock côté serveur à l’adapter 🛠️✨](jour-103.md)
 - [Jour 104 – Migration Mock → Adapter 📦➡️🔌](jour-104.md)
 - [Jour 105 – Intégration PDP Iopole et suivi des factures 🚀📄](jour-105.md)
+- [Jour 107 – Première interaction “réelle” avec le PDP 🎯💻](jour-107.md)
+- [🧭 Jour 108 – Bilan de la semaine : du code au produit 🌍💡](jour-108.md)
