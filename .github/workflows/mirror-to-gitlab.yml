@@ -3,9 +3,9 @@ name: Mirror to GitLab
 on:
   push:
     branches:
-      - main  # branche que tu veux synchroniser
-      - 'feature/**'  # optionnel : pour toutes les branches feature
-  workflow_dispatch:  # permet de déclencher manuellement
+      - main
+      - 'feature/**'
+  workflow_dispatch:
 
 jobs:
   mirror:
@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Push to GitLab
         env:
