@@ -19,5 +19,5 @@ jobs:
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
         run: |
           git remote add gitlab https://oauth2:${GITLAB_TOKEN}@gitlab.com/fbonnafous31/eInvoicing.git
-          git push --all gitlab
-          git push --tags gitlab
+          git push --all gitlab --force
+          git push --tags gitlab --force
