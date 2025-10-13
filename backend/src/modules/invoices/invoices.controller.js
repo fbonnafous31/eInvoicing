@@ -311,9 +311,14 @@ const markInvoicePaid = asyncHandler(async (req, res) => {
   const pdpProvider = process.env.PDP_PROVIDER || 'mock';
   const pdp = new PDPService(pdpProvider);
 
-  // Mapper le code interne vers le code attendu par le PDP
+  // Mapper le code interne vers le code attendu par le PDP selon le provider
+  const codeMapping = {
+    mock: 212,
+    iopole: 'PAYMENT_RECEIVED',
+  };
+
   const pdpPayload = {
-    code: 'PAYMENT_RECEIVED', 
+    code: codeMapping[pdpProvider] || newStatus.code,
     message: 'Facture encaissée',
   };
 

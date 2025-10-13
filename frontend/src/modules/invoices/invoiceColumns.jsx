@@ -148,8 +148,9 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
 
                   // 1️⃣ Envoi de la facture au PDP
                   const res = await invoiceService.sendInvoice(row.id);
-                  const submissionId = res.result?.submissionId;
-                  
+                  const submissionId = res.submissionId; 
+                  console.log(`[Envoyer] Facture ${row.id} envoyée, réponse:`, res);
+
                   if (!submissionId) {
                     console.warn(`[Envoyer] Facture ${row.id} envoyée mais pas de submissionId pour suivi`);
                     alert("Facture envoyée mais le statut technique ne peut pas être suivi pour l'instant.");
