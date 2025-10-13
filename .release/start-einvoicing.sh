@@ -1,30 +1,26 @@
 #!/bin/bash
 # ===================================================
-# Guide de démarrage eInvoicing
+# 🚀 Installation eInvoicing (version clean)
 # ===================================================
 
-# Récupère les dernières images
+# 1️⃣ Mise à jour des images
 docker-compose pull
 
-# Stoppe et supprime les conteneurs existants
-docker-compose down
+# 2️⃣ Reset complet
+docker-compose down -v  # -v supprime aussi le volume pgdata
+docker rm -f einvoicing-db einvoicing-backend einvoicing-frontend 2>/dev/null || true
+docker-compose up -d 
 
-# Lancer tous les conteneurs
-docker-compose up -d
+# 3️⃣ Attendre que PostgreSQL démarre
+echo "⏳ Initialisation de la base..."
+sleep 10
 
-# Chargement du dump DB (si DB vide)
-docker-compose exec db psql -U einvoicing -d einvoicing_local -c "\dt" | grep -q "invoices" || docker-compose exec db psql -U einvoicing -d einvoicing_local -f /docker-entrypoint-initdb.d/einvoicing.sql && echo "Restauration du dump SQL effectuée !"
+# 4️⃣ Vérifie si la table 'invoices' existe, sinon charge la structure
+# ⚠️ Renommer einvoicing_local par le nom de la DB
+docker exec einvoicing-db psql -U einvoicing -d einvoicing_local -c "\\dt" | grep -q "invoices" || \
+docker exec -i einvoicing-db psql -U einvoicing -d einvoicing_local -f /docker-entrypoint-initdb.d/einvoicing.sql
 
-# Copier le config.js dans le conteneur frontend afin d'injecter les variables d'environnement
+# 5️⃣ Configuration frontend
 docker cp frontend/config.js einvoicing-frontend:/usr/share/nginx/html/config.js
-
-# Copier la configuration Nginx personnalisée dans le conteneur frontend.
-# - Résout les problèmes CORS 
-# - Gère le proxy vers /api/ pour le backend Node.js
-# - Sert correctement les fichiers statiques dans /assets/ pour éviter les erreurs de type MIME
-# - Permet le fallback SPA pour React (toutes les routes non existantes pointent vers index.html)
-# - Gère l'accès aux fichiers uploadés via /uploads/
 docker cp frontend/default.conf einvoicing-frontend:/etc/nginx/conf.d/default.conf
-
-# Recharger Nginx pour prendre en compte le nouveau config.js
 docker exec einvoicing-frontend nginx -s reload
