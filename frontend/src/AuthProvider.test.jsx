@@ -28,14 +28,10 @@ describe("AuthProvider", () => {
   });
 
   it("rend Auth0Provider quand les variables sont présentes", () => {
-    Object.defineProperty(import.meta, "env", {
-      value: {
-        VITE_AUTH0_DOMAIN: "domain.test",
-        VITE_AUTH0_CLIENT_ID: "client.test",
-        VITE_AUTH0_AUDIENCE: "audience.test",
-      },
-      configurable: true,
-    });
+    // ✅ Mock des variables d'environnement
+    vi.stubEnv("VITE_AUTH0_DOMAIN", "domain.test");
+    vi.stubEnv("VITE_AUTH0_CLIENT_ID", "client.test");
+    vi.stubEnv("VITE_AUTH0_AUDIENCE", "audience.test");
 
     const { getByTestId } = render(<AuthProvider>{CHILD_CONTENT}</AuthProvider>);
 
@@ -44,14 +40,9 @@ describe("AuthProvider", () => {
   });
 
   it("onRedirectCallback utilise navigate avec returnTo ou /", () => {
-    Object.defineProperty(import.meta, "env", {
-      value: {
-        VITE_AUTH0_DOMAIN: "domain.test",
-        VITE_AUTH0_CLIENT_ID: "client.test",
-        VITE_AUTH0_AUDIENCE: "audience.test",
-      },
-      configurable: true,
-    });
+    vi.stubEnv("VITE_AUTH0_DOMAIN", "domain.test");
+    vi.stubEnv("VITE_AUTH0_CLIENT_ID", "client.test");
+    vi.stubEnv("VITE_AUTH0_AUDIENCE", "audience.test");
 
     const { getByTestId } = render(<AuthProvider>{CHILD_CONTENT}</AuthProvider>);
 
