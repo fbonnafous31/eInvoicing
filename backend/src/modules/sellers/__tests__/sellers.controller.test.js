@@ -42,4 +42,103 @@ describe('SellersController', () => {
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.json).toHaveBeenCalledWith({ message: 'Vendeur non trouvé' });
   });
+
+  it('getSellers : renvoie la liste des vendeurs', async () => {
+    const sellers = [{ id: 1 }, { id: 2 }];
+    SellersService.listSellers.mockResolvedValue(sellers);
+
+    await SellersController.getSellers(req, res);
+
+    expect(res.json).toHaveBeenCalledWith(sellers);
+  });
+
+  it('getSellers : gère l\'erreur serveur', async () => {
+    SellersService.listSellers.mockRejectedValue(new Error('Erreur serveur'));
+
+    await SellersController.getSellers(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Erreur serveur' });
+  });
+
+  it('getMySeller : succès', async () => {
+    const seller = { id: 1 };
+    SellersService.getSellerByAuth0Id.mockResolvedValue(seller);
+
+    await SellersController.getMySeller(req, res, jest.fn());
+
+    expect(res.json).toHaveBeenCalledWith(seller);
+  });
+
+  it('getMySeller : aucun vendeur trouvé', async () => {
+    SellersService.getSellerByAuth0Id.mockResolvedValue(null);
+
+    await SellersController.getMySeller(req, res, jest.fn());
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ message: "Aucun vendeur trouvé pour cet utilisateur" });
+  });
+
+  it('getMySeller : erreur serveur appelle next', async () => {
+    const error = new Error('Boom');
+    SellersService.getSellerByAuth0Id.mockRejectedValue(error);
+    const next = jest.fn();
+
+    await SellersController.getMySeller(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(error);
+  });
+
+  it('deleteSeller : succès', async () => {
+    const deleted = { id: 1 };
+    SellersService.deleteSeller.mockResolvedValue(deleted);
+    req.params = { id: 1 };
+
+    await SellersController.deleteSeller(req, res);
+
+    expect(res.json).toHaveBeenCalledWith({ message: 'Seller deleted', seller: deleted });
+  });
+
+  it('deleteSeller : erreur', async () => {
+    const err = new Error('Not found');
+    SellersService.deleteSeller.mockRejectedValue(err);
+    req.params = { id: 1 };
+
+    await SellersController.deleteSeller(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Not found' });
+  });
+
+  it('updateSeller : succès', async () => {
+    const updated = { id: 1, name: 'New' };
+    SellersService.updateSellerData.mockResolvedValue(updated);
+    req.params = { id: 1 };
+    req.body = { name: 'New' };
+
+    await SellersController.updateSeller(req, res);
+
+    expect(res.json).toHaveBeenCalledWith(updated);
+  });
+
+  it('updateSeller : erreur', async () => {
+    const err = new Error('Not found');
+    SellersService.updateSellerData.mockRejectedValue(err);
+    req.params = { id: 1 };
+    req.body = { name: 'New' };
+
+    await SellersController.updateSeller(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ error: err.message });
+  });
+
+  it('checkIdentifier : succès', async () => {
+    SellersService.checkIdentifierExists.mockResolvedValue(true);
+    req.query = { identifier: 'abc', id: '123' };
+
+    await SellersController.checkIdentifier(req, res);
+
+    expect(res.json).toHaveBeenCalledWith({ exists: true });
+  });
 });

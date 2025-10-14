@@ -1,7 +1,9 @@
-// tests/services/sellers.service.test.js
-const SellersModel = require('../sellers.model');
+/* global describe, it, expect, afterEach, jest */
 
-// Mock complet du modèle avant d'importer le service
+const db = require('../../../config/db');
+
+// Mock complet du modèle
+const SellersModel = require('../sellers.model');
 jest.mock('../sellers.model', () => ({
   getAllSellers: jest.fn(),
   insertSeller: jest.fn(),
@@ -13,18 +15,22 @@ jest.mock('../sellers.model', () => ({
   getMySeller: jest.fn(),
 }));
 
-const SellersService = require('../sellers.service');
+// Mock de la DB pour les requêtes directes
+jest.mock('../../../config/db', () => ({
+  query: jest.fn(),
+}));
 
-const { describe, it, expect, afterEach } = globalThis;
+const SellersService = require('../sellers.service');
 
 describe('SellersService', () => {
   const auth0_id = 'auth0|123';
   const sellerId = 42;
 
   afterEach(() => {
-    Object.values(SellersModel).forEach(fn => fn.mockClear());
+    jest.clearAllMocks();
   });
 
+  // ---- Méthodes utilisant SellersModel ----
   it('listSellers appelle le modèle et retourne les vendeurs', async () => {
     const mockSellers = [{ id: 1, name: 'Alice' }];
     SellersModel.getAllSellers.mockResolvedValue(mockSellers);
@@ -74,5 +80,67 @@ describe('SellersService', () => {
 
     expect(SellersModel.updateSeller).toHaveBeenCalledWith(sellerId, sellerData);
     expect(result).toEqual(mockSeller);
+  });
+
+  // ---- Méthodes utilisant db.query ----
+  it('getSellerByAuth0Id retourne un vendeur', async () => {
+    const row = { id: 1, name: 'Alice' };
+    db.query.mockResolvedValue({ rows: [row] });
+
+    const result = await SellersService.getSellerByAuth0Id(auth0_id);
+
+    expect(db.query).toHaveBeenCalledWith(
+      expect.stringContaining('WHERE auth0_id = $1'),
+      [auth0_id]
+    );
+    expect(result).toEqual(row);
+  });
+
+  it('getSellerByAuth0Id retourne null si aucun résultat', async () => {
+    db.query.mockResolvedValue({ rows: [] });
+
+    const result = await SellersService.getSellerByAuth0Id(auth0_id);
+
+    expect(result).toBeNull();
+  });
+
+  it('getSellerByAuth0Id retourne null si auth0_id absent', async () => {
+    const result = await SellersService.getSellerByAuth0Id(null);
+    expect(result).toBeNull();
+  });
+
+  it('checkIdentifierExists retourne true si identifiant existe', async () => {
+    db.query.mockResolvedValue({ rowCount: 1 });
+
+    const result = await SellersService.checkIdentifierExists('ABC123', null);
+
+    expect(db.query).toHaveBeenCalledWith(
+      expect.stringContaining('WHERE legal_identifier = $1'),
+      ['ABC123', null]
+    );
+    expect(result).toBe(true);
+  });
+
+  it('checkIdentifierExists retourne false si identifiant n’existe pas', async () => {
+    db.query.mockResolvedValue({ rowCount: 0 });
+
+    const result = await SellersService.checkIdentifierExists('ABC123', 1);
+
+    expect(result).toBe(false);
+  });
+
+  // ---- getMySeller ----
+  it('getMySeller appelle getSellerByAuth0Id et retourne le vendeur', async () => {
+    const row = { id: 1 };
+    db.query.mockResolvedValue({ rows: [row] });
+
+    const result = await SellersService.getMySeller(auth0_id);
+
+    expect(result).toEqual(row);
+  });
+
+  it('getMySeller retourne null si auth0_id absent', async () => {
+    const result = await SellersService.getMySeller(null);
+    expect(result).toBeNull();
   });
 });
