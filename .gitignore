@@ -41,4 +41,4 @@ backend/src/uploads/pdf/*
 backend/uploads/*
 
 startDB.sh
-.story/strategie
+.story/strategy
