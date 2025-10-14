@@ -111,3 +111,7 @@
 - [🧭 Jour 108 – Bilan de la semaine : du code au produit 🌍💡](jour-108.md)
 - [🧭 Jour 109 – Passer du projet au produit… et du produit à la vitrine 🚀](jour-109.md)
 - [🧭 Jour 110 – Ne pas dépendre d’un seul pilier 🧩  ](jour-110.md)
+- [Jour 111 – Déploiement automatisé & base propre ⚡🛠️](jour-111.md)
+- [Jour 112 – Lancement et premiers retours 🚀](jour-112.md)
+- [Jour 113 – Conformité, sécurité et déploiement 🔒⚙️](jour-113.md)
+- [Jour 114 – Communauté, documentation et industrialisation 🌍📘](jour-114.md)
