@@ -116,3 +116,4 @@
 - [Jour 113 – Conformité, sécurité et déploiement 🔒⚙️](jour-113.md)
 - [Jour 114 – Communauté, documentation et industrialisation 🌍📘](jour-114.md)
 - [Jour 115 – Consolidation stratégique & offre Web finalisée 🌐🧠](jour-115.md)
+- [Jour 116 – Conformité PDF/A-3 : la victoire du détail 🎯📄](jour-116.md)

@@ -68,16 +68,13 @@
 - **Mise en place d'un environnement de staging** : Sans authentification et respectant le RGPD
 - **Communication sur le projet** : LinkedIn (prévu en Décembre 2025)
 - **Connexion et communication avec une Sandbox PDP** : Iopole comme PDP choisi (pour la qualité de sa documentation)
+- **Finalisation de la conformité PDF/A-3** : Résoudre les derniers points techniques (pour obtenir une validation ISO 19005-3 complète).
 
 ---
 ## Rappel – Composants et services réutilisables
 
 - Privilégier **les composants UI réutilisables** (`InputField`, `TextAreaField`, `EllipsisCell`, ...) pour uniformité.
 - Utiliser **les services centralisés** pour les appels API afin de garder cohérence et validations.
-
-
-## 📌 Prochaines étapes
-- **Finalisation de la conformité PDF/A-3** : Résoudre les derniers points techniques (pour obtenir une validation ISO 19005-3 complète).
 
 
 ## Architecture 
