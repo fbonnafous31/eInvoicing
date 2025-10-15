@@ -73,13 +73,12 @@ Chaque étape du développement est documentée et réfléchie pour rester **pro
 ### 2. Gestion des factures
 - Création, mise à jour, suppression et suivi des factures.  
 - Gestion des lignes de facture, taxes et pièces jointes.  
-- Génération automatique en **PDF** avec intégration des données.  
-- **Conformité PDF/A-3** : métadonnées XMP, intégration du XML Factur-X et des justificatifs.  
-- Visionneuse PDF intégrée dans l’application.  
+- **Génération PDF** : visuel complet et automatique des factures.  
+- **Conformité PDF/A-3** : XML Factur-X embarqué, métadonnées XMP conformes ISO 19005.  
+- Visionneuse PDF intégrée directement dans l’application.  
 
 ### 3. Standards de facturation
 - Génération **Factur-X (profil BASIC)** validé.  
-- Support initial pour **UBL**.  
 - Intégration du XML dans le PDF pour compatibilité réglementaire.  
 
 ### 4. Authentification et sécurité
@@ -88,15 +87,19 @@ Chaque étape du développement est documentée et réfléchie pour rester **pro
 - Parcours utilisateur fluide : inscription → fiche vendeur → accès protégé.  
 
 ### 5. Simulation PDP
-- Connexion à une **plateforme de dématérialisation partenaire simulée**.  
-- Émission et réception de factures.  
-- Gestion du cycle de vie (émission, encaissement).  
+- Connexion à une **plateforme de dématérialisation partenaire** (Iopole).  
+- Émission et réception de factures, gestion complète du cycle de vie.  
+- Traçabilité et validation via le laboratoire de la plateforme pour **ISO 19005-3**.  
 
 ### 6. Industrialisation
 - **Tests unitaires et d’intégration** (Vitest).  
 - **CI/CD** (Github Actions).  
 - **Monitoring** via Prometheus et Grafana.  
 - Documentation et journal de bord quotidien.  
+
+### 7. Gestion des pièces jointes
+- Upload et distinction entre document principal et documents additionnels.  
+- Intégration automatique dans le PDF/A-3.  
 
 ---
 
