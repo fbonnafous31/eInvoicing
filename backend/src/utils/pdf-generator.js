@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { PDFDocument, PDFName, PDFString } = require('pdf-lib');
+const { PDFDocument, PDFName, PDFString, PDFHexString } = require('pdf-lib');
 const { generateXmpContent } = require('./xmp-helper');
 
 const PDF_A3_DIR = path.resolve('src/uploads/pdf-a3');
@@ -78,10 +78,13 @@ async function embedFacturXInPdf(pdfPath, facturxPath, attachments = [], invoice
 
   pdfDoc.catalog.set(PDFName.of('OutputIntents'), pdfDoc.context.obj([pdfDoc.context.register(outputIntentDict)]));
 
-  // --- ID ---
-  const id1 = Buffer.from(crypto.randomBytes(16)).toString('hex');
-  const id2 = Buffer.from(crypto.randomBytes(16)).toString('hex');
-  pdfDoc.catalog.set(PDFName.of('ID'), pdfDoc.context.obj([PDFString.of(id1), PDFString.of(id2)]));
+  // --- ID (obligatoire PDF/A-3) ---
+  const idBuffer = crypto.randomBytes(16);
+  const hexId = idBuffer.toString('hex').toUpperCase(); // même ID deux fois, comme dans les PDF conformes
+  pdfDoc.context.trailerInfo.ID = [
+    PDFHexString.of(hexId),
+    PDFHexString.of(hexId),
+  ];  
 
   // --- Sauvegarde ---
   const pdfA3Path = path.join(PDF_A3_DIR, `${invoiceId}_pdf-a3.pdf`);
