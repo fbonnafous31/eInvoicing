@@ -51,7 +51,7 @@ export default function Home() {
           <h2>Bienvenue sur eInvoicing !</h2>
           <p>Avant de commencer, créez votre fiche vendeur pour gérer vos factures.</p>
           <button
-            className="px-4 py-2 mt-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+            className="px-4 py-2 mt-3 rounded-lg bg-blue-600 text-gray-900 hover:bg-blue-700"
             onClick={() => navigate("/sellers/new")}
           >
             Créer ma fiche vendeur
