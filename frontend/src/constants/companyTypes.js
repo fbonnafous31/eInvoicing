@@ -1,5 +1,6 @@
 // src/constants/companyTypes.js
 const companyTypes = [
+  { value: 'AUTO', label: 'Auto-entrepreneur' },
   { value: 'MICRO', label: 'Micro-entreprise' },
   { value: 'EI', label: 'Entreprise Individuelle' },
   { value: 'EIRL', label: 'EIRL' },

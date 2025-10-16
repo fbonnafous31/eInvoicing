@@ -199,7 +199,11 @@ async function generateInvoicePdf(invoice) {
   const blockWidth = 220;
   const seller = invoice.seller || {};
   let sellerText = "";
-  if (seller.legal_name) sellerText += `${seller.legal_name}\n`;
+  if (seller.legal_name) {
+    sellerText += seller.company_type === 'AUTO'
+      ? `${seller.legal_name} - Auto-entrepreneur\n`
+      : `${seller.legal_name}\n`;
+  }
   if (seller.address) sellerText += `${seller.address}\n`;
   if (seller.postal_code || seller.city)
     sellerText += `${seller.postal_code || ""} ${seller.city || ""}\n`;
@@ -631,7 +635,11 @@ async function generateInvoicePdfBuffer(invoice) {
   // ---------------- Seller (haut droite) ----------------
   const blockWidth = 220;
   let sellerText = "";
-  if (seller.legal_name) sellerText += `${seller.legal_name}\n`;
+  if (seller.legal_name) {
+    sellerText += seller.company_type === 'AUTO'
+      ? `${seller.legal_name} - Auto-entrepreneur\n`
+      : `${seller.legal_name}\n`;
+  }  
   if (seller.address) sellerText += `${seller.address}\n`;
   if (seller.postal_code || seller.city)
     sellerText += `${seller.postal_code || ""} ${seller.city || ""}\n`;
