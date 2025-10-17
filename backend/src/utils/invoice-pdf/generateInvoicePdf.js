@@ -32,8 +32,8 @@ function formatDateFr(dateStr) {
   return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
 }
 
-async function generateInvoicePdf(invoice) {
-  console.log("invoice:", invoice);
+async function generateInvoicePdf(quote) {
+  console.log("quote:", quote);
   const pdfDoc = await PDFDocument.create();
 
   // --- Début des modifications pour conformité PDF/A ---
@@ -44,8 +44,8 @@ async function generateInvoicePdf(invoice) {
   // 2. Définir les métadonnées XMP pour l'identification PDF/A-3B
   const now = new Date();
   const nowIso = now.toISOString();
-  const title = `Facture ${invoice.invoice_number || invoice.id}`;
-  const author = invoice.seller?.legal_name || 'eInvoicing App';
+  const title = `Devis ${quote.invoice_number || quote.id}`;
+  const author = quote.seller?.legal_name || 'eInvoicing App';
   // Le nom du fichier XML est requis pour les métadonnées Factur-X
   const xmlFileName = "factur-x.xml";
 
@@ -197,7 +197,7 @@ async function generateInvoicePdf(invoice) {
 
   // ---------------- Seller (haut droite, aligné top logo) ----------------
   const blockWidth = 220;
-  const seller = invoice.seller || {};
+  const seller = quote.seller || {};
   let sellerText = "";
   if (seller.legal_name) {
     sellerText += seller.company_type === 'AUTO'
@@ -226,7 +226,7 @@ async function generateInvoicePdf(invoice) {
   });
 
   // ---------------- Client (sous logo) ----------------
-  const client = invoice.client || {};
+  const client = quote.client || {};
   let clientText = "";
   if (client.legal_name) clientText += `${client.legal_name}\n`;
   if (client.address) clientText += `${client.address}\n`;
@@ -255,8 +255,8 @@ async function generateInvoicePdf(invoice) {
   let y = Math.min(sellerY, clientY) - 20;
 
   // ---------------- Dates & infos facture ----------------
-  if (invoice.invoice_number) {
-    page.drawText(`Référence facture : ${invoice.invoice_number}`, {
+  if (quote.invoice_number) {
+    page.drawText(`Référence devis : ${quote.invoice_number}`, {
       x: margin,
       y,
       size: 10,
@@ -265,16 +265,16 @@ async function generateInvoicePdf(invoice) {
   }
   y -= 20;
 
-  if (invoice.issue_date)
-    page.drawText(`Date d'émission : ${formatDateFr(invoice.issue_date)}`, {
+  if (quote.issue_date)
+    page.drawText(`Date d'émission : ${formatDateFr(quote.issue_date)}`, {
       x: margin,
       y,
       size: 10,
       font: fontRegular,
     });
 
-  if (invoice.supply_date)
-    page.drawText(`Date de livraison : ${formatDateFr(invoice.supply_date)}`, {
+  if (quote.supply_date)
+    page.drawText(`Date de livraison : ${formatDateFr(quote.supply_date)}`, {
       x: margin + 200,
       y,
       size: 10,
@@ -316,7 +316,7 @@ async function generateInvoicePdf(invoice) {
   tableY -= rowHeight;
 
   // Rows
-  invoice.lines?.forEach((line) => {
+  quote.lines?.forEach((line) => {
     xCursor = tableX;
     const rowValues = [
       line.description || "",
@@ -355,9 +355,9 @@ async function generateInvoicePdf(invoice) {
   // ---------------- Totaux ----------------
   const totalLabels = ["Sous-total", "Total TVA", "Total TTC"];
   const totalValues = [
-    invoice.subtotal ? `${invoice.subtotal} €` : "",
-    invoice.total_taxes ? `${invoice.total_taxes} €` : "",
-    invoice.total ? `${invoice.total} €` : "",
+    quote.subtotal ? `${quote.subtotal} €` : "",
+    quote.total_taxes ? `${quote.total_taxes} €` : "",
+    quote.total ? `${quote.total} €` : "",
   ];
 
   const boxWidth = 180;
@@ -392,80 +392,26 @@ async function generateInvoicePdf(invoice) {
   });
   y = totalsY - 30;
 
-  // ---------------- Informations de paiement ----------------
-  if (invoice.seller?.payment_method) {
-    // Cherche le libellé correspondant à la méthode de paiement
-    const paymentMethodOption = paymentMethodsOptions.find(
-      (opt) => opt.value === invoice.seller?.payment_method
-    );
-    const paymentMethodLabel = paymentMethodOption
-      ? paymentMethodOption.label
-      : invoice.seller?.payment_method;
+  // ---------------- Mentions pour devis ----------------
+  const mentionDevis = "Les conditions de paiement et mentions légales seront précisées sur la facture.";
+  const maxWidth = 595 - 2 * margin;
+  const wrappedLines = wrapText(mentionDevis, fontRegular, 9, maxWidth);
 
-    page.drawText(`Moyen de paiement : ${paymentMethodLabel}`, {
-      x: margin,
-      y,
-      size: 10,
-      font: fontRegular,
-    });
-    y -= 15;
-
-    // 👉 IBAN + BIC si virement bancaire
-    if (invoice.seller?.payment_method === "bank_transfer") {
-      if (seller.iban) {
-        page.drawText(`IBAN : ${seller.iban}`, {
-          x: margin,
-          y,
-          size: 10,
-          font: fontRegular,
-        });
-        y -= 15;
-      }
-      if (seller.bic) {
-        page.drawText(`BIC : ${seller.bic}`, {
-          x: margin,
-          y,
-          size: 10,
-          font: fontRegular,
-        });
-        y -= 15;
-      }
-    }  
-  }
-
-  if (invoice.seller?.payment_terms) {
-    const termsLabel = paymentTermsOptions.find(t => t.value === invoice.seller.payment_terms)?.label || invoice.seller.payment_terms;
-    page.drawText(`Conditions de paiement : ${termsLabel}`, {
-      x: margin,
-      y,
-      size: 10,
-      font: fontRegular,
-    });
-    y -= 25;
-  }
-  
-  // ---------------- Mentions additionnelles ----------------
-    const mentions = [invoice.seller?.additional_1, invoice.seller?.additional_2].filter(Boolean);
-    const maxWidth = 595 - 2 * margin; // largeur de la page moins marges
-
-    mentions.forEach(mention => {
-      const wrappedLines = wrapText(mention, fontRegular, 9, maxWidth);
-      wrappedLines.forEach(line => {
-        if (y < 50) {
-          page.addPage([595, 842]); // nouvelle page
-          y = 842 - margin;
-        }
-        page.drawText(line, { x: margin, y, size: 9, font: fontRegular });
-        y -= 12;
-      });
-      y -= 10;
-    });
-
+  wrappedLines.forEach(line => {
+    if (y < 50) {
+      page.addPage([595, 842]); // nouvelle page
+      y = 842 - margin;
+    }
+    page.drawText(line, { x: margin, y, size: 9, font: fontRegular });
+    y -= 12;
+  });
+  y -= 10;
+    
   // ---------------- Save ----------------
   const uploadDir = path.join(__dirname, "../../uploads/pdf");
   if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-  const filePath = path.join(uploadDir, `${invoice.id}_invoice.pdf`);
+  const filePath = path.join(uploadDir, `${quote.id}_invoice.pdf`);
   const pdfBytes = await pdfDoc.save();
   await fs.promises.writeFile(filePath, pdfBytes);
 
