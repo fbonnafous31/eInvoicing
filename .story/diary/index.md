@@ -118,3 +118,4 @@
 - [Jour 115 – Consolidation stratégique & offre Web finalisée 🌐🧠](jour-115.md)
 - [Jour 116 – Conformité PDF/A-3 : la victoire du détail 🎯📄](jour-116.md)
 - [Jour 117 – Auto-entrepreneur, tests et guide utilisateur 🚀📄](jour-117.md)
+- [Jour 118 – CGU, token et déploiement GitHub Pages 🚀📄](jour-118.md)

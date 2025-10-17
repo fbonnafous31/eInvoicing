@@ -108,7 +108,7 @@ function generateFacturXXML(invoice) {
 
   // SellerTradeParty
   const sellerParty = agreement.ele('ram:SellerTradeParty');
-  const schemeId = process.env.PDP_PROVIDER === 'iopole' ? '0009' : '0007';
+  let schemeId = process.env.PDP_PROVIDER === 'iopole' ? '0009' : '0007';
 
   sellerParty.ele('ram:Name').txt(seller.legal_name).up();
   sellerParty.ele('ram:SpecifiedLegalOrganization')
@@ -121,16 +121,30 @@ function generateFacturXXML(invoice) {
       .ele('ram:CountryID').txt(seller.country_code || '').up()
     .up();
 
-  if (seller.vat_number) {
-    sellerParty.ele('ram:SpecifiedTaxRegistration')
-        .ele('ram:ID', { schemeID: 'VA' }).txt(seller.vat_number).up()
-      .up();
+  let vatNumber = seller.vat_number;
+  let finalSchemeID;
+
+  if (!vatNumber && isAuto) {
+    // Auto-entrepreneur → numéro factice
+    vatNumber = 'FRXX123456789';
+    finalSchemeID = 'VA';
+  } else if (vatNumber) {
+    // Vendeur normal avec VAT
+    finalSchemeID = 'VA'; 
   } else if (seller.legal_identifier) {
+    // Fallback si pas de VAT 
+    vatNumber = seller.legal_identifier;
+    finalSchemeID = '0002';
+  }
+
+  // Génération XML si on a un numéro
+  if (vatNumber) {
     sellerParty.ele('ram:SpecifiedTaxRegistration')
-        .ele('ram:ID', { schemeID: '0002' }).txt(seller.legal_identifier).up()
+        .ele('ram:ID', { schemeID: finalSchemeID })
+        .txt(vatNumber)
+        .up()
       .up();
   }
-  sellerParty.up();
 
   // BuyerTradeParty
   const buyerParty = agreement.ele('ram:BuyerTradeParty');
