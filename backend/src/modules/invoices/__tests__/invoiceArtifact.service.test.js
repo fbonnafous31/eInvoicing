@@ -5,10 +5,10 @@ jest.mock('path', () => ({
   resolve: jest.fn(() => '/abs/path/uploads/factur-x'),
   join: jest.fn((...args) => args.join('/')),
 }));
-jest.mock('../../../utils/facturx-generator', () => ({
+jest.mock('../../../utils/facturx/facturx-generator', () => ({
   generateFacturXXML: jest.fn(),
 }));
-jest.mock('../../../utils/pdf-generator', () => ({
+jest.mock('../../../utils/invoice-pdf/pdf-generator', () => ({
   embedFacturXInPdf: jest.fn(),
 }));
 jest.mock('../invoiceAttachments.model', () => ({
@@ -17,8 +17,8 @@ jest.mock('../invoiceAttachments.model', () => ({
 }));
 
 const fs = require('fs/promises');
-const { embedFacturXInPdf } = require('../../../utils/pdf-generator');
-const { generateFacturXXML } = require('../../../utils/facturx-generator');
+const { embedFacturXInPdf } = require('../../../utils/invoice-pdf/pdf-generator');
+const { generateFacturXXML } = require('../../../utils/facturx/facturx-generator');
 const InvoicesAttachmentsModel = require('../invoiceAttachments.model');
 const { generateInvoiceArtifacts } = require('../invoiceArtifact.service');
 

@@ -1,7 +1,7 @@
 const fs = require('fs/promises');
 const path = require('path');
-const { generateFacturXXML } = require('../../utils/facturx-generator');
-const { embedFacturXInPdf } = require('../../utils/pdf-generator');
+const { generateFacturXXML } = require('../../utils/facturx/facturx-generator');
+const { embedFacturXInPdf } = require('../../utils/invoice-pdf/pdf-generator');
 const InvoicesAttachmentsModel = require('./invoiceAttachments.model');
 
 const FACTURX_DIR = path.resolve('src/uploads/factur-x');

@@ -13,10 +13,10 @@ jest.mock("../../../middlewares/attachSeller", () => (req, res, next) => {
 });
 
 // === Mock des utilitaires ESM qui cassent Jest ===
-jest.mock("../../../utils/facturx-generator", () => ({
+jest.mock("../../../utils/facturx/facturx-generator", () => ({
   generateFacturXXML: jest.fn(() => "mock-xml"),
 }));
-jest.mock("../../../utils/pdf-generator", () => ({
+jest.mock("../../../utils/invoice-pdf/pdf-generator", () => ({
   embedFacturXInPdf: jest.fn(() => Buffer.from("mock-pdf")),
 }));
 

@@ -1,42 +1,21 @@
-.
-├── backend
-│   ├── constants
-│   ├── coverage
-│   │   └── lcov-report
-│   ├── mock-pdp
-│   │   ├── routes
-│   │   ├── services
-│   │   └── uploads
-│   ├── src
-│   │   ├── config
-│   │   ├── middlewares
-│   │   ├── modules
-│   │   ├── uploads
-│   │   └── utils
-│   ├── tests
-│   └── uploads
-├── frontend
-│   ├── coverage
-│   │   └── lcov-report
-│   ├── public
-│   ├── src
-│   │   ├── assets
-│   │   ├── components
-│   │   ├── constants
-│   │   ├── hooks
-│   │   ├── modules
-│   │   ├── pages
-│   │   ├── services
-│   │   └── utils
-│   └── tests
-├── scripts
-│   └── factur-x
-│       ├── js
-│       ├── sh
-│       └── xsd
-└── sql
-    ├── dataset
-    ├── ddl
-    └── scripts
+backend/src/utils
+├── facturx-generator.js
+├── facturx-template.xmp
+├── fileNaming.js
+├── icc
+│   └── sRGB.icc
+├── invoice-pdf
+│   ├── fonts
+│   │   ├── DejaVuSans-Bold.ttf
+│   │   └── DejaVuSans.ttf
+│   ├── generateInvoicePdf.js
+│   ├── logo.png
+│   └── testGenerate.js
+├── pdf-generator.js
+├── siret.js
+├── __tests__
+│   └── siret.test.js
+├── xmp-helper.js
+└── xmp-injector.js
 
-40 directories
+5 directories, 14 files

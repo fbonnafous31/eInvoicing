@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { PDFDocument, PDFName, PDFString, PDFHexString } = require('pdf-lib');
-const { generateXmpContent } = require('./xmp-helper');
+const { generateXmpContent } = require('../facturx/xmp-helper');
 
 const PDF_A3_DIR = path.resolve('src/uploads/pdf-a3');
 const ICC_DIR = path.resolve(__dirname, 'icc');
