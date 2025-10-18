@@ -120,3 +120,5 @@
 - [Jour 117 – Auto-entrepreneur, tests et guide utilisateur 🚀📄](jour-117.md)
 - [Jour 118 – CGU, token et déploiement GitHub Pages 🚀📄](jour-118.md)
 - [Jour 119 – Devis, Factur‑X et LinkedIn ✨💻](jour-119.md)
+- [Jour 120 – Refacto et factorisation 🔄💻](jour-120.md)
+- [Jour 121 – Simulateur et déploiement Vercel 🚀💻](jour-121.md)
