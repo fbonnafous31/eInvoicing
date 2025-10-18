@@ -6,8 +6,12 @@ import TechnicalStatusCell from './TechnicalStatusCell';
 import BusinessStatusCell from './BusinessStatusCell';
 import { FaFilePdf } from "react-icons/fa";
 import { canSendInvoice } from '../../utils/businessRules/invoiceStatus';
+import { useInvoiceService } from '../../services/invoices';
+import { downloadFile } from '../../utils/downloadFile';
+
 export default function useInvoiceColumns(invoiceService, onTechnicalStatusChange, onBusinessStatusChange, onInvoiceUpdate) {
   const navigate = useNavigate();
+  const { generateInvoicePdf, API_ROOT } = useInvoiceService();
 
   // -------------------- Polling du statut technique --------------------
   const pollStatus = async (invoiceId, interval = 2000, timeout = 60000) => {
@@ -68,26 +72,21 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
             ✏️
           </button>
 
-          {/* Générer PDF */}
+          {/* Devis PDF */}
           <button
             className="btn btn-sm btn-link p-0 m-0 align-middle text-decoration-none"
             title="Télécharger le devis"
             onClick={async () => {
               if (!row?.id) return;
+
               try {
-                const data = await invoiceService.generateInvoicePdf(row.id);
+                const data = await generateInvoicePdf(row.id);
                 if (!data?.path) return console.error("❌ Pas de chemin PDF renvoyé");
 
-                const pdfRes = await fetch(`http://localhost:3000${data.path}`);
-                const blob = await pdfRes.blob();
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = `facture_${row.invoice_number}.pdf`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(link.href);
-                console.log("✅ PDF téléchargé");
+                const pdfUrl = `${API_ROOT}${data.path}`;
+                const filename = `facture_${row.invoice_number}.pdf`;
+
+                downloadFile(pdfUrl, filename);
               } catch (err) {
                 console.error("❌ Erreur génération PDF :", err);
               }
@@ -96,14 +95,17 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
             📄
           </button>
 
-          {/* PDF/A-3 */}
+          {/* Facture PDF/A-3 */}
           <button
-            className="btn btn-sm btn-link p-0 m-0 align-middle"
-            title="Télécharger la facture"
+            className="btn btn-sm btn-link p-0 m-0 align-middle text-decoration-none"
+            title="Télécharger la facture au format PDF/A-3"
             onClick={() => {
               if (!row?.id) return;
-              const pdfUrl = `http://localhost:3000/pdf-a3/${row.id}_pdf-a3.pdf`;
-              window.open(pdfUrl, "_blank");
+
+              const pdfUrl = `${API_ROOT}/pdf-a3/${row.id}_pdf-a3.pdf`;
+              const filename = `facture_${row.invoice_number}_PDF-A3.pdf`;
+
+              downloadFile(pdfUrl, filename);
             }}
           >
             <FaFilePdf size={18} color="red" style={{ position: "relative", top: "-2px" }} />

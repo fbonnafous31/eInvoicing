@@ -1,7 +1,9 @@
 import { useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
-const API_BASE = `${window.__ENV__?.VITE_API_URL ?? 'http://localhost:3000'}/api/invoices`;
+// const API_BASE = `${window.__ENV__?.VITE_API_URL ?? 'http://localhost:3000'}/api/invoices`;
+const API_ROOT = window.__ENV__?.VITE_API_URL ?? 'http://localhost:3000';
+const API_BASE = `${API_ROOT}/api/invoices`;
 
 export function useInvoiceService() {
   const { getToken } = useAuth();
@@ -161,6 +163,7 @@ export function useInvoiceService() {
   );
 
   return {
+    API_ROOT,
     fetchInvoicesBySeller,
     fetchInvoice,
     createInvoice,
