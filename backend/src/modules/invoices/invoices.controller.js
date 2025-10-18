@@ -3,7 +3,7 @@ const InvoicesService = require('./invoices.service');
 const InvoicePdpService = require('./invoicePdp.service');
 const PDPService = require('../pdp/PDPService');
 const { getInvoiceById } = require('./invoices.model');
-const { generateInvoicePdf, generateInvoicePdfBuffer: generatePdfUtil } = require('../../utils/invoice-pdf/generateInvoicePdf');
+const { generateQuotePdf, generateInvoicePdfBuffer: generatePdfUtil } = require('../../utils/invoice-pdf/generateInvoicePdf');
 const InvoiceStatusModel = require('../invoices/invoiceStatus.model');
 const path = require("path");
 
@@ -132,7 +132,7 @@ const createInvoicePdf = asyncHandler(async (req, res) => {
     return res.status(404).json({ error: "Facture introuvable" });
   }
 
-  const pdfPath = await generateInvoicePdf(invoice);
+  const pdfPath = await generateQuotePdf(invoice);
   const fileName = path.basename(pdfPath);
   const publicPath = `/uploads/pdf/${fileName}`;
 

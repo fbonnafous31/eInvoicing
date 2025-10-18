@@ -32,7 +32,7 @@ function formatDateFr(dateStr) {
   return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
 }
 
-async function generateInvoicePdf(quote) {
+async function generateQuotePdf(quote) {
   console.log("quote:", quote);
   const pdfDoc = await PDFDocument.create();
 
@@ -841,4 +841,4 @@ async function generateInvoicePdfBuffer(invoice) {
   return pdfBytes; // buffer pour envoyer au front sans écrire sur disque
 }
 
-module.exports = { generateInvoicePdf, generateInvoicePdfBuffer };
+module.exports = { generateQuotePdf, generateInvoicePdfBuffer };
