@@ -79,6 +79,7 @@ Chaque étape du développement est documentée et réfléchie pour rester **pro
 
 ### 3. Standards de facturation
 - Génération **Factur-X (profil BASIC)** validé.  
+- **PDF/A3** conforme à la norme **ISO 19005-3**
 - Intégration du XML dans le PDF pour compatibilité réglementaire.  
 
 ### 4. Authentification et sécurité
@@ -86,13 +87,12 @@ Chaque étape du développement est documentée et réfléchie pour rester **pro
 - Sécurisation des routes via **JWT**.  
 - Parcours utilisateur fluide : inscription → fiche vendeur → accès protégé.  
 
-### 5. Simulation PDP
-- Connexion à une **plateforme de dématérialisation partenaire** (Iopole).  
+### 5. Connexion à une plateforme agréée
+- Connexion à la **plateforme agréée Iopole** (Sandbox).  
 - Émission et réception de factures, gestion complète du cycle de vie.  
-- Traçabilité et validation via le laboratoire de la plateforme pour **ISO 19005-3**.  
 
 ### 6. Industrialisation
-- **Tests unitaires et d’intégration** (Vitest).  
+- **Tests unitaires et d’intégration** (Vitest) – couverture actuelle : 60%.  
 - **CI/CD** (Github Actions).  
 - **Monitoring** via Prometheus et Grafana.  
 - Documentation et journal de bord quotidien.  
@@ -101,7 +101,16 @@ Chaque étape du développement est documentée et réfléchie pour rester **pro
 - Upload et distinction entre document principal et documents additionnels.  
 - Intégration automatique dans le PDF/A-3.  
 
+### 8. Environnement de staging
+- Mise en place d’un **environnement de staging** simple et respectueux du RGPD 
+[staging](https://einvoicing-staging-frontend.onrender.com/)  
+
 ---
+
+## 🌐 Site vitrine
+
+Un site vitrine est désormais disponible pour présenter l’application et son simulateur :  
+[https://e-invoicing-landing.vercel.app](https://e-invoicing-landing.vercel.app)
 
 ## 📜 Vision
 
