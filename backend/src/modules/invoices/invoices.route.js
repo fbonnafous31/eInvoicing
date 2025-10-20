@@ -3,6 +3,7 @@ const router = express.Router();
 const InvoicesController = require('./invoices.controller');
 const upload = require('../../middlewares/upload'); 
 const attachSeller = require('../../middlewares/attachSeller'); 
+const InvoiceMailController = require('./invoiceMail.controller');
 const checkJwt = require('../../middlewares/auth'); 
 
 // Routes publiques (si besoin)
@@ -10,6 +11,9 @@ const checkJwt = require('../../middlewares/auth');
 // Routes protégées par Auth0 et middleware attachSeller
 router.use(checkJwt);    
 router.use(attachSeller);
+
+// Route spécifique pour envoyer la facture (nouvelle)
+router.post('/:id/send-mail', InvoiceMailController.sendInvoiceMail);
 
 // Route spécifique pour envoyer la facture
 router.post('/:id/send', InvoicesController.sendInvoice);

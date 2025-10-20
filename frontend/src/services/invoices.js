@@ -59,6 +59,16 @@ export function useInvoiceService() {
       }),
     [request]
   );
+
+  const sendInvoiceMail = useCallback(
+    (id, message) =>
+      request(`${API_BASE}/${id}/send-mail`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      }),
+    [request]
+  );
   
   const getInvoiceStatus = useCallback((id) => request(`${API_BASE}/${id}/status`), [request]);
 
@@ -171,6 +181,7 @@ export function useInvoiceService() {
     deleteInvoice,
     generateInvoicePdf,
     sendInvoice,
+    sendInvoiceMail,
     getInvoiceStatus,
     pollInvoiceStatusPDP, 
     refreshInvoiceLifecycle,
