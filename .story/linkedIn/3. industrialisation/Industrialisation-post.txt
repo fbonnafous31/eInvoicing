@@ -7,10 +7,10 @@ Ce projet m’a fait découvrir tout ce qui va au-delà du développement : fiab
 Pour que le produit puisse être testé et présenté en toute sécurité, j’ai progressivement mis en place :
 🗸 Une stratégie de tests complète ✅ pour garantir que tout fonctionne correctement
 🗸 Des processus automatisés ⚙️ pour simplifier les mises à jour
+🗸 Une vitrine publique accessible à tous 🌱 :
+🔗 https://e-invoicing-landing.vercel.app
 🗸 Un environnement de démonstration 🌱 accessible à tous : 
 🔗 https://einvoicing-staging-frontend.onrender.com
-👤 Login : francois.bonnafous@hotmail.fr
-🔐 Mot de passe : eInvoice2026
 🗸 Une connexion à un PDP réel (sandbox Iopole) pour émettre et recevoir des factures
 🗸 Une pipeline CI/CD 🚀 pour déployer facilement et de manière reproductible
 🗸 Des outils de monitoring 📊 pour suivre la santé du système et détecter les problèmes

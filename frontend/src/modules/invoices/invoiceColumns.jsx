@@ -8,6 +8,8 @@ import { FaFilePdf } from "react-icons/fa";
 import { canSendInvoice } from '../../utils/businessRules/invoiceStatus';
 import { useInvoiceService } from '../../services/invoices';
 import { downloadFile } from '../../utils/downloadFile';
+import { useSellerService } from '@/services/sellers';
+import { useState, useEffect } from 'react';
 
 export default function useInvoiceColumns(invoiceService, onTechnicalStatusChange, onBusinessStatusChange, onInvoiceUpdate) {
   const navigate = useNavigate();
@@ -39,9 +41,9 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
   };
 
   // -------------------- Colonnes du tableau --------------------
-  return [
-    {
-      name: 'Voir / Modifier / PDF ',
+  const allColumns = [
+    {      
+      name: 'Voir/Modifier/PDF',
       style: { textAlign: 'left', paddingLeft: '20px' },
       ignoreRowClick: true,
       width: '150px',      
@@ -399,4 +401,31 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
       width: '150px',
     }
   ];
+
+  const sellerService = useSellerService();
+  const [sellerPlan, setSellerPlan] = useState("essentiel");
+
+  // On récupère le plan du vendeur connecté
+  useEffect(() => {
+    const fetchSellerPlan = async () => {
+      try {
+        const seller = await sellerService.fetchMySeller();
+        setSellerPlan(seller?.plan || "essentiel");
+      } catch (err) {
+        console.error("Impossible de récupérer le plan du vendeur :", err);
+        setSellerPlan("essentiel");
+      }
+    };
+    fetchSellerPlan();
+  }, [sellerService]);  
+  console.log("Seller plan:", sellerPlan);
+
+  const filteredColumns = allColumns.filter(col => {
+    // Liste des colonnes à masquer pour le plan "essentiel"
+    const colsToHideForEssentiel = ["Envoyer / Statut", "Statut facture", "Statut PDP"];
+    if (sellerPlan === "essentiel" && colsToHideForEssentiel.includes(col.name)) return false;
+    return true;
+  });
+
+  return filteredColumns;  
 }

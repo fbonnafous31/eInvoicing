@@ -449,6 +449,7 @@ async function getInvoicesBySeller(sellerId) {
   const result = await pool.query(
     `SELECT 
         i.*,
+        s.plan AS seller_plan,
         c.id AS client_id,
         c.is_company AS client_is_company,
         c.firstname AS client_firstname,
@@ -463,6 +464,7 @@ async function getInvoicesBySeller(sellerId) {
         c.email AS client_email,
         c.phone AS client_phone
      FROM invoicing.invoices i
+     JOIN invoicing.sellers s ON i.seller_id = s.id
      LEFT JOIN invoicing.clients c ON i.client_id = c.id
      WHERE i.seller_id = $1
      ORDER BY i.created_at DESC`,
@@ -472,6 +474,7 @@ async function getInvoicesBySeller(sellerId) {
   // On transforme chaque row pour imbriquer les infos client dans un objet `client`
   return result.rows.map(row => ({
     ...row,
+    plan: row.seller_plan, 
     client: {
       id: row.client_id,
       is_company: row.client_is_company,

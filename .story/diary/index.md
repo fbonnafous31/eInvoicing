@@ -123,3 +123,4 @@
 - [Jour 120 – Refacto et factorisation 🔄💻](jour-120.md)
 - [Jour 121 – Simulateur et déploiement Vercel 🚀💻](jour-121.md)
 - [Jour 122 – Formulaire de retours et amélioration des services 💬⚙️](jour-122.md)
+- [Jour 123 – Différenciation des offres : Essentiel vs Pro 💡💼](jour-123.md)
