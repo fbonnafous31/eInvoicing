@@ -88,6 +88,15 @@ async function checkIdentifier(req, res) {
   res.json({ exists });
 }
 
+async function testSmtp(req, res) {
+  try {
+    const result = await SellersService.testSmtp(req.body);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+}
+
 module.exports = {
   getSellers,
   createSeller,
@@ -95,5 +104,6 @@ module.exports = {
   deleteSeller,
   updateSeller,
   getMySeller,
-  checkIdentifier
+  checkIdentifier, 
+  testSmtp
 };

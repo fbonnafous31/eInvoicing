@@ -1,5 +1,5 @@
-const db = require('../../config/db');  
-
+const db = require('../../config/db');
+const nodemailer = require('nodemailer');
 const SellersModel = require('./sellers.model');
 
 async function listSellers() {
@@ -47,6 +47,28 @@ async function getMySeller(auth0_id) {
   return await getSellerByAuth0Id(auth0_id);
 }
 
+async function testSmtp(config) {
+  const transporter = nodemailer.createTransport({
+    host: config.smtp_host,
+    port: config.smtp_port,
+    secure: config.smtp_secure,
+    auth: {
+      user: config.smtp_user,
+      pass: config.smtp_pass,
+    },
+    connectionTimeout: 5000, 
+    greetingTimeout: 5000,   
+    socketTimeout: 5000,     
+  });
+
+  try {
+    await transporter.verify();
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
 module.exports = {
   listSellers,
   createSeller,
@@ -55,5 +77,6 @@ module.exports = {
   updateSellerData, 
   getSellerByAuth0Id,
   checkIdentifierExists,
-  getMySeller
+  getMySeller,
+  testSmtp
 };

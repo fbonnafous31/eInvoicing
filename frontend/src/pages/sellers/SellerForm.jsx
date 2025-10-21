@@ -3,12 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import countries from "i18n-iso-countries";
 import enLocale from "i18n-iso-countries/langs/en.json";
-
-import LegalFields from './fields/LegalFields';
-import ContactFields from './fields/ContactFields';
-import AddressFields from './fields/AddressFields';
-import FinanceFields from './fields/FinanceFields';
-import MentionsFields from './fields/MentionsFields';
+import { LegalFields, ContactFields, AddressFields, FinanceFields, MentionsFields, SmtpFields } from './fields';
 import useSellerForm from '../../modules/sellers/useSellerForm';
 import { validateSeller } from '../../utils/validators/seller';
 import SaveButton from '@/components/ui/buttons/SaveButton';
@@ -90,7 +85,8 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
     { key: 'contact', label: 'Contact', component: ContactFields },
     { key: 'address', label: 'Adresse', component: AddressFields },
     { key: 'finances', label: 'Finances', component: FinanceFields },
-    { key: 'mentions', label: 'Mentions complémentaires', component: MentionsFields }
+    { key: 'mentions', label: 'Mentions complémentaires', component: MentionsFields },
+    { key: 'smtp', label: 'Paramètres SMTP', component: SmtpFields }
   ];
 
   return (

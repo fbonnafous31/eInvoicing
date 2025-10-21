@@ -124,3 +124,5 @@
 - [Jour 121 – Simulateur et déploiement Vercel 🚀💻](jour-121.md)
 - [Jour 122 – Formulaire de retours et amélioration des services 💬⚙️](jour-122.md)
 - [Jour 123 – Différenciation des offres : Essentiel vs Pro 💡💼](jour-123.md)
+- [Jour 124 – Réflexion et mise en place de l’envoi de mail 📧⚙️](jour-124.md)
+- [Jour 125 – Mise en place de la configuration SMTP pour les vendeurs 🏗️📧](jour-125.md)

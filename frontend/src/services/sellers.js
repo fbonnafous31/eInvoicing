@@ -46,6 +46,12 @@ export function useSellerService() {
       deleteSeller: () => request(`${API_BASE}`, { method: "DELETE" }), // supprime le vendeur connecté
       checkIdentifier: (identifier, sellerId) =>
         request(`${API_BASE}/check-identifier?identifier=${identifier}${sellerId ? `&id=${sellerId}` : ''}`),
+      testSmtp: (smtpData) =>
+        request(`${API_BASE}/smtp/test`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(smtpData),
+        }),
     };
   }, [getToken]);
 }

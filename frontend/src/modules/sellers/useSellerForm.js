@@ -27,11 +27,12 @@ export default function useSellerForm(initialData = {}) {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [openSections, setOpenSections] = useState({
-    legal: true,
-    contact: true,
-    address: true,
-    finances: true,
-    mentions: true,
+    legal: false,
+    contact: false,
+    address: false,
+    finances: false,
+    mentions: false,
+    smtp: false
   });
 
   const { checkIdentifier } = useSellerService();

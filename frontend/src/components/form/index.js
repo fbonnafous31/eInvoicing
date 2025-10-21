@@ -8,3 +8,4 @@ export { default as InputEmail } from './InputEmail';
 export { default as InputPhone } from './InputPhone';
 export { default as InputSiret } from './InputSiret';
 export { DatePickerField } from './DatePickerField';
+export { CheckboxField } from './CheckboxField';

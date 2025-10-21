@@ -13,6 +13,7 @@ export default function InputField({
   error = "",
   submitted = false,
   hideLabel = false,
+  helpText = "",
   ...props
 }) {
   // Détermination si le champ est en erreur

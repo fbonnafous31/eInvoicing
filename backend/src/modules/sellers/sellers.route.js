@@ -20,4 +20,7 @@ router.post('/', SellersController.createSeller);
 // Mettre à jour son vendeur
 router.put('/:id', SellersController.updateSeller);
 
+// Tester la connexion SMTP
+router.post('/smtp/test', SellersController.testSmtp);
+
 module.exports = router;
