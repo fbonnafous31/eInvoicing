@@ -9,3 +9,4 @@ export { default as InputPhone } from './InputPhone';
 export { default as InputSiret } from './InputSiret';
 export { DatePickerField } from './DatePickerField';
 export { CheckboxField } from './CheckboxField';
+export { default as PasswordInput } from './PasswordInput';

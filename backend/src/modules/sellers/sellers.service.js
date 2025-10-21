@@ -23,15 +23,16 @@ async function updateSellerData(id, sellerData) {
 }
 
 async function getSellerByAuth0Id(auth0_id) {
-  if (!auth0_id) return null; 
+  if (!auth0_id) return null;
 
-  const result = await db.query(
-    `SELECT *
-     FROM invoicing.sellers
-     WHERE auth0_id = $1`,
-    [auth0_id]
-  );
-  return result.rows[0] || null;
+  const sellerRes = await db.query(`SELECT * FROM invoicing.sellers WHERE auth0_id = $1`, [auth0_id]);
+  const seller = sellerRes.rows[0];
+  if (!seller) return null;
+
+  const smtpRes = await db.query(`SELECT * FROM invoicing.seller_smtp_settings WHERE seller_id = $1`, [seller.id]);
+  const smtp = smtpRes.rows[0] || {};
+
+  return { ...seller, ...smtp };
 }
 
 async function checkIdentifierExists(identifier, sellerId) {

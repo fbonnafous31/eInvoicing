@@ -23,6 +23,7 @@ export default function useSellerForm(initialData = {}) {
     additional_2: '',
     ...initialData,
   });
+  console.log("[useSellerForm] formData", formData);
 
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
