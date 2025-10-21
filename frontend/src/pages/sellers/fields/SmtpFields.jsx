@@ -1,19 +1,22 @@
 // frontend/src/pages/sellers/fields/SmtpFields.jsx
 import React, { useState } from 'react';
-import { InputField, CheckboxField, PasswordInput} from '@/components/form';
+import { InputField, CheckboxField, PasswordInput } from '@/components/form';
 import { useSellerService } from '@/services/sellers';
 
 export default function SmtpFields({ formData, handleChange, disabled, errors, setErrors }) {
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState(null);
 
-  const isDisabled = disabled || !formData.active;
   const sellerService = useSellerService();
 
-  const handleCheckboxChange = (e) => {
-    handleChange('active', e.target.checked);
+  // Assurer que formData.smtp existe
+  const smtp = formData.smtp || {};
 
-    // Si on désactive l'envoi SMTP, on peut effacer les erreurs
+  const isDisabled = disabled || !smtp.active;
+
+  const handleCheckboxChange = (e) => {
+    handleChange('smtp', { ...smtp, active: e.target.checked });
+
     if (!e.target.checked && setErrors) {
       setErrors((prev) => {
         const copy = { ...prev };
@@ -27,19 +30,22 @@ export default function SmtpFields({ formData, handleChange, disabled, errors, s
     }
   };
 
-  // Validation locale pour empêcher l'envoi de valeurs nulles
+  const handleSmtpChange = (field, value) => {
+    handleChange('smtp', { ...smtp, [field]: value });
+  };
+
   const validateFields = () => {
-    if (!formData.active) return true; // Pas actif = pas de validation SMTP
+    if (!smtp.active) return true;
 
     const newErrors = {};
-    if (!formData.smtp_host) newErrors.smtp_host = 'Le host SMTP est requis';
-    if (!formData.smtp_port) newErrors.smtp_port = 'Le port SMTP est requis';
-    if (!formData.smtp_user) newErrors.smtp_user = 'L’utilisateur SMTP est requis';
-    if (!formData.smtp_pass) newErrors.smtp_pass = 'Le mot de passe SMTP est requis';
-    if (!formData.smtp_from) newErrors.smtp_from = 'L’email d’expéditeur est requis';
+    if (!smtp.smtp_host) newErrors.smtp_host = 'Le host SMTP est requis';
+    if (!smtp.smtp_port) newErrors.smtp_port = 'Le port SMTP est requis';
+    if (!smtp.smtp_user) newErrors.smtp_user = 'L’utilisateur SMTP est requis';
+    if (!smtp.smtp_pass) newErrors.smtp_pass = 'Le mot de passe SMTP est requis';
+    if (!smtp.smtp_from) newErrors.smtp_from = 'L’email d’expéditeur est requis';
 
     if (Object.keys(newErrors).length > 0) {
-      setErrors?.(prev => ({ ...prev, ...newErrors }));
+      setErrors?.((prev) => ({ ...prev, ...newErrors }));
       return false;
     }
     return true;
@@ -56,7 +62,7 @@ export default function SmtpFields({ formData, handleChange, disabled, errors, s
         setTimeout(() => reject(new Error('Connexion expirée')), 5000)
       );
 
-      const data = await Promise.race([sellerService.testSmtp(formData), timeoutPromise]);
+      const data = await Promise.race([sellerService.testSmtp(smtp), timeoutPromise]);
 
       if (data.success) {
         setTestResult({ message: 'Connexion réussie ✅', success: true });
@@ -76,7 +82,7 @@ export default function SmtpFields({ formData, handleChange, disabled, errors, s
         id="smtp_active"
         name="active"
         label="Activer l'envoi de mails"
-        checked={formData.active || false}
+        checked={smtp.active || false}
         onChange={handleCheckboxChange}
         disabled={disabled}
       />
@@ -85,10 +91,10 @@ export default function SmtpFields({ formData, handleChange, disabled, errors, s
         id="smtp_host"
         name="smtp_host"
         label="SMTP Host"
-        value={formData.smtp_host || ''}
-        onChange={(value) => handleChange('smtp_host', value)}
+        value={smtp.smtp_host || ''}
+        onChange={(value) => handleSmtpChange('smtp_host', value)}
         disabled={isDisabled}
-        error={errors.smtp_host}
+        error={errors?.smtp_host}
         helpText="Ex: smtp.gmail.com"
       />
 
@@ -97,10 +103,10 @@ export default function SmtpFields({ formData, handleChange, disabled, errors, s
         name="smtp_port"
         label="SMTP Port"
         type="number"
-        value={formData.smtp_port || ''}
-        onChange={(value) => handleChange('smtp_port', parseInt(value) || '')}
+        value={smtp.smtp_port || ''}
+        onChange={(value) => handleSmtpChange('smtp_port', parseInt(value) || '')}
         disabled={isDisabled}
-        error={errors.smtp_port}
+        error={errors?.smtp_port}
         helpText="Ex: 587"
       />
 
@@ -108,8 +114,8 @@ export default function SmtpFields({ formData, handleChange, disabled, errors, s
         id="smtp_secure"
         name="smtp_secure"
         label="Connexion sécurisée (SSL/TLS)"
-        checked={formData.smtp_secure || false}
-        onChange={(e) => handleChange('smtp_secure', e.target.checked)}
+        checked={smtp.smtp_secure || false}
+        onChange={(e) => handleSmtpChange('smtp_secure', e.target.checked)}
         disabled={isDisabled}
       />
 
@@ -117,16 +123,16 @@ export default function SmtpFields({ formData, handleChange, disabled, errors, s
         id="smtp_user"
         name="smtp_user"
         label="Utilisateur SMTP (email)"
-        value={formData.smtp_user || ''}
-        onChange={(value) => handleChange('smtp_user', value)}
+        value={smtp.smtp_user || ''}
+        onChange={(value) => handleSmtpChange('smtp_user', value)}
         disabled={isDisabled}
-        error={errors.smtp_user}
+        error={errors?.smtp_user}
       />
 
       <PasswordInput
-        value={formData.smtp_pass}
-        onChange={(value) => handleChange('smtp_pass', value)}
-        error={errors.smtp_pass}
+        value={smtp.smtp_pass || ''}
+        onChange={(value) => handleSmtpChange('smtp_pass', value)}
+        error={errors?.smtp_pass}
         disabled={isDisabled}
         helpText="Mot de passe d'application si nécessaire."
       />
@@ -135,10 +141,10 @@ export default function SmtpFields({ formData, handleChange, disabled, errors, s
         id="smtp_from"
         name="smtp_from"
         label="Email d'expéditeur"
-        value={formData.smtp_from || ''}
-        onChange={(value) => handleChange('smtp_from', value)}
+        value={smtp.smtp_from || ''}
+        onChange={(value) => handleSmtpChange('smtp_from', value)}
         disabled={isDisabled}
-        error={errors.smtp_from}
+        error={errors?.smtp_from}
       />
 
       <button

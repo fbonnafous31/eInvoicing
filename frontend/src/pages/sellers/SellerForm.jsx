@@ -30,13 +30,14 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
   // Validation SMTP
   // ---------------------
   const validateSmtpFields = (data) => {
-    if (!data.active) return {};
+    const smtp = data.smtp || {};
+    if (!smtp.active) return {};
     const smtpErrors = {};
-    if (!data.smtp_host) smtpErrors.smtp_host = "Le host SMTP est requis";
-    if (!data.smtp_port) smtpErrors.smtp_port = "Le port SMTP est requis";
-    if (!data.smtp_user) smtpErrors.smtp_user = "L’utilisateur SMTP est requis";
-    if (!data.smtp_pass) smtpErrors.smtp_pass = "Le mot de passe SMTP est requis";
-    if (!data.smtp_from) smtpErrors.smtp_from = "L’email d’expéditeur est requis";
+    if (!smtp.smtp_host) smtpErrors.smtp_host = "Le host SMTP est requis";
+    if (!smtp.smtp_port) smtpErrors.smtp_port = "Le port SMTP est requis";
+    if (!smtp.smtp_user) smtpErrors.smtp_user = "L’utilisateur SMTP est requis";
+    if (!smtp.smtp_pass) smtpErrors.smtp_pass = "Le mot de passe SMTP est requis";
+    if (!smtp.smtp_from) smtpErrors.smtp_from = "L’email d’expéditeur est requis";
     return smtpErrors;
   };
 
@@ -78,6 +79,7 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
 
     const payload = {
       ...formData,
+      ...formData.smtp, 
       legal_identifier: formData.country_code === 'FR' ? cleanedSiret : formData.vat_number?.trim() || null,
     };
 

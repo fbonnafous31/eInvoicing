@@ -13,7 +13,7 @@ import { useState, useEffect } from 'react';
 
 export default function useInvoiceColumns(invoiceService, onTechnicalStatusChange, onBusinessStatusChange, onInvoiceUpdate) {
   const navigate = useNavigate();
-  const { generateInvoicePdf, API_ROOT } = useInvoiceService();
+  const { generateInvoicePdf, sendInvoiceMail, API_ROOT } = useInvoiceService();
 
   // -------------------- Polling du statut technique --------------------
   const pollStatus = async (invoiceId, interval = 2000, timeout = 60000) => {
@@ -111,6 +111,24 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
             }}
           >
             <FaFilePdf size={18} color="red" style={{ position: "relative", top: "-2px" }} />
+          </button>
+
+          {/* Bouton envoi mail */}
+          <button
+            className="btn btn-sm btn-link p-0 m-0 align-middle text-decoration-none ml-2"
+            title="Envoyer la facture par email"
+            onClick={async () => {
+              if (!row?.id) return;
+
+              try {
+                await sendInvoiceMail(row.id, `Bonjour ${row.client?.legal_name},\n\nVoici votre facture ${row.invoice_number}.\n\nCordialement,\n${row.seller?.legal_name}`);
+                alert('📧 Facture envoyée par email !');
+              } catch (err) {
+                console.error(err);
+                alert(`❌ Erreur lors de l'envoi : ${err.message}`);
+              }
+            }}
+          > ✉️
           </button>
         </div>
       ),

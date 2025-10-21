@@ -126,3 +126,4 @@
 - [Jour 123 – Différenciation des offres : Essentiel vs Pro 💡💼](jour-123.md)
 - [Jour 124 – Réflexion et mise en place de l’envoi de mail 📧⚙️](jour-124.md)
 - [Jour 125 – Mise en place de la configuration SMTP pour les vendeurs 🏗️📧](jour-125.md)
+- [Jour 126 – Bouton d’envoi de facture et activation dans l’application 📬✨](jour-126.md)

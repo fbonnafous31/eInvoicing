@@ -105,7 +105,7 @@ async function insertSeller(sellerData, auth0_id) {
 /* --- Récupérer un vendeur avec sa config SMTP --- */
 async function getSellerById(id) {
   const result = await pool.query(
-    `SELECT s.*, smtp.smtp_host, smtp.smtp_port, smtp.smtp_secure, smtp.smtp_user, smtp.smtp_from, smtp.active
+    `SELECT s.*, smtp.smtp_host, smtp.smtp_port, smtp.smtp_secure, smtp.smtp_user, smtp.smtp_from, smtp.active, smtp.smtp_pass
      FROM invoicing.sellers s
      LEFT JOIN invoicing.seller_smtp_settings smtp ON s.id = smtp.seller_id
      WHERE s.id = $1`,

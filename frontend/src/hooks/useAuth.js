@@ -9,7 +9,7 @@ export function useAuth() {
     try {
       // 🔹 Récupération des variables selon l'environnement
       const env = import.meta.env.DEV
-        ? import.meta.env          // dev → variables Vite
+        ? import.meta.env           // dev → variables Vite
         : window.__ENV__ || {};     // prod → config.js injecté par Nginx
 
       const audience = env.VITE_AUTH0_AUDIENCE;
