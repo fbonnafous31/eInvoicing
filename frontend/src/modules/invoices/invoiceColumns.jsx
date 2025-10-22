@@ -43,8 +43,8 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
   // -------------------- Colonnes du tableau --------------------
   const allColumns = [
     {      
-      name: 'Voir/Modifier/PDF',
-      style: { textAlign: 'left', paddingLeft: '20px' },
+      name: 'Actions',
+      style: { textAlign: 'left' },
       ignoreRowClick: true,
       width: '150px',      
       cell: row => (

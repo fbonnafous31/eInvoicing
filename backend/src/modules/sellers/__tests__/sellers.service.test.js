@@ -84,8 +84,13 @@ describe('SellersService', () => {
 
   // ---- Méthodes utilisant db.query ----
   it('getSellerByAuth0Id retourne un vendeur', async () => {
-    const row = { id: 1, name: 'Alice' };
-    db.query.mockResolvedValue({ rows: [row] });
+    const sellerRow = { id: 1, name: 'Alice' };
+    const smtpRow = { id: 1, smtp_host: 'smtp.example.com' };
+    
+    // Mock de la DB
+    db.query
+      .mockResolvedValueOnce({ rows: [sellerRow] }) // première requête : seller
+      .mockResolvedValueOnce({ rows: [smtpRow] });  // deuxième requête : SMTP
 
     const result = await SellersService.getSellerByAuth0Id(auth0_id);
 
@@ -93,7 +98,9 @@ describe('SellersService', () => {
       expect.stringContaining('WHERE auth0_id = $1'),
       [auth0_id]
     );
-    expect(result).toEqual(row);
+
+    // On attend maintenant que smtp soit dans un sous-objet
+    expect(result).toEqual({ ...sellerRow, smtp: smtpRow });
   });
 
   it('getSellerByAuth0Id retourne null si aucun résultat', async () => {
@@ -131,12 +138,16 @@ describe('SellersService', () => {
 
   // ---- getMySeller ----
   it('getMySeller appelle getSellerByAuth0Id et retourne le vendeur', async () => {
-    const row = { id: 1 };
-    db.query.mockResolvedValue({ rows: [row] });
+    const sellerRow = { id: 1, name: 'Alice' };
+    const smtpRow = { id: 1, smtp_host: 'smtp.example.com' };
+
+    db.query
+      .mockResolvedValueOnce({ rows: [sellerRow] }) // seller
+      .mockResolvedValueOnce({ rows: [smtpRow] });  // smtp
 
     const result = await SellersService.getMySeller(auth0_id);
 
-    expect(result).toEqual(row);
+    expect(result).toEqual({ ...sellerRow, smtp: smtpRow });
   });
 
   it('getMySeller retourne null si auth0_id absent', async () => {

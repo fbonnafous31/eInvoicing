@@ -33,11 +33,12 @@ describe('useSellerForm', () => {
     expect(result.current.errors).toEqual({});
     expect(result.current.touched).toEqual({});
     expect(result.current.openSections).toEqual({
-      legal: true,
-      contact: true,
-      address: true,
-      finances: true,
-      mentions: true,
+      legal: false,
+      contact: false,
+      address: false,
+      finances: false,
+      mentions: false,
+      smtp: false,
     });
   });
 
@@ -64,11 +65,12 @@ describe('useSellerForm', () => {
   it('toggleSection inverse l’état de la section', () => {
     const { result } = renderHook(() => useSellerForm());
 
-    act(() => result.current.toggleSection('contact'));
-    expect(result.current.openSections.contact).toBe(false);
-
+    // Initialement fermé (false)
     act(() => result.current.toggleSection('contact'));
     expect(result.current.openSections.contact).toBe(true);
+
+    act(() => result.current.toggleSection('contact'));
+    expect(result.current.openSections.contact).toBe(false);
   });
 
   it('checkIdentifierAPI renvoie valid=false si l’identifiant existe', async () => {
