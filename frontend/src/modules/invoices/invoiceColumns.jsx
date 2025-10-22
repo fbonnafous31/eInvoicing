@@ -121,15 +121,32 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
               if (!row?.id) return;
 
               try {
-                await sendInvoiceMail(row.id, `Bonjour ${row.client?.legal_name},\n\nVoici votre facture ${row.invoice_number}.\n\nCordialement,\n${row.seller?.legal_name}`);
+                // Construction du message par défaut avec fallback sur seller.legal_name
+                const clientName = row.client?.legal_name || 'Client';
+                const sellerName = row.seller?.legal_name || 'Votre société';
+                const invoiceNumber = row.invoice_number || '';
+
+                const defaultMessage = `Bonjour ${clientName},
+
+                Nous espérons que vous allez bien.
+                Veuillez trouver ci-joint votre facture n°${invoiceNumber}.
+
+                Si vous avez la moindre question, n'hésitez pas à nous contacter.
+
+                Cordialement,
+                ${sellerName}`;
+
+                await sendInvoiceMail(row.id, defaultMessage);
                 alert('📧 Facture envoyée par email !');
               } catch (err) {
                 console.error(err);
                 alert(`❌ Erreur lors de l'envoi : ${err.message}`);
               }
             }}
-          > ✉️
+          >
+            ✉️
           </button>
+
         </div>
       ),
     },
