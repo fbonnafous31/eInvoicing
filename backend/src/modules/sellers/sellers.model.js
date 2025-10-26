@@ -147,7 +147,8 @@ async function updateSeller(id, data) {
       smtp_pass,
       smtp_secure,
       smtp_from,
-      seller_id, // vrai identifiant DB
+      active: smtp_active,      
+      seller_id, 
       ...mainData
     } = data;
 
@@ -219,9 +220,9 @@ async function updateSeller(id, data) {
               smtp_pass = $4,
               smtp_secure = $5,
               smtp_from = $6,
-              active = true,
+              active = $7,
               updated_at = NOW()
-          WHERE seller_id = $7
+          WHERE seller_id = $8
           `,
           [
             smtp_host,
@@ -230,6 +231,7 @@ async function updateSeller(id, data) {
             smtp_pass,
             smtp_secure || false,
             smtp_from,
+            smtp_active ?? true, 
             sellerDbId
           ]
         );
@@ -239,7 +241,7 @@ async function updateSeller(id, data) {
           `
           INSERT INTO invoicing.seller_smtp_settings
           (seller_id, smtp_host, smtp_port, smtp_user, smtp_pass, smtp_secure, smtp_from, active)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, true)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
           `,
           [
             sellerDbId,
@@ -248,7 +250,8 @@ async function updateSeller(id, data) {
             smtp_user,
             smtp_pass,
             smtp_secure || false,
-            smtp_from
+            smtp_from,
+            smtp_active ?? true
           ]
         );
       }
