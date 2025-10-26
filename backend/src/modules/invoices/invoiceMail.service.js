@@ -8,21 +8,20 @@ const { getSellerById } = require('../sellers/sellers.model');
  * Envoi une facture par email en utilisant la configuration SMTP du vendeur
  * @param {number} invoiceId - L'identifiant de la facture
  * @param {string} [message] - Message personnalisé
+ * @param {string} [subject] - Sujet personnalisé
+ * @param {string} [to] - Destinataire personnalisé
  * @returns {Promise<object>} - Résultat Nodemailer
  */
-async function sendInvoiceMail(invoiceId, message) {
+async function sendInvoiceMail(invoiceId, message, subject, to) {
   console.log(`[sendInvoiceMail] Début de l’envoi pour invoiceId=${invoiceId}`);
 
-  // --- Récupération de la facture
   const invoice = await getInvoiceById(invoiceId);
   if (!invoice) throw new Error("Facture introuvable");
-  if (!invoice.client?.email) throw new Error("Client n'a pas d'email");
+  if (!invoice.client?.email && !to) throw new Error("Client n'a pas d'email");
 
-  // --- Récupération du vendeur et sa config SMTP
   const seller = await getSellerById(invoice.seller_id);
   if (!seller) throw new Error("Vendeur introuvable");
 
-  // --- SMTP fallback
   const smtp = seller.smtp_settings || {
     smtp_host: seller.smtp_host,
     smtp_port: seller.smtp_port,
@@ -39,16 +38,15 @@ async function sendInvoiceMail(invoiceId, message) {
 
   console.log(`[sendInvoiceMail] SMTP du vendeur : host=${smtp.smtp_host} user=${smtp.smtp_user}`);
 
-  // --- Chercher le PDF/A-3
+  // PDF/A-3
   const pdfAttachment = invoice.attachments?.find(a => a.filename?.toLowerCase().endsWith('_pdf-a3.pdf'));
   const pdfPath = pdfAttachment
     ? path.join(__dirname, '../../uploads/pdf-a3', pdfAttachment.filename)
     : path.join(__dirname, '../../uploads/pdf-a3', `${invoice.id}_pdf-a3.pdf`);
-
   if (!fs.existsSync(pdfPath)) throw new Error("PDF/A-3 introuvable");
   console.log(`[sendInvoiceMail] PDF trouvé : ${pdfPath}`);
 
-  // --- Création du transporteur Nodemailer
+  // Transporteur Nodemailer
   const transporter = nodemailer.createTransport({
     host: smtp.smtp_host,
     port: Number(smtp.smtp_port) || 587,
@@ -59,7 +57,6 @@ async function sendInvoiceMail(invoiceId, message) {
     }
   });
 
-  // --- Test de connexion SMTP
   try {
     console.log('[sendInvoiceMail] Vérification de la connexion SMTP...');
     await transporter.verify();
@@ -69,21 +66,16 @@ async function sendInvoiceMail(invoiceId, message) {
     throw err;
   }
 
-  // --- Fallbacks et texte par défaut
   const sellerName = seller?.legal_name?.trim() || 'Votre société';
   const invoiceNumber = invoice.invoice_number?.trim() || '';
   const fromAddress = smtp.smtp_from || smtp.smtp_user || 'no-reply@example.com';
   const clientName = invoice.client?.legal_name || 'Client';
-  const clientEmail = invoice.client?.email;
+  const clientEmail = to || invoice.client?.email;
 
   const useMessage = message?.trim() ? message : null;
+  const finalSubject = subject?.trim() || `Votre facture ${invoiceNumber} de ${sellerName}`;
 
-  const mailOptions = {
-    from: fromAddress,
-    to: clientEmail,
-    subject: `Votre facture ${invoiceNumber} de ${sellerName}`,
-    text: useMessage || 
-`Bonjour ${clientName},
+  const defaultText = `Bonjour ${clientName},
 
 Nous espérons que vous allez bien.
 Veuillez trouver ci-joint votre facture n°${invoiceNumber}.
@@ -91,20 +83,25 @@ Veuillez trouver ci-joint votre facture n°${invoiceNumber}.
 Si vous avez la moindre question, n'hésitez pas à nous contacter.
 
 Cordialement,
-${sellerName}`,
-    html: useMessage
-      ? `<p>${useMessage.replace(/\n/g, '<br>')}</p>`
-      : `<p>Bonjour ${clientName},</p>
-         <p>Nous espérons que vous allez bien.</p>
-         <p>Veuillez trouver ci-joint votre facture <strong>n°${invoiceNumber}</strong>.</p>
-         <p>Si vous avez la moindre question, n'hésitez pas à nous contacter.</p>
-         <p>Cordialement,<br/>${sellerName}</p>`,
+${sellerName}`;
+
+  const defaultHtml = `<p>Bonjour ${clientName},</p>
+<p>Nous espérons que vous allez bien.</p>
+<p>Veuillez trouver ci-joint votre facture <strong>n°${invoiceNumber}</strong>.</p>
+<p>Si vous avez la moindre question, n'hésitez pas à nous contacter.</p>
+<p>Cordialement,<br/>${sellerName}</p>`;
+
+  const mailOptions = {
+    from: fromAddress,
+    to: clientEmail,
+    subject: finalSubject,
+    text: useMessage || defaultText,
+    html: useMessage ? `<p>${useMessage.replace(/\n/g, '<br>')}</p>` : defaultHtml,
     attachments: [
       { filename: `${invoiceNumber}_PDF-A3.pdf`, path: pdfPath }
     ]
   };
 
-  // --- Envoi du mail
   try {
     const info = await transporter.sendMail(mailOptions);
     console.log(`[sendInvoiceMail] Email envoyé avec succès à ${clientEmail}`);

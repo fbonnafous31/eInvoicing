@@ -61,11 +61,11 @@ export function useInvoiceService() {
   );
 
   const sendInvoiceMail = useCallback(
-    (id, message) =>
+    (id, { message, subject, to }) =>
       request(`${API_BASE}/${id}/send-mail`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message, subject, to }),
       }),
     [request]
   );
