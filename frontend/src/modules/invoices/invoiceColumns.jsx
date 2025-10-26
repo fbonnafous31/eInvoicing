@@ -41,6 +41,38 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
     });
   };
 
+  const sellerService = useSellerService();
+  const [sellerPlan, setSellerPlan] = useState("essentiel");
+  const [sellerActive, setSellerActive] = useState(false);
+
+  // On récupère les infos du vendeur connecté
+  useEffect(() => {
+    const fetchSellerInfo = async () => {
+      try {
+        const seller = await sellerService.fetchMySeller();
+        console.log("Seller raw from service:", seller);
+
+        // Plan principal du vendeur
+        const plan = seller?.plan || "essentiel";
+        setSellerPlan(plan);
+
+        // L'active correspond au SMTP actif
+        const isActive = seller?.smtp?.active === true;
+        setSellerActive(isActive);
+
+        console.log("Seller plan:", plan, "Active:", isActive);
+      } catch (err) {
+        console.error("Impossible de récupérer le vendeur :", err);
+        setSellerPlan("essentiel");
+        setSellerActive(false);
+      }
+    };
+
+    fetchSellerInfo();
+  }, [sellerService]);
+
+  console.log("Seller plan:", sellerPlan, "Active:", sellerActive);
+
   const InvoiceEmailButton = ({ row, sendInvoiceMail }) => {
   const [showModal, setShowModal] = useState(false);
 
@@ -166,7 +198,9 @@ ${sellerName}`,
           </button>
 
           {/* Bouton envoi mail */}
-          <InvoiceEmailButton row={row} sendInvoiceMail={sendInvoiceMail} />
+          {sellerActive && (
+            <InvoiceEmailButton row={row} sendInvoiceMail={sendInvoiceMail} />
+          )}
 
         </div>
       ),
@@ -457,24 +491,6 @@ ${sellerName}`,
       width: '150px',
     }
   ];
-
-  const sellerService = useSellerService();
-  const [sellerPlan, setSellerPlan] = useState("essentiel");
-
-  // On récupère le plan du vendeur connecté
-  useEffect(() => {
-    const fetchSellerPlan = async () => {
-      try {
-        const seller = await sellerService.fetchMySeller();
-        setSellerPlan(seller?.plan || "essentiel");
-      } catch (err) {
-        console.error("Impossible de récupérer le plan du vendeur :", err);
-        setSellerPlan("essentiel");
-      }
-    };
-    fetchSellerPlan();
-  }, [sellerService]);  
-  console.log("Seller plan:", sellerPlan);
 
   const filteredColumns = allColumns.filter(col => {
     // Liste des colonnes à masquer pour le plan "essentiel"
