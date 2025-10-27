@@ -1,4 +1,5 @@
 const pool = require('../../config/db');
+const { encrypt, decrypt } = require('../../utils/encryption');
 
 /* --- Récupérer tous les vendeurs (sans SMTP) --- */
 async function getAllSellers() {
@@ -84,11 +85,13 @@ async function insertSeller(sellerData, auth0_id) {
 
     // Insertion SMTP si présente
     if (smtp_host && smtp_user) {
+      const encryptedPass = smtp_pass ? encrypt(smtp_pass) : null;
+
       await client.query(
         `INSERT INTO invoicing.seller_smtp_settings
           (seller_id, smtp_host, smtp_port, smtp_secure, smtp_user, smtp_pass, smtp_from, active)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, true)`,
-        [seller.id, smtp_host, smtp_port || 587, smtp_secure || false, smtp_user, smtp_pass, smtp_from]
+        VALUES ($1, $2, $3, $4, $5, $6, $7, true)`,
+        [seller.id, smtp_host, smtp_port || 587, smtp_secure || false, smtp_user, encryptedPass, smtp_from]
       );
     }
 
@@ -111,8 +114,21 @@ async function getSellerById(id) {
      WHERE s.id = $1`,
     [id]
   );
-  return result.rows[0] || null;
+
+  const seller = result.rows[0];
+  if (!seller) return null;
+
+  if (seller.smtp_pass) {
+    try {
+      seller.smtp_pass = decrypt(seller.smtp_pass);
+    } catch {
+      seller.smtp_pass = '';
+    }
+  }
+
+  return seller;
 }
+
 
 /* --- Supprimer un vendeur et sa config SMTP --- */
 async function removeSeller(id) {
@@ -211,13 +227,15 @@ async function updateSeller(id, data) {
 
       if (existing.rows.length > 0) {
         console.log('[updateSeller] updating existing SMTP settings...');
+        const encryptedPass = smtp_pass ? encrypt(smtp_pass) : null;
+
         await client.query(
           `
           UPDATE invoicing.seller_smtp_settings
           SET smtp_host = $1,
               smtp_port = $2,
               smtp_user = $3,
-              smtp_pass = $4,
+              smtp_pass = COALESCE($4, smtp_pass),
               smtp_secure = $5,
               smtp_from = $6,
               active = $7,
@@ -228,7 +246,7 @@ async function updateSeller(id, data) {
             smtp_host,
             smtp_port || 587,
             smtp_user,
-            smtp_pass,
+            encryptedPass,
             smtp_secure || false,
             smtp_from,
             smtp_active ?? true, 
