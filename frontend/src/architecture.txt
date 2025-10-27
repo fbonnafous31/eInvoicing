@@ -2,50 +2,80 @@
 ├── App.css
 ├── App.jsx
 ├── AppRoutes.jsx
+├── AppRoutes.test.jsx
+├── App.test.jsx
 ├── architecture.txt
 ├── assets
 │   ├── pdf.worker.min.mjs
 │   ├── react.svg
 │   └── sample-invoice.pdf
 ├── AuthProvider.jsx
+├── AuthProvider.test.jsx
 ├── components
 │   ├── architecture.txt
 │   ├── auth
 │   │   ├── LoginButton.jsx
+│   │   ├── LoginButton.test.jsx
 │   │   ├── LogoutButton.jsx
-│   │   └── PrivateRoute.jsx
+│   │   ├── LogoutButton.test.jsx
+│   │   ├── PrivateRoute.jsx
+│   │   └── PrivateRoute.test.jsx
 │   ├── common
 │   │   ├── AuditPanel.jsx
-│   │   └── EllipsisCell.jsx
+│   │   ├── AuditPanel.test.jsx
+│   │   ├── EllipsisCell.jsx
+│   │   └── EllipsisCell.test.jsx
 │   ├── form
+│   │   ├── CheckboxField.jsx
 │   │   ├── DatePickerField.css
 │   │   ├── DatePickerField.jsx
 │   │   ├── FormSection.jsx
+│   │   ├── FormSection.test.jsx
 │   │   ├── index.js
 │   │   ├── InputEmail.jsx
+│   │   ├── InputEmail.test.jsx
 │   │   ├── InputField.jsx
+│   │   ├── InputField.test.jsx
 │   │   ├── InputPhone.jsx
+│   │   ├── InputPhone.test.jsx
 │   │   ├── InputPostalCode.jsx
+│   │   ├── InputPostalCode.test.jsx
 │   │   ├── InputSiret.jsx
+│   │   ├── InputSiret.test.jsx
+│   │   ├── PasswordInput.jsx
 │   │   ├── SelectField.jsx
-│   │   └── TextAreaField.jsx
+│   │   ├── SelectField.test.jsx
+│   │   ├── TextAreaField.jsx
+│   │   └── TextAreaField.test.jsx
 │   ├── guard
 │   │   ├── RequireNoSeller.jsx
-│   │   └── RequireSeller.jsx
+│   │   ├── RequireNoSeller.test.jsx
+│   │   ├── RequireSeller.jsx
+│   │   └── RequireSeller.test.jsx
 │   ├── invoices
+│   │   ├── EmailModal.jsx
 │   │   ├── InvoiceClient.jsx
+│   │   ├── InvoiceClient.test.jsx
 │   │   ├── InvoiceForm.jsx
 │   │   ├── InvoiceHeader.jsx
+│   │   ├── InvoiceHeader.test.jsx
 │   │   ├── InvoiceLines.jsx
+│   │   ├── InvoiceLines.test.jsx
 │   │   ├── InvoiceTabs.jsx
+│   │   ├── InvoiceTabs.test.jsx
 │   │   ├── PdfViewer.jsx
+│   │   ├── PdfViewer.test.jsx
 │   │   ├── SupportingDocs.jsx
+│   │   ├── SupportingDocs.test.jsx
 │   │   ├── TaxBases.jsx
+│   │   ├── TaxBases.test.jsx
 │   │   └── TestPdfViewer.jsx
 │   ├── layout
 │   │   ├── Breadcrumb.jsx
+│   │   ├── Breadcrumb.test.jsx
 │   │   ├── NavBar.css
-│   │   └── NavBar.jsx
+│   │   ├── NavBar.jsx
+│   │   └── NavBar.test.jsx
 │   └── ui
 │       └── buttons
 ├── constants
@@ -55,68 +85,108 @@
 │   ├── paymentTerms.js
 │   └── translations.js
 ├── hooks
-│   └── useAuth.js
+│   ├── useAuth.js
+│   └── useAuth.test.js
 ├── index.css
 ├── LoginPage.css
 ├── LoginPage.jsx
+├── LoginPage.test.jsx
 ├── main.jsx
+├── main.test.jsx
 ├── modules
 │   ├── clients
 │   │   ├── clientColumns.jsx
+│   │   ├── clientColumns.test.jsx
 │   │   ├── useClientForm.js
-│   │   └── useClients.js
+│   │   ├── useClientForm.test.js
+│   │   ├── useClients.js
+│   │   └── useClients.test.js
 │   ├── common
 │   │   └── datatableStyles.js
 │   ├── invoices
 │   │   ├── BusinessStatusCell.jsx
+│   │   ├── BusinessStatusCell.test.jsx
 │   │   ├── invoiceColumns.jsx
-│   │   └── TechnicalStatusCell.jsx
+│   │   ├── invoiceColumns.test.jsx
+│   │   ├── TechnicalStatusCell.jsx
+│   │   └── TechnicalStatusCell.test.jsx
 │   └── sellers
 │       ├── sellerColumns.jsx
+│       ├── sellerColumns.test.jsx
 │       ├── useSellerForm.js
-│       └── useSellers.js
+│       ├── useSellerForm.test.js
+│       ├── useSellers.js
+│       └── useSellers.test.js
 ├── pages
 │   ├── AuthTest.jsx
+│   ├── AuthTest.test.jsx
 │   ├── clients
 │   │   ├── ClientDetail.jsx
+│   │   ├── ClientDetail.test.jsx
 │   │   ├── ClientForm.jsx
 │   │   ├── ClientsList.jsx
+│   │   ├── ClientsList.test.jsx
 │   │   ├── ClientsPage.jsx
 │   │   ├── fields
 │   │   └── NewClient.jsx
 │   ├── Home.jsx
+│   ├── Home.test.jsx
 │   ├── invoices
 │   │   ├── InvoiceDetail.jsx
+│   │   ├── invoiceDetail.test.jsx
 │   │   ├── InvoicesList.jsx
+│   │   ├── invoicesList.test.jsx
 │   │   ├── InvoiceView.jsx
-│   │   └── NewInvoice.jsx
+│   │   ├── InvoiceView.test.jsx
+│   │   ├── NewInvoice.jsx
+│   │   └── NewInvoice.test.jsx
 │   ├── NotFound.jsx
+│   ├── NotFound.test.jsx
 │   └── sellers
 │       ├── fields
 │       ├── NewSeller.jsx
+│       ├── NewSeller.test.jsx
 │       ├── ProfilePage.jsx
+│       ├── ProfilePage.test.jsx
 │       ├── SellerDetail.jsx
 │       ├── SellerForm.jsx
 │       ├── SellersList.jsx
+│       ├── SellersList.test.jsx
 │       └── SellersPage.jsx
 ├── services
 │   ├── clients.js
+│   ├── clients.test.js
 │   ├── invoices.js
-│   └── sellers.js
+│   ├── invoices.test.js
+│   ├── sellers.js
+│   └── sellers.test.js
 └── utils
     ├── architecture.txt
+    ├── businessRules
+    │   ├── invoiceStatus.js
+    │   └── invoiceStatus.test.js
+    ├── downloadFile.js
     ├── formatters
-    │   └── formatters.js
-    ├── formatters.js
+    │   ├── formatters.js
+    │   └── formatters.test.js
     └── validators
         ├── client.js
+        ├── client.test.js
         ├── contact.js
+        ├── contact.test.js
         ├── email.js
+        ├── email.test.js
         ├── invoice.js
+        ├── invoice.test.js
         ├── issueDate.js
+        ├── issueDate.test.js
         ├── phone_number.js
+        ├── phone_number.test.js
         ├── postal_code.js
+        ├── postal_code.test.js
         ├── seller.js
-        └── siret.js
+        ├── seller.test.js
+        ├── siret.js
+        └── siret.test.js
 
-28 directories, 92 files
+29 directories, 161 files

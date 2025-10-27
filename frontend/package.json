@@ -7,7 +7,9 @@
     "build": "vite build",
     "lint": "eslint src --ext .js,.jsx",
     "preview": "vite preview",
+    "start:db": "bash -c 'systemctl is-active --quiet postgresql || (echo \"🚀 Démarrage de PostgreSQL...\" && sudo systemctl start postgresql)'",
     "start:all": "concurrently -k -n \"BACKEND,FRONTEND\" -c \"cyan,green\" \"cd ../backend && node server.js\" \"npm run dev\"",
+    "start:full": "npm run start:db && npm run start:all",
     "test": "vitest run",
     "test:dev": "vitest"
   },
