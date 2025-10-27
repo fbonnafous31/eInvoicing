@@ -127,3 +127,5 @@
 - [Jour 124 – Réflexion et mise en place de l’envoi de mail 📧⚙️](jour-124.md)
 - [Jour 125 – Mise en place de la configuration SMTP pour les vendeurs 🏗️📧](jour-125.md)
 - [Jour 126 – Bouton d’envoi de facture et activation dans l’application 📬✨](jour-126.md)
+- [Jour 127 – Activation du bouton d’envoi et personnalisation des emails 📬🛠️](jour-127.md)
+- [Jour 128 – Validation email dans la modale et tests unitaires ✅🛠️](jour-128.md)
