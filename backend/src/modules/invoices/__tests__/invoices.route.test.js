@@ -1,8 +1,12 @@
 // src/modules/invoices/__tests__/invoices.route.test.js
+
+// --- Fix CI : définir ENCRYPTION_KEY avant tout import ---
+process.env.ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || '01234567890123456789012345678901';
+
 const request = require("supertest");
 const express = require("express");
 
-// Import du vrai router
+// Import du vrai router après avoir défini la clé
 const invoicesRouter = require("../invoices.route");
 
 // === Mock des middlewares ===
