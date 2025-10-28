@@ -1,4 +1,6 @@
 /* global describe, it, expect, beforeEach, afterEach, jest */
+const fs = require('fs');
+const path = require('path');
 const pool = require('../../../config/db');
 const invoiceModel = require('../invoices.model');
 const { saveAttachment } = require('../invoiceAttachments.model');
@@ -15,6 +17,7 @@ jest.mock('../invoiceAttachments.model', () => ({
 describe('invoice.model', () => {
   let conn;
   let getInvoiceByIdMock;
+  const uploadDir = path.join(__dirname, '../../../uploads/invoices');
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -23,6 +26,11 @@ describe('invoice.model', () => {
       release: jest.fn(),
     };
     pool.connect.mockResolvedValue(conn);
+
+    // --- Crée le dossier uploads/invoices si absent ---
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
   });
 
   afterEach(() => {
