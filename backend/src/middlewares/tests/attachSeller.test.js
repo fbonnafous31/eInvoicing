@@ -1,9 +1,18 @@
+// src/middlewares/tests/attachSeller.test.js
+
 /* global describe, it, expect, beforeEach, beforeAll, afterAll */
 
 const attachSeller = require('../attachSeller');
 const sellersService = require('../../modules/sellers/sellers.service');
 
+// 🧩 Mock complet du service
 jest.mock('../../modules/sellers/sellers.service');
+
+// 🧩 Mock du module encryption pour éviter l'erreur d'import ESM
+jest.mock('../../utils/encryption', () => ({
+  encrypt: jest.fn((v) => v),
+  decrypt: jest.fn((v) => v),
+}));
 
 describe('attachSeller middleware', () => {
   let req, res, next;

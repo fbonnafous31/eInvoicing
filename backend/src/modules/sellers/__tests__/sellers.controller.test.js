@@ -1,9 +1,16 @@
 /* global describe, it, expect, beforeEach, jest */
 
+// 🧩 Mock du module ESM pour éviter l'erreur d'import
+jest.mock('../../../utils/encryption', () => ({
+  encrypt: jest.fn((v) => v),
+  decrypt: jest.fn((v) => v),
+}));
+
+// 🧩 Mock du service utilisé par le controller
+jest.mock('../sellers.service');
+
 const SellersController = require('../sellers.controller');
 const SellersService = require('../sellers.service');
-
-jest.mock('../sellers.service'); // mock complet du service
 
 describe('SellersController', () => {
   let req, res, next;
@@ -16,7 +23,6 @@ describe('SellersController', () => {
     };
     next = jest.fn();
 
-    // Supprimer les logs intempestifs
     jest.spyOn(console, 'error').mockImplementation(() => {});
     jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
@@ -60,7 +66,7 @@ describe('SellersController', () => {
     expect(res.json).toHaveBeenCalledWith(sellers);
   });
 
-  it('getSellers : gère l\'erreur serveur', async () => {
+  it("getSellers : gère l'erreur serveur", async () => {
     SellersService.listSellers.mockRejectedValue(new Error('Erreur serveur'));
 
     await SellersController.getSellers(req, res);

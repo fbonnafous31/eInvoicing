@@ -1,4 +1,11 @@
 // frontend/src/modules/sellers/__tests__/sellers.route.test.js
+
+// 🧩 Mock du module ESM pour éviter l'erreur d'import
+jest.mock('../../../utils/encryption', () => ({
+  encrypt: jest.fn((v) => v),
+  decrypt: jest.fn((v) => v),
+}));
+
 const request = require("supertest");
 const express = require("express");
 
