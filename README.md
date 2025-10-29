@@ -1,5 +1,6 @@
 # eInvoicing – Application Web de Gestion des Factures
 
+[![PDF/A Compliant](https://img.shields.io/badge/PDF/A--3-compliant-red.svg)](https://www.pdfa.org/solution-center/)
 [![codecov](https://codecov.io/gh/fbonnafous31/eInvoicing/branch/main/graph/badge.svg)](https://codecov.io/gh/fbonnafous31/eInvoicing)
 
 ## 📖 Contexte
@@ -138,12 +139,12 @@ Faire d’eInvoicing un compagnon fiable et simple pour toutes les petites struc
 
 ---
 
-## 🚀 Prochaines étapes
+## 🚀 Prochaines étapes et Vision à long terme
 
-- Finaliser la conformité PDF/A-3 ISO 19005-3  
-- Mise en place d’un environnement de staging simple et respectueux du RGPD  
-- Améliorer les échanges avec les PDP via Swagger  
-- Renforcer la couverture de tests et le monitoring  
+- **Renforcer la couverture de tests** avec des scénarios End-to-End (E2E) automatisés pour garantir la robustesse des parcours utilisateurs critiques.
+- **Recueillir les retours** des premiers utilisateurs via l'environnement de staging pour affiner l'expérience et prioriser les futures évolutions.
+- **Améliorer les échanges avec les PDP** en s'appuyant sur des standards comme Swagger/OpenAPI pour faciliter l'intégration de nouvelles plateformes.
+- **Explorer de nouveaux profils Factur-X** (par exemple, `EXTENDED`) pour couvrir des cas d'usage plus complexes et élargir la cible du produit.
 
 ---
 
