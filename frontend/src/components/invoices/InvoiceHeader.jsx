@@ -82,14 +82,14 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
       try {
         const seller = await fetchMySeller();
         if (seller && !data.seller_id) {
-          handleChange("seller_id", seller.id); // auto-fill, pas touché donc pas de warning
+          handleChange("seller_id", seller.id); 
         }
       } catch (err) {
         console.error("Erreur fetch my seller:", err);
       }
     };
     fetchData();
-  }, [fetchMySeller]);
+  }, [fetchMySeller, handleChange, data.seller_id]);
 
   const issueYear = data.issue_date ? new Date(data.issue_date).getFullYear() : new Date().getFullYear();
   const fiscalYearValue = data.fiscal_year || issueYear;

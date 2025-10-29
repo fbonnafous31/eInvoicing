@@ -129,3 +129,5 @@
 - [Jour 126 – Bouton d’envoi de facture et activation dans l’application 📬✨](jour-126.md)
 - [Jour 127 – Activation du bouton d’envoi et personnalisation des emails 📬🛠️](jour-127.md)
 - [Jour 128 – Validation email dans la modale et tests unitaires ✅🛠️](jour-128.md)
+- [Jour 129 – Sécurisation des mots de passe SMTP 🔐](jour-129.md)
+- [Jour 130 – Amélioration de la qualité du code et couverture de tests 🧪](jour-130.md)
