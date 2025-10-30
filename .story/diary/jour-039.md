@@ -13,6 +13,7 @@ Aujourd’hui, focus sur la consultation des factures avec intégration des PDF 
   - Navigation page par page avec boutons de contrôle.  
   - Zoom responsive et ajustable en pourcentage.  
   - Téléchargement dans un nouvel onglet avec nom de fichier dynamique basé sur l’ID de la facture.
+  
   ![Visualisation d factures avec PDF](../images/jour39/invoiceView.png)
 
 - **Interface et UX** :  

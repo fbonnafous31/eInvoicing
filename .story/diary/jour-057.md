@@ -40,6 +40,7 @@ Aujourd’hui, j’ai terminé toute la **partie authentification et parcours ut
   - `loading`, `error` et rendu conditionnel pour une expérience fluide,
   - logs détaillés pour suivre l’état du composant et les réponses backend.
 * Tous les composants sont maintenant cohérents avec le **parcours utilisateur** : connexion → inscription → profil vendeur → accès sécurisé aux données.
+  
 ![Profil](../images/jour57/Profile.png)
 
 ---

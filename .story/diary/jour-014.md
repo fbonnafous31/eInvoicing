@@ -18,6 +18,7 @@ L’objectif était de poser la structure principale avant de gérer les tables 
   - `payment_terms` (liste prédéfinie avec valeur par défaut « Paiement à 30 jours date de facture »)  
 
 - Préparer la structure pour **la saisie future des tables liées** : lignes, taxes, justificatifs.
+  
 ![Création d'une facture](../images/jour14/createInvoice.png)
 ---
 

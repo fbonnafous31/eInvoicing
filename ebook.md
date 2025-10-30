@@ -180,7 +180,8 @@ Cela m’a permis d’avoir un environnement robuste et évolutif, capable de g�
 ## Choix de l’outil de gestion : DBeaver
 
 Pour interagir avec ma base, j’ai opté pour DBeaver, un client SQL open source, riche en fonctionnalités, qui supporte PostgreSQL et offre une interface graphique complète.
-![Client DBeaver](../images/jour2/DBeaver.png)
+
+![Client DBeaver](.story/images/jour2/DBeaver.png)
 
 DBeaver facilite la création, la visualisation et la modification des tables ainsi que l’exécution de requêtes SQL, ce qui accélère grandement la phase de développement. C’est un excellent complément à VSCode, surtout pour la partie base de données.
 
@@ -191,7 +192,7 @@ La partie la plus intéressante de la journée a été de dessiner la structure 
 - **Tables `sellers` et `buyers`** : elles représentent les entités commerciales impliquées dans les factures, avec leurs informations légales, fiscales et bancaires.  
 - **Table `invoices`** : le cœur du système, elle regroupe toutes les informations essentielles d’une facture — numéros, dates, montants, références, et liens vers vendeur et acheteur.  
 - **Tables `invoice_lines`,  `invoice_taxes` et `invoice_attachments`** : détaillent les lignes de facture, la ventilation des taxes et les justificatifs de facture, indispensables pour un traitement précis et conforme des documents.  
-![DB](../images/jour2/einvoicing_db.png)
+![DB](.story/images/jour2/einvoicing_db.png)
 
 Les commentaires associés à chaque colonne sont un atout précieux, ils garantissent que chaque donnée a un sens clair et que la maintenance future sera plus simple.
 
@@ -219,7 +220,7 @@ Dans ce contexte, garder une séparation technique entre front-end et back-end, 
 
 Voici la structure que j’ai choisie pour le projet :  
 
-![Architecture de la solution](../images/jour3/project_architecture.png)
+![Architecture de la solution](.story/images/jour3/project_architecture.png)
 
 Cela me permet de :  
 - conserver une séparation claire entre interface utilisateur et logique serveur,  
@@ -294,10 +295,10 @@ C’était un premier vrai défi React, avec ses erreurs de parsing et d’impor
 
 L’étape suivante a été de faire communiquer correctement les deux serveurs :  
 - Le backend sur le port 3000 qui expose l’API  
-  ![](../images/jour4/backend.png)
+  ![](.story/images/jour4/backend.png)
 
 - Le frontend sur le port 5173 qui fait la requête via la proxy Vite  
-  ![](../images/jour4/frontend.png)
+  ![](.story/images/jour4/frontend.png)
 
 ## Ce que j’ai appris 📚
 
@@ -381,7 +382,7 @@ Le résultat est fluide, simple, et surtout rapide à mettre en place. Cela m’
 
 Je me suis aussi permis d’ajouter Bootstrap pour un peu de mise en forme générale, histoire que les champs de recherche et la structure globale soient plus agréables visuellement, sans devoir partir dans du CSS complexe.
 
-![](../images/jour5/sellers.png)
+![](.story/images/jour5/sellers.png)
 
 ## Ce que ça m’a appris
 
@@ -476,7 +477,7 @@ Pour améliorer l’expérience, j’ai intégré un système d’alerte qui aff
 
 En cas d’erreur, un message d’erreur s’affiche clairement, permettant à l’utilisateur de comprendre qu’il faut revoir sa saisie ou réessayer plus tard.
 
-![Message de succès de création](../images/jour6/success.png)
+![Message de succès de création](.story/images/jour6/success.png)
 
 ## Backend adapté et robustesse
 
@@ -486,7 +487,7 @@ J’ai aussi mis à jour la fonction backend pour accepter toutes les données s
 
 Le formulaire reprend le style Bootstrap, identique à celui de la liste des vendeurs, pour garder une interface cohérente, claire et agréable.
 
-![Création d'un nouveau vendeur](../images/jour6/NewSeller.png)
+![Création d'un nouveau vendeur](.story/images/jour6/NewSeller.png)
 
 ## Travail sur la barre de navigation
 
@@ -987,7 +988,7 @@ Cette approche rend le projet **plus clair**, les échanges **plus rapides**, et
 ## 📚 Ce que j’ai appris
 
 - Les **tooltips combinés aux `...`** offrent un compromis parfait entre lisibilité et accessibilité des informations.  
-  ![Liste des factures](../images/jour13/invoiceList.png)
+  ![Liste des factures](.story/images/jour13/invoiceList.png)
 - Décomposer les fils de conversation améliore réellement la **productivité et la clarté**.  
 - Préparer les helpers et appliquer les règles métier côté frontend (comme le SIRET) dès l’insertion ou la modification simplifie beaucoup la maintenance.
 
@@ -1022,7 +1023,8 @@ L’objectif était de poser la structure principale avant de gérer les tables 
   - `payment_terms` (liste prédéfinie avec valeur par défaut « Paiement à 30 jours date de facture »)  
 
 - Préparer la structure pour **la saisie future des tables liées** : lignes, taxes, justificatifs.
-![Création d'une facture](../images/jour14/createInvoice.png)
+  
+![Création d'une facture](.story/images/jour14/createInvoice.png)
 ---
 
 ## 💻 Côté frontend
@@ -2137,7 +2139,7 @@ Chaque bloc a trouvé sa place et le tout fonctionne de manière fluide et cohé
   - Séparation visuelle nette des sections.  
   - Composants cohérents (`InputField`, `SelectField`).  
   - Plus de friction inutile → un vrai workflow complet.  
-  ![Formulaire de création de facture](../images/jour32/createInvoice.png)
+  ![Formulaire de création de facture](.story/images/jour32/createInvoice.png)
 ---
 
 ## 💪 Le résultat
@@ -2145,7 +2147,7 @@ Chaque bloc a trouvé sa place et le tout fonctionne de manière fluide et cohé
 - Un formulaire **complet, robuste et agréable à utiliser**.  
 - Les données sont cohérentes et prêtes pour l’API.  
 - Le code est organisé et suffisamment modulaire pour évoluer facilement.  
-![Saisie de facture](../images/jour32/checkInvoice.png)
+![Saisie de facture](.story/images/jour32/checkInvoice.png)
 
 ---
 
@@ -2495,7 +2497,8 @@ Aujourd’hui, focus sur la consultation des factures avec intégration des PDF 
   - Navigation page par page avec boutons de contrôle.  
   - Zoom responsive et ajustable en pourcentage.  
   - Téléchargement dans un nouvel onglet avec nom de fichier dynamique basé sur l’ID de la facture.
-  ![Visualisation d factures avec PDF](../images/jour39/invoiceView.png)
+  
+  ![Visualisation d factures avec PDF](.story/images/jour39/invoiceView.png)
 
 - **Interface et UX** :  
   - Breadcrumb au-dessus du formulaire et du PDF pour cohérence.  
@@ -2545,7 +2548,7 @@ Aujourd’hui, focus sur **la mise en forme et la finalisation du carousel eInvo
 - Carousel **complet et prêt à publier**, structuré pour LinkedIn.  
 - Contenu vivant, professionnel et fidèle à ton expérience.  
 - Slide 1 et 2 très personnelles, slides suivantes détaillent clairement les fonctionnalités et l’avancement technique.  
-![Carousel LinkedIn](../images/jour40/LinkedIn.png)
+![Carousel LinkedIn](.story/images/jour40/LinkedIn.png)
 
 ---
 
@@ -2699,7 +2702,8 @@ Aujourd’hui, focus sur **l’intégration du XML Factur‑X dans le PDF de la 
 - **PDF de la facture prêt** à recevoir le XML Factur‑X et les éventuels autres attachments.  
 - **Script backend opérationnel** pour créer un PDF “préparé” à la conversion PDF/A‑3.  
 - Vue claire sur les **prochaines étapes pour la conformité totale PDF/A‑3**.
-![PDF-A3](../images/jour43/pdf-a3.png)
+  
+![PDF-A3](.story/images/jour43/pdf-a3.png)
 
 ---
 
@@ -2945,8 +2949,8 @@ Ce matin, on a travaillé sur **l’amélioration de la logique côté frontend 
   - Les informations de paiement et mentions sont affichées correctement.  
   - Les dates sont au format français et lisibles.  
 - Gestion intelligente des textes longs et des sauts de page pour les mentions additionnelles.  
-![Génération depuis liste de factures](../images/jour47/invoiceList.png)
-![Justificatif de facture](../images/jour47/invoicePDF.png)
+![Génération depuis liste de factures](.story/images/jour47/invoiceList.png)
+![Justificatif de facture](.story/images/jour47/invoicePDF.png)
 
 ---
 
@@ -3060,8 +3064,10 @@ Aujourd'hui, j'ai travaillé sur **l'optimisation de la création de facture** a
 
 * Il est désormais possible de **créer une facture sans justificatif PDF préalable**.
 * Le justificatif est **produit automatiquement en même temps que la facture**, simplifiant le workflow.
-![Génération au moment de la création de facture](../images/jour49/invoiceCreate.png)
-![Visualisation de la facture](../images/jour49/invoiceView.png)
+  
+![Génération au moment de la création de facture](.story/images/jour49/invoiceCreate.png)
+
+![Visualisation de la facture](.story/images/jour49/invoiceView.png)
 
 ### 3. Synchronisation frontend/backend
 
@@ -3218,7 +3224,8 @@ Aujourd'hui, j'ai travaillé sur l'intégration de l'**authentification des util
 * Ajout du package `@auth0/auth0-react` dans le frontend.
 * Création du **AuthProvider** pour encapsuler l’application et fournir les hooks Auth0 à tous les composants.
 * Mise en place du **.env** pour sécuriser le `VITE_AUTH0_DOMAIN` et `VITE_AUTH0_CLIENT_ID`.
-![Auth0](../images/jour52/Auth0.png)
+  
+![Auth0](.story/images/jour52/Auth0.png)
 
 ### 4. Protection globale de l’application
 
@@ -3232,14 +3239,15 @@ Aujourd'hui, j'ai travaillé sur l'intégration de l'**authentification des util
 * Ajout d’un **LoginButton** intégré au SDK Auth0.
 * Application d’un **fond sombre avec carte blanche** pour un contraste élégant et une expérience utilisateur agréable.
 
-![Connexion](../images/jour52/Connect.png)
+![Connexion](.story/images/jour52/Connect.png)
 
 ### 6. Mise à jour de la NavBar
 
 * Ajout des boutons **Login / Logout** dans la NavBar existante, respectant le style et la hiérarchie des menus.
 * Affichage du **nom ou email de l’utilisateur connecté** pour un feedback immédiat.
 * Gestion du **Logout avec redirection vers la page Login**, assurant un flux propre et intuitif.
-![Barre de navigation](../images/jour52/NavBar.png)
+  
+![Barre de navigation](.story/images/jour52/NavBar.png)
 
 ### 7. Test complet du flux Auth0
 
@@ -3574,7 +3582,8 @@ Aujourd’hui, j’ai terminé toute la **partie authentification et parcours ut
   - `loading`, `error` et rendu conditionnel pour une expérience fluide,
   - logs détaillés pour suivre l’état du composant et les réponses backend.
 * Tous les composants sont maintenant cohérents avec le **parcours utilisateur** : connexion → inscription → profil vendeur → accès sécurisé aux données.
-![Profil](../images/jour57/Profile.png)
+  
+![Profil](.story/images/jour57/Profile.png)
 
 ---
 
@@ -3695,7 +3704,7 @@ Aujourd’hui, j’ai travaillé sur **la mise en place des tests pour les écha
 * Log systématique des fichiers reçus pour vérifier que les factures sont bien transmises.  
 * Possibilité d’ajouter facilement des statuts ou traitements simulés pour les cycles de vie des factures.
  
-![Serveur Mock PDP](../images/jour59/mockPDP.png)
+![Serveur Mock PDP](.story/images/jour59/mockPDP.png)
 
 ---
 
@@ -3708,8 +3717,8 @@ Aujourd’hui, j’ai travaillé sur **la mise en place des tests pour les écha
 * Ajout d’un **intercepteur Axios** pour logger les détails de chaque requête sortante : URL, méthode, headers et info sur le fichier envoyé.  
 * Gestion des erreurs HTTP et vérification du bon retour du Mock PDP.
 
-![Envoi d'une facture](../images/jour59/sendInvoice.png)
-![Réception de l'accusé de réception](../images/jour59/getTechnicalStatus.png)
+![Envoi d'une facture](.story/images/jour59/sendInvoice.png)
+![Réception de l'accusé de réception](.story/images/jour59/getTechnicalStatus.png)
 
 ---
 
@@ -3718,7 +3727,7 @@ Aujourd’hui, j’ai travaillé sur **la mise en place des tests pour les écha
 * Log côté backend pour confirmer la bonne réception des fichiers et leur taille.  
 * Préparation à l’affichage dans le frontend : possibilité d’indiquer à l’utilisateur que la facture a bien été transmise au PDP simulé.  
 * L’objectif futur : intégrer ces retours dans l’interface pour visualiser le statut (`draft`, `sent`, `received`) de chaque facture.
-![Liste de factures](../images/jour59/invoiceList.png)
+![Liste de factures](.story/images/jour59/invoiceList.png)
 
 ---
 
@@ -3762,7 +3771,7 @@ Aujourd’hui, j’ai travaillé sur **la mise à jour des statuts techniques et
   - rouge → `REJECTED`  
   - gris → `PENDING`  
 * Correction des warnings ESLint : ajout de `row.submissionId` dans les dépendances du hook pour garantir un comportement stable.
-![Demande de statut facture](../images/jour60/getLifeCycle.png)
+![Demande de statut facture](.story/images/jour60/getLifeCycle.png)
 
 ---
 
@@ -3795,7 +3804,7 @@ Aujourd’hui, j’ai travaillé sur **la mise à jour des statuts techniques et
 * Vérification que le polling fonctionne : le badge passe automatiquement de `PENDING → RECEIVED → VALIDATED`.  
 * Vérification que l’UI n’a pas besoin de `F5` pour le statut technique (mais reste à finaliser le refresh temps réel côté statuts métiers).  
 * Correction des erreurs de hook et dépendances pour garantir un rendu stable et éviter les erreurs React.
-![Demande de statut facture](../images/jour60/invoiceList.png)
+![Demande de statut facture](.story/images/jour60/invoiceList.png)
 
 ---
 
@@ -3907,7 +3916,7 @@ Aujourd’hui, pas grand-chose de concret côté dev, juste un **update rapide**
 
 - Les **boutons PDF/A-3** et PDF standard sont maintenant alignés, propres et cliquables directement depuis la liste des factures.  
 - L’UI des actions de facture est **uniforme et sans cadres**, prête pour tous les tests.  
-![Demande de statut facture](../images/jour63/invoiceList.png)
+![Demande de statut facture](.story/images/jour63/invoiceList.png)
 
 ---
 
@@ -3943,7 +3952,7 @@ Aujourd’hui, la session a été consacrée à **la protection réglementaire d
 ### 1. Protection des factures transmises
 
 * **Règle métier essentielle** : une fois qu’une facture est transmise au PDP, son contenu **ne peut plus être modifié** pour garantir la **conservation des données initialement transmises**, conformément aux obligations réglementaires.  
-![Facture transmise non modifiable](../images/jour64/submitedInvoice.png)
+![Facture transmise non modifiable](.story/images/jour64/submitedInvoice.png)
 * Backend : la route `updateInvoice` bloque toute modification si `technical_status` est final (`validated`, `received`, etc.), avec un retour **403** si tentative de modification.  
 * Frontend : les boutons **Modifier / Supprimer** sont désactivés pour ces factures, assurant que l’utilisateur ne puisse pas altérer les données transmises.
 
@@ -3952,8 +3961,8 @@ Aujourd’hui, la session a été consacrée à **la protection réglementaire d
 ### 2. Mode suspension pour compléter la facture
 
 * Mise en place d’un **mode `canEditAdditional`** déclenché si `business_status = "208"`.  
-![Facture suspendue](../images/jour64/suspendedInvoice.png)
-![Ajout d'un justificatif additionnel](../images/jour64/additionalsAllowed.png)
+![Facture suspendue](.story/images/jour64/suspendedInvoice.png)
+![Ajout d'un justificatif additionnel](.story/images/jour64/additionalsAllowed.png)
 
 * Objectif : permettre uniquement l’**ajout de justificatifs additionnels**, sans toucher au justificatif principal ni aux lignes de facture existantes.  
 * UI :  
@@ -4017,14 +4026,14 @@ Nous avons ajouté un **bouton 💰 “Encaisser”** directement dans le tablea
   * `setVersion` force le re-render du DataTable pour que les boutons se mettent à jour instantanément.
   * Le bouton 💰 appelle `cashInvoice`, puis récupère le **dernier statut du cycle métier** pour actualiser le tableau.
 
-    ![Encaisser la facture](../images/jour65/cashInvoice.png)
+    ![Encaisser la facture](.story/images/jour65/cashInvoice.png)
 
 * **Backend** :
 
   * Route `cashInvoice` renvoyant le statut final de la facture après encaissement.
   * Les statuts finaux (`210`, `212`) bloquent les actions suivantes pour assurer la cohérence réglementaire.
-  ![Paiement transmis](../images/jour65/submittedPayment.png)
-  ![Facture encaissée](../images/jour65/collectedInvoice.png)
+  ![Paiement transmis](.story/images/jour65/submittedPayment.png)
+  ![Facture encaissée](.story/images/jour65/collectedInvoice.png)
 
 * **Mock PDP** :
 
@@ -4125,10 +4134,10 @@ Cela permet de :
 
 J’ai ajouté des **messages d’erreurs métier** directement sur l’interface :
 - Bulles d’aide pour chaque statut particulier (refus, approbation partielle, suspension, litige)  
-![Retour client suite au retour de traitement de la facture](../images/jour67/clientComment.png)
+![Retour client suite au retour de traitement de la facture](.story/images/jour67/clientComment.png)
 - Gestion de la suspension côté interface : le cycle est bloqué et le message informe l’utilisateur de l’action requise  
 - Messages dynamiques pour les cas de statut technique (ex. rejection ou erreur 500 côté PDP)  
-![Facture suspendue, justificatif additionnel attendu](../images/jour67/suspendedInvoice.png)
+![Facture suspendue, justificatif additionnel attendu](.story/images/jour67/suspendedInvoice.png)
 Ces ajouts permettent de tester l’expérience utilisateur dans des scénarios réalistes, sans avoir à simuler manuellement chaque erreur.
 
 ---
@@ -4202,8 +4211,8 @@ Aujourd’hui, j’ai travaillé sur la **gestion des factures suspendues et de 
 - Une fois que le PDP confirme la réception de la facture complétée :  
   - Le **statut métier passe à “complété”**  
   - Le **cycle de vie de la facture reprend normalement**, jusqu’à l’encaissement  
-![Facture suspendue, facture à compléter en ajoutant le justificatif additionnel demandé par le client](../images/jour69/suspendedInvoice.png)
-![Facture complétée](../images/jour69/CompletedInvoice.png)
+![Facture suspendue, facture à compléter en ajoutant le justificatif additionnel demandé par le client](.story/images/jour69/suspendedInvoice.png)
+![Facture complétée](.story/images/jour69/CompletedInvoice.png)
 - Tous les événements sont **loggés côté backend** pour garder une trace précise de chaque étape  
 - Côté frontend, l’utilisateur reçoit un **retour clair et immédiat** sur le statut de la facture complétée
 
@@ -4303,7 +4312,7 @@ L’idée est que dès sa connexion, il dispose d’une **vue globale** de son a
 - **Montant facturé par mois** : histogramme interactif pour visualiser l’évolution du CA dans le temps.  
 - **Statuts de factures** : tableau récapitulatif du nombre de factures par statut métier (draft, issued, late, etc.).  
 - **Graphique des statuts** : visualisation claire via un bar chart coloré (codes couleurs cohérents avec les statuts métiers).  
-![DashBoard](../images/jour72/dashBoard.png)
+![DashBoard](.story/images/jour72/dashBoard.png)
 
 ## Résultat  
 
@@ -4344,14 +4353,14 @@ Vérifier la logique métier des controllers et services indépendamment des rou
 Exemple : calcul du montant total facturé, génération de statuts ou transformation de données.  
 ✅ On a déjà commencé à initier les tests unitaires côté backend, notamment pour la validation de **SIRET** et certaines **routes invoices**.
 
-![Tests unitaires](../images/jour73/unitTest.png)
+![Tests unitaires](.story/images/jour73/unitTest.png)
 
 **Tests d’intégration 🔗**  
 Vérifier que les routes REST fonctionnent correctement et retournent les bonnes réponses JSON.  
 Assurer que les middlewares, même si mockés temporairement, s’intègrent correctement avec les routes.  
 Pour ces tests, on peut utiliser des outils comme **Vitest** ou **Jest**, qui permettent de lancer facilement des tests unitaires et d’intégration et de s’assurer que tout le backend répond comme prévu.
 
-![Tests d'intégration](../images/jour73/integrationTest.png)
+![Tests d'intégration](.story/images/jour73/integrationTest.png)
 
 **Tests end-to-end (E2E) 🏁**  
 Simuler le parcours complet d’un utilisateur (connexion, création de facture, génération PDF).  
@@ -4361,7 +4370,7 @@ Prévoir ces tests pour les étapes critiques avant le déploiement.
 Chaque push déclenche les tests pour s’assurer qu’aucune modification ne casse l’existant.  
 Les tests deviennent un outil de confiance pour continuer à faire évoluer le produit rapidement.
 
-![Exécution des tests](../images/jour73/backendTests.png)
+![Exécution des tests](.story/images/jour73/backendTests.png)
 
 ## Avantages attendus 🌟
 
@@ -4403,7 +4412,8 @@ Ensuite, j’ai commencé à tester des composants plus complexes comme `Clients
 - **Mocks** pour les hooks et composants tiers (`useClients`, `DataTable`, `Breadcrumb`) afin d’isoler le composant testé.
 
 Ces tests permettent de vérifier rapidement le comportement attendu sans lancer toute l’application.
-![Exécution des tests](../images/jour74/frontendTests.png)
+
+![Exécution des tests](.story/images/jour74/frontendTests.png)
 
 ## Pourquoi penser à une CI maintenant 🤖
 
@@ -4653,7 +4663,7 @@ En pratique, on a corrigé **10 points bloquants** qui empêchaient la validatio
 - Préparer une **version stable PDF/A‑3 + Factur‑X** utilisable pour toutes les factures futures.  
 - Documenter la méthode pour que le processus soit **réutilisable et maintenable**.
 
-![Validation du PDF/A‑3](../images/jour78/pdfa3-validation.png)
+![Validation du PDF/A‑3](.story/images/jour78/pdfa3-validation.png)
 
 
 \newpage
@@ -4677,7 +4687,7 @@ Le workflow CI a été configuré pour couvrir **backend et frontend** :
 * La CI est désormais capable de **tester automatiquement** le backend et le frontend à chaque push ou pull request sur `main`.
 * Les artefacts de couverture sont stockés et prêts à être utilisés pour un suivi de la qualité du code.
 * Le workflow est structuré pour être facilement **étendu** à linting, Codecov, et d’autres vérifications automatiques à l’avenir.
-![Lancement de l'intégration](../images/jour79/ci.png)
+![Lancement de l'intégration](.story/images/jour79/ci.png)
 
 ## 📌 Prochaines étapes
 
@@ -4703,11 +4713,13 @@ Aujourd’hui, j’ai attaqué l’intégration de **Codecov** pour notre projet
    - Visualiser la couverture globale du projet.
    - Identifier les fichiers ou fonctions peu testés.
    - Suivre l’évolution de la couverture au fil du temps.
-   ![Analyse de la couverture](../images/jour80/tracked-line.png)
+  
+   ![Analyse de la couverture](.story/images/jour80/tracked-line.png)
 
 3. **Badges et reporting**  
    J’ai ajouté un badge Codecov dans le README pour avoir un aperçu rapide de la couverture depuis GitHub. C’est motivant et très utile pour garder un œil sur la qualité du code.
-   ![Badge Codecov](../images/jour80/badge.png)
+
+   ![Badge Codecov](.story/images/jour80/badge.png)
 
 ## Retours
 
@@ -4728,7 +4740,7 @@ Aujourd’hui, j’ai consolidé la qualité du code sur **eInvoicing** en ajout
 ## Frontend ✅
 
 Le lint côté frontend était déjà opérationnel. Après quelques ajustements sur les règles et suppression des avertissements inutiles, le pipeline CI détecte maintenant les problèmes de manière fiable avant même le merge.
-![Lint frontend](../images/jour81/lint-frontend.png)
+![Lint frontend](.story/images/jour81/lint-frontend.png)
 
 
 ## Backend ✅
@@ -4784,7 +4796,8 @@ Aujourd’hui, j’ai travaillé sur la **Continuous Deployment** de **tout le p
   - Configuration pour que l’application écoute sur le port défini.  
 * Possibilité de **lancer backend et frontend ensemble via Docker Compose** pour simuler un environnement complet.  
 * Objectif : générer une image prête pour déploiement et intégrable dans un pipeline CD.
-![Lancement de la CD](../images/jour82/cd.png)
+  
+![Lancement de la CD](.story/images/jour82/cd.png)
 
 ## Problèmes rencontrés ⚠️
 
@@ -4916,7 +4929,7 @@ docker-compose up -d
   * Test de la connexion réussie.
 * Vérification que les métriques du backend remontent correctement dans Prometheus.
 
-![Dashboard Grafana](../images/jour84/grafana-dashboard.png)
+![Dashboard Grafana](.story/images/jour84/grafana-dashboard.png)
 
 ### 5️⃣ Points clés appris
 
@@ -5673,7 +5686,7 @@ L’objectif était de proposer un espace de démo **RGPD-friendly**, utilisable
 ## 🔹 Objectif du jour  
 
 * Bloquer toutes les actions sensibles (création/mise à jour de clients et vendeurs) pour le mode staging.  
-  ![Fonctionnalités restreintes](../images/jour94/restrictedFeature.png)
+  ![Fonctionnalités restreintes](.story/images/jour94/restrictedFeature.png)
 * Finaliser la génération des documents (PDF, Factur-X XML, PDF/A3).  
 * Mettre en place un **mock PDP** pour simuler l’envoi des factures et la réception des statuts.  
 
@@ -5752,7 +5765,7 @@ Aujourd’hui, la session a été entièrement dédiée à **mettre en place un 
   * `express-jwt` → vérifié et résolu
 * Suppression temporaire de la route `/metrics` pour éviter les erreurs en mode staging.
   
-  ![Déploiement Render](../images/jour95/renderDashboard.png)
+  ![Déploiement Render](.story/images/jour95/renderDashboard.png)
 
 ### 3️⃣ Backend et routes ✅
 
@@ -5851,7 +5864,7 @@ Aujourd’hui, la session a été centrée sur **la mise en place du frontend en
 * Routes `/clients`, `/invoices`, `/sellers` testées depuis le frontend.
 * Logs clairs pour toutes les requêtes et tokens.
 
-![App en mode staging déployée en remote](../images/jour96/frontendStaging.png)
+![App en mode staging déployée en remote](.story/images/jour96/frontendStaging.png)
 
 ## 🔹 Réflexion du jour
 
@@ -8104,7 +8117,7 @@ L’objectif du jour : **renforcer la qualité du projet avant de le rendre visi
 
 \newpage
 
-# Jour 131 — Bilan provisoire
+# Jour 131 - Bilan provisoire
 
 Aujourd’hui, je ne code pas.  
 Je prends simplement un temps pour regarder en arrière.

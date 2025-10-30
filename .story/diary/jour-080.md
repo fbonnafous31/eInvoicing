@@ -12,10 +12,12 @@ Aujourd’hui, j’ai attaqué l’intégration de **Codecov** pour notre projet
    - Visualiser la couverture globale du projet.
    - Identifier les fichiers ou fonctions peu testés.
    - Suivre l’évolution de la couverture au fil du temps.
+  
    ![Analyse de la couverture](../images/jour80/tracked-line.png)
 
 3. **Badges et reporting**  
    J’ai ajouté un badge Codecov dans le README pour avoir un aperçu rapide de la couverture depuis GitHub. C’est motivant et très utile pour garder un œil sur la qualité du code.
+
    ![Badge Codecov](../images/jour80/badge.png)
 
 ## Retours

@@ -9,6 +9,7 @@ Cela m’a permis d’avoir un environnement robuste et évolutif, capable de g�
 ## Choix de l’outil de gestion : DBeaver
 
 Pour interagir avec ma base, j’ai opté pour DBeaver, un client SQL open source, riche en fonctionnalités, qui supporte PostgreSQL et offre une interface graphique complète.
+
 ![Client DBeaver](../images/jour2/DBeaver.png)
 
 DBeaver facilite la création, la visualisation et la modification des tables ainsi que l’exécution de requêtes SQL, ce qui accélère grandement la phase de développement. C’est un excellent complément à VSCode, surtout pour la partie base de données.

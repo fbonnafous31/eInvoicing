@@ -32,6 +32,7 @@ Aujourd’hui, focus sur **l’intégration du XML Factur‑X dans le PDF de la 
 - **PDF de la facture prêt** à recevoir le XML Factur‑X et les éventuels autres attachments.  
 - **Script backend opérationnel** pour créer un PDF “préparé” à la conversion PDF/A‑3.  
 - Vue claire sur les **prochaines étapes pour la conformité totale PDF/A‑3**.
+  
 ![PDF-A3](../images/jour43/pdf-a3.png)
 
 ---
