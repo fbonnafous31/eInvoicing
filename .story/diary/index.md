@@ -1,6 +1,6 @@
 # Index du journal
 
-- [Jour 0 – Genèse du projet eInvoicing](jour-000.md)
+- [Jour 0 – Avant la première ligne de code](jour-000.md)
 - [Journal de bord - Jour 1](jour-001.md)
 - [Jour 2 - Installation de la base, choix de DBeaver et modélisation métier](jour-002.md)
 - [Jour 3 – Réflexion sur l’architecture](jour-003.md)
@@ -131,3 +131,4 @@
 - [Jour 128 – Validation email dans la modale et tests unitaires ✅🛠️](jour-128.md)
 - [Jour 129 – Sécurisation des mots de passe SMTP 🔐](jour-129.md)
 - [Jour 130 – Amélioration de la qualité du code et couverture de tests 🧪](jour-130.md)
+- [Jour 131 — Bilan provisoire](jour-131.md)
