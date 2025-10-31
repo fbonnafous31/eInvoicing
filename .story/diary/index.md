@@ -131,4 +131,6 @@
 - [Jour 128 – Validation email dans la modale et tests unitaires ✅🛠️](jour-128.md)
 - [Jour 129 – Sécurisation des mots de passe SMTP 🔐](jour-129.md)
 - [Jour 130 – Amélioration de la qualité du code et couverture de tests 🧪](jour-130.md)
-- [Jour 131 — Bilan provisoire](jour-131.md)
+- [Jour 131 - Bilan provisoire](jour-131.md)
+- [Jour 132 – Création et publication de l’eBook 📚💻](jour-132.md)
+- [Jour 133 – Passage au plan payant de la DB 💳🛠](jour-133.md)
