@@ -1,6 +1,7 @@
 const db = require('../../config/db');
 const nodemailer = require('nodemailer');
 const SellersModel = require('./sellers.model');
+const SCHEMA = process.env.DB_SCHEMA || 'public';
 
 async function listSellers() {
   return await SellersModel.getAllSellers();
@@ -26,14 +27,14 @@ async function getSellerByAuth0Id(auth0_id) {
   if (!auth0_id) return null;
 
   const sellerRes = await db.query(
-    `SELECT * FROM invoicing.sellers WHERE auth0_id = $1`,
+    `SELECT * FROM ${SCHEMA}.sellers WHERE auth0_id = $1`,
     [auth0_id]
   );
   const seller = sellerRes.rows[0];
   if (!seller) return null;
 
   const smtpRes = await db.query(
-    `SELECT * FROM invoicing.seller_smtp_settings WHERE seller_id = $1`,
+    `SELECT * FROM ${SCHEMA}.seller_smtp_settings WHERE seller_id = $1`,
     [seller.id]
   );
   const smtp = smtpRes.rows[0] || {};
@@ -45,7 +46,7 @@ async function getSellerByAuth0Id(auth0_id) {
 
 async function checkIdentifierExists(identifier, sellerId) {
   const result = await db.query(
-    'SELECT id FROM invoicing.sellers WHERE legal_identifier = $1 AND ($2::int IS NULL OR id != $2)',
+    `SELECT id FROM ${SCHEMA}.sellers WHERE legal_identifier = $1 AND ($2::int IS NULL OR id != $2)`,
     [identifier, sellerId || null]
   );
   return result.rowCount > 0;

@@ -1,5 +1,6 @@
 const pool = require('../../config/db');
 const { encrypt, decrypt } = require('../../utils/encryption');
+const SCHEMA = process.env.DB_SCHEMA || 'public';
 
 /* --- Récupérer tous les vendeurs (sans SMTP) --- */
 async function getAllSellers() {
@@ -8,7 +9,7 @@ async function getAllSellers() {
             vat_number, registration_info, share_capital, iban, bic, contact_email, phone_number,
             company_type, payment_method, payment_terms, additional_1, additional_2,
             created_at, updated_at 
-     FROM invoicing.sellers`
+     FROM ${SCHEMA}.sellers`
   );
   return result.rows;
 }
@@ -48,7 +49,7 @@ async function insertSeller(sellerData, auth0_id) {
 
     // Création du vendeur
     const sellerResult = await client.query(
-      `INSERT INTO invoicing.sellers
+      `INSERT INTO ${SCHEMA}.sellers
         (legal_name, legal_identifier, address, city, postal_code, country_code, 
          vat_number, registration_info, share_capital, iban, bic, contact_email, phone_number, 
          company_type, payment_method, payment_terms, additional_1, additional_2, auth0_id)
@@ -88,7 +89,7 @@ async function insertSeller(sellerData, auth0_id) {
       const encryptedPass = smtp_pass ? encrypt(smtp_pass) : null;
 
       await client.query(
-        `INSERT INTO invoicing.seller_smtp_settings
+        `INSERT INTO ${SCHEMA}.seller_smtp_settings
           (seller_id, smtp_host, smtp_port, smtp_secure, smtp_user, smtp_pass, smtp_from, active)
         VALUES ($1, $2, $3, $4, $5, $6, $7, true)`,
         [seller.id, smtp_host, smtp_port || 587, smtp_secure || false, smtp_user, encryptedPass, smtp_from]
@@ -109,8 +110,8 @@ async function insertSeller(sellerData, auth0_id) {
 async function getSellerById(id) {
   const result = await pool.query(
     `SELECT s.*, smtp.smtp_host, smtp.smtp_port, smtp.smtp_secure, smtp.smtp_user, smtp.smtp_from, smtp.active, smtp.smtp_pass
-     FROM invoicing.sellers s
-     LEFT JOIN invoicing.seller_smtp_settings smtp ON s.id = smtp.seller_id
+     FROM ${SCHEMA}.sellers s
+     LEFT JOIN ${SCHEMA}.seller_smtp_settings smtp ON s.id = smtp.seller_id
      WHERE s.id = $1`,
     [id]
   );
@@ -135,8 +136,8 @@ async function removeSeller(id) {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    await client.query('DELETE FROM invoicing.seller_smtp_settings WHERE seller_id = $1', [id]);
-    const result = await client.query('DELETE FROM invoicing.sellers WHERE id = $1 RETURNING *', [id]);
+    await client.query(`DELETE FROM ${SCHEMA}.seller_smtp_settings WHERE seller_id = $1`, [id]);
+    const result = await client.query(`DELETE FROM ${SCHEMA}.sellers WHERE id = $1 RETURNING *`, [id]);
     if (result.rowCount === 0) throw new Error('Seller not found');
     await client.query('COMMIT');
     return result.rows[0];
@@ -176,7 +177,7 @@ async function updateSeller(id, data) {
 
     // --- Mise à jour des données principales
     const query = `
-      UPDATE invoicing.sellers
+      UPDATE ${SCHEMA}.sellers
       SET legal_name = $1,
           legal_identifier = $2,
           address = $3,
@@ -220,7 +221,7 @@ async function updateSeller(id, data) {
     if (smtp_host || smtp_user || smtp_pass || smtp_from) {
       console.log('[updateSeller] checking existing SMTP settings...');
       const existing = await client.query(
-        'SELECT * FROM invoicing.seller_smtp_settings WHERE seller_id = $1 FOR UPDATE',
+        `SELECT * FROM ${SCHEMA}.seller_smtp_settings WHERE seller_id = $1 FOR UPDATE`,
         [sellerDbId]
       );
       console.log('[updateSeller] existing SMTP rows:', existing.rows);
@@ -231,7 +232,7 @@ async function updateSeller(id, data) {
 
         await client.query(
           `
-          UPDATE invoicing.seller_smtp_settings
+          UPDATE ${SCHEMA}.seller_smtp_settings
           SET smtp_host = $1,
               smtp_port = $2,
               smtp_user = $3,
@@ -257,7 +258,7 @@ async function updateSeller(id, data) {
         console.log('[updateSeller] inserting new SMTP settings...');
         await client.query(
           `
-          INSERT INTO invoicing.seller_smtp_settings
+          INSERT INTO ${SCHEMA}.seller_smtp_settings
           (seller_id, smtp_host, smtp_port, smtp_user, smtp_pass, smtp_secure, smtp_from, active)
           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
           `,
