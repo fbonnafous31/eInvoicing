@@ -1,4 +1,5 @@
 const pool = require('../../config/db');
+const SCHEMA = process.env.DB_SCHEMA || 'public';
 
 function validateClientData(clientData) {
   const {
@@ -32,7 +33,7 @@ function validateClientData(clientData) {
 async function checkSiretUnique(siret, clientId = null) {
   if (!siret) return;
   const cleaned = siret.replace(/\D/g, '');
-  let query = 'SELECT id FROM invoicing.clients WHERE siret = $1';
+  let query = `SELECT id FROM ${SCHEMA}.clients WHERE siret = $1`;
   const params = [cleaned];
 
   if (clientId) {
@@ -52,7 +53,7 @@ async function getAllClients() {
     `SELECT id, is_company, legal_name, firstname, lastname, siret, legal_identifier,
             address, city, postal_code, country_code, vat_number, email, phone,
             created_at, updated_at
-     FROM invoicing.clients
+     FROM ${SCHEMA}.clients
      ORDER BY legal_name`
   );
   return result.rows;
@@ -64,7 +65,7 @@ async function getClientsBySeller(sellerId) {
     `SELECT id, is_company, legal_name, firstname, lastname, siret, legal_identifier,
             address, city, postal_code, country_code, vat_number, email, phone,
             created_at, updated_at
-     FROM invoicing.clients
+     FROM ${SCHEMA}.clients
      WHERE seller_id = $1
      ORDER BY legal_name`,
     [sellerId]
@@ -75,7 +76,7 @@ async function getClientsBySeller(sellerId) {
 // ----------------- Get client by ID -----------------
 async function getClientById(id, sellerId) {
   const result = await pool.query(
-    'SELECT * FROM invoicing.clients WHERE id = $1 AND seller_id = $2',
+    `SELECT * FROM ${SCHEMA}.clients WHERE id = $1 AND seller_id = $2`,
     [id, sellerId]
   );
   return result.rows[0];
@@ -108,7 +109,7 @@ async function insertClient(clientData, sellerId) {
   const cleanedSiret = country_code === 'FR' && siret ? siret.replace(/\D/g, '') : siret;
 
   const result = await pool.query(
-    `INSERT INTO invoicing.clients
+    `INSERT INTO ${SCHEMA}.clients
       (is_company, legal_name, firstname, lastname, siret, legal_identifier,
        address, city, postal_code, country_code, vat_number, email, phone, seller_id)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
@@ -137,7 +138,7 @@ async function insertClient(clientData, sellerId) {
 // ----------------- Remove client -----------------
 async function removeClient(id, sellerId) {
   const result = await pool.query(
-    'DELETE FROM invoicing.clients WHERE id = $1 AND seller_id = $2 RETURNING *',
+    `DELETE FROM ${SCHEMA}.clients WHERE id = $1 AND seller_id = $2 RETURNING *`,
     [id, sellerId]
   );
   if (result.rowCount === 0) throw new Error('Client not found');
@@ -171,7 +172,7 @@ async function updateClient(id, clientData, sellerId) {
   const cleanedSiret = country_code === 'FR' && siret ? siret.replace(/\D/g, '') : siret;
 
   const result = await pool.query(
-    `UPDATE invoicing.clients
+    `UPDATE ${SCHEMA}.clients
      SET is_company = $1,
          legal_name = $2,
          firstname = $3,

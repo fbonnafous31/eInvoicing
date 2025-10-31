@@ -1,5 +1,6 @@
 const ClientsService = require('./clients.service');
-const pool = require('../../config/db'); // nécessaire pour checkSiret
+const pool = require('../../config/db');
+const SCHEMA = process.env.DB_SCHEMA || 'public';
 
 // ----------------- Liste des clients du seller connecté -----------------
 async function getClients(req, res) {
@@ -105,7 +106,7 @@ async function checkSiret(req, res) {
     const siret = req.params.siret.replace(/\D/g, '');
     const clientId = req.query.id ? parseInt(req.query.id, 10) : null;
 
-    let query = 'SELECT id FROM invoicing.clients WHERE siret = $1';
+    let query = `SELECT id FROM ${SCHEMA}.clients WHERE siret = $1`;
     const params = [siret];
 
     if (clientId) {
