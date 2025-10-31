@@ -12,6 +12,8 @@ jest.mock('../../../config/db', () => ({
 }));
 
 describe('status.model', () => {
+  const schema = process.env.DB_SCHEMA || 'public';
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -40,14 +42,14 @@ describe('status.model', () => {
       // Vérifie l'update de la facture
       expect(pool.query).toHaveBeenNthCalledWith(
         1,
-        expect.stringContaining('UPDATE invoicing.invoices'),
+        expect.stringContaining(`UPDATE ${schema}.invoices`),
         ['paid', 1]
       );
 
       // Vérifie l'insertion dans l'historique
       expect(pool.query).toHaveBeenNthCalledWith(
         2,
-        expect.stringContaining('INSERT INTO invoicing.invoice_status'),
+        expect.stringContaining(`INSERT INTO ${schema}.invoice_status`),
         [1, 'paid', 'Payée', 'Merci']
       );
 
@@ -64,9 +66,10 @@ describe('status.model', () => {
 
       expect(pool.query).toHaveBeenNthCalledWith(
         2,
-        expect.stringContaining('INSERT INTO invoicing.invoice_status'),
+        expect.stringContaining(`INSERT INTO ${schema}.invoice_status`),
         [2, 'draft', 'Brouillon', null]
       );
+
       expect(result).toEqual(updatedInvoice);
     });
   });
@@ -80,7 +83,7 @@ describe('status.model', () => {
       pool.query.mockResolvedValue({ rows });
 
       const result = await getInvoiceStatusHistory(1);
-      expect(pool.query).toHaveBeenCalledWith(expect.any(String), [1]);
+      expect(pool.query).toHaveBeenCalledWith(expect.stringContaining(`FROM ${schema}.invoice_status`), [1]);
       expect(result).toEqual(rows);
     });
   });
@@ -91,7 +94,10 @@ describe('status.model', () => {
       pool.query.mockResolvedValue({ rows });
 
       const result = await getInvoiceStatusComment(1, 'paid');
-      expect(pool.query).toHaveBeenCalledWith(expect.any(String), [1, 'paid']);
+      expect(pool.query).toHaveBeenCalledWith(
+        expect.stringContaining(`FROM ${schema}.invoice_status`),
+        [1, 'paid']
+      );
       expect(result).toBe('Merci');
     });
 

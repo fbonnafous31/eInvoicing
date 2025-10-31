@@ -1,4 +1,5 @@
 const pool = require("../../config/db.js");
+const SCHEMA = process.env.DB_SCHEMA || 'public';
 
 /**
  * InvoiceClient Model
@@ -7,7 +8,7 @@ const pool = require("../../config/db.js");
 const InvoiceClientModel = {
   create: async function(invoiceId, data) {
     const query = `
-      INSERT INTO invoicing.invoice_client 
+      INSERT INTO ${SCHEMA}.invoice_client 
         (invoice_id, legal_name, legal_identifier_type, legal_identifier, address, city, postal_code, country_code, email, phone)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING *;
@@ -33,7 +34,7 @@ const InvoiceClientModel = {
   findByInvoiceId: async function(invoiceId) {
     const query = `
       SELECT * 
-      FROM invoicing.invoice_client
+      FROM ${SCHEMA}.invoice_client
       WHERE invoice_id = $1;
     `;
     const result = await pool.query(query, [invoiceId]);
@@ -42,7 +43,7 @@ const InvoiceClientModel = {
 
   update: async function(invoiceId, data) {
     const query = `
-      UPDATE invoicing.invoice_client
+      UPDATE ${SCHEMA}.invoice_client
       SET legal_name = $2,
           legal_identifier_type = $3,
           legal_identifier = $4,
@@ -71,7 +72,7 @@ const InvoiceClientModel = {
 
   delete: async function(invoiceId) {
     const query = `
-      DELETE FROM invoicing.invoice_client
+      DELETE FROM ${SCHEMA}.invoice_client
       WHERE invoice_id = $1;
     `;
     await pool.query(query, [invoiceId]);

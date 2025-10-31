@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const { getSellerById } = require('../sellers/sellers.model'); 
 const { saveAttachment, cleanupAttachments } = require("./invoiceAttachments.model");
+const SCHEMA = process.env.DB_SCHEMA || 'public';
 
 /**
  * Récupère toutes les factures avec leurs lignes, taxes et justificatifs
@@ -11,8 +12,8 @@ async function getAllInvoices() {
   // 1. Récupérer toutes les factures de base avec le nom du client joint
   const invoicesResult = await pool.query(
     `SELECT i.*, ic.legal_name as client_legal_name
-     FROM invoicing.invoices i
-     LEFT JOIN invoicing.invoice_client ic ON i.id = ic.invoice_id
+     FROM ${SCHEMA}.invoices i
+     LEFT JOIN ${SCHEMA}.invoice_client ic ON i.id = ic.invoice_id
      ORDER BY i.created_at DESC`
   );
   if (invoicesResult.rows.length === 0) {
@@ -24,9 +25,9 @@ async function getAllInvoices() {
 
   // 2. Récupérer toutes les données liées en 3 requêtes au lieu de N*3
   const [linesResult, taxesResult, attachmentsResult] = await Promise.all([
-    pool.query('SELECT * FROM invoicing.invoice_lines WHERE invoice_id = ANY($1::int[])', [invoiceIds]),
-    pool.query('SELECT * FROM invoicing.invoice_taxes WHERE invoice_id = ANY($1::int[])', [invoiceIds]),
-    pool.query('SELECT * FROM invoicing.invoice_attachments WHERE invoice_id = ANY($1::int[])', [invoiceIds])
+    pool.query(`SELECT * FROM ${SCHEMA}.invoice_lines WHERE invoice_id = ANY($1::int[])`, [invoiceIds]),
+    pool.query(`SELECT * FROM ${SCHEMA}.invoice_taxes WHERE invoice_id = ANY($1::int[])`, [invoiceIds]),
+    pool.query(`SELECT * FROM ${SCHEMA}.invoice_attachments WHERE invoice_id = ANY($1::int[])`, [invoiceIds])
   ]);
 
   // 3. Mapper les données pour un accès rapide
@@ -56,15 +57,15 @@ async function getAllInvoices() {
  * Récupère une facture par son ID
  */
 async function getInvoiceById(id) {
-  const invoiceResult = await pool.query('SELECT * FROM invoicing.invoices WHERE id = $1', [id]);
+  const invoiceResult = await pool.query(`SELECT * FROM ${SCHEMA}.invoices WHERE id = $1`, [id]);
   if (invoiceResult.rows.length === 0) return null;
   const invoice = invoiceResult.rows[0];  
 
   const [linesResult, taxesResult, attachmentsResult, clientResult, seller] = await Promise.all([
-    pool.query('SELECT * FROM invoicing.invoice_lines WHERE invoice_id = $1', [id]),
-    pool.query('SELECT * FROM invoicing.invoice_taxes WHERE invoice_id = $1', [id]),
-    pool.query('SELECT * FROM invoicing.invoice_attachments WHERE invoice_id = $1', [id]),
-    pool.query('SELECT * FROM invoicing.invoice_client WHERE invoice_id = $1', [id]),
+    pool.query(`SELECT * FROM ${SCHEMA}.invoice_lines WHERE invoice_id = $1`, [id]),
+    pool.query(`SELECT * FROM ${SCHEMA}.invoice_taxes WHERE invoice_id = $1`, [id]),
+    pool.query(`SELECT * FROM ${SCHEMA}.invoice_attachments WHERE invoice_id = $1`, [id]),
+    pool.query(`SELECT * FROM ${SCHEMA}.invoice_client WHERE invoice_id = $1`, [id]),
     invoice.seller_id ? getSellerById(invoice.seller_id) : Promise.resolve(null)
   ]);
 
@@ -90,7 +91,7 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
     // --- Remplir seller_legal_name ---
     if (invoice.seller_id && !invoice.seller_legal_name) {
       const sellerRes = await conn.query(
-        "SELECT legal_name FROM invoicing.sellers WHERE id = $1",
+        `SELECT legal_name FROM ${SCHEMA}.sellers WHERE id = $1`,
         [invoice.seller_id]
       );
       invoice.seller_legal_name = sellerRes.rows[0]?.legal_name || null;
@@ -113,7 +114,7 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
     // --- Vérification unicité ---
     const existing = await conn.query(
       `SELECT id 
-       FROM invoicing.invoices 
+       FROM ${SCHEMA}.invoices 
        WHERE seller_id = $1 AND fiscal_year = $2 AND invoice_number = $3`,
       [invoice.seller_id, invoice.fiscal_year, invoice.invoice_number]
     );
@@ -147,7 +148,7 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
     const placeholders = invoiceColumns.map((_, i) => `$${i + 1}`).join(", ");
 
     const invoiceRes = await conn.query(
-      `INSERT INTO invoicing.invoices (${invoiceColumns.join(", ")}) VALUES (${placeholders}) RETURNING *`,
+      `INSERT INTO ${SCHEMA}.invoices (${invoiceColumns.join(", ")}) VALUES (${placeholders}) RETURNING *`,
       invoiceValues
     );
     const invoiceId = invoiceRes.rows[0].id;
@@ -155,7 +156,7 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
     // --- Insertion client ---
     if (client) {
       await conn.query(
-        `INSERT INTO invoicing.invoice_client 
+        `INSERT INTO ${SCHEMA}.invoice_client 
           (invoice_id, legal_name, legal_identifier_type, legal_identifier, address, city, postal_code, country_code, email, phone)
         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
         [
@@ -183,7 +184,7 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
         const vals = Object.values(line);
         const placeholdersLine = vals.map((_, i) => `$${i + 1}`).join(", ");
         return conn.query(
-          `INSERT INTO invoicing.invoice_lines (${cols}, invoice_id) VALUES (${placeholdersLine}, $${
+          `INSERT INTO ${SCHEMA}.invoice_lines (${cols}, invoice_id) VALUES (${placeholdersLine}, $${
             vals.length + 1
           })`,
           [...vals, invoiceId]
@@ -194,7 +195,7 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
         const vals = Object.values(tax);
         const placeholdersTax = vals.map((_, i) => `$${i + 1}`).join(", ");
         return conn.query(
-          `INSERT INTO invoicing.invoice_taxes (${cols}, invoice_id) VALUES (${placeholdersTax}, $${
+          `INSERT INTO ${SCHEMA}.invoice_taxes (${cols}, invoice_id) VALUES (${placeholdersTax}, $${
             vals.length + 1
           })`,
           [...vals, invoiceId]
@@ -225,7 +226,7 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
  */
 async function deleteInvoice(id) {
   const result = await pool.query(
-    `DELETE FROM invoicing.invoices
+    `DELETE FROM ${SCHEMA}.invoices
      WHERE id = $1 AND status = 'draft'
      RETURNING *`,
     [id]
@@ -268,7 +269,7 @@ async function updateInvoice(
 
       if (updates.length > 0) {
         await conn.query(
-          `UPDATE invoicing.invoices SET ${updates.join(", ")} WHERE id = $1`,
+          `UPDATE ${SCHEMA}.invoices SET ${updates.join(", ")} WHERE id = $1`,
           [id, ...values]
         );
       }
@@ -278,13 +279,13 @@ async function updateInvoice(
     if (client) {
       if (client.client_id) {
         await conn.query(
-          "UPDATE invoicing.invoices SET client_id = $1 WHERE id = $2",
+          `UPDATE ${SCHEMA}.invoices SET client_id = $1 WHERE id = $2`,
           [client.client_id, id]
         );
       }
 
       const clientExistsResult = await conn.query(
-        "SELECT id FROM invoicing.invoice_client WHERE invoice_id = $1",
+        `SELECT id FROM ${SCHEMA}.invoice_client WHERE invoice_id = $1`,
         [id]
       );
 
@@ -301,7 +302,7 @@ async function updateInvoice(
 
       if (clientExistsResult.rows.length > 0) {
         await conn.query(
-          `UPDATE invoicing.invoice_client 
+          `UPDATE ${SCHEMA}.invoice_client 
            SET legal_name = $2,
                legal_identifier_type = $3,
                legal_identifier = $4,
@@ -327,7 +328,7 @@ async function updateInvoice(
         );
       } else if (legal_name) {
         await conn.query(
-          `INSERT INTO invoicing.invoice_client 
+          `INSERT INTO ${SCHEMA}.invoice_client 
             (invoice_id, legal_name, legal_identifier_type, legal_identifier, address, city, postal_code, country_code, email, phone)
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
           [
@@ -347,7 +348,7 @@ async function updateInvoice(
     }
 
     // --- 3. Update invoice lines ---
-    await conn.query("DELETE FROM invoicing.invoice_lines WHERE invoice_id = $1", [id]);
+    await conn.query(`DELETE FROM ${SCHEMA}.invoice_lines WHERE invoice_id = $1`, [id]);
     if (lines?.length) {
       for (const line of lines) {
         const { id: lineId, invoice_id, ...lineData } = line; // eslint-disable-line no-unused-vars
@@ -355,7 +356,7 @@ async function updateInvoice(
         const vals = Object.values(lineData);
         const placeholdersLine = vals.map((_, i) => `$${i + 1}`).join(", ");
         await conn.query(
-          `INSERT INTO invoicing.invoice_lines (${cols}, invoice_id) VALUES (${placeholdersLine}, $${
+          `INSERT INTO ${SCHEMA}.invoice_lines (${cols}, invoice_id) VALUES (${placeholdersLine}, $${
             vals.length + 1
           })`,
           [...vals, id]
@@ -363,7 +364,7 @@ async function updateInvoice(
       }
     }
 
-    await conn.query("DELETE FROM invoicing.invoice_taxes WHERE invoice_id = $1", [id]);
+    await conn.query(`DELETE FROM ${SCHEMA}.invoice_taxes WHERE invoice_id = $1`, [id]);
     if (taxes?.length) {
       for (const tax of taxes) {
         const { id: taxId, invoice_id, ...taxData } = tax; // eslint-disable-line no-unused-vars
@@ -371,7 +372,7 @@ async function updateInvoice(
         const vals = Object.values(taxData);
         const placeholdersTax = vals.map((_, i) => `$${i + 1}`).join(", ");
         await conn.query(
-          `INSERT INTO invoicing.invoice_taxes (${cols}, invoice_id) VALUES (${placeholdersTax}, $${
+          `INSERT INTO ${SCHEMA}.invoice_taxes (${cols}, invoice_id) VALUES (${placeholdersTax}, $${
             vals.length + 1
           })`,
           [...vals, id]
@@ -382,7 +383,7 @@ async function updateInvoice(
     // --- 4. Attachments ---
     // Récupérer ceux existants en DB
     const { rows: dbAttachments } = await conn.query(
-      `SELECT id, stored_name FROM invoicing.invoice_attachments WHERE invoice_id = $1`,
+      `SELECT id, stored_name FROM ${SCHEMA}.invoice_attachments WHERE invoice_id = $1`,
       [id]
     );
 
@@ -403,7 +404,7 @@ async function updateInvoice(
     // Supprimer ceux que le front ne veut pas garder
     for (const dbAtt of dbAttachments) {
       if (!keepIds.has(dbAtt.id)) {
-        await conn.query(`DELETE FROM invoicing.invoice_attachments WHERE id = $1`, [dbAtt.id]);
+        await conn.query(`DELETE FROM ${SCHEMA}.invoice_attachments WHERE id = $1`, [dbAtt.id]);
       }
     }
 
@@ -417,7 +418,7 @@ async function updateInvoice(
     // Nettoyer les fichiers orphelins côté serveur
     const uploadDir = path.join(__dirname, "../../uploads/invoices");
     const { rows: dbFiles } = await conn.query(
-      `SELECT stored_name FROM invoicing.invoice_attachments WHERE invoice_id = $1`,
+      `SELECT stored_name FROM ${SCHEMA}.invoice_attachments WHERE invoice_id = $1`,
       [id]
     );
     const dbFileSet = new Set(dbFiles.map((f) => f.stored_name));
@@ -463,9 +464,9 @@ async function getInvoicesBySeller(sellerId) {
         c.country_code AS client_country_code,
         c.email AS client_email,
         c.phone AS client_phone
-     FROM invoicing.invoices i
-     JOIN invoicing.sellers s ON i.seller_id = s.id
-     LEFT JOIN invoicing.clients c ON i.client_id = c.id
+     FROM ${SCHEMA}.invoices i
+     JOIN ${SCHEMA}.sellers s ON i.seller_id = s.id
+     LEFT JOIN ${SCHEMA}.clients c ON i.client_id = c.id
      WHERE i.seller_id = $1
      ORDER BY i.created_at DESC`,
     [sellerId]

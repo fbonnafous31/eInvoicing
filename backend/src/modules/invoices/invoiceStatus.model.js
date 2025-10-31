@@ -1,4 +1,5 @@
 const pool = require('../../config/db');
+const SCHEMA = process.env.DB_SCHEMA || 'public';
 
 /**
  * Met à jour le statut technique et l'ID de soumission d'une facture.
@@ -7,7 +8,7 @@ const pool = require('../../config/db');
  */
 async function updateTechnicalStatus(invoiceId, { technicalStatus, submissionId }) {
   const query = `
-    UPDATE invoicing.invoices
+    UPDATE ${SCHEMA}.invoices
     SET technical_status = $1,
         submission_id = $2,
         last_technical_update = now()
@@ -27,7 +28,7 @@ async function updateTechnicalStatus(invoiceId, { technicalStatus, submissionId 
 async function updateBusinessStatus(invoiceId, data) {
   // 🔹 Mise à jour du statut métier sur la facture
   const queryUpdateInvoice = `
-    UPDATE invoicing.invoices
+    UPDATE ${SCHEMA}.invoices
     SET business_status = $1,
         updated_at = now()
     WHERE id = $2
@@ -38,7 +39,7 @@ async function updateBusinessStatus(invoiceId, data) {
 
   // 🔹 Ajout dans l'historique avec éventuellement le commentaire client
   const queryInsertStatus = `
-    INSERT INTO invoicing.invoice_status(invoice_id, status_code, status_label, client_comment)
+    INSERT INTO ${SCHEMA}.invoice_status(invoice_id, status_code, status_label, client_comment)
     VALUES ($1, $2, $3, $4)
     RETURNING *;
   `;
@@ -59,7 +60,7 @@ async function updateBusinessStatus(invoiceId, data) {
 async function getInvoiceStatusHistory(invoiceId) {
   const query = `
     SELECT id, status_code, status_label, client_comment, created_at
-    FROM invoicing.invoice_status
+    FROM ${SCHEMA}.invoice_status
     WHERE invoice_id = $1
     ORDER BY created_at ASC;
   `;
@@ -73,7 +74,7 @@ async function getInvoiceStatusHistory(invoiceId) {
 async function getInvoiceStatusComment(invoiceId, statusCode) {
   const query = `
     SELECT client_comment
-    FROM invoicing.invoice_status
+    FROM ${SCHEMA}.invoice_status
     WHERE invoice_id = $1 AND status_code = $2
     ORDER BY created_at DESC
     LIMIT 1;

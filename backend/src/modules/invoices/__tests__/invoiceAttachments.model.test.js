@@ -22,6 +22,7 @@ jest.mock('../../../utils/fileNaming', () => ({
 describe('invoiceAttachments.model', () => {
   const conn = { query: jest.fn() };
   const mockInvoiceId = 123;
+  const schema = process.env.DB_SCHEMA || 'public';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -44,7 +45,7 @@ describe('invoiceAttachments.model', () => {
 
     expect(fs.promises.rename).toHaveBeenCalledWith('/tmp/file.pdf', '/uploads/123_main_file.pdf');
     expect(conn.query).toHaveBeenCalledWith(
-      expect.stringContaining('INSERT INTO invoicing.invoice_attachments'),
+      expect.stringContaining(`INSERT INTO ${schema}.invoice_attachments`),
       [123, 'file.pdf', '/uploads/123_main_file.pdf', '123_main_file.pdf', 'main']
     );
     expect(result).toEqual({ id: 1 });
@@ -67,7 +68,7 @@ describe('invoiceAttachments.model', () => {
     const result = await getAttachment(123, 'main');
 
     expect(db.query).toHaveBeenCalledWith(
-      expect.stringContaining('FROM invoicing.invoice_attachments'),
+      expect.stringContaining(`FROM ${schema}.invoice_attachments`),
       [123, 'main']
     );
     expect(result).toEqual({ file_name: 'f.pdf', file_path: '/path/f.pdf' });

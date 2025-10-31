@@ -2,6 +2,7 @@ const fs = require("fs");
 const db = require("../../config/db");
 const path = require("path");
 const { generateStoredName, getFinalPath } = require("../../utils/fileNaming");
+const SCHEMA = process.env.DB_SCHEMA || 'public';
 
 async function saveAttachment(conn, invoiceId, att) {
   const attachmentType = att.attachment_type || "additional";
@@ -13,7 +14,7 @@ async function saveAttachment(conn, invoiceId, att) {
 
   // Insérer en DB
   const result = await conn.query(
-    `INSERT INTO invoicing.invoice_attachments
+    `INSERT INTO ${SCHEMA}.invoice_attachments
       (invoice_id, file_name, file_path, stored_name, attachment_type)
      VALUES ($1, $2, $3, $4, $5) RETURNING *`,
     [invoiceId, att.file_name, finalPath, storedName, attachmentType]
@@ -25,7 +26,7 @@ async function saveAttachment(conn, invoiceId, att) {
 async function cleanupAttachments(conn, invoiceId) {
   const uploadDir = getFinalPath(""); // juste le dossier
   const { rows: dbFiles } = await conn.query(
-    `SELECT stored_name FROM invoicing.invoice_attachments WHERE invoice_id = $1`,
+    `SELECT stored_name FROM ${SCHEMA}.invoice_attachments WHERE invoice_id = $1`,
     [invoiceId]
   );
   const dbFileSet = new Set(dbFiles.map(f => f.stored_name));
@@ -41,7 +42,7 @@ async function cleanupAttachments(conn, invoiceId) {
 async function getAttachment(invoiceId, type) {
   const res = await db.query(
     `SELECT file_name, file_path 
-     FROM invoicing.invoice_attachments 
+     FROM ${SCHEMA}.invoice_attachments 
      WHERE invoice_id = $1 AND attachment_type = $2`,
     [invoiceId, type]
   );
@@ -51,7 +52,7 @@ async function getAttachment(invoiceId, type) {
 async function getAttachmentsByType(invoiceId, type) {
   const res = await db.query(
     `SELECT file_name, file_path
-     FROM invoicing.invoice_attachments
+     FROM ${SCHEMA}.invoice_attachments
      WHERE invoice_id = $1 AND attachment_type = $2`,
     [invoiceId, type]
   );
