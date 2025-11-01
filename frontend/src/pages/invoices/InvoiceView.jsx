@@ -1,4 +1,3 @@
-// frontend/src/pages/invoices/InvoiceView.jsx
 import { useParams } from "react-router-dom";
 import InvoiceForm from "../../components/invoices/InvoiceForm";
 import Breadcrumb from "../../components/layout/Breadcrumb";
@@ -6,14 +5,14 @@ import InvoiceTabs from "../../components/invoices/InvoiceTabs";
 import { useEffect, useState, useMemo } from "react";
 import { useClientService } from "@/services/clients";
 import { useInvoiceService } from "@/services/invoices";
+import { getEnv } from "@/utils/getEnv";
 
 const InvoiceView = () => {
   const { id } = useParams();
   const [invoice, setInvoice] = useState(null);
 
-  const BACKEND_URL = import.meta.env.DEV
-    ? import.meta.env.VITE_API_URL
-    : (window.__ENV__?.VITE_API_URL || "");
+  const env = getEnv();
+  const BACKEND_URL = env.VITE_API_URL || "";
 
   console.log("[InvoiceView] BACKEND_URL :", BACKEND_URL);
 
@@ -93,7 +92,6 @@ const InvoiceView = () => {
     };
   }, [invoice, mappedClient]);
 
-  // Loading
   if (!invoice || !invoiceFormData) return <div>Chargement...</div>;
 
   const breadcrumbItems = [

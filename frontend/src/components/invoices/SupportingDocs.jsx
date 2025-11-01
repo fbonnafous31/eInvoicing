@@ -1,7 +1,7 @@
-// frontend/src/components/invoices/SupportingDocs.jsx
 import React, { useEffect } from "react";
 import { SmallDeleteButton } from "@/components/ui/buttons";
 import { useAuth } from "@/hooks/useAuth";
+import { getEnv } from "@/utils/getEnv";
 
 export default function SupportingDocs({ data, onChange, disabled, hideLabelsInView, invoice, canEditAdditional }) {
   const { getToken } = useAuth();
@@ -31,9 +31,6 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
     onChange(newData);
   };
 
-  // ----------------------
-  // Gestion justificatifs additionnels
-  // ----------------------
   const handleAdditionalChange = (e) => {
     const files = Array.from(e.target.files).map(f => ({
       file_name: f.name,
@@ -45,9 +42,6 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
     onChange([...data, ...files]);
   };
 
-  // ----------------------
-  // Suppression fichier
-  // ----------------------
   const removeFile = (index, type) => {
     let newData;
     if (type === "main") {
@@ -63,31 +57,25 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
     onChange(newData);
   };
 
-  // ----------------------
-  // Génération PDF backend
-  // ----------------------
   const handleGeneratePdf = async () => {
     if (!invoice) return console.error("❌ invoice missing");
 
     try {
-      // 🔹 Récupération audience selon l'environnement
-      const env = import.meta.env.DEV
-        ? import.meta.env
-        : window.__ENV__ || {};
-      
+      // 🔹 Récupération audience centralisée
+      const env = getEnv();
+
       const token = await getToken({
         audience: env.VITE_AUTH0_AUDIENCE,
       });
 
       console.log("[Auth] Token pour génération PDF:", token);
-
       console.log("➡️ Génération PDF pour facture:", invoice.id);
 
       const res = await fetch("/api/invoices/generate-pdf", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`, // ✅ Auth0 JWT
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify(invoice),
       });
@@ -99,7 +87,7 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
 
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
-      window.open(url, "_blank"); // ouvrir le PDF dans un nouvel onglet
+      window.open(url, "_blank");
 
       console.log("✅ PDF généré et ouvert dans un nouvel onglet");
     } catch (err) {
@@ -143,7 +131,7 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
             {!hideLabelsInView && (
               <SmallDeleteButton
                 onClick={() => removeFile(0, "main")}
-                disabled={canEditAdditional || disabled} // interdit en mode suspension
+                disabled={canEditAdditional || disabled}
               />
             )}
           </div>
@@ -169,7 +157,7 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
               {!hideLabelsInView && (
                 <SmallDeleteButton
                   onClick={() => removeFile(index, "additional")}
-                  disabled={canEditAdditional} 
+                  disabled={canEditAdditional}
                 />
               )}
             </li>

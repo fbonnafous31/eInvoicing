@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
+import { getEnv } from "./utils/getEnv";
 import './LoginPage.css';
 
 const LoginPage = () => {
@@ -7,15 +8,12 @@ const LoginPage = () => {
   const [isSignup, setIsSignup] = useState(false);
 
   const handleAuth = () => {
-    // 🔹 Récupération des variables selon l'environnement
-    const env = import.meta.env.DEV
-      ? import.meta.env       // dev → .env Vite
-      : window.__ENV__ || {};  // prod → config.js injecté par Nginx
+    const env = getEnv(); // récupère les variables Auth0 selon l'environnement
 
     loginWithRedirect({
       screen_hint: isSignup ? "signup" : "login",
       authorizationParams: {
-        audience: env.VITE_AUTH0_AUDIENCE, // ← utilise les variables runtime
+        audience: env.VITE_AUTH0_AUDIENCE, // centralisé via getEnv
         scope: "openid profile email",
       },
     });
