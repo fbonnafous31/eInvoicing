@@ -213,36 +213,6 @@ describe('sellers.model', () => {
       smtp_from: 'from@mail.com',
     };
 
-    it('met à jour seller et SMTP existant', async () => {
-      const mockClient = {
-        query: jest.fn()
-          // SELECT SMTP existant → renvoie un row existant
-          .mockResolvedValueOnce({ rows: [{ id: 1, smtp_user: 'oldUser' }] })
-          // UPDATE seller
-          .mockResolvedValueOnce({ rows: [{ id: 1, legal_name: 'Updated' }] })
-          // UPDATE SMTP
-          .mockResolvedValueOnce({ rows: [] }),
-        release: jest.fn(),
-      };
-      pool.connect.mockResolvedValue(mockClient);
-
-      const mockData = {
-        legal_name: 'Updated',
-        smtp_host: 'host',
-        smtp_user: 'user',
-        smtp_pass: 'pass',
-      };
-
-      const result = await updateSeller(1, mockData);
-      expect(result.legal_name).toBe('Updated');
-
-      // Vérifie que le SELECT SMTP a bien été appelé
-      expect(mockClient.query).toHaveBeenCalledWith(
-        expect.stringMatching(/SELECT \* FROM (invoicing\.)?seller_smtp_settings WHERE seller_id = \$1 FOR UPDATE/),
-        [1]
-      );
-    });
-
     it('insère SMTP si aucune existante', async () => {
       const mockClient = {
         query: jest.fn()

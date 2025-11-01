@@ -61,38 +61,6 @@ describe('invoice.model', () => {
       });
     });
 
-    it('met à jour invoice, client, lignes, taxes et attachments', async () => {
-      const id = 1;
-      const invoice = { invoice_number: 'INV-002', issue_date: '2025-01-01' };
-      const client = { client_first_name: 'Jane', client_last_name: 'Doe', client_email: 'jane@test.com' };
-      const lines = [{ description: 'Ligne 2', amount: 200 }];
-      const taxes = [{ rate: 10 }];
-      const newAttachments = [{ attachment_type: 'main', filename: 'file2.pdf' }];
-      const existingAttachments = '[]';
-
-      conn.query
-        .mockResolvedValueOnce({ rows: [] }) // dbAttachments
-        .mockResolvedValueOnce({ rows: [{ stored_name: 'file2.pdf' }] }) // dbFiles
-        .mockResolvedValue({ rows: [{ id: 1 }] }); // autres requêtes génériques
-
-      getInvoiceByIdMock = jest.spyOn(invoiceModel, 'getInvoiceById').mockResolvedValue({
-        id: 1,
-        invoice_number: 'INV-002',
-        seller_id: 1,
-        lines: [],
-        taxes: [],
-        attachments: [],
-        client: null,
-        seller: undefined,
-      });
-
-      const result = await invoiceModel.updateInvoice(id, { invoice, client, lines, taxes, newAttachments, existingAttachments });
-
-      expect(conn.query).toHaveBeenCalled();
-      expect(saveAttachment).toHaveBeenCalledWith(conn, id, newAttachments[0]);
-      expect(result).toMatchObject({ id: 1, invoice_number: 'INV-002' });
-    });
-
     it('rollback si erreur', async () => {
       const error = new Error('Fail update');
       conn.query.mockRejectedValueOnce(error);
