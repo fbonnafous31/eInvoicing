@@ -2,6 +2,7 @@ const db = require('../../config/db');
 const nodemailer = require('nodemailer');
 const SellersModel = require('./sellers.model');
 const SCHEMA = process.env.DB_SCHEMA || 'public';
+const { decrypt } = require('../../utils/encryption');
 
 async function listSellers() {
   return await SellersModel.getAllSellers();
@@ -39,10 +40,19 @@ async function getSellerByAuth0Id(auth0_id) {
   );
   const smtp = smtpRes.rows[0] || {};
 
+  if (smtp.smtp_pass) {
+    try {
+      smtp.smtp_pass = decrypt(smtp.smtp_pass); // décrypte avant de renvoyer
+    } catch {
+      smtp.smtp_pass = '';
+    }
+  } else {
+    smtp.smtp_pass = '';
+  }
+
   // SMTP dans un sous-objet pour éviter d’écraser id du vendeur
   return { ...seller, smtp };
 }
-
 
 async function checkIdentifierExists(identifier, sellerId) {
   const result = await db.query(

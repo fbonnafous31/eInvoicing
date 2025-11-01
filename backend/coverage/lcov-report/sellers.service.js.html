@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">82.14% </span>
+                <span class="strong">82.85% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>23/28</span>
+                <span class='fraction'>29/35</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">90% </span>
+                <span class="strong">92.85% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>9/10</span>
+                <span class='fraction'>13/14</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">80% </span>
+                <span class="strong">81.25% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>20/25</span>
+                <span class='fraction'>26/32</span>
             </div>
         
             
@@ -153,7 +153,20 @@
 <a name='L88'></a><a href='#L88'>88</a>
 <a name='L89'></a><a href='#L89'>89</a>
 <a name='L90'></a><a href='#L90'>90</a>
-<a name='L91'></a><a href='#L91'>91</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a>
+<a name='L102'></a><a href='#L102'>102</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -178,6 +191,13 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
@@ -185,17 +205,19 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -246,6 +268,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const db = require('../../config/db');
 const nodemailer = require('nodemailer');
 const SellersModel = require('./sellers.model');
+const SCHEMA = process.env.DB_SCHEMA || 'public';
+const { decrypt } = require('../../utils/encryption');
 &nbsp;
 async function listSellers() {
   return await SellersModel.getAllSellers();
@@ -271,26 +295,35 @@ async function getSellerByAuth0Id(auth0_id) {
   if (!auth0_id) return null;
 &nbsp;
   const sellerRes = await db.query(
-    `SELECT * FROM invoicing.sellers WHERE auth0_id = $1`,
+    `SELECT * FROM ${SCHEMA}.sellers WHERE auth0_id = $1`,
     [auth0_id]
   );
   const seller = sellerRes.rows[0];
   if (!seller) return null;
 &nbsp;
   const smtpRes = await db.query(
-    `SELECT * FROM invoicing.seller_smtp_settings WHERE seller_id = $1`,
+    `SELECT * FROM ${SCHEMA}.seller_smtp_settings WHERE seller_id = $1`,
     [seller.id]
   );
   const smtp = smtpRes.rows[0] || <span class="branch-1 cbranch-no" title="branch not covered" >{};</span>
+&nbsp;
+  if (smtp.smtp_pass) {
+    try {
+      smtp.smtp_pass = decrypt(smtp.smtp_pass); // décrypte avant de renvoyer
+    } catch {
+<span class="cstat-no" title="statement not covered" >      smtp.smtp_pass = '';</span>
+    }
+  } else {
+    smtp.smtp_pass = '';
+  }
 &nbsp;
   // SMTP dans un sous-objet pour éviter d’écraser id du vendeur
   return { ...seller, smtp };
 }
 &nbsp;
-&nbsp;
 async function checkIdentifierExists(identifier, sellerId) {
   const result = await db.query(
-    'SELECT id FROM invoicing.sellers WHERE legal_identifier = $1 AND ($2::int IS NULL OR id != $2)',
+    `SELECT id FROM ${SCHEMA}.sellers WHERE legal_identifier = $1 AND ($2::int IS NULL OR id != $2)`,
     [identifier, sellerId || null]
   );
   return result.rowCount &gt; 0;
@@ -340,7 +373,7 @@ module.exports = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-28T07:58:10.630Z
+                at 2025-11-01T12:10:28.537Z
             </div>
         <script src="prettify.js"></script>
         <script>

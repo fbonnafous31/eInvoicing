@@ -1,6 +1,7 @@
 /* global describe, it, expect, afterEach, jest */
 
 const db = require('../../../config/db');
+process.env.ENCRYPTION_KEY = '12345678901234567890123456789012';
 
 // Mock complet du modèle
 const SellersModel = require('../sellers.model');
@@ -18,6 +19,12 @@ jest.mock('../sellers.model', () => ({
 // Mock de la DB pour les requêtes directes
 jest.mock('../../../config/db', () => ({
   query: jest.fn(),
+}));
+
+// Mock complet du module encryption avant d'importer le service
+jest.mock('../../../utils/encryption', () => ({
+  encrypt: jest.fn(),
+  decrypt: jest.fn().mockReturnValue('decrypted'),
 }));
 
 const SellersService = require('../sellers.service');
@@ -153,5 +160,25 @@ describe('SellersService', () => {
   it('getMySeller retourne null si auth0_id absent', async () => {
     const result = await SellersService.getMySeller(null);
     expect(result).toBeNull();
+  });
+
+  it('getSellerByAuth0Id décrypte smtp_pass correctement', async () => {
+    const sellerRow = { id: 1, name: 'Alice' };
+    const smtpRow = { id: 1, smtp_host: 'smtp.example.com', smtp_pass: 'encrypted' };
+
+    // Mock de la DB
+    db.query
+      .mockResolvedValueOnce({ rows: [sellerRow] })  // seller
+      .mockResolvedValueOnce({ rows: [smtpRow] });   // SMTP
+
+    const result = await SellersService.getSellerByAuth0Id(auth0_id);
+
+    const encryption = require('../../../utils/encryption');
+
+    // Vérifie que decrypt a été appelé avec la valeur de la DB
+    expect(encryption.decrypt).toHaveBeenCalledWith('encrypted');
+
+    // Vérifie que le résultat contient bien le mot de passe décrypté
+    expect(result.smtp.smtp_pass).toBe('decrypted');
   });
 });

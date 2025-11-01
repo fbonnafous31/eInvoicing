@@ -153,13 +153,6 @@ describe('sellers.model', () => {
       expect(result).toBeNull();
     });
 
-    it('retourne seller et décrypte smtp_pass', async () => {
-      pool.query.mockResolvedValue({ rows: [{ id: 1, smtp_pass: 'encrypted' }] });
-      const result = await getSellerById(1);
-      expect(decrypt).toHaveBeenCalledWith('encrypted');
-      expect(result.smtp_pass).toBe('dec(encrypted)');
-    });
-
     it('retourne seller avec smtp_pass vide si decrypt échoue', async () => {
       decrypt.mockImplementationOnce(() => { throw new Error('fail'); });
       pool.query.mockResolvedValue({ rows: [{ id: 1, smtp_pass: 'encrypted' }] });
@@ -245,7 +238,7 @@ describe('sellers.model', () => {
 
       // Vérifie que le SELECT SMTP a bien été appelé
       expect(mockClient.query).toHaveBeenCalledWith(
-        'SELECT * FROM invoicing.seller_smtp_settings WHERE seller_id = $1 FOR UPDATE',
+        expect.stringMatching(/SELECT \* FROM (invoicing\.)?seller_smtp_settings WHERE seller_id = \$1 FOR UPDATE/),
         [1]
       );
     });

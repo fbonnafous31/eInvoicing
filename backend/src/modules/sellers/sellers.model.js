@@ -1,5 +1,5 @@
 const pool = require('../../config/db');
-const { encrypt, decrypt } = require('../../utils/encryption');
+const { encrypt } = require('../../utils/encryption');
 const SCHEMA = process.env.DB_SCHEMA || 'public';
 
 /* --- Récupérer tous les vendeurs (sans SMTP) --- */
@@ -119,17 +119,11 @@ async function getSellerById(id) {
   const seller = result.rows[0];
   if (!seller) return null;
 
-  if (seller.smtp_pass) {
-    try {
-      seller.smtp_pass = decrypt(seller.smtp_pass);
-    } catch {
-      seller.smtp_pass = '';
-    }
-  }
+  // Ne jamais renvoyer le mot de passe réel au front
+  seller.smtp_pass = '';
 
   return seller;
 }
-
 
 /* --- Supprimer un vendeur et sa config SMTP --- */
 async function removeSeller(id) {
@@ -164,12 +158,12 @@ async function updateSeller(id, data) {
       smtp_pass,
       smtp_secure,
       smtp_from,
-      active: smtp_active,      
-      seller_id, 
+      active: smtp_active,
+      seller_id,
       ...mainData
     } = data;
 
-    const sellerDbId = seller_id || id; // Priorité à seller_id
+    const sellerDbId = seller_id || id;
 
     console.log('[updateSeller] mainData:', mainData);
     console.log('[updateSeller] SMTP data:', { smtp_host, smtp_port, smtp_user, smtp_pass, smtp_secure, smtp_from });
@@ -193,7 +187,6 @@ async function updateSeller(id, data) {
       WHERE id = $12
       RETURNING *;
     `;
-
     const values = [
       mainData.legal_name,
       mainData.legal_identifier,
@@ -209,27 +202,28 @@ async function updateSeller(id, data) {
       sellerDbId
     ];
 
-    console.log('[updateSeller] UPDATE sellers query values:', values);
     const { rows } = await client.query(query, values);
-    if (!rows[0]) {
-      throw new Error(`[updateSeller] Seller with id ${sellerDbId} not found`);
-    }
+    if (!rows[0]) throw new Error(`[updateSeller] Seller with id ${sellerDbId} not found`);
     const updatedSeller = rows[0];
     console.log('[updateSeller] updatedSeller:', updatedSeller);
 
-    // --- Gestion du bloc SMTP
+    // --- Gestion du bloc SMTP sécurisé
     if (smtp_host || smtp_user || smtp_pass || smtp_from) {
       console.log('[updateSeller] checking existing SMTP settings...');
-      const existing = await client.query(
+      const existingRes = await client.query(
         `SELECT * FROM ${SCHEMA}.seller_smtp_settings WHERE seller_id = $1 FOR UPDATE`,
         [sellerDbId]
       );
-      console.log('[updateSeller] existing SMTP rows:', existing.rows);
+      const existing = existingRes.rows[0];
 
-      if (existing.rows.length > 0) {
+      // encode seulement si un nouveau mot de passe est fourni
+      let encryptedPass = null;
+      if (smtp_pass && smtp_pass !== '') {
+        encryptedPass = encrypt(smtp_pass);
+      }
+
+      if (existing) {
         console.log('[updateSeller] updating existing SMTP settings...');
-        const encryptedPass = smtp_pass ? encrypt(smtp_pass) : null;
-
         await client.query(
           `
           UPDATE ${SCHEMA}.seller_smtp_settings
@@ -244,13 +238,13 @@ async function updateSeller(id, data) {
           WHERE seller_id = $8
           `,
           [
-            smtp_host,
-            smtp_port || 587,
-            smtp_user,
-            encryptedPass,
-            smtp_secure || false,
-            smtp_from,
-            smtp_active ?? true, 
+            smtp_host || existing.smtp_host,
+            smtp_port || existing.smtp_port || 587,
+            smtp_user || existing.smtp_user,
+            encryptedPass, // null si pas de nouveau mot de passe
+            smtp_secure ?? existing.smtp_secure ?? false,
+            smtp_from || existing.smtp_from,
+            smtp_active ?? existing.active ?? true,
             sellerDbId
           ]
         );
@@ -267,7 +261,7 @@ async function updateSeller(id, data) {
             smtp_host,
             smtp_port || 587,
             smtp_user,
-            smtp_pass,
+            encryptedPass, // encode si fourni, sinon null
             smtp_secure || false,
             smtp_from,
             smtp_active ?? true
