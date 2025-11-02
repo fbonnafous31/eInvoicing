@@ -5,7 +5,17 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>eInvoicing</title>
-    <script src="/config.js"></script>
+    <script>
+      fetch('/config.js', { method: 'HEAD' })
+        .then(() => {
+          const script = document.createElement('script');
+          script.src = '/config.js';
+          document.head.appendChild(script);
+        })
+        .catch(() => {
+          console.log("[Env] Aucun config.js → mode Vite/Render");
+        });
+    </script>
   </head>
   <body>
     <div id="root"></div>
