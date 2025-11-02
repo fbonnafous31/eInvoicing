@@ -3,13 +3,17 @@ import React from "react";
 import { Link, NavLink } from "react-router-dom";
 import { FaUserTie, FaUsers, FaFileInvoice } from "react-icons/fa";
 import { useAuth0 } from "@auth0/auth0-react";
+import { getEnv } from "@/utils/getEnv";
 import "./NavBar.css";
 
 export default function NavBar() {
   const { isAuthenticated, loginWithRedirect, logout, user } = useAuth0();
+  const env = getEnv();
+
+  // URL de retour après logout
   const logoutUrl = import.meta.env.PROD
-    ? (window.__ENV__.VITE_APP_URL || window.location.origin) + "/login"
-    : "http://localhost:5173/login";  
+    ? `${env.VITE_APP_URL || window.location.origin}/login`
+    : "http://localhost:5173/login";
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm">
