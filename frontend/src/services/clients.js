@@ -8,7 +8,7 @@ export function useClientService() {
 
   return useMemo(() => {
     const request = async (url, options = {}) => {
-      const token = await getToken();
+      const token = await getToken();     
       const res = await fetch(url, {
         ...options,
         headers: {
@@ -47,5 +47,5 @@ export function useClientService() {
         return request(url.toString());
       },
     };
-  }, [getToken]); // dépendance stable
+  }, [getToken]);
 }

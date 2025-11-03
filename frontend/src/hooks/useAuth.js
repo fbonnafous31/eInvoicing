@@ -7,7 +7,7 @@ export function useAuth() {
 
   const getToken = useCallback(async () => {
     try {
-      const env = getEnv(); // récupération centralisée
+      const env = getEnv(); 
       const audience = env.VITE_AUTH0_AUDIENCE;
 
       const token = await getAccessTokenSilently({

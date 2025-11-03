@@ -1,9 +1,9 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const errorHandler = require("./src/middlewares/errorHandler");
-
-// 🔹 Import monitoring
 const { register, metricsMiddleware } = require("./src/monitoring/metrics");
 
 // Routes métier
@@ -13,17 +13,39 @@ const invoicesRoutes = require("./src/modules/invoices/invoices.route");
 
 const app = express();
 
+// 🌍 CORS dynamique selon l'origin
+const allowedOrigins = [
+  "http://localhost:5173", // front local
+  "https://einvoicing-preprod-frontend.onrender.com" // front préprod
+];
+
+app.use(cors({
+  origin: function(origin, callback) {
+    // autorise les requêtes sans origin (ex: curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error("Not allowed by CORS"));
+  },
+  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
+  allowedHeaders: ["Content-Type","Authorization"],
+  credentials: true
+}));
+
+// Log simple des requêtes
 app.use((req, res, next) => {
+  if (req.originalUrl === '/favicon.ico') return next();
   console.log("⚡ Requête reçue :", req.method, req.originalUrl);
+  console.log("Header Authorization :", req.headers.authorization || "none");
   next();
 });
 
-// Middlewares
-app.use(cors());
+// Middlewares JSON / URL-encoded
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Ajout du middleware Prometheus AVANT les routes
+// Prometheus avant les routes
 app.use(metricsMiddleware);
 
 // Routes API
@@ -32,9 +54,7 @@ app.use("/api/clients", clientsRoutes);
 app.use("/api/invoices", invoicesRoutes);
 
 // Route /health
-app.get("/health", async (req, res) => {
-  res.json({ status: "ok" });
-});
+app.get("/health", (req, res) => res.json({ status: "ok" }));
 
 // Endpoint Prometheus
 app.get("/metrics", async (req, res) => {

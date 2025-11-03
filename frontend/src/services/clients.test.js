@@ -1,20 +1,20 @@
 // src/services/clients.test.js
-import { renderHook } from "@testing-library/react";
+import { renderHook, act } from "@testing-library/react";
 import { vi, describe, it, beforeEach, expect } from "vitest";
 import { useClientService } from "./clients";
-import * as useAuthModule from "@/hooks/useAuth";
+import * as useAuthModule from "../hooks/useAuth"; // 🔹 Import en tant que module pour vi.spyOn
 
 describe("useClientService", () => {
   const mockToken = "mock-token";
   let fetchMock;
 
   beforeEach(() => {
-    // Mock useAuth
+    // 🔹 Mock useAuth
     vi.spyOn(useAuthModule, "useAuth").mockReturnValue({
       getToken: vi.fn().mockResolvedValue(mockToken),
     });
 
-    // Mock fetch
+    // 🔹 Mock global fetch
     fetchMock = vi.fn();
     global.fetch = fetchMock;
   });
@@ -28,7 +28,7 @@ describe("useClientService", () => {
     });
 
     const { result } = renderHook(() => useClientService());
-    const clients = await result.current.fetchClients();
+    const clients = await act(() => result.current.fetchClients());
 
     expect(clients).toEqual(data);
     expect(fetchMock).toHaveBeenCalledWith(
@@ -50,7 +50,7 @@ describe("useClientService", () => {
     });
 
     const { result } = renderHook(() => useClientService());
-    const fetched = await result.current.fetchClient(1);
+    const fetched = await act(() => result.current.fetchClient(1));
 
     expect(fetched).toEqual(client);
     expect(fetchMock).toHaveBeenCalledWith(
@@ -68,7 +68,7 @@ describe("useClientService", () => {
     });
 
     const { result } = renderHook(() => useClientService());
-    const created = await result.current.createClient(newClient);
+    const created = await act(() => result.current.createClient(newClient));
 
     expect(created).toEqual({ id: 2, ...newClient });
     expect(fetchMock).toHaveBeenCalledWith(
@@ -89,7 +89,7 @@ describe("useClientService", () => {
     });
 
     const { result } = renderHook(() => useClientService());
-    const updated = await result.current.updateClient(1, updatedClient);
+    const updated = await act(() => result.current.updateClient(1, updatedClient));
 
     expect(updated).toEqual(updatedClient);
     expect(fetchMock).toHaveBeenCalledWith(
@@ -108,7 +108,7 @@ describe("useClientService", () => {
     });
 
     const { result } = renderHook(() => useClientService());
-    const response = await result.current.deleteClient(1);
+    const response = await act(() => result.current.deleteClient(1));
 
     expect(response).toBe(true);
     expect(fetchMock).toHaveBeenCalledWith(
@@ -126,7 +126,7 @@ describe("useClientService", () => {
     });
 
     const { result } = renderHook(() => useClientService());
-    const res = await result.current.checkSiret("12345678901234", 5);
+    const res = await act(() => result.current.checkSiret("12345678901234", 5));
 
     expect(res).toEqual(siretResponse);
     expect(fetchMock).toHaveBeenCalledWith(
@@ -143,7 +143,7 @@ describe("useClientService", () => {
     });
 
     const { result } = renderHook(() => useClientService());
-    await expect(result.current.fetchClients()).rejects.toThrow(
+    await expect(act(() => result.current.fetchClients())).rejects.toThrow(
       /Erreur 400: Bad Request/
     );
   });

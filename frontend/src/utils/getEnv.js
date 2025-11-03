@@ -1,10 +1,10 @@
 export function getEnv() {
-  // 1️⃣ Dev local → .env Vite
-  if (import.meta.env.DEV) {
+  // 1️⃣ Dev local → Vite .env
+  if (import.meta.env.DEV || window.location.hostname === "localhost") {
     return import.meta.env;
   }
 
-  // 2️⃣ Serveur dédié / Docker → config.js doit EXISTer ET contenir des valeurs
+  // 2️⃣ Serveur dédié / Docker → config.js injecté côté serveur
   if (
     typeof window !== "undefined" &&
     window.__ENV__ &&
@@ -14,7 +14,7 @@ export function getEnv() {
     return window.__ENV__;
   }
 
-  // 3️⃣ Render / Netlify / Vercel → variables Vite sont dans le bundle
+  // 3️⃣ Render / Netlify / Vercel → variables Vite dans le bundle
   console.log("[Env] Mode PROD Render → import.meta.env utilisé", import.meta.env);
   return import.meta.env;
 }
