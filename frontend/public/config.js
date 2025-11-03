@@ -1,14 +1,5 @@
-// frontend/config.js
-// Fichier JS pur, servi par Nginx, utilisé par le frontend pour les variables runtime
-// à configurer avec les URL API / APP / Auth0
-
+// frontend/public/config.js
+// ⚠️ Ce fichier n’est utilisé que pour que le navigateur ne plante pas sur Render
 window.__ENV__ = {
-  // URL du backend (container ou hôte)
-  VITE_API_URL: '',
-  VITE_APP_URL: '',
-
-  // Variables Auth0 du client
-  VITE_AUTH0_DOMAIN: '',   
-  VITE_AUTH0_CLIENT_ID: '',
-  VITE_AUTH0_AUDIENCE: ''      
+  IS_RENDER: true // signal pour que getEnv() ignore ce fichier
 };

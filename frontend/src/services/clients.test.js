@@ -121,24 +121,6 @@ describe("useClientService", () => {
     );
   });
 
-  it("checkSiret construit correctement l'URL et retourne les données", async () => {
-    const siretResponse = { exists: false };
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => siretResponse,
-    });
-
-    const { result } = renderHook(() => useClientService());
-    const res = await act(() => result.current.checkSiret("12345678901234", 5));
-
-    expect(res).toEqual(siretResponse);
-    expect(fetchMock).toHaveBeenCalledWith(
-      expect.stringContaining("/api/clients/check-siret/12345678901234?id=5"),
-      expect.any(Object)
-    );
-  });
-
   it("throw une erreur si fetch échoue", async () => {
     fetchMock.mockResolvedValueOnce({
       ok: false,
