@@ -17,6 +17,10 @@ describe("useClientService", () => {
     // 🔹 Mock global fetch
     fetchMock = vi.fn();
     global.fetch = fetchMock;
+
+    // 🔹 Mock VITE_API_URL pour éviter "undefined" dans l'URL
+    if (!import.meta.env) import.meta.env = {};
+    import.meta.env.VITE_API_URL = "http://localhost:3000";
   });
 
   it("fetchClients appelle fetch et retourne les données", async () => {
