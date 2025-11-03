@@ -13,10 +13,13 @@ const invoicesRoutes = require("./src/modules/invoices/invoices.route");
 
 const app = express();
 
+// 🌟 Pour détecter correctement HTTPS derrière Render
+app.enable('trust proxy');
+
 // 🌍 CORS dynamique selon l'origin
 const allowedOrigins = [
-  "http://localhost:5173", // front local
-  "https://einvoicing-preprod-frontend.onrender.com" // front préprod
+  "http://localhost:5173", 
+  "https://einvoicing-preprod-frontend.onrender.com" 
 ];
 
 app.use(cors({
@@ -37,7 +40,6 @@ app.use(cors({
 app.use((req, res, next) => {
   if (req.originalUrl === '/favicon.ico') return next();
   console.log("⚡ Requête reçue :", req.method, req.originalUrl);
-  console.log("Header Authorization :", req.headers.authorization || "none");
   next();
 });
 
