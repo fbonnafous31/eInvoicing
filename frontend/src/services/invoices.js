@@ -1,7 +1,8 @@
 import { useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
-const API_BASE = `${import.meta.env.VITE_API_URL}/api/invoices`;
+const API_ROOT = import.meta.env.VITE_API_URL; 
+const API_BASE = `${API_ROOT}/api/invoices`;
 
 export function useInvoiceService() {
   const { getToken } = useAuth();
