@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
-const API_BASE = `${window.__ENV__?.VITE_API_URL ?? 'http://localhost:3000'}/api/sellers`;
+const API_BASE = `${import.meta.env.VITE_API_URL}/api/sellers`;
+console.log("API_BASE sellers =", import.meta.env.VITE_API_URL);
 
 export function useSellerService() {
   const { getToken } = useAuth();
