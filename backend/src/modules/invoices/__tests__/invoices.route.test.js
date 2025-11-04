@@ -1,12 +1,22 @@
 // src/modules/invoices/__tests__/invoices.route.test.js
 
-// --- Fix CI : définir ENCRYPTION_KEY avant tout import ---
+// --- Fix CI : définir les clés avant tout import ---
 process.env.ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || '01234567890123456789012345678901';
+process.env.RESEND_API_KEY = process.env.RESEND_API_KEY || 're_test';
 
 const request = require("supertest");
 const express = require("express");
 
-// Import du vrai router après avoir défini la clé
+// --- Mock Resend pour éviter les appels réels ---
+jest.mock("resend", () => {
+  return {
+    Resend: jest.fn(() => ({
+      emails: { send: jest.fn() },
+    })),
+  };
+});
+
+// --- Import du vrai router APRÈS les mocks / variables d'env ---
 const invoicesRouter = require("../invoices.route");
 
 // === Mock des middlewares ===
@@ -52,13 +62,13 @@ jest.mock("../invoices.controller", () => ({
   deleteInvoice: jest.fn(),
 }));
 
-// Setup Express
+// --- Setup Express ---
 const app = express();
 app.use(express.json());
 app.use("/api/invoices", invoicesRouter);
 
-// Tests
-describe("Invoices routes (réelles)", () => {
+// --- Tests ---
+describe("Invoices routes (réelles, mockées pour CI)", () => {
   it("GET /api/invoices retourne un tableau de factures", async () => {
     const res = await request(app).get("/api/invoices");
     expect(res.status).toBe(200);
