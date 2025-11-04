@@ -22,22 +22,13 @@ vi.mock('@/components/form', () => ({
       disabled={disabled}
     />
   ),
-  PasswordInput: ({ value, onChange, disabled }) => (
-    <input
-      data-testid="smtp_pass"
-      type="password"
-      value={value}
-      onChange={e => onChange(e.target.value)}
-      disabled={disabled}
-    />
-  ),
 }));
 
 // 🔹 Mock du service
-const mockTestSmtp = vi.fn();
+const mockTestSmtpResend = vi.fn();
 vi.mock('@/services/sellers', () => ({
   useSellerService: () => ({
-    testSmtp: mockTestSmtp,
+    testSmtpResend: mockTestSmtpResend,
   }),
 }));
 
@@ -48,72 +39,56 @@ describe('SmtpFields', () => {
     formData = {
       smtp: {
         active: true,
-        smtp_host: 'smtp.example.com',
-        smtp_port: 587,
-        smtp_secure: true,
-        smtp_user: 'user@example.com',
-        smtp_pass: 'password',
         smtp_from: 'from@example.com',
       },
     };
     handleChange = vi.fn();
     setErrors = vi.fn();
-    mockTestSmtp.mockReset();
+    mockTestSmtpResend.mockReset();
   });
 
-  it('rend tous les champs avec les valeurs initiales', () => {
+  it('rend le champ actif avec les valeurs initiales', () => {
     render(<SmtpFields formData={formData} handleChange={handleChange} errors={{}} setErrors={setErrors} />);
 
     expect(screen.getByTestId('smtp_active')).toBeChecked();
-    expect(screen.getByTestId('smtp_host')).toHaveValue(formData.smtp.smtp_host);
-    expect(screen.getByTestId('smtp_port')).toHaveValue(String(formData.smtp.smtp_port));
-    expect(screen.getByTestId('smtp_user')).toHaveValue(formData.smtp.smtp_user);
-    expect(screen.getByTestId('smtp_pass')).toHaveValue(formData.smtp.smtp_pass);
     expect(screen.getByTestId('smtp_from')).toHaveValue(formData.smtp.smtp_from);
   });
 
-  it('appelle handleChange quand on modifie un champ', () => {
+  it('modifie le champ smtp_from et appelle handleChange', () => {
     render(<SmtpFields formData={formData} handleChange={handleChange} errors={{}} setErrors={setErrors} />);
 
-    fireEvent.change(screen.getByTestId('smtp_host'), { target: { value: 'smtp.test.com' } });
-    expect(handleChange).toHaveBeenCalledWith('smtp', expect.objectContaining({ smtp_host: 'smtp.test.com' }));
-
-    fireEvent.change(screen.getByTestId('smtp_port'), { target: { value: '465' } });
-    expect(handleChange).toHaveBeenCalledWith('smtp', expect.objectContaining({ smtp_port: 465 }));
-
-    fireEvent.change(screen.getByTestId('smtp_pass'), { target: { value: 'newpass' } });
-    expect(handleChange).toHaveBeenCalledWith('smtp', expect.objectContaining({ smtp_pass: 'newpass' }));
+    fireEvent.change(screen.getByTestId('smtp_from'), { target: { value: 'test@resend.dev' } });
+    expect(handleChange).toHaveBeenCalledWith('smtp', expect.objectContaining({ smtp_from: 'test@resend.dev' }));
   });
 
-  it('désactive tous les champs si active=false ou disabled=true', () => {
+  it('désactive le champ si smtp.active=false ou disabled=true', () => {
     const { rerender } = render(
       <SmtpFields formData={{ smtp: { ...formData.smtp, active: false } }} handleChange={handleChange} errors={{}} setErrors={setErrors} />
     );
-    expect(screen.getByTestId('smtp_host')).toBeDisabled();
-    expect(screen.getByTestId('smtp_port')).toBeDisabled();
+    expect(screen.getByTestId('smtp_from')).toBeDisabled();
 
     rerender(<SmtpFields formData={formData} handleChange={handleChange} errors={{}} setErrors={setErrors} disabled={true} />);
-    expect(screen.getByTestId('smtp_host')).toBeDisabled();
-    expect(screen.getByTestId('smtp_port')).toBeDisabled();
+    expect(screen.getByTestId('smtp_from')).toBeDisabled();
   });
 
-  it('teste la connexion SMTP et affiche le résultat', async () => {
-    mockTestSmtp.mockResolvedValueOnce({ success: true });
+  it('teste la connexion SMTP avec succès', async () => {
+    mockTestSmtpResend.mockResolvedValueOnce({ success: true });
 
     render(<SmtpFields formData={formData} handleChange={handleChange} errors={{}} setErrors={setErrors} />);
 
-    fireEvent.click(screen.getByText('Tester la configuration'));
+    fireEvent.click(screen.getByText('Envoyer un email de test'));
 
-    await waitFor(() => expect(screen.getByText('Connexion réussie ✅')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Email envoyé ✅')).toBeInTheDocument());
+    expect(mockTestSmtpResend).toHaveBeenCalledWith({ smtp_from: formData.smtp.smtp_from });
   });
 
-  it('affiche une erreur si la connexion échoue', async () => {
-    mockTestSmtp.mockResolvedValueOnce({ success: false, error: 'Auth failed' });
+  it('affiche une erreur si testSmtpResend lance une exception', async () => {
+    mockTestSmtpResend.mockRejectedValueOnce(new Error('Resend fail'));
 
     render(<SmtpFields formData={formData} handleChange={handleChange} errors={{}} setErrors={setErrors} />);
 
-    fireEvent.click(screen.getByText('Tester la configuration'));
+    fireEvent.click(screen.getByText('Envoyer un email de test'));
 
-    await waitFor(() => expect(screen.getByText('Erreur : Auth failed')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('Resend fail')).toBeInTheDocument());
   });
 });

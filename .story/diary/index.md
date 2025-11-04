@@ -136,3 +136,6 @@
 - [Jour 133 – Passage au plan payant de la DB 💳🛠](jour-133.md)
 - [Jour 134 – Refacto multi-environnements et variable DB_SCHEMA 🛠🌱](jour-134.md)
 - [Jour 135 – Génération propre des environnements et stabilisation du schéma DB 🏗️🌿](jour-135.md)
+- [Jour 136 – Déploiement de l’environnement preprod sur Render 🚀🟡](jour-136.md)
+- [Jour 137 – Stabilisation de la preprod et corrections réseau/SSL 🛠🌫️](jour-137.md)
+- [Jour 138 – Finalisation preprod, Auth0 et documentation 📚🛠️](jour-138.md)

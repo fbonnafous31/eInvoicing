@@ -156,24 +156,4 @@ describe('SellersController', () => {
     expect(res.json).toHaveBeenCalledWith({ exists: true });
   });
 
-  it('testSmtp : succès', async () => {
-    const smtpResult = { ok: true };
-    SellersService.testSmtp.mockResolvedValue(smtpResult);
-    req.body = { host: 'smtp.test.com', port: 587 };
-
-    await SellersController.testSmtp(req, res);
-
-    expect(res.json).toHaveBeenCalledWith(smtpResult);
-  });
-
-  it('testSmtp : erreur', async () => {
-    const err = new Error('SMTP down');
-    SellersService.testSmtp.mockRejectedValue(err);
-    req.body = { host: 'bad', port: 123 };
-
-    await SellersController.testSmtp(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ success: false, error: err.message });
-  });
 });

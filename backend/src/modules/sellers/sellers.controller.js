@@ -88,12 +88,37 @@ async function checkIdentifier(req, res) {
   res.json({ exists });
 }
 
-async function testSmtp(req, res) {
+async function testSmtpResend(req, res) {
   try {
-    const result = await SellersService.testSmtp(req.body);
-    res.json(result);
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    const { smtp_from } = req.body;
+
+    if (!smtp_from) {
+      return res.status(400).json({
+        success: false,
+        error: "smtp_from manquant"
+      });
+    }
+
+    const { Resend } = require('resend');
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    await resend.emails.send({
+      from: 'no-reply@resend.dev',
+      to: smtp_from,
+      subject: 'Test Resend OK ✅',
+      text: 'Votre configuration email fonctionne via Resend.'
+    });
+
+    return res.json({
+      success: true,
+      message: "Email envoyé via Resend ✅"
+    });
+
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      error: error.message
+    });
   }
 }
 
@@ -105,5 +130,5 @@ module.exports = {
   updateSeller,
   getMySeller,
   checkIdentifier, 
-  testSmtp
+  testSmtpResend
 };

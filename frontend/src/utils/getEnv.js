@@ -13,11 +13,11 @@ export function getEnv() {
     Object.keys(window.__ENV__).length > 0 &&
     !window.__ENV__.IS_RENDER // ⚡ si tu veux signaler Render explicitement
   ) {
-    console.log("[Env] Mode serveur dédié / Docker → window.__ENV__ utilisé", window.__ENV__);
+    console.log("[Env] Mode serveur dédié / Docker → window.__ENV__ utilisé");
     return window.__ENV__;
   }
 
   // 3️⃣ Render / Netlify / Vercel → variables Vite dans le bundle
-  console.log("[Env] Mode PROD Render → import.meta.env utilisé", import.meta.env);
+  console.log("[Env] Mode PROD Render → import.meta.env utilisé");
   return import.meta.env;
 }

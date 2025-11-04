@@ -47,6 +47,11 @@ jest.mock("../sellers.controller", () => ({
   testSmtp: jest.fn((req, res) => {
     res.status(200).json({ ok: true, message: "Connexion SMTP OK" });
   }),
+
+  // 🔹 Nouveau mock pour la route Resend
+  testSmtpResend: jest.fn((req, res) => {
+    res.status(200).json({ ok: true, message: "Connexion SMTP Resend OK" });
+  }),
 }));
 
 // === Setup express ===
@@ -90,12 +95,12 @@ describe("Sellers routes (réelles)", () => {
     expect(res.body.name).toBe("Vendeur Modifié");
   });
 
-  it("POST /api/sellers/smtp/test teste la connexion SMTP", async () => {
+  it("POST /api/sellers/smtp/test-resend teste la connexion SMTP Resend", async () => {
     const res = await request(app)
-      .post("/api/sellers/smtp/test")
-      .send({ host: "smtp.test.com", port: 587 });
+      .post("/api/sellers/smtp/test-resend")
+      .send({ apiKey: "test" });
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
-    expect(res.body.message).toBe("Connexion SMTP OK");
+    expect(res.body.message).toBe("Connexion SMTP Resend OK");
   });
 });

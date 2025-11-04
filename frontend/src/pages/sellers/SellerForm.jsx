@@ -109,7 +109,7 @@ export default function SellerForm({ onSubmit, disabled = false, initialData = {
     { key: 'address', label: 'Adresse', component: AddressFields },
     { key: 'finances', label: 'Finances', component: FinanceFields },
     { key: 'mentions', label: 'Mentions complémentaires', component: MentionsFields },
-    { key: 'smtp', label: 'Paramètres SMTP', component: SmtpFields }
+    { key: 'smtp', label: 'Paramètres mail', component: SmtpFields }
   ];
 
   return (
