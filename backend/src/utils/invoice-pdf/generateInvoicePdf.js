@@ -302,7 +302,7 @@ async function generateQuotePdf(quote) {
   });
 
   let xCursor = tableX;
-  const headers = ["Description", "Qté", "PU", "Taux TVA", "HT", "TVA", "TTC"];
+  const headers = ["Description", "Qté", "PU", "Taux", "HT", "TVA", "TTC"];
   headers.forEach((h, i) => {
     page.drawText(h, {
       x: xCursor + 5,
@@ -674,7 +674,7 @@ async function generateInvoicePdfBuffer(invoice) {
     borderWidth: 1,
   });
 
-  const headers = ["Description", "Qté", "PU", "Taux TVA", "HT", "TVA", "TTC"];
+  const headers = ["Description", "Qté", "PU", "Taux", "HT", "TVA", "TTC"];
   let xCursor = tableX;
   headers.forEach((h, i) => {
     page.drawText(h, { x: xCursor + 5, y: tableY - 15, size: 9, font: fontBold });
