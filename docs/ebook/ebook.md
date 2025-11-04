@@ -181,7 +181,7 @@ Cela m’a permis d’avoir un environnement robuste et évolutif, capable de g�
 
 Pour interagir avec ma base, j’ai opté pour DBeaver, un client SQL open source, riche en fonctionnalités, qui supporte PostgreSQL et offre une interface graphique complète.
 
-![Client DBeaver](.story/images/jour2/DBeaver.png)
+![Client DBeaver](./images/jour2/DBeaver.png)
 
 DBeaver facilite la création, la visualisation et la modification des tables ainsi que l’exécution de requêtes SQL, ce qui accélère grandement la phase de développement. C’est un excellent complément à VSCode, surtout pour la partie base de données.
 
@@ -192,7 +192,7 @@ La partie la plus intéressante de la journée a été de dessiner la structure 
 - **Tables `sellers` et `buyers`** : elles représentent les entités commerciales impliquées dans les factures, avec leurs informations légales, fiscales et bancaires.  
 - **Table `invoices`** : le cœur du système, elle regroupe toutes les informations essentielles d’une facture — numéros, dates, montants, références, et liens vers vendeur et acheteur.  
 - **Tables `invoice_lines`,  `invoice_taxes` et `invoice_attachments`** : détaillent les lignes de facture, la ventilation des taxes et les justificatifs de facture, indispensables pour un traitement précis et conforme des documents.  
-![DB](.story/images/jour2/einvoicing_db.png)
+![DB](./images/jour2/einvoicing_db.png)
 
 Les commentaires associés à chaque colonne sont un atout précieux, ils garantissent que chaque donnée a un sens clair et que la maintenance future sera plus simple.
 
@@ -220,7 +220,7 @@ Dans ce contexte, garder une séparation technique entre front-end et back-end, 
 
 Voici la structure que j’ai choisie pour le projet :  
 
-![Architecture de la solution](.story/images/jour3/project_architecture.png)
+![Architecture de la solution](./images/jour3/project_architecture.png)
 
 Cela me permet de :  
 - conserver une séparation claire entre interface utilisateur et logique serveur,  
@@ -295,10 +295,10 @@ C’était un premier vrai défi React, avec ses erreurs de parsing et d’impor
 
 L’étape suivante a été de faire communiquer correctement les deux serveurs :  
 - Le backend sur le port 3000 qui expose l’API  
-  ![](.story/images/jour4/backend.png)
+  ![](./images/jour4/backend.png)
 
 - Le frontend sur le port 5173 qui fait la requête via la proxy Vite  
-  ![](.story/images/jour4/frontend.png)
+  ![](./images/jour4/frontend.png)
 
 ## Ce que j’ai appris 📚
 
@@ -382,7 +382,7 @@ Le résultat est fluide, simple, et surtout rapide à mettre en place. Cela m’
 
 Je me suis aussi permis d’ajouter Bootstrap pour un peu de mise en forme générale, histoire que les champs de recherche et la structure globale soient plus agréables visuellement, sans devoir partir dans du CSS complexe.
 
-![](.story/images/jour5/sellers.png)
+![](./images/jour5/sellers.png)
 
 ## Ce que ça m’a appris
 
@@ -477,7 +477,7 @@ Pour améliorer l’expérience, j’ai intégré un système d’alerte qui aff
 
 En cas d’erreur, un message d’erreur s’affiche clairement, permettant à l’utilisateur de comprendre qu’il faut revoir sa saisie ou réessayer plus tard.
 
-![Message de succès de création](.story/images/jour6/success.png)
+![Message de succès de création](./images/jour6/success.png)
 
 ## Backend adapté et robustesse
 
@@ -487,7 +487,7 @@ J’ai aussi mis à jour la fonction backend pour accepter toutes les données s
 
 Le formulaire reprend le style Bootstrap, identique à celui de la liste des vendeurs, pour garder une interface cohérente, claire et agréable.
 
-![Création d'un nouveau vendeur](.story/images/jour6/NewSeller.png)
+![Création d'un nouveau vendeur](./images/jour6/NewSeller.png)
 
 ## Travail sur la barre de navigation
 
@@ -988,7 +988,7 @@ Cette approche rend le projet **plus clair**, les échanges **plus rapides**, et
 ## 📚 Ce que j’ai appris
 
 - Les **tooltips combinés aux `...`** offrent un compromis parfait entre lisibilité et accessibilité des informations.  
-  ![Liste des factures](.story/images/jour13/invoiceList.png)
+  ![Liste des factures](./images/jour13/invoiceList.png)
 - Décomposer les fils de conversation améliore réellement la **productivité et la clarté**.  
 - Préparer les helpers et appliquer les règles métier côté frontend (comme le SIRET) dès l’insertion ou la modification simplifie beaucoup la maintenance.
 
@@ -1023,8 +1023,8 @@ L’objectif était de poser la structure principale avant de gérer les tables 
   - `payment_terms` (liste prédéfinie avec valeur par défaut « Paiement à 30 jours date de facture »)  
 
 - Préparer la structure pour **la saisie future des tables liées** : lignes, taxes, justificatifs.
-  
-![Création d'une facture](.story/images/jour14/createInvoice.png)
+- ![Création d'une facture](./images/jour14/createInvoice.png) 
+
 ---
 
 ## 💻 Côté frontend
@@ -2139,7 +2139,7 @@ Chaque bloc a trouvé sa place et le tout fonctionne de manière fluide et cohé
   - Séparation visuelle nette des sections.  
   - Composants cohérents (`InputField`, `SelectField`).  
   - Plus de friction inutile → un vrai workflow complet.  
-  ![Formulaire de création de facture](.story/images/jour32/createInvoice.png)
+  ![Formulaire de création de facture](./images/jour32/createInvoice.png)
 ---
 
 ## 💪 Le résultat
@@ -2147,7 +2147,7 @@ Chaque bloc a trouvé sa place et le tout fonctionne de manière fluide et cohé
 - Un formulaire **complet, robuste et agréable à utiliser**.  
 - Les données sont cohérentes et prêtes pour l’API.  
 - Le code est organisé et suffisamment modulaire pour évoluer facilement.  
-![Saisie de facture](.story/images/jour32/checkInvoice.png)
+![Saisie de facture](./images/jour32/checkInvoice.png)
 
 ---
 
@@ -2498,7 +2498,7 @@ Aujourd’hui, focus sur la consultation des factures avec intégration des PDF 
   - Zoom responsive et ajustable en pourcentage.  
   - Téléchargement dans un nouvel onglet avec nom de fichier dynamique basé sur l’ID de la facture.
   
-  ![Visualisation d factures avec PDF](.story/images/jour39/invoiceView.png)
+  ![Visualisation d factures avec PDF](./images/jour39/invoiceView.png)
 
 - **Interface et UX** :  
   - Breadcrumb au-dessus du formulaire et du PDF pour cohérence.  
@@ -2548,7 +2548,7 @@ Aujourd’hui, focus sur **la mise en forme et la finalisation du carousel eInvo
 - Carousel **complet et prêt à publier**, structuré pour LinkedIn.  
 - Contenu vivant, professionnel et fidèle à ton expérience.  
 - Slide 1 et 2 très personnelles, slides suivantes détaillent clairement les fonctionnalités et l’avancement technique.  
-![Carousel LinkedIn](.story/images/jour40/LinkedIn.png)
+![Carousel LinkedIn](./images/jour40/LinkedIn.png)
 
 ---
 
@@ -2703,7 +2703,7 @@ Aujourd’hui, focus sur **l’intégration du XML Factur‑X dans le PDF de la 
 - **Script backend opérationnel** pour créer un PDF “préparé” à la conversion PDF/A‑3.  
 - Vue claire sur les **prochaines étapes pour la conformité totale PDF/A‑3**.
   
-![PDF-A3](.story/images/jour43/pdf-a3.png)
+![PDF-A3](./images/jour43/pdf-a3.png)
 
 ---
 
@@ -2949,8 +2949,8 @@ Ce matin, on a travaillé sur **l’amélioration de la logique côté frontend 
   - Les informations de paiement et mentions sont affichées correctement.  
   - Les dates sont au format français et lisibles.  
 - Gestion intelligente des textes longs et des sauts de page pour les mentions additionnelles.  
-![Génération depuis liste de factures](.story/images/jour47/invoiceList.png)
-![Justificatif de facture](.story/images/jour47/invoicePDF.png)
+![Génération depuis liste de factures](./images/jour47/invoiceList.png)
+![Justificatif de facture](./images/jour47/invoicePDF.png)
 
 ---
 
@@ -3065,9 +3065,9 @@ Aujourd'hui, j'ai travaillé sur **l'optimisation de la création de facture** a
 * Il est désormais possible de **créer une facture sans justificatif PDF préalable**.
 * Le justificatif est **produit automatiquement en même temps que la facture**, simplifiant le workflow.
   
-![Génération au moment de la création de facture](.story/images/jour49/invoiceCreate.png)
+![Génération au moment de la création de facture](./images/jour49/invoiceCreate.png)
 
-![Visualisation de la facture](.story/images/jour49/invoiceView.png)
+![Visualisation de la facture](./images/jour49/invoiceView.png)
 
 ### 3. Synchronisation frontend/backend
 
@@ -3225,7 +3225,7 @@ Aujourd'hui, j'ai travaillé sur l'intégration de l'**authentification des util
 * Création du **AuthProvider** pour encapsuler l’application et fournir les hooks Auth0 à tous les composants.
 * Mise en place du **.env** pour sécuriser le `VITE_AUTH0_DOMAIN` et `VITE_AUTH0_CLIENT_ID`.
   
-![Auth0](.story/images/jour52/Auth0.png)
+![Auth0](./images/jour52/Auth0.png)
 
 ### 4. Protection globale de l’application
 
@@ -3239,7 +3239,7 @@ Aujourd'hui, j'ai travaillé sur l'intégration de l'**authentification des util
 * Ajout d’un **LoginButton** intégré au SDK Auth0.
 * Application d’un **fond sombre avec carte blanche** pour un contraste élégant et une expérience utilisateur agréable.
 
-![Connexion](.story/images/jour52/Connect.png)
+![Connexion](./images/jour52/Connect.png)
 
 ### 6. Mise à jour de la NavBar
 
@@ -3247,7 +3247,7 @@ Aujourd'hui, j'ai travaillé sur l'intégration de l'**authentification des util
 * Affichage du **nom ou email de l’utilisateur connecté** pour un feedback immédiat.
 * Gestion du **Logout avec redirection vers la page Login**, assurant un flux propre et intuitif.
   
-![Barre de navigation](.story/images/jour52/NavBar.png)
+![Barre de navigation](./images/jour52/NavBar.png)
 
 ### 7. Test complet du flux Auth0
 
@@ -3583,7 +3583,7 @@ Aujourd’hui, j’ai terminé toute la **partie authentification et parcours ut
   - logs détaillés pour suivre l’état du composant et les réponses backend.
 * Tous les composants sont maintenant cohérents avec le **parcours utilisateur** : connexion → inscription → profil vendeur → accès sécurisé aux données.
   
-![Profil](.story/images/jour57/Profile.png)
+![Profil](./images/jour57/Profile.png)
 
 ---
 
@@ -3704,7 +3704,7 @@ Aujourd’hui, j’ai travaillé sur **la mise en place des tests pour les écha
 * Log systématique des fichiers reçus pour vérifier que les factures sont bien transmises.  
 * Possibilité d’ajouter facilement des statuts ou traitements simulés pour les cycles de vie des factures.
  
-![Serveur Mock PDP](.story/images/jour59/mockPDP.png)
+![Serveur Mock PDP](./images/jour59/mockPDP.png)
 
 ---
 
@@ -3717,8 +3717,8 @@ Aujourd’hui, j’ai travaillé sur **la mise en place des tests pour les écha
 * Ajout d’un **intercepteur Axios** pour logger les détails de chaque requête sortante : URL, méthode, headers et info sur le fichier envoyé.  
 * Gestion des erreurs HTTP et vérification du bon retour du Mock PDP.
 
-![Envoi d'une facture](.story/images/jour59/sendInvoice.png)
-![Réception de l'accusé de réception](.story/images/jour59/getTechnicalStatus.png)
+![Envoi d'une facture](./images/jour59/sendInvoice.png)
+![Réception de l'accusé de réception](./images/jour59/getTechnicalStatus.png)
 
 ---
 
@@ -3727,7 +3727,7 @@ Aujourd’hui, j’ai travaillé sur **la mise en place des tests pour les écha
 * Log côté backend pour confirmer la bonne réception des fichiers et leur taille.  
 * Préparation à l’affichage dans le frontend : possibilité d’indiquer à l’utilisateur que la facture a bien été transmise au PDP simulé.  
 * L’objectif futur : intégrer ces retours dans l’interface pour visualiser le statut (`draft`, `sent`, `received`) de chaque facture.
-![Liste de factures](.story/images/jour59/invoiceList.png)
+![Liste de factures](./images/jour59/invoiceList.png)
 
 ---
 
@@ -3771,7 +3771,7 @@ Aujourd’hui, j’ai travaillé sur **la mise à jour des statuts techniques et
   - rouge → `REJECTED`  
   - gris → `PENDING`  
 * Correction des warnings ESLint : ajout de `row.submissionId` dans les dépendances du hook pour garantir un comportement stable.
-![Demande de statut facture](.story/images/jour60/getLifeCycle.png)
+![Demande de statut facture](./images/jour60/getLifeCycle.png)
 
 ---
 
@@ -3804,7 +3804,7 @@ Aujourd’hui, j’ai travaillé sur **la mise à jour des statuts techniques et
 * Vérification que le polling fonctionne : le badge passe automatiquement de `PENDING → RECEIVED → VALIDATED`.  
 * Vérification que l’UI n’a pas besoin de `F5` pour le statut technique (mais reste à finaliser le refresh temps réel côté statuts métiers).  
 * Correction des erreurs de hook et dépendances pour garantir un rendu stable et éviter les erreurs React.
-![Demande de statut facture](.story/images/jour60/invoiceList.png)
+![Demande de statut facture](./images/jour60/invoiceList.png)
 
 ---
 
@@ -3916,7 +3916,7 @@ Aujourd’hui, pas grand-chose de concret côté dev, juste un **update rapide**
 
 - Les **boutons PDF/A-3** et PDF standard sont maintenant alignés, propres et cliquables directement depuis la liste des factures.  
 - L’UI des actions de facture est **uniforme et sans cadres**, prête pour tous les tests.  
-![Demande de statut facture](.story/images/jour63/invoiceList.png)
+![Demande de statut facture](./images/jour63/invoiceList.png)
 
 ---
 
@@ -3952,7 +3952,7 @@ Aujourd’hui, la session a été consacrée à **la protection réglementaire d
 ### 1. Protection des factures transmises
 
 * **Règle métier essentielle** : une fois qu’une facture est transmise au PDP, son contenu **ne peut plus être modifié** pour garantir la **conservation des données initialement transmises**, conformément aux obligations réglementaires.  
-![Facture transmise non modifiable](.story/images/jour64/submitedInvoice.png)
+![Facture transmise non modifiable](./images/jour64/submitedInvoice.png)
 * Backend : la route `updateInvoice` bloque toute modification si `technical_status` est final (`validated`, `received`, etc.), avec un retour **403** si tentative de modification.  
 * Frontend : les boutons **Modifier / Supprimer** sont désactivés pour ces factures, assurant que l’utilisateur ne puisse pas altérer les données transmises.
 
@@ -3961,8 +3961,8 @@ Aujourd’hui, la session a été consacrée à **la protection réglementaire d
 ### 2. Mode suspension pour compléter la facture
 
 * Mise en place d’un **mode `canEditAdditional`** déclenché si `business_status = "208"`.  
-![Facture suspendue](.story/images/jour64/suspendedInvoice.png)
-![Ajout d'un justificatif additionnel](.story/images/jour64/additionalsAllowed.png)
+![Facture suspendue](./images/jour64/suspendedInvoice.png)
+![Ajout d'un justificatif additionnel](./images/jour64/additionalsAllowed.png)
 
 * Objectif : permettre uniquement l’**ajout de justificatifs additionnels**, sans toucher au justificatif principal ni aux lignes de facture existantes.  
 * UI :  
@@ -4026,14 +4026,14 @@ Nous avons ajouté un **bouton 💰 “Encaisser”** directement dans le tablea
   * `setVersion` force le re-render du DataTable pour que les boutons se mettent à jour instantanément.
   * Le bouton 💰 appelle `cashInvoice`, puis récupère le **dernier statut du cycle métier** pour actualiser le tableau.
 
-    ![Encaisser la facture](.story/images/jour65/cashInvoice.png)
+    ![Encaisser la facture](./images/jour65/cashInvoice.png)
 
 * **Backend** :
 
   * Route `cashInvoice` renvoyant le statut final de la facture après encaissement.
   * Les statuts finaux (`210`, `212`) bloquent les actions suivantes pour assurer la cohérence réglementaire.
-  ![Paiement transmis](.story/images/jour65/submittedPayment.png)
-  ![Facture encaissée](.story/images/jour65/collectedInvoice.png)
+  ![Paiement transmis](./images/jour65/submittedPayment.png)
+  ![Facture encaissée](./images/jour65/collectedInvoice.png)
 
 * **Mock PDP** :
 
@@ -4134,10 +4134,10 @@ Cela permet de :
 
 J’ai ajouté des **messages d’erreurs métier** directement sur l’interface :
 - Bulles d’aide pour chaque statut particulier (refus, approbation partielle, suspension, litige)  
-![Retour client suite au retour de traitement de la facture](.story/images/jour67/clientComment.png)
+![Retour client suite au retour de traitement de la facture](./images/jour67/clientComment.png)
 - Gestion de la suspension côté interface : le cycle est bloqué et le message informe l’utilisateur de l’action requise  
 - Messages dynamiques pour les cas de statut technique (ex. rejection ou erreur 500 côté PDP)  
-![Facture suspendue, justificatif additionnel attendu](.story/images/jour67/suspendedInvoice.png)
+![Facture suspendue, justificatif additionnel attendu](./images/jour67/suspendedInvoice.png)
 Ces ajouts permettent de tester l’expérience utilisateur dans des scénarios réalistes, sans avoir à simuler manuellement chaque erreur.
 
 ---
@@ -4211,8 +4211,8 @@ Aujourd’hui, j’ai travaillé sur la **gestion des factures suspendues et de 
 - Une fois que le PDP confirme la réception de la facture complétée :  
   - Le **statut métier passe à “complété”**  
   - Le **cycle de vie de la facture reprend normalement**, jusqu’à l’encaissement  
-![Facture suspendue, facture à compléter en ajoutant le justificatif additionnel demandé par le client](.story/images/jour69/suspendedInvoice.png)
-![Facture complétée](.story/images/jour69/CompletedInvoice.png)
+![Facture suspendue, facture à compléter en ajoutant le justificatif additionnel demandé par le client](./images/jour69/suspendedInvoice.png)
+![Facture complétée](./images/jour69/CompletedInvoice.png)
 - Tous les événements sont **loggés côté backend** pour garder une trace précise de chaque étape  
 - Côté frontend, l’utilisateur reçoit un **retour clair et immédiat** sur le statut de la facture complétée
 
@@ -4312,7 +4312,7 @@ L’idée est que dès sa connexion, il dispose d’une **vue globale** de son a
 - **Montant facturé par mois** : histogramme interactif pour visualiser l’évolution du CA dans le temps.  
 - **Statuts de factures** : tableau récapitulatif du nombre de factures par statut métier (draft, issued, late, etc.).  
 - **Graphique des statuts** : visualisation claire via un bar chart coloré (codes couleurs cohérents avec les statuts métiers).  
-![DashBoard](.story/images/jour72/dashBoard.png)
+![DashBoard](./images/jour72/dashBoard.png)
 
 ## Résultat  
 
@@ -4353,14 +4353,14 @@ Vérifier la logique métier des controllers et services indépendamment des rou
 Exemple : calcul du montant total facturé, génération de statuts ou transformation de données.  
 ✅ On a déjà commencé à initier les tests unitaires côté backend, notamment pour la validation de **SIRET** et certaines **routes invoices**.
 
-![Tests unitaires](.story/images/jour73/unitTest.png)
+![Tests unitaires](./images/jour73/unitTest.png)
 
 **Tests d’intégration 🔗**  
 Vérifier que les routes REST fonctionnent correctement et retournent les bonnes réponses JSON.  
 Assurer que les middlewares, même si mockés temporairement, s’intègrent correctement avec les routes.  
 Pour ces tests, on peut utiliser des outils comme **Vitest** ou **Jest**, qui permettent de lancer facilement des tests unitaires et d’intégration et de s’assurer que tout le backend répond comme prévu.
 
-![Tests d'intégration](.story/images/jour73/integrationTest.png)
+![Tests d'intégration](./images/jour73/integrationTest.png)
 
 **Tests end-to-end (E2E) 🏁**  
 Simuler le parcours complet d’un utilisateur (connexion, création de facture, génération PDF).  
@@ -4370,7 +4370,7 @@ Prévoir ces tests pour les étapes critiques avant le déploiement.
 Chaque push déclenche les tests pour s’assurer qu’aucune modification ne casse l’existant.  
 Les tests deviennent un outil de confiance pour continuer à faire évoluer le produit rapidement.
 
-![Exécution des tests](.story/images/jour73/backendTests.png)
+![Exécution des tests](./images/jour73/backendTests.png)
 
 ## Avantages attendus 🌟
 
@@ -4413,7 +4413,7 @@ Ensuite, j’ai commencé à tester des composants plus complexes comme `Clients
 
 Ces tests permettent de vérifier rapidement le comportement attendu sans lancer toute l’application.
 
-![Exécution des tests](.story/images/jour74/frontendTests.png)
+![Exécution des tests](./images/jour74/frontendTests.png)
 
 ## Pourquoi penser à une CI maintenant 🤖
 
@@ -4663,7 +4663,7 @@ En pratique, on a corrigé **10 points bloquants** qui empêchaient la validatio
 - Préparer une **version stable PDF/A‑3 + Factur‑X** utilisable pour toutes les factures futures.  
 - Documenter la méthode pour que le processus soit **réutilisable et maintenable**.
 
-![Validation du PDF/A‑3](.story/images/jour78/pdfa3-validation.png)
+![Validation du PDF/A‑3](./images/jour78/pdfa3-validation.png)
 
 
 \newpage
@@ -4687,7 +4687,7 @@ Le workflow CI a été configuré pour couvrir **backend et frontend** :
 * La CI est désormais capable de **tester automatiquement** le backend et le frontend à chaque push ou pull request sur `main`.
 * Les artefacts de couverture sont stockés et prêts à être utilisés pour un suivi de la qualité du code.
 * Le workflow est structuré pour être facilement **étendu** à linting, Codecov, et d’autres vérifications automatiques à l’avenir.
-![Lancement de l'intégration](.story/images/jour79/ci.png)
+![Lancement de l'intégration](./images/jour79/ci.png)
 
 ## 📌 Prochaines étapes
 
@@ -4714,12 +4714,12 @@ Aujourd’hui, j’ai attaqué l’intégration de **Codecov** pour notre projet
    - Identifier les fichiers ou fonctions peu testés.
    - Suivre l’évolution de la couverture au fil du temps.
   
-   ![Analyse de la couverture](.story/images/jour80/tracked-line.png)
+   ![Analyse de la couverture](./images/jour80/tracked-line.png)
 
 3. **Badges et reporting**  
    J’ai ajouté un badge Codecov dans le README pour avoir un aperçu rapide de la couverture depuis GitHub. C’est motivant et très utile pour garder un œil sur la qualité du code.
 
-   ![Badge Codecov](.story/images/jour80/badge.png)
+   ![Badge Codecov](./images/jour80/badge.png)
 
 ## Retours
 
@@ -4740,7 +4740,7 @@ Aujourd’hui, j’ai consolidé la qualité du code sur **eInvoicing** en ajout
 ## Frontend ✅
 
 Le lint côté frontend était déjà opérationnel. Après quelques ajustements sur les règles et suppression des avertissements inutiles, le pipeline CI détecte maintenant les problèmes de manière fiable avant même le merge.
-![Lint frontend](.story/images/jour81/lint-frontend.png)
+![Lint frontend](./images/jour81/lint-frontend.png)
 
 
 ## Backend ✅
@@ -4797,7 +4797,7 @@ Aujourd’hui, j’ai travaillé sur la **Continuous Deployment** de **tout le p
 * Possibilité de **lancer backend et frontend ensemble via Docker Compose** pour simuler un environnement complet.  
 * Objectif : générer une image prête pour déploiement et intégrable dans un pipeline CD.
   
-![Lancement de la CD](.story/images/jour82/cd.png)
+![Lancement de la CD](./images/jour82/cd.png)
 
 ## Problèmes rencontrés ⚠️
 
@@ -4929,7 +4929,7 @@ docker-compose up -d
   * Test de la connexion réussie.
 * Vérification que les métriques du backend remontent correctement dans Prometheus.
 
-![Dashboard Grafana](.story/images/jour84/grafana-dashboard.png)
+![Dashboard Grafana](./images/jour84/grafana-dashboard.png)
 
 ### 5️⃣ Points clés appris
 
@@ -5686,7 +5686,7 @@ L’objectif était de proposer un espace de démo **RGPD-friendly**, utilisable
 ## 🔹 Objectif du jour  
 
 * Bloquer toutes les actions sensibles (création/mise à jour de clients et vendeurs) pour le mode staging.  
-  ![Fonctionnalités restreintes](.story/images/jour94/restrictedFeature.png)
+  ![Fonctionnalités restreintes](./images/jour94/restrictedFeature.png)
 * Finaliser la génération des documents (PDF, Factur-X XML, PDF/A3).  
 * Mettre en place un **mock PDP** pour simuler l’envoi des factures et la réception des statuts.  
 
@@ -5765,7 +5765,7 @@ Aujourd’hui, la session a été entièrement dédiée à **mettre en place un 
   * `express-jwt` → vérifié et résolu
 * Suppression temporaire de la route `/metrics` pour éviter les erreurs en mode staging.
   
-  ![Déploiement Render](.story/images/jour95/renderDashboard.png)
+  ![Déploiement Render](./images/jour95/renderDashboard.png)
 
 ### 3️⃣ Backend et routes ✅
 
@@ -5864,7 +5864,7 @@ Aujourd’hui, la session a été centrée sur **la mise en place du frontend en
 * Routes `/clients`, `/invoices`, `/sellers` testées depuis le frontend.
 * Logs clairs pour toutes les requêtes et tokens.
 
-![App en mode staging déployée en remote](.story/images/jour96/frontendStaging.png)
+![App en mode staging déployée en remote](./images/jour96/frontendStaging.png)
 
 ## 🔹 Réflexion du jour
 
@@ -8227,3 +8227,320 @@ Avec la même attention tranquille qu’au premier jour.
 
 > Ce que je garderai surtout, c’est que **faire** quelque chose à son rythme, avec soin, avec honnêteté, est une forme de joie simple.  
 À quelque chose près, c’est tout ce que je cherchais, et je l’ai trouvé en chemin.
+
+
+\newpage
+
+# Jour 132 – Création et publication de l’eBook 📚💻
+
+Aujourd’hui, l’objectif était de **mettre en forme tout le contenu accumulé dans le journal**, de générer un eBook complet et de le rendre **accessible en ligne**.
+
+---
+
+## 🛠 Préparation du contenu
+
+J’ai commencé par **assembler tous les fichiers Markdown** du journal (`.story/diary`) :
+
+* Chaque jour est trié dans l’ordre chronologique.
+* Une page de garde a été ajoutée avec le titre, l’auteur et l’année.
+* Des sauts de page (`\newpage`) sont insérés entre chaque jour pour que la lecture soit **fluide et structurée**.
+
+> Cette étape est automatisée via un script Node (`generate-ebook.js`) qui assemble les fichiers et ajuste automatiquement les chemins des images.
+
+---
+
+## 🌟 Gestion des images
+
+Pour que le PDF contienne **toutes les illustrations** :
+
+* Les images sont centralisées dans `.story/images`.
+* Les chemins dans les fichiers Markdown sont corrigés pour pointer vers ce dossier.
+* Chaque image est insérée dans le PDF avec **un centrage et un retour à la ligne**, pour préserver la lisibilité et la mise en page.
+
+> L’objectif est de **préserver l’expérience visuelle** tout en gardant un flux de génération simple et fiable.
+
+---
+
+## 🖥 Génération du PDF
+
+Le Markdown est transformé en PDF avec **Pandoc et XeLaTeX** :
+
+* Métadonnées intégrées (titre, auteur, date).
+* Sommaire automatique via `--toc`.
+* Sauts de page et mise en forme conservés pour un rendu professionnel.
+
+> Grâce au script `generate-ebook.js`, cette opération est **réalisable en une seule commande**, même avec des dizaines de chapitres et de nombreuses images.
+
+---
+
+## 🚀 Publication en ligne
+
+Une fois généré :
+
+* L’eBook est hébergé sur un espace en ligne accessible via un **lien direct**.
+* Les utilisateurs peuvent **télécharger ou consulter le PDF** sans installation préalable.
+* L’infrastructure choisie permet de mettre à jour l’eBook facilement à chaque nouvelle édition.
+
+---
+
+## ✨ Bilan du jour
+
+| Élément           | Avancée                          | Impact                                                        |
+| ----------------- | -------------------------------- | ------------------------------------------------------------- |
+| Contenu Markdown  | ✅ Tous les jours assemblés       | Base prête pour le PDF et l’édition                          |
+| Images            | ✅ Centralisées et chemins corrigés | Le PDF inclut toutes les illustrations correctement          |
+| PDF               | ✅ Généré avec Pandoc/XeLaTeX    | Lecture agréable et format professionnel                      |
+| Publication       | ✅ PDF mis en ligne               | Accessible immédiatement aux utilisateurs et testeurs        |
+
+---
+
+## 💡 Conclusion
+
+Jour 132 est consacré à **la formalisation et la diffusion** :
+
+* On transforme un contenu quotidien en un produit tangible.
+* La lecture est soignée, avec images et structure.
+* L’eBook est disponible en ligne, prêt à être partagé ou mis à jour.
+
+> **Mettre le contenu en valeur et le rendre accessible** avant tout. 🌱
+
+
+\newpage
+
+# Jour 133 – Passage au plan payant de la DB 💳🛠
+
+Aujourd’hui, j’ai pris une **décision importante pour le projet** : garantir la continuité de mon environnement staging en passant ma base de données Render sur un plan payant.
+
+---
+
+## 🏦 Abonnement DB
+
+Après quelques hésitations et un petit **coup d’humour financier** (“casser mon PEL”), j’ai souscrit à l’abonnement minimal pour ma DB :
+
+* La DB ne sera plus suspendue tous les mois.
+* Plus besoin de me soucier de la date d’expiration ou de recréer la base.
+* L’autoscaling est **désactivé pour le moment** afin d’éviter tout risque de surcoût.
+
+> Cette étape offre une **tranquillité immédiate** pour le staging, tout en gardant le contrôle sur les ressources utilisées.
+
+---
+
+## 🖥 Gestion des environnements
+
+Avec cette DB payante, je peux désormais **monter plusieurs environnements sur la même instance** :
+
+* `staging` et `preprod` auront chacun leur propre **schéma**.
+* Les clients et testeurs verront uniquement leurs données grâce au **multi-tenancy** côté backend.
+* Cette approche permet de **centraliser la gestion** de la base tout en isolant les données par environnement.
+
+> Une seule instance, plusieurs usages : gain de temps et simplicité pour tester et déployer de nouvelles fonctionnalités.
+
+---
+
+## ✨ Avancées concrètes
+
+| Élément            | Avancée                                  | Impact                                                   |
+| -----------------  | ---------------------------------------- | -------------------------------------------------------- |
+| DB Render          | ✅ Passage au plan payant                 | Staging stable et service continu                        |
+| Autoscaling        | ⚪ Désactivé pour le moment               | Contrôle du coût et prévention des surprises             |
+| Environnements     | ✅ Possibilité de multi-schéma           | Staging, preprod, production sur une seule DB           |
+| Multi-tenancy      | ✅ Isolation des données côté backend     | Chaque client ne voit que ses données                    |
+
+---
+
+## 💡 Bilan du jour
+
+Jour 133 est consacré à **la stabilité et la flexibilité** :
+
+* Je sécurise mon environnement de staging sans avoir à m’inquiéter des suspensions mensuelles.
+* La DB payante permet de créer plusieurs environnements en parallèle.
+* L’architecture multi-schéma est prête à accueillir de nouveaux usages ou testeurs.
+
+> On continue d’avancer pas à pas, avec des décisions qui garantissent la **continuité et la fiabilité** du projet. 🚀
+
+
+\newpage
+
+# Jour 134 – Refacto multi-environnements et variable DB_SCHEMA 🛠🌱
+
+Aujourd’hui, l’objectif était de **rendre mon backend indépendant du schéma de la DB**, afin de pouvoir exploiter pleinement la DB payante et gérer plusieurs environnements facilement.
+
+---
+
+## 🔧 Variable d’environnement DB_SCHEMA
+
+Pour éviter de **hardcoder le nom des schémas**, j’ai ajouté la variable d’environnement `DB_SCHEMA` :
+
+* Définie dans `.env` : `DB_SCHEMA=invoice_staging` ou `invoice_prod`.
+* Tous les modèles et requêtes SQL utilisent désormais `${SCHEMA}` au lieu d’un nom fixe.
+* Les tables restent les mêmes (`clients`, `invoice_attachments`, etc.) mais avec le **schéma dynamique**.
+
+> Objectif : changer d’environnement simplement sans toucher au code. Un switch rapide entre staging, preprod et production.
+
+---
+
+## 🖥 Refacto des composants
+
+Le refacto a concerné **tous les composants principaux** :
+
+* **Clients** : plus de `Client.table_name`, toutes les requêtes utilisent `${SCHEMA}.clients`.
+* **Invoices** : modèles `invoiceAttachments` et `invoiceStatus` adaptés pour prendre en compte le schéma dynamique.
+* **Sellers** : mise à jour du composant pour rester cohérent avec l’approche multi-schéma.
+* **Tests** : tous les tests unitaires et mocks ont été adaptés pour accepter la variable `${SCHEMA}`.
+
+> Résultat : un code **plus propre, découplé et modulable**, prêt à accueillir plusieurs environnements sans duplication.
+
+---
+
+## ✨ Avancées concrètes
+
+| Élément              | Avancée                                  | Impact                                                 |
+| -------------------- | ---------------------------------------- | ------------------------------------------------------ |
+| Variable DB_SCHEMA   | ✅ Ajoutée dans `.env`                    | Schéma dynamique selon l’environnement                 |
+| Clients & Invoices   | ✅ Refacto des modèles                    | Plus de dépendance aux noms de schéma fixes            |
+| Tests unitaires      | ✅ Adaptés aux schémas dynamiques         | Passent sur tous les environnements                    |
+| Multi-environnements | ✅ Staging, preprod, production possibles | Un seul codebase et une seule DB pour plusieurs usages |
+
+---
+
+## 💡 Bilan du jour
+
+Jour 134 est consacré à **la modularité et la maintenabilité** :
+
+* Le code n’est plus couplé à un schéma spécifique.
+* Passer d’un environnement à l’autre est maintenant **transparent** grâce à `DB_SCHEMA`.
+* L’architecture est prête pour accueillir de nouveaux environnements ou tester des fonctionnalités sans risque pour les données existantes.
+
+> Une étape clé pour continuer à **scaler proprement** et sécuriser le projet avant de lancer de nouveaux tests ou fonctionnalités. 🚀
+
+
+\newpage
+
+# Jour 135 – Génération propre des environnements et stabilisation du schéma DB 🏗️🌿
+
+Après avoir rendu mon backend **agnostique du schéma** grâce à `DB_SCHEMA`, l’étape suivante était de **mettre en place des environnements propres et reproductibles** autour de ma base Render.  
+L’objectif : **pouvoir créer un nouvel environnement** (staging, preprod, tests, etc.) sans bricolage ni copie sauvage de données.
+
+---
+
+## 🧱 Construire un environnement à partir d’un schéma de référence
+
+Plutôt que d’utiliser un dump complet (avec données), j’ai préféré repartir d’un **schéma de référence** sain :
+
+1. **Exporter le schéma `invoicing`** depuis DBeaver (structure uniquement, pas les données).
+2. Ouvrir le fichier SQL généré (`db_schema.sql`).
+3. **Remplacer toutes les occurrences** de `invoicing.` par `staging.`.
+
+```bash
+sed -i 's/invoicing\./staging./g' db_schema.sql
+```
+
+→ Résultat : un script capable de **recréer le schéma staging à l’identique**, aligné sur la structure principale.
+
+> Et surtout : **plus besoin de re-taper des commandes manuelles** ou de vérifier table par table.
+
+---
+
+## 🔁 Cohérence multi-environnements
+
+Ce travail pose les bases de ce que je veux pouvoir faire facilement :
+
+| Action | Avant | Maintenant |
+|-------|-------|------------|
+| Créer un nouvel environnement | Délicat, manuel, risqué | Simple, reproductible, automatisable |
+| Synchroniser la structure | Risque d’oublis | Alignement garanti depuis un schéma source |
+| Tester sans casser la prod | Complexe | Transparent, naturel |
+
+> J’ai maintenant une **mécanique stable pour scaler** mon architecture autour d’une seule DB Render avec plusieurs schémas isolés.
+
+---
+
+## 🛠 Détail bonus : correction de l’envoi d’emails
+
+J’en ai profité pour régler un petit problème qui traînait :  
+ma fonction d’envoi d’email **recryptait la clé** si le vendeur était modifié — ce qui cassait plus ou moins silencieusement l’envoi.
+
+Ce bug est maintenant réglé ✅  
+→ La clé est reconnue si elle est déjà encryptée.  
+→ L’état du vendeur reste cohérent.  
+→ L’envoi de mail est stable et predictable.
+
+---
+
+## 🌱 Bilan du jour
+
+Une avancée **structurante** :  
+Je peux maintenant **déployer, tester, corriger, itérer** dans de nouveaux environnements **sans prise de tête**.
+
+- Schémas reproductibles ✅  
+- Architecture prête à scaler ✅  
+- Moins d’entropie, plus d’intention ✅  
+
+> Ce sont des choses qu’on ne remarque pas dans l’interface,  
+> mais qui font **toute la différence** dans la vie du projet.
+
+On avance. Tranquillement mais sûrement 🚀
+
+\newpage
+
+# Jour 136 – Déploiement de l’environnement preprod sur Render 🚀🟡
+
+Aujourd’hui, j’ai passé une étape importante : la mise en place d’un **environnement preprod** dédié.  
+L’objectif est clair : **ouvrir progressivement l’application à des bêta‑testeurs** dans un espace isolé, stable et reproductible.
+
+---
+
+## 🌍 Pourquoi une preprod maintenant ?
+
+J’avais déjà un environnement *staging* pour mes tests internes.  
+Mais pour inviter des utilisateurs réels à tester l’application, il faut :
+
+- **un environnement séparé**, stable et persistant
+- **une base de données dédiée**, dérivée proprement du schéma principal
+- **une configuration Auth0 isolée** pour éviter la confusion des espaces utilisateurs
+
+La preprod devient **le pont** entre mon environnement de développement *et* la future version réellement utilisée par des clients.
+
+---
+
+## 🏗️ Création de l’environnement sur Render
+
+En m’appuyant sur la logique mise en place hier (schéma reproductible via fichier SQL), j’ai pu :
+
+1. **Créer une nouvelle base (schéma)** sur la DB Render existante : `preprod`
+2. Générer le schéma depuis mon fichier `db_schema.sql`
+3. Déployer un **nouveau service Render** depuis le même code front + backend
+4. Configurer les variables d’environnement proprement
+
+→ Résultat : un environnement **cohérent**, aligné avec staging, isolé, et reproductible.
+
+---
+
+## 🔐 Prochaine étape : Auth0 dédié
+
+Pour l’instant, l’environnement preprod **partage encore le tenant Auth0** du staging.  
+Ce n’est pas bloquant, mais **ce n’est pas idéal** pour gérer des testeurs.
+
+### Ce que je vais faire ensuite :
+- Créer un **nouveau tenant Auth0** (`eInvoicing-preprod`)
+- Reconfigurer les applications (frontend + backend)
+- Synchroniser les règles RBAC
+- Mettre en place un **bash script** pour générer automatiquement les variables d’env
+
+Ce sera l’occasion d’avoir **un espace utilisateur complètement séparé**, ce qui simplifie énormément la gestion du cycle de vie.
+
+---
+
+## ✅ Bilan du jour
+
+Une journée moins « visible », mais très structurante :
+
+- Environnement preprod en ligne ✅
+- DB clean, reproductible et alignée ✅
+- Déploiement simplifié ✅
+- Direction bêta‑testeurs ouverte ✅
+
+> On se rapproche concrètement de **mettre l’application dans les mains de vrais utilisateurs**.
+> Chaque étape rend le projet plus réel, plus solide, plus prêt.
+
+On avance. Toujours. 🌱🔥
