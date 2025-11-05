@@ -140,3 +140,4 @@
 - [Jour 137 – Stabilisation de la preprod et corrections réseau/SSL 🛠🌫️](jour-137.md)
 - [Jour 138 – Finalisation preprod, Auth0 et documentation 📚🛠️](jour-138.md)
 - [Jour 139 – Migration vers Resend et simplification SMTP ✉️🚀](jour-139.md)
+- [Jour 140 – Rendre le stockage indépendant du support 📂🌐](jour-140.md)
