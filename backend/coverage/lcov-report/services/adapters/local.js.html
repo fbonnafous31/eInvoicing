@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for modules/sellers/sellers.route.js</title>
+    <title>Code coverage report for services/adapters/local.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">modules/sellers</a> sellers.route.js</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">services/adapters</a> local.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">57.14% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>13/13</span>
+                <span class='fraction'>8/14</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">66.66% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/0</span>
+                <span class='fraction'>4/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/0</span>
+                <span class='fraction'>2/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">58.33% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>13/13</span>
+                <span class='fraction'>7/12</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -89,58 +89,61 @@
 <a name='L24'></a><a href='#L24'>24</a>
 <a name='L25'></a><a href='#L25'>25</a>
 <a name='L26'></a><a href='#L26'>26</a>
-<a name='L27'></a><a href='#L27'>27</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const express = require('express');
-const router = express.Router();
-const SellersController = require('./sellers.controller');
-const checkJwt = require('../../middlewares/auth');
-const attachSeller = require('../../middlewares/attachSeller');
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const fs = require('fs');
+const path = require('path');
 &nbsp;
-// Route publique (optionnelle)
-router.get('/check-identifier', SellersController.checkIdentifier);
+class LocalAdapter {
+  constructor(basePath) {
+    this.basePath = basePath || path.join(__dirname, '../../uploads');
+    if (!fs.existsSync(this.basePath)) fs.mkdirSync(this.basePath, { recursive: true });
+  }
 &nbsp;
-// Routes protégées
-router.use(checkJwt);
-router.use(attachSeller);
+<span class="fstat-no" title="function not covered" >  as</span>ync save(fileBuffer, fileName) {
+    const filePath = <span class="cstat-no" title="statement not covered" >path.join(this.basePath, fileName);</span>
+<span class="cstat-no" title="statement not covered" >    fs.writeFileSync(filePath, fileBuffer);</span>
+<span class="cstat-no" title="statement not covered" >    return filePath;</span>
+  }
 &nbsp;
-// Récupérer son vendeur
-router.get('/me', SellersController.getMySeller);
+  async get(fileName) {
+    const filePath = path.join(this.basePath, fileName);
+    return fs.readFileSync(filePath);
+  }
 &nbsp;
-// Créer son vendeur (si pas encore créé)
-router.post('/', SellersController.createSeller);
+<span class="fstat-no" title="function not covered" >  as</span>ync delete(fileName) {
+    const filePath = <span class="cstat-no" title="statement not covered" >path.join(this.basePath, fileName);</span>
+<span class="cstat-no" title="statement not covered" >    if (fs.existsSync(filePath)) <span class="cstat-no" title="statement not covered" >fs.unlinkSync(filePath);</span></span>
+  }
+}
 &nbsp;
-// Mettre à jour son vendeur
-router.put('/:id', SellersController.updateSeller);
-&nbsp;
-// Tester l’envoi via Resend (pas de ports SMTP → fonctionne sur Render)
-router.post('/smtp/test-resend', SellersController.testSmtpResend);
-&nbsp;
-module.exports = router;
+module.exports = LocalAdapter;
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -148,7 +151,7 @@ module.exports = router;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-05T10:27:50.277Z
+                at 2025-11-05T09:44:17.227Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
