@@ -102,7 +102,8 @@ export default function Home() {
 
   // Factures en retard
   const overdueInvoices = filteredInvoices.filter(inv => {
-    if (inv.technical_status === 'pending' && inv.business_status !== 'rejected') return false;
+    // 210 = Rejet de la facture
+    if (inv.technical_status === 'pending' || inv.business_status === '210') return false;
 
     const statusCode = parseInt(inv.business_status, 10);
     if (isNaN(statusCode) || statusCode >= 211) return false;

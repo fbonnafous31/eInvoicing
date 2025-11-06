@@ -14,8 +14,10 @@ class LocalAdapter {
   }
 
   async get(fileName) {
-    const filePath = path.join(this.basePath, fileName);
-    return fs.readFileSync(filePath);
+    const fullPath = fileName.includes('pdf-a3') ? path.join(this.baseDir, 'pdf-a3', fileName)
+                    : fileName.includes('_main_') ? path.join(this.baseDir, 'invoices', fileName)
+                    : path.join(this.baseDir, fileName);
+    return fs.promises.readFile(fullPath);
   }
 
   async delete(fileName) {

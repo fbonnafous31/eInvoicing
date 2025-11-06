@@ -1,0 +1,80 @@
+.
+├── architecture.txt
+├── config
+│   ├── db.js
+│   └── tests
+│       └── db.test.js
+├── middlewares
+│   ├── attachSeller.js
+│   ├── auth.js
+│   ├── errorHandler.js
+│   ├── tests
+│   │   ├── attachSeller.test.js
+│   │   ├── auth.test.js
+│   │   ├── errorHandler.test.js
+│   │   └── upload.test.js
+│   └── upload.js
+├── modules
+│   ├── architeture.txt
+│   ├── clients
+│   │   ├── clients.controller.js
+│   │   ├── clients.model.js
+│   │   ├── clients.route.js
+│   │   ├── clients.service.js
+│   │   └── __tests__
+│   ├── invoices
+│   │   ├── invoiceArtifact.service.js
+│   │   ├── invoiceAttachments.model.js
+│   │   ├── invoiceClient.model.js
+│   │   ├── invoiceClient.service.js
+│   │   ├── invoiceMail.controller.js
+│   │   ├── invoiceMail.service.js
+│   │   ├── invoicePdp.service.js
+│   │   ├── invoices.controller.js
+│   │   ├── invoices.model.js
+│   │   ├── invoices.route.js
+│   │   ├── invoices.service.js
+│   │   ├── invoiceStatus.model.js
+│   │   └── __tests__
+│   ├── pdp
+│   │   ├── adapters
+│   │   ├── PDPInterface.js
+│   │   └── PDPService.js
+│   └── sellers
+│       ├── sellers.controller.js
+│       ├── sellers.model.js
+│       ├── sellers.route.js
+│       ├── sellers.service.js
+│       └── __tests__
+├── monitoring
+│   └── metrics.js
+├── services
+│   ├── adapters
+│   │   └── local.js
+│   ├── index.js
+│   └── storage.js
+├── uploads
+│   ├── factur-x
+│   ├── invoices
+│   ├── pdf
+│   ├── pdp
+│   └── tmp
+└── utils
+    ├── encryption.js
+    ├── facturx
+    │   ├── facturx-generator.js
+    │   └── xmp-helper.js
+    ├── fileNaming.js
+    ├── invoice-pdf
+    │   ├── fonts
+    │   ├── generateInvoicePdf.js
+    │   ├── icc
+    │   ├── logo.png
+    │   ├── pdf-generator.js
+    │   └── testGenerate.js
+    ├── siret.js
+    └── __tests__
+        ├── encryption.test.js
+        ├── fileNaming.test.js
+        └── siret.test.js
+
