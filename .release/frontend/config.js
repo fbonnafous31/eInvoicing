@@ -10,5 +10,8 @@ window.__ENV__ = {
   // Variables Auth0 du client
   VITE_AUTH0_DOMAIN: '',   
   VITE_AUTH0_CLIENT_ID: '',
-  VITE_AUTH0_AUDIENCE: ''      
+  VITE_AUTH0_AUDIENCE: '',      
+
+  // Plateforme agréée
+  VITE_PDP_PROVIDER: ''
 };

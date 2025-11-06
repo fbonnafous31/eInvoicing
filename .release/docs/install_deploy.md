@@ -47,6 +47,12 @@ PDP_BASE_URL=
 PDP_AUTH_URL=
 PDP_CLIENT_ID=
 PDP_CLIENT_SECRET=
+
+# Encryption key (32 bytes minimum)
+ENCRYPTION_KEY=
+
+# Resend configuration (envoi de mail)
+RESEND_API_KEY=
 ```
 
 🟡 **Remarque** :\
@@ -71,7 +77,10 @@ window.__ENV__ = {
   // Variables Auth0 du client
   VITE_AUTH0_DOMAIN: '',   
   VITE_AUTH0_CLIENT_ID: '',
-  VITE_AUTH0_AUDIENCE: ''      
+  VITE_AUTH0_AUDIENCE: '' 
+
+  // Plateforme agréée
+  VITE_PDP_PROVIDER: 'mock'
 };
 ```
 
@@ -156,7 +165,7 @@ chmod +x start-einvoicing.sh
   ------------------------------------------------------------------------------------------------------------------------------
   Élément             Commande / URL                                                                        Attendu
   ------------------- ------------------------------------------------------------------------------------- --------------------
-  **Base de données** `docker exec -it einvoicing-db psql -U einvoicing -d einvoicing_local_pdp -c "\dt"`   Liste des tables
+  **Base de données** ` "`   Liste des tables
 
   **Backend**         <http://localhost:3000/health>                                                        `HTTP STATUS: 200`
 
