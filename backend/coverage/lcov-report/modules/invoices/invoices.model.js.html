@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">8.64% </span>
+                <span class="strong">8.58% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>14/162</span>
+                <span class='fraction'>14/163</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">9.72% </span>
+                <span class="strong">9.65% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>14/144</span>
+                <span class='fraction'>14/145</span>
             </div>
         
             
@@ -567,7 +567,12 @@
 <a name='L502'></a><a href='#L502'>502</a>
 <a name='L503'></a><a href='#L503'>503</a>
 <a name='L504'></a><a href='#L504'>504</a>
-<a name='L505'></a><a href='#L505'>505</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">2x</span>
+<a name='L505'></a><a href='#L505'>505</a>
+<a name='L506'></a><a href='#L506'>506</a>
+<a name='L507'></a><a href='#L507'>507</a>
+<a name='L508'></a><a href='#L508'>508</a>
+<a name='L509'></a><a href='#L509'>509</a>
+<a name='L510'></a><a href='#L510'>510</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
@@ -988,9 +993,13 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -999,6 +1008,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1073,9 +1083,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const pool = require('../../config/db');
 const path = require('path');
-const fs = require('fs');
 const { getSellerById } = require('../sellers/sellers.model'); 
 const { saveAttachment, cleanupAttachments } = require("./invoiceAttachments.model");
+const storageService = require('../../services');
 const SCHEMA = process.env.DB_SCHEMA || <span class="branch-1 cbranch-no" title="branch not covered" >'public';</span>
 &nbsp;
 /**
@@ -1484,28 +1494,33 @@ async function updateInvoice(
     // Ajouter les nouveaux fichiers via saveAttachment
 <span class="cstat-no" title="statement not covered" >    if (newAttachments?.length) {</span>
 <span class="cstat-no" title="statement not covered" >      for (const att of newAttachments) {</span>
-<span class="cstat-no" title="statement not covered" >        await saveAttachment(conn, id, att); </span>// ⬅️ refacto appliqué
+<span class="cstat-no" title="statement not covered" >        await saveAttachment(conn, id, att); </span>
       }
     }
 &nbsp;
     // Nettoyer les fichiers orphelins côté serveur
     const uploadDir = <span class="cstat-no" title="statement not covered" >path.join(__dirname, "../../uploads/invoices");</span>
+    const relativeDir = <span class="cstat-no" title="statement not covered" >uploadDir.split('uploads/')[1];</span> // 'invoices'
+&nbsp;
     const { rows: dbFiles } = <span class="cstat-no" title="statement not covered" >await conn.query(</span>
       `SELECT stored_name FROM ${SCHEMA}.invoice_attachments WHERE invoice_id = $1`,
       [id]
     );
     const dbFileSet = <span class="cstat-no" title="statement not covered" >new Set(dbFiles.map(<span class="fstat-no" title="function not covered" >(f</span>) =&gt; <span class="cstat-no" title="statement not covered" >f.stored_name)</span>);</span>
-    const allFiles = <span class="cstat-no" title="statement not covered" >await fs.promises.readdir(uploadDir);</span>
+&nbsp;
+    // Lister tous les fichiers via storageService
+    const allFiles = <span class="cstat-no" title="statement not covered" >await storageService.list(relativeDir);</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    for (const file of allFiles) {</span>
 <span class="cstat-no" title="statement not covered" >      if (file.startsWith(`${id}_`) &amp;&amp; !dbFileSet.has(file)) {</span>
 <span class="cstat-no" title="statement not covered" >        try {</span>
-<span class="cstat-no" title="statement not covered" >          await fs.promises.unlink(path.join(uploadDir, file));</span>
+<span class="cstat-no" title="statement not covered" >          await storageService.delete(`${relativeDir}/${file}`);</span>
         } catch (err) {
 <span class="cstat-no" title="statement not covered" >          console.error("❌ Failed to remove file:", file, err);</span>
         }
       }
     }
+&nbsp;
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    await conn.query("COMMIT");</span>
 <span class="cstat-no" title="statement not covered" >    return await getInvoiceById(id);</span>
@@ -1582,7 +1597,7 @@ module.exports = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-06T15:56:23.706Z
+                at 2025-11-07T09:15:42.936Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

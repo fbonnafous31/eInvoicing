@@ -1,10 +1,13 @@
 /* global describe, it, expect, beforeEach, beforeAll, afterAll */
 
-jest.mock('fs/promises');
-jest.mock('path', () => ({
-  resolve: jest.fn(() => '/abs/path/uploads/factur-x'),
-  join: jest.fn((...args) => args.join('/')),
-}));
+const fs = require('fs/promises');
+const path = require('path');
+const { generateInvoiceArtifacts } = require('../invoiceArtifact.service');
+const { embedFacturXInPdf } = require('../../../utils/invoice-pdf/pdf-generator');
+const { generateFacturXXML } = require('../../../utils/facturx/facturx-generator');
+const InvoicesAttachmentsModel = require('../invoiceAttachments.model');
+const { getFinalPath } = require('../../../utils/fileNaming');
+
 jest.mock('../../../utils/facturx/facturx-generator', () => ({
   generateFacturXXML: jest.fn(),
 }));
@@ -15,12 +18,9 @@ jest.mock('../invoiceAttachments.model', () => ({
   getAttachment: jest.fn(),
   getAdditionalAttachments: jest.fn(),
 }));
-
-const fs = require('fs/promises');
-const { embedFacturXInPdf } = require('../../../utils/invoice-pdf/pdf-generator');
-const { generateFacturXXML } = require('../../../utils/facturx/facturx-generator');
-const InvoicesAttachmentsModel = require('../invoiceAttachments.model');
-const { generateInvoiceArtifacts } = require('../invoiceArtifact.service');
+jest.mock('../../../utils/fileNaming', () => ({
+  getFinalPath: jest.fn(),
+}));
 
 describe('InvoiceArtifactService', () => {
   const mockInvoice = {
@@ -32,6 +32,8 @@ describe('InvoiceArtifactService', () => {
     attachments: [],
   };
 
+  const uploadsDir = '/home/francois/dev/eInvoicing/backend/src/uploads';
+
   beforeAll(() => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
   });
@@ -42,11 +44,18 @@ describe('InvoiceArtifactService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // On mock getFinalPath pour renvoyer le vrai dossier uploads local
+    getFinalPath.mockImplementation((subPath) => `${uploadsDir}/${subPath}`);
+
+    // Mock fs
+    jest.spyOn(fs, 'mkdir').mockResolvedValue();
+    jest.spyOn(fs, 'writeFile').mockResolvedValue();
+
+    jest.spyOn(path, 'join').mockImplementation((...args) => args.join('/'));
   });
 
   it('✅ génère correctement le XML et le PDF/A-3', async () => {
-    fs.mkdir.mockResolvedValue();
-    fs.writeFile.mockResolvedValue();
     generateFacturXXML.mockReturnValue('<xml></xml>');
     InvoicesAttachmentsModel.getAttachment.mockResolvedValue({ file_path: '/fake/main.pdf' });
     InvoicesAttachmentsModel.getAdditionalAttachments.mockResolvedValue([
@@ -56,34 +65,34 @@ describe('InvoiceArtifactService', () => {
 
     const result = await generateInvoiceArtifacts(mockInvoice);
 
-    expect(fs.mkdir).toHaveBeenCalledWith('/abs/path/uploads/factur-x', { recursive: true });
+    expect(fs.mkdir).toHaveBeenCalledWith(
+      '/home/francois/dev/eInvoicing/backend/src/uploads/factur-x',
+      { recursive: true }
+    );
     expect(fs.writeFile).toHaveBeenCalledWith(
-      '/abs/path/uploads/factur-x/123-factur-x.xml',
-      '<xml></xml>',
-      'utf-8'
+      '/home/francois/dev/eInvoicing/backend/src/uploads/factur-x/123-factur-x.xml',
+      '<xml></xml>'
     );
     expect(result).toEqual({
-      xmlPath: '/abs/path/uploads/factur-x/123-factur-x.xml',
+      xmlPath: '/home/francois/dev/eInvoicing/backend/src/uploads/factur-x/123-factur-x.xml',
       pdfA3Path: '/fake/final.pdf',
     });
   });
 
   it('⚠️ retourne des chemins null si le PDF principal est introuvable', async () => {
-    fs.mkdir.mockResolvedValue();
-    fs.writeFile.mockResolvedValue();
     generateFacturXXML.mockReturnValue('<xml></xml>');
     InvoicesAttachmentsModel.getAttachment.mockResolvedValue(null);
 
     const result = await generateInvoiceArtifacts(mockInvoice);
 
     expect(result).toEqual({
-      xmlPath: '/abs/path/uploads/factur-x/123-factur-x.xml',
+      xmlPath: '/home/francois/dev/eInvoicing/backend/src/uploads/factur-x/123-factur-x.xml',
       pdfA3Path: null,
     });
   });
 
   it('❌ gère proprement une erreur lors de la génération du XML', async () => {
-    fs.mkdir.mockRejectedValue(new Error('Erreur mkdir'));
+    fs.mkdir.mockRejectedValueOnce(new Error('Erreur mkdir'));
 
     const result = await generateInvoiceArtifacts(mockInvoice);
 

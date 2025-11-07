@@ -6,7 +6,6 @@ const db = require('../../../config/db');
 const { generateStoredName, getFinalPath } = require('../../../utils/fileNaming');
 const {
   saveAttachment,
-  cleanupAttachments,
   getAttachment,
   getAdditionalAttachments,
 } = require('../invoiceAttachments.model');
@@ -49,17 +48,6 @@ describe('invoiceAttachments.model', () => {
       [123, 'file.pdf', '/uploads/123_main_file.pdf', '123_main_file.pdf', 'main']
     );
     expect(result).toEqual({ id: 1 });
-  });
-
-  it('⚙️ cleanupAttachments supprime les fichiers orphelins', async () => {
-    getFinalPath.mockReturnValue('/uploads');
-    conn.query.mockResolvedValue({ rows: [{ stored_name: '123_a.pdf' }] });
-    fs.promises.readdir.mockResolvedValue(['123_a.pdf', '123_b.pdf']);
-    fs.promises.unlink.mockResolvedValue();
-
-    await cleanupAttachments(conn, 123);
-
-    expect(fs.promises.unlink).toHaveBeenCalledWith('/uploads/123_b.pdf');
   });
 
   it('📄 getAttachment retourne la première pièce jointe', async () => {

@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">96.66% </span>
+                <span class="strong">96.15% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>29/30</span>
+                <span class='fraction'>25/26</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>28/28</span>
+                <span class='fraction'>24/24</span>
             </div>
         
             
@@ -132,22 +132,9 @@
 <a name='L67'></a><a href='#L67'>67</a>
 <a name='L68'></a><a href='#L68'>68</a>
 <a name='L69'></a><a href='#L69'>69</a>
-<a name='L70'></a><a href='#L70'>70</a>
-<a name='L71'></a><a href='#L71'>71</a>
-<a name='L72'></a><a href='#L72'>72</a>
-<a name='L73'></a><a href='#L73'>73</a>
-<a name='L74'></a><a href='#L74'>74</a>
-<a name='L75'></a><a href='#L75'>75</a>
-<a name='L76'></a><a href='#L76'>76</a>
-<a name='L77'></a><a href='#L77'>77</a>
-<a name='L78'></a><a href='#L78'>78</a>
-<a name='L79'></a><a href='#L79'>79</a>
-<a name='L80'></a><a href='#L80'>80</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">2x</span>
+<a name='L70'></a><a href='#L70'>70</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -168,14 +155,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -201,12 +183,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -221,13 +201,10 @@
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const fs = require('fs/promises');
-const path = require('path');
-const { generateFacturXXML } = require('../../utils/facturx/facturx-generator');
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const { generateFacturXXML } = require('../../utils/facturx/facturx-generator');
 const { embedFacturXInPdf } = require('../../utils/invoice-pdf/pdf-generator');
 const InvoicesAttachmentsModel = require('./invoiceAttachments.model');
-&nbsp;
-const FACTURX_DIR = path.resolve('src/uploads/factur-x');
+const storageService = require('../../services');
 &nbsp;
 /**
  * Prépare les données client pour la génération XML.
@@ -246,17 +223,12 @@ function _prepareClientForXML(client) {
   };
 }
 &nbsp;
-/**
- * Sauvegarde le fichier XML Factur-X sur le disque.
- * @private
- */
 async function _saveFacturXXML(id, invoiceData) {
-  // Utilisation de fs/promises pour la cohérence
-  await fs.mkdir(FACTURX_DIR, { recursive: true });
   const xml = generateFacturXXML(invoiceData);
-  const xmlPath = path.join(FACTURX_DIR, `${id}-factur-x.xml`);
-  await fs.writeFile(xmlPath, xml, 'utf-8');
-  return xmlPath;
+  const relativePath = `factur-x/${id}-factur-x.xml`;
+  const savedPath = await storageService.save(xml, relativePath);
+  console.log(`✅ Factur-X généré pour la facture ${id} à : ${savedPath}`);
+  return savedPath; 
 }
 &nbsp;
 /**
@@ -280,14 +252,12 @@ async function generateInvoiceArtifacts(invoice) {
     };
 &nbsp;
     xmlPath = await _saveFacturXXML(invoice.id, invoiceDataForXML);
-    console.log(`📄 Factur-X généré pour la facture ${invoice.id} à :`, xmlPath);
 &nbsp;
     const mainPdfAttachment = await InvoicesAttachmentsModel.getAttachment(invoice.id, 'main');
     if (!mainPdfAttachment) throw new Error(`PDF principal introuvable pour la facture ${invoice.id}`);
     
     const additionalAttachments = await InvoicesAttachmentsModel.getAdditionalAttachments(invoice.id);
     pdfA3Path = await embedFacturXInPdf(mainPdfAttachment.file_path, xmlPath, additionalAttachments, invoice.id);
-    console.log(`📄 PDF/A-3 généré pour la facture ${invoice.id} à :`, pdfA3Path);
   } catch (err) {
     console.error(`❌ Erreur lors de la génération des artefacts pour la facture ${invoice.id}:`, err.message);
     // On ne lève pas d'erreur pour ne pas bloquer le flux principal.
@@ -307,7 +277,7 @@ module.exports = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-06T15:56:23.706Z
+                at 2025-11-07T09:15:42.936Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
