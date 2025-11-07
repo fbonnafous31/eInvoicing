@@ -17,6 +17,13 @@ class StorageService {
   async delete(fileName) {
     return this.adapter.delete(fileName);
   }
+
+    async list(dir = '') {
+    if (typeof this.adapter.list !== 'function') {
+      throw new Error('Adapter does not implement list()');
+    }
+    return this.adapter.list(dir);
+  }
 }
 
 module.exports = StorageService;

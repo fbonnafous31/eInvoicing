@@ -1,28 +1,42 @@
-const fs = require('fs');
+const fs = require('fs/promises');
 const path = require('path');
 
 class LocalAdapter {
-  constructor(basePath) {
-    this.basePath = basePath || path.join(__dirname, '../../uploads');
-    if (!fs.existsSync(this.basePath)) fs.mkdirSync(this.basePath, { recursive: true });
+  constructor() {
+    this.basePath = path.join(__dirname, '../../../src/uploads');
+
+    // Création des répertoires standards
+    fs.mkdir(path.join(this.basePath, 'factur-x'), { recursive: true }).catch(() => {});
+    fs.mkdir(path.join(this.basePath, 'invoices'), { recursive: true }).catch(() => {});
+    fs.mkdir(path.join(this.basePath, 'pdf-a3'), { recursive: true }).catch(() => {});
   }
 
-  async save(fileBuffer, fileName) {
-    const filePath = path.join(this.basePath, fileName);
-    fs.writeFileSync(filePath, fileBuffer);
+  async save(buffer, relativePath) {
+    const filePath = path.join(this.basePath, relativePath);
+    await fs.mkdir(path.dirname(filePath), { recursive: true });
+    await fs.writeFile(filePath, buffer);
     return filePath;
   }
 
-  async get(fileName) {
-    const fullPath = fileName.includes('pdf-a3') ? path.join(this.baseDir, 'pdf-a3', fileName)
-                    : fileName.includes('_main_') ? path.join(this.baseDir, 'invoices', fileName)
-                    : path.join(this.baseDir, fileName);
-    return fs.promises.readFile(fullPath);
+  async get(relativePath) {
+    const filePath = path.join(this.basePath, relativePath);
+    return await fs.readFile(filePath);
   }
 
-  async delete(fileName) {
-    const filePath = path.join(this.basePath, fileName);
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  async delete(relativePath) {
+    const filePath = path.join(this.basePath, relativePath);
+    await fs.unlink(filePath).catch(() => {});
+  }
+
+  async list(relativeDir = '') {
+    const dirPath = path.join(this.basePath, relativeDir);
+    try {
+      const files = await fs.readdir(dirPath);
+      return files;
+    } catch (err) {
+      console.log(err);
+      return []; 
+    }
   }
 }
 

@@ -1,9 +1,8 @@
 // backend/src/modules/invoices/invoiceMail.service.js
-const fs = require('fs');
-const path = require('path');
 const { Resend } = require('resend');
 const { getInvoiceById } = require('./invoices.service');
 const { getSellerById } = require('../sellers/sellers.model');
+const storageService = require('../../services');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -32,10 +31,14 @@ async function sendInvoiceMail(invoiceId, message, subject, to) {
   const sellerName = seller?.legal_name?.trim() || 'Votre société';
   const invoiceNumber = invoice.invoice_number?.trim() || invoice.id;
 
-  // PDF/A-3
-  const pdfPath = path.join(__dirname, '../../uploads/pdf-a3', `${invoice.id}_pdf-a3.pdf`);
-  if (!fs.existsSync(pdfPath)) throw new Error('PDF/A-3 introuvable');
-  const pdfBuffer = fs.readFileSync(pdfPath);
+  // PDF/A-3 via storageService
+  const relativePath = `pdf-a3/${invoice.id}_pdf-a3.pdf`;
+  let pdfBuffer;
+  try {
+    pdfBuffer = await storageService.get(relativePath);
+  } catch (err) {
+    throw new Error(`PDF/A-3 introuvable pour la facture ${invoice.id}`, err.message);
+  }
 
   // Contenu de l’email
   const finalText = message?.trim() || `Bonjour ${invoice.client?.legal_name || 'Client'},\n\nVeuillez trouver ci-joint votre facture n°${invoiceNumber}.\n\nCordialement,\n${sellerName}`;

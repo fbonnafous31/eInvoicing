@@ -4,43 +4,39 @@ const path = require('path');
 const crypto = require('crypto');
 const { PDFDocument, PDFName, PDFString, PDFHexString } = require('pdf-lib');
 const { generateXmpContent } = require('../facturx/xmp-helper');
+const storageService = require('../../services'); 
 
-const PDF_A3_DIR = path.resolve('src/uploads/pdf-a3');
 const ICC_DIR = path.resolve(__dirname, 'icc');
 const SRGB_PROFILE = path.join(ICC_DIR, 'sRGB.icc');
 
-function ensurePdfDirExists() {
-  if (!fs.existsSync(PDF_A3_DIR)) {
-    fs.mkdirSync(PDF_A3_DIR, { recursive: true });
-  }
-  return PDF_A3_DIR;
-}
-
 async function embedFacturXInPdf(pdfPath, facturxPath, attachments = [], invoiceId, title) {
-  ensurePdfDirExists();
 
-  const pdfBytes = fs.readFileSync(pdfPath);
+  const relativePdfPath = pdfPath.split('uploads/')[1]; 
+  const pdfBytes = await storageService.get(relativePdfPath);
   const pdfDoc = await PDFDocument.load(pdfBytes);
 
   // --- Attacher Factur-X XML avec AFRelationship ---
-  const xmlBytes = fs.readFileSync(facturxPath);
+  const relativeFacturXPath = facturxPath.split('uploads/')[1]; 
+  const xmlBytes = await storageService.get(relativeFacturXPath);
   await pdfDoc.attach(xmlBytes, 'factur-x.xml', {
     mimeType: 'application/xml',
     description: 'Factur-X XML',
     creationDate: new Date(),      
     modificationDate: new Date(),     
-    afRelationship: 'Source', // ✅ AFRelationship correct
+    afRelationship: 'Source', 
   });
 
   // --- Attacher fichiers supplémentaires ---
   for (const att of attachments) {
-    const fileBytes = fs.readFileSync(att.file_path);
+    const relativePath = att.file_path.split('uploads/')[1];
+    const fileBytes = await storageService.get(relativePath);
+
     await pdfDoc.attach(fileBytes, att.file_name, {
       mimeType: att.mimeType || 'application/octet-stream',
       description: att.description || 'Additional attachment',
       afRelationship: att.afRelationship || 'Data',
-      creationDate: new Date(),       
-      modificationDate: new Date(),   
+      creationDate: new Date(),
+      modificationDate: new Date(),
     });
   }
 
@@ -87,12 +83,12 @@ async function embedFacturXInPdf(pdfPath, facturxPath, attachments = [], invoice
   ];  
 
   // --- Sauvegarde ---
-  const pdfA3Path = path.join(PDF_A3_DIR, `${invoiceId}_pdf-a3.pdf`);
   const finalBytes = await pdfDoc.save();
-  fs.writeFileSync(pdfA3Path, finalBytes);
+  const relativePath = `pdf-a3/${invoiceId}_pdf-a3.pdf`;
 
-  console.log(`✅ PDF/A-3 final prêt : ${pdfA3Path}`);
-  return pdfA3Path;
+  const savedPath = await storageService.save(finalBytes, relativePath);
+
+  console.log(`✅ PDF/A-3 final prêt : ${savedPath}`);
 }
 
-module.exports = { embedFacturXInPdf, PDF_A3_DIR };
+module.exports = { embedFacturXInPdf };

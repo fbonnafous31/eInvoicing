@@ -1,8 +1,8 @@
 const pool = require('../../config/db');
 const path = require('path');
-const fs = require('fs');
 const { getSellerById } = require('../sellers/sellers.model'); 
 const { saveAttachment, cleanupAttachments } = require("./invoiceAttachments.model");
+const storageService = require('../../services');
 const SCHEMA = process.env.DB_SCHEMA || 'public';
 
 /**
@@ -411,28 +411,33 @@ async function updateInvoice(
     // Ajouter les nouveaux fichiers via saveAttachment
     if (newAttachments?.length) {
       for (const att of newAttachments) {
-        await saveAttachment(conn, id, att); // ⬅️ refacto appliqué
+        await saveAttachment(conn, id, att); 
       }
     }
 
     // Nettoyer les fichiers orphelins côté serveur
     const uploadDir = path.join(__dirname, "../../uploads/invoices");
+    const relativeDir = uploadDir.split('uploads/')[1]; // 'invoices'
+
     const { rows: dbFiles } = await conn.query(
       `SELECT stored_name FROM ${SCHEMA}.invoice_attachments WHERE invoice_id = $1`,
       [id]
     );
     const dbFileSet = new Set(dbFiles.map((f) => f.stored_name));
-    const allFiles = await fs.promises.readdir(uploadDir);
+
+    // Lister tous les fichiers via storageService
+    const allFiles = await storageService.list(relativeDir);
 
     for (const file of allFiles) {
       if (file.startsWith(`${id}_`) && !dbFileSet.has(file)) {
         try {
-          await fs.promises.unlink(path.join(uploadDir, file));
+          await storageService.delete(`${relativeDir}/${file}`);
         } catch (err) {
           console.error("❌ Failed to remove file:", file, err);
         }
       }
     }
+
 
     await conn.query("COMMIT");
     return await getInvoiceById(id);

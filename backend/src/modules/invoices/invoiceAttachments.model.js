@@ -2,6 +2,7 @@ const fs = require("fs");
 const db = require("../../config/db");
 const path = require("path");
 const { generateStoredName, getFinalPath } = require("../../utils/fileNaming");
+const storageService = require("../../services");
 const SCHEMA = process.env.DB_SCHEMA || 'public';
 
 async function saveAttachment(conn, invoiceId, att) {
@@ -24,17 +25,21 @@ async function saveAttachment(conn, invoiceId, att) {
 }
 
 async function cleanupAttachments(conn, invoiceId) {
-  const uploadDir = getFinalPath(""); // juste le dossier
+  const uploadDir = getFinalPath(""); 
+  const relativeDir = uploadDir.split('uploads/')[1]; // 'invoices'
+
   const { rows: dbFiles } = await conn.query(
     `SELECT stored_name FROM ${SCHEMA}.invoice_attachments WHERE invoice_id = $1`,
     [invoiceId]
   );
   const dbFileSet = new Set(dbFiles.map(f => f.stored_name));
 
-  const allFiles = await fs.promises.readdir(uploadDir);
+  const allFiles = await storageService.list(relativeDir);
+  
+  // Supprimer les fichiers orphelins
   for (const file of allFiles) {
     if (file.startsWith(`${invoiceId}_`) && !dbFileSet.has(file)) {
-      await fs.promises.unlink(path.join(uploadDir, file));
+      await storageService.delete(`${relativeDir}/${file}`);
     }
   }
 }

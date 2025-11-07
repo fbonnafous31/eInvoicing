@@ -141,3 +141,5 @@
 - [Jour 138 – Finalisation preprod, Auth0 et documentation 📚🛠️](jour-138.md)
 - [Jour 139 – Migration vers Resend et simplification SMTP ✉️🚀](jour-139.md)
 - [Jour 140 – Rendre le stockage indépendant du support 📂🌐](jour-140.md)
+- [Jour 141 – Déployer eInvoicing localement, stable et automatique 🖥️🚀](jour-141.md)
+- [Jour 142 – Rendre le stockage agnostique et centralisé 📂🌐](jour-142.md)
