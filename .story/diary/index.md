@@ -146,3 +146,4 @@
 - [Jour 143 – L’envie de partager autrement ✍️🌱](jour-143.md)
 - [Jour 144 – Un week-end pour réfléchir et affiner 🧠🌱](jour-144.md)
 - [Jour 145 – Mise en place de Backblaze B2 pour le stockage 📂☁️](jour-145.md)
+- [Jour 146 – Validation du PDF/A-3 sur Backblaze B2 📂☁️✅](jour-146.md)

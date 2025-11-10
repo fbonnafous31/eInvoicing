@@ -1,4 +1,3 @@
-// utils/pdf-generator.js
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -9,28 +8,20 @@ const storageService = require('../../services');
 const ICC_DIR = path.resolve(__dirname, 'icc');
 const SRGB_PROFILE = path.join(ICC_DIR, 'sRGB.icc');
 
-/**
- * Retourne le path correct pour lire le fichier
- * - B2 : clé relative ('invoices/...', 'factur-x/...', 'pdf-a3/...')
- * - Local : path absolu
- */
 function _getPath(filePath) {
   if (!filePath) throw new Error('File path is undefined');
   console.log('🟡 _getPath input:', filePath);
 
-  // Déjà relatif B2 ou pdf-a3 → on renvoie tel quel
   if (filePath.startsWith('invoices/') || filePath.startsWith('factur-x/') || filePath.startsWith('pdf-a3/')) {
     console.log('🟢 _getPath détecté comme relatif B2:', filePath);
     return filePath;
   }
 
-  // Si absolu (local) → on renvoie tel quel
   if (path.isAbsolute(filePath)) {
-    console.log('🟢 _getPath détecté comme absolu local:', filePath);
+    console.log('🟢 _getPath détecté comme absolu local (ne sera pas modifié):', filePath);
     return filePath;
   }
 
-  // Relatif local → préfixe uploads
   const resolved = path.resolve(__dirname, '../../uploads', filePath);
   console.log('🟢 _getPath relatif local résolu:', resolved);
   return resolved;
@@ -39,13 +30,13 @@ function _getPath(filePath) {
 async function embedFacturXInPdf(pdfPath, facturxPath, attachments = [], invoiceId, title) {
   console.log('🟡 embedFacturXInPdf inputs:', { pdfPath, facturxPath, attachmentsCount: attachments.length });
 
-  // --- PDF principal ---
+  // PDF principal
   const mainPdfPath = _getPath(pdfPath);
   console.log('🟢 mainPdfPath utilisé:', mainPdfPath);
   const pdfBytes = await storageService.get(mainPdfPath);
   const pdfDoc = await PDFDocument.load(pdfBytes);
 
-  // --- Factur-X XML ---
+  // Factur-X XML
   const facturXPath = _getPath(facturxPath);
   console.log('🟢 facturXPath utilisé:', facturXPath);
   const xmlBytes = await storageService.get(facturXPath);
@@ -57,7 +48,7 @@ async function embedFacturXInPdf(pdfPath, facturxPath, attachments = [], invoice
     afRelationship: 'Source',
   });
 
-  // --- Fichiers supplémentaires ---
+  // Attachments
   for (const att of attachments) {
     const attPath = _getPath(att.file_path);
     console.log('🟢 attachment path:', attPath);
@@ -71,13 +62,13 @@ async function embedFacturXInPdf(pdfPath, facturxPath, attachments = [], invoice
     });
   }
 
-  // --- Métadonnées PDF ---
+  // Métadonnées PDF
   pdfDoc.setTitle(title || `Invoice ${invoiceId}`);
   pdfDoc.setSubject('Facture électronique PDF/A-3 avec Factur-X et attachments');
   pdfDoc.setCreator('eInvoicing');
   pdfDoc.setProducer('eInvoicing');
 
-  // --- XMP ---
+  // XMP
   const xmpContent = generateXmpContent({ invoiceId, xmlFileName: 'factur-x.xml', title: title || `Invoice ${invoiceId}` });
   const metadataStream = pdfDoc.context.stream(Buffer.from(xmpContent, 'utf8'), {
     Type: PDFName.of('Metadata'),
@@ -86,7 +77,7 @@ async function embedFacturXInPdf(pdfPath, facturxPath, attachments = [], invoice
   const metadataRef = pdfDoc.context.register(metadataStream);
   pdfDoc.catalog.set(PDFName.of('Metadata'), metadataRef);
 
-  // --- OutputIntent sRGB ---
+  // OutputIntent sRGB
   const iccBytes = fs.readFileSync(SRGB_PROFILE);
   const iccStream = pdfDoc.context.flateStream(iccBytes, { N: 3, Alternate: PDFName.of('DeviceRGB') });
   const iccRef = pdfDoc.context.register(iccStream);
@@ -99,17 +90,17 @@ async function embedFacturXInPdf(pdfPath, facturxPath, attachments = [], invoice
   });
   pdfDoc.catalog.set(PDFName.of('OutputIntents'), pdfDoc.context.obj([pdfDoc.context.register(outputIntentDict)]));
 
-  // --- ID PDF/A-3 ---
+  // ID PDF/A-3
   const idBuffer = crypto.randomBytes(16);
   const hexId = idBuffer.toString('hex').toUpperCase();
   pdfDoc.context.trailerInfo.ID = [PDFHexString.of(hexId), PDFHexString.of(hexId)];
 
-  // --- Nom du fichier correct ---
+  // Nom du fichier correct
   const outputFileName = `${invoiceId}_pdf-a3.pdf`;
   const relativeOutputPath = `pdf-a3/${outputFileName}`;
   console.log('🟢 relativeOutputPath pour sauvegarde:', relativeOutputPath);
 
-  // --- Sauvegarde ---
+  // Sauvegarde
   const finalBytes = await pdfDoc.save();
   const savedPath = await storageService.save(finalBytes, relativeOutputPath);
 
