@@ -7,7 +7,7 @@
 docker-compose pull
 
 # 2️⃣ Reset complet
-docker-compose down -v  # -v supprime aussi le volume pgdata
+docker-compose down # -v supprime aussi le volume pgdata
 docker rm -f einvoicing-db einvoicing-backend einvoicing-frontend 2>/dev/null || true
 docker-compose up -d 
 
