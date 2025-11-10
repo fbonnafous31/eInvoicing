@@ -4,8 +4,7 @@ const InvoicesAttachmentsModel = require('./invoiceAttachments.model');
 const storageService = require('../../services');
 
 /**
- * Prépare les données client pour la génération XML.
- * @private
+ * Normalisation côté XML
  */
 function _prepareClientForXML(client) {
   if (!client) return {};
@@ -20,24 +19,28 @@ function _prepareClientForXML(client) {
   };
 }
 
+// _saveFacturXXML
 async function _saveFacturXXML(id, invoiceData) {
   const xml = generateFacturXXML(invoiceData);
   const relativePath = `factur-x/${id}-factur-x.xml`;
-  const savedPath = await storageService.save(xml, relativePath);
-  console.log(`✅ Factur-X généré pour la facture ${id} à : ${savedPath}`);
-  return savedPath; 
+
+  // storageService.save accepte un Buffer ou string
+  await storageService.save(xml, relativePath);
+
+  console.log(`✅ Factur-X généré pour la facture ${id} à : ${relativePath}`);
+  return relativePath; 
 }
 
+
 /**
- * Génère et sauvegarde les artefacts (XML et PDF/A-3) pour une facture.
- * @param {object} invoice - L'objet facture complet.
- * @returns {Promise<{xmlPath: string|null, pdfA3Path: string|null}>}
+ * Génère XML + PDF/A-3
  */
 async function generateInvoiceArtifacts(invoice) {
   let xmlPath = null;
   let pdfA3Path = null;
 
   try {
+    // 1) Génération des données XML
     const clientForXML = _prepareClientForXML(invoice.client);
     const invoiceDataForXML = {
       header: invoice,
@@ -48,22 +51,35 @@ async function generateInvoiceArtifacts(invoice) {
       attachments: invoice.attachments,
     };
 
+    // 2) Sauvegarde du XML
     xmlPath = await _saveFacturXXML(invoice.id, invoiceDataForXML);
 
+    // 3) Récupération du PDF principal depuis la base
     const mainPdfAttachment = await InvoicesAttachmentsModel.getAttachment(invoice.id, 'main');
-    if (!mainPdfAttachment) throw new Error(`PDF principal introuvable pour la facture ${invoice.id}`);
-    
-    const additionalAttachments = await InvoicesAttachmentsModel.getAdditionalAttachments(invoice.id);
-    pdfA3Path = await embedFacturXInPdf(mainPdfAttachment.file_path, xmlPath, additionalAttachments, invoice.id);
+    if (!mainPdfAttachment) {
+      throw new Error(`PDF principal introuvable pour la facture ${invoice.id}`);
+    }
+
+    // 4) Autres pièces jointes
+    const additionalAttachments = (await InvoicesAttachmentsModel.getAdditionalAttachments(invoice.id))
+    .map(att => ({
+      ...att,
+      file_path: att.file_path.replace(/^\/.*?\/backend\//, ''), // normaliser en relatif
+    }));
+
+    // 5) Génération du PDF/A-3 final
+    pdfA3Path = await embedFacturXInPdf(
+      mainPdfAttachment.file_path, 
+      xmlPath,                     
+      additionalAttachments,
+      invoice.id
+    );
+
   } catch (err) {
-    console.error(`❌ Erreur lors de la génération des artefacts pour la facture ${invoice.id}:`, err.message);
-    // On ne lève pas d'erreur pour ne pas bloquer le flux principal.
-    // La génération pourra être relancée.
+    console.error(`❌ Erreur lors de la génération des artefacts pour la facture ${invoice.id} :`, err.message);
   }
 
   return { xmlPath, pdfA3Path };
 }
 
-module.exports = {
-  generateInvoiceArtifacts,
-};
+module.exports = { generateInvoiceArtifacts };
