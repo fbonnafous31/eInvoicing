@@ -8544,3 +8544,726 @@ Une journée moins « visible », mais très structurante :
 > Chaque étape rend le projet plus réel, plus solide, plus prêt.
 
 On avance. Toujours. 🌱🔥
+
+\newpage
+
+# Jour 137 – Stabilisation de la preprod et corrections réseau/SSL 🛠🌫️
+
+Aujourd’hui, l’objectif n’était plus de créer l’environnement preprod, mais de le faire fonctionner réellement : frontend, backend, Auth0 et base de données ensemble, dans les conditions « vraies » d’un déploiement Render.
+Et comme souvent avec les environnements cloud… la théorie est simple, la pratique un peu plus subtile. 😉
+
+---
+
+## 🧩 Les ajustements techniques
+
+### 1) Variables d’environnement et `config.js`
+En local, le frontend chargeait une config embarquée dans `config.js`.
+Mais sur Render, cela écrasait les `import.meta.env` pourtant correctement renseignées.
+
+➡️ On a modifié la logique pour que :
+
+- En local → on peut utiliser `config.js`
+- En staging / preprod → `import.meta.env` est la source unique et fiable
+
+Ce petit changement a ré-aligné front, backend et Auth0.
+
+---
+
+### 2) URL d’API unifiées dans tout le frontend
+Il restait des URLs codées en dur (`http://localhost`) dans certains services.
+
+➡️ Mise en place d’un unique `VITE_API_URL`, injecté partout.
+
+Cela simplifie et sécurise les déploiements multi-environnements.
+
+---
+
+### 3) Connexion PostgreSQL sur Render : le fameux `SSL/TLS required`
+En local, pas de SSL.
+Sur Render, PostgreSQL exige SSL.
+
+➡️ Ajout de :
+
+```
+ssl: { rejectUnauthorized: false }
+```
+
+dans la configuration du `Pool`.
+
+C’est lui qui a débloqué le backend en preprod. 🎯
+
+---
+
+### 4) Reverse proxy / HTTPS : activation du `trust proxy`
+Render termine la connexion TLS et passe ensuite la requête au Node server.
+Sans `app.set('trust proxy', 1)`, Express pense que la requête n’est pas HTTPS.
+
+➡️ Correction appliquée → communication stable ✅
+
+---
+
+## 🌱 Mes ressentis du jour
+
+Ce déploiement m’a rappelé quelque chose de fondamental :
+
+> Ce qui marche parfaitement en local peut se casser complètement en environnement réel.
+
+Ce n’est pas difficile, mais ça demande de la patience, de la méthode et de la lucidité.
+
+Je commence vraiment à apprécier l’idée d’environnements reproductibles :
+si je sais monter un staging et une preprod sans bricoler, alors la production sera presque une formalité.
+
+C’est une sensation de solidité. De fondation.
+
+---
+
+## ✅ Bilan du jour
+
+- Fix `getEnv()` et `config.js` sur Render ✅
+- URLs API unifiées via `VITE_API_URL` ✅
+- Connexion PostgreSQL avec SSL ✅
+- Proxy HTTPS Render correctement géré ✅
+- Preprod fonctionnelle, avec création vendeur et client ✅
+
+> Ça avance. Lentement parfois, mais dans le bon sens.
+> Plus j’automatise, moins j’aurai à y penser demain.
+
+Demain → Auth0 dédié preprod.
+On se rapproche d’un espace prêt pour les bêta-testeurs. 🚀
+
+\newpage
+
+# Jour 138 – Finalisation preprod, Auth0 et documentation 📚🛠️
+
+Aujourd’hui, l’objectif était de **finaliser la préproduction** et de stabiliser l’environnement, tout en avançant sur la documentation du produit.
+
+Même si certaines parties restent en développement (notamment l’hébergement et le stockage de la documentation), j’ai énormément avancé et mis en place des bases solides pour la suite. 😌
+
+---
+
+## 🧩 Les avancées techniques
+
+### 1️⃣ Déploiement de la preprod finalisé
+
+* Frontend, backend, Auth0 et PostgreSQL connectés et fonctionnels ensemble.
+* Vérification des flux JWT : login → API → vérification d’audience isolée par environnement.
+* Preprod prête à accueillir des **bêta-testeurs**.
+
+---
+
+### 2️⃣ Auth0 dédié pour la preprod
+
+J’ai écrit un guide complet pour créer des environnements isolés dans le même tenant Auth0 :
+
+* **Frontend SPA dédié** → Client ID unique par environnement
+* **API backend dédiée** → Audience unique et RS256
+* Variables d’environnement mises à jour (`VITE_API_URL`, `VITE_AUTH0_CLIENT_ID`, `AUTH0_AUDIENCE`)
+* Isolement total entre dev, staging, preprod et prod
+* Flux JWT validé : un utilisateur peut se connecter dans tous les environnements sans conflit
+
+> Ce guide est réutilisable pour créer **tous les nouveaux environnements** à l’avenir.
+
+---
+
+### 3️⃣ Documentation et ebook
+
+* Ebook mis à jour avec toutes les fonctionnalités existantes.
+* Document récapitulatif de l’ensemble des fonctionnalités produit : chaque module, chaque workflow, toutes les validations et spécificités PDF/A-3 et Factur-X.
+* Base solide pour rédiger le guide utilisateur et la documentation technique.
+
+---
+
+## 🌱 Points humains / ressentis
+
+En voyant les **problèmes liés à la GED et à l’hébergement**, j’ai pris un petit coup sur la tête… 😅
+C’est le cœur du projet et je pensais toucher au but avec la préprod.
+
+Mais je me rappelle :
+
+> Faire des murs, c’est normal. Trouver des solutions, c’est ce qui fait avancer un projet solo.
+
+Même si l’hébergement est **encore en bêta**, le reste fonctionne parfaitement et apporte déjà **une valeur concrète**.
+
+C’est un rappel : **progresser sur un produit complet, seul, prend du temps et demande de l’adaptabilité**.
+
+---
+
+## ✅ Bilan du jour
+
+* Preprod finalisée et fonctionnelle ✅
+* Auth0 mis à jour avec isolation complète par environnement ✅
+* Guide de création d’environnements Auth0 rédigé ✅
+* Ebook et documentation produit mis à jour ✅
+* Réflexion sur l’hébergement Bêta et solutions GED en cours ✅
+
+> Même face aux obstacles, je continue à avancer. Chaque bloc stabilisé est un pas vers le produit final.
+
+---
+
+## 🚀 Perspectives
+
+* Continuer à stabiliser l’hébergement et le stockage de la documentation.
+* Recueillir les premiers retours sur la preprod via des bêta-testeurs.
+* Automatiser le plus possible les déploiements pour dev → staging → preprod → prod.
+* Avancer sur l’intégration des fonctionnalités avancées hébergement et GED, tout en gardant l’offre en Bêta pour le moment.
+
+
+\newpage
+
+# Jour 139 – Migration vers Resend et simplification SMTP ✉️🚀
+
+Aujourd’hui, l’objectif était de **remplacer l’envoi SMTP classique par Resend**, tout en **simplifiant le paramétrage vendeur** et en poursuivant le déploiement sur Render.
+
+---
+
+## 🧩 Les avancées techniques
+
+### 1️⃣ Migration vers Resend
+
+* Le backend n’utilise plus SMTP via le vendeur pour l’envoi des factures, mais **Resend**, un service d’email API simple et fiable.
+* Le service `invoiceMail.service.js` a été adapté pour :
+
+  * Gérer les PDF/A-3 en base64
+  * Préparer le texte et l’HTML des emails
+  * Retourner une réponse claire sur l’envoi
+* Tests unitaires refaits et mock Resend intégré pour **garantir la fiabilité** du service en local et sur CI.
+
+> Cette migration permet de **contourner les limitations SMTP de Render** tout en gardant une UX simple pour le vendeur.
+
+---
+
+### 2️⃣ Simplification du paramétrage SMTP côté vendeur
+
+* Les champs SMTP classiques ont été supprimés, **seul le champ `from` reste** pour indiquer l’adresse d’expéditeur.
+* L’utilisateur peut maintenant **tester directement l’envoi via Resend** depuis l’interface.
+* Les erreurs sont gérées de manière claire dans le formulaire (email manquant, connexion échouée, etc.).
+* Formulaire `SmtpFields` mis à jour pour :
+
+  * Bouton unique “Envoyer un email de test”
+  * Affichage dynamique du résultat ✅ / ❌
+  * Gestion simple du désactiver/activer le paramétrage
+
+> Moins de friction pour le vendeur et moins de risques d’erreur côté configuration.
+
+---
+
+### 3️⃣ Déploiement Render
+
+* Déploiement du backend et du frontend sur Render **stabilisé**.
+* Les tests passent en local et CI grâce aux mocks de Resend.
+* Les fichiers PDF/A-3 et l’envoi de mail fonctionnent correctement, même en environnement distant.
+
+---
+
+## 🌱 Points humains / ressentis
+
+* La migration vers Resend a apporté une **solution concrète à un blocage technique**.
+* La simplification du paramétrage vendeur est un vrai soulagement : moins de paramètres, moins d’erreurs, plus simple pour les bêta-testeurs.
+* Render est maintenant **fiable pour le déploiement**, et la CI passe sans accroc grâce aux mocks et aux tests refaits.
+
+> Chaque bloc technique stabilisé réduit la friction pour la suite du projet.
+
+---
+
+## ✅ Bilan du jour
+
+* Migration des envois de mail vers Resend ✅
+* Paramétrage d'envoi des emails vendeur simplifié (seul `from` restant) ✅
+* Tests unitaires adaptés et fonctionnels ✅
+* Déploiement Render stabilisé ✅
+* Documentation mise à jour ✅
+
+
+\newpage
+
+# Jour 140 – Rendre le stockage indépendant du support 📂🌐
+
+Aujourd’hui, l’objectif n’était pas d’ajouter une fonctionnalité spectaculaire, mais de **préparer le projet à être portable et stable**, peu importe l’endroit où il tourne.
+
+---
+
+## 🧩 Pourquoi cette session
+
+* Sur ma machine locale, tout fonctionne avec `fs` et les fichiers restent accessibles.
+* Sur Render, le système de fichiers est **éphémère**, et chaque écriture directe peut disparaître ou poser problème.
+* Demain, ce sera peut-être **Scaleway, AWS ou un autre fournisseur**. Si le code dépend du système local, il faudra tout réécrire à chaque migration.
+* L’objectif est donc de créer **une abstraction de stockage universelle** : `save`, `get`, `delete`. Mon code devient **agnostique** : il ne se soucie plus du support derrière.
+
+> Cette approche rend le projet **plus robuste et adaptable**, et protège le cœur du produit : le PDF/A-3.
+
+---
+
+## 🌱 Points humains / ressentis
+
+* Ce matin, j’ai un peu précipité les choses et ça a causé des blocages 😅
+* Revenir à cette réflexion sur le **pourquoi** me permet de **reprendre confiance** et de structurer le travail par étapes.
+* Même si rien de spectaculaire n’est visible, c’est **la fondation nécessaire pour que le projet survive à n’importe quel hébergeur**.
+
+---
+
+## ✅ Bilan du jour
+
+* Objectif : rendre le stockage PDF/A-3 indépendant du système local ✅
+* Adapter local conservé comme point de départ stable ✅
+* Base posée pour ajouter d’autres adapters et rendre le code portable ✅
+
+
+\newpage
+
+# Jour 141 – Déployer eInvoicing localement, stable et automatique 🖥️🚀
+
+Aujourd’hui, l’objectif était de **rendre l’application eInvoicing complètement accessible en local**, avec une adresse stable, **sans port**, et **démarrage automatique au boot**, comme si c’était un vrai SaaS mais sur mon PC.
+
+---
+
+## 🧩 Pourquoi cette session
+
+* Pouvoir **accéder à l’application via une URL stable** (`http://e-invoicing.local`) même sur un poste local.
+* Faciliter les tests de développement **sans passer par localhost:port** ni devoir reconfigurer Auth0 à chaque fois.
+* Préparer le terrain pour **déployer sur n’importe quelle machine** sans intervention manuelle répétitive.
+* Assurer un **démarrage automatique**, pour que l’environnement soit prêt dès que la machine est allumée, **comme un serveur distant**.
+
+> L’idée est de créer un **environnement local robuste, stable et portable**, pour se rapprocher de la qualité d’un hébergement cloud tout en restant sur son PC.
+
+---
+
+## 🛠️ Travail technique effectué
+
+1. **Configuration du domaine local**
+
+   * Ajout de `127.0.0.1 e-invoicing.local` dans `/etc/hosts`.
+   * Vérification que l’adresse est bien résolue par `getent hosts`.
+
+2. **Mise en place de Docker pour le projet**
+
+   * Vérification que Docker et Docker Compose sont installés et démarrent automatiquement.
+   * Test du démarrage des conteneurs : backend, frontend et base de données PostgreSQL.
+
+3. **Gestion des domaines Auth0 pour le local**
+
+   * Configuration des `Allowed Callback URLs` et `Allowed Web Origins` pour inclure `http://e-invoicing.local`.
+   * Correction de la redirection HTTPS pour éviter les erreurs `Callback URL mismatch`.
+   * Vérification du runtime configuration du frontend (`window.__ENV__`) pour que le client Auth0 pointe sur la bonne URL.
+
+4. **Création d’un service systemd pour démarrer l’environnement automatiquement**
+
+   * Fichier `/etc/systemd/system/einvoicing.service` avec `ExecStart` et `ExecStop`.
+   * Ajustement pour utiliser le chemin correct vers `docker-compose` (`/usr/local/bin/docker-compose`).
+   * Configuration avec `Restart=always` pour que l’application reste **toujours active**, même après reboot.
+
+5. **Documentation et mise à jour de guides**
+
+   * Création d’un guide complet pour la **mise en place locale automatique**, incluant Docker, systemd et Caddy pour masquer le port.
+   * Explication claire du **pourquoi** de chaque étape : stabilité, portabilité, accès local sans complications.
+
+---
+
+## 🌱 Points humains / ressentis
+
+* Faire en sorte que tout soit **automatique et stable** réduit le stress des tests et des démos.
+* La configuration locale reflète ce que **les clients finaux pourraient vivre**, mais de façon beaucoup plus flexible pour le développement.
+* Même si ce n’est pas visible dans l’interface, c’est **une fondation technique essentielle** : la prochaine fois que j’ajouterai une feature, elle sera directement testable dans un environnement réaliste.
+
+---
+
+## ✅ Bilan du jour
+
+* URL locale stable : ✅ `e-invoicing.local`
+* Conteneurs Docker prêts et automatisés : ✅ backend, frontend, DB
+* Auth0 configuré pour le local : ✅ callback et web origin corrects
+* Service systemd pour démarrage automatique : ✅ lancement dès le boot
+* Documentation complète mise à jour : ✅ pour référence future et partage
+
+> Avec tout cela, **l’application fonctionne comme un vrai SaaS sur mon PC**, prête à être utilisée ou testée, sans jamais avoir à toucher à la configuration à chaque session.
+
+
+\newpage
+
+# Jour 142 – Rendre le stockage agnostique et centralisé 📂🌐
+
+Aujourd’hui, l’objectif était de **supprimer toutes les dépendances directes au système de fichiers local** dans le produit, pour que l’application puisse fonctionner **peu importe l’environnement ou l’hébergeur**.
+
+---
+
+## 🧩 Pourquoi cette session
+
+* Jusqu’ici, toutes les opérations d’écriture et de lecture PDF, Factur-X ou pièces jointes étaient **codées en dur avec `fs`**, ce qui limitait le projet à une machine locale.
+* Sur Render ou tout autre hébergeur cloud, le système de fichiers est **éphémère**, et chaque écriture directe pouvait disparaître.
+* L’objectif était donc de créer une **interface unique pour le stockage**, gérée par un `StorageService` et des adapters (aujourd’hui `LocalAdapter`), pour rendre le code **agnostique au support**.
+* Cette abstraction prépare le terrain pour **changer d’adapter** (S3, Azure, autre) sans toucher au cœur du projet.
+
+> L’idée est d’avoir **un backend robuste et portable**, où toutes les lectures, écritures, listes et suppressions passent par le même service.
+
+---
+
+## 🛠️ Travail technique effectué
+
+1. **Création du `LocalAdapter`**
+
+   * Méthodes implémentées : `save`, `get`, `delete`, `list`.
+   * Gestion des **répertoires standards** (`factur-x`, `invoices`, `pdf-a3`) à la création de l’adapter.
+   * Toutes les opérations locales remplacent les appels directs à `fs`.
+
+2. **Centralisation avec `StorageService`**
+
+   * `StorageService` encapsule l’adapter et expose la même interface (`save/get/delete/list`).
+   * Permet de **changer facilement de backend de stockage** selon l’environnement (`process.env.STORAGE_ADAPTER`).
+   * Toutes les parties du code qui manipulent des fichiers passent maintenant par `storageService`.
+
+3. **Remplacement des instructions de lecture/écriture**
+
+   * `fs.writeFile` / `fs.writeFileSync` → `storageService.save`
+   * `fs.readFile` / `fs.readFileSync` → `storageService.get`
+   * `fs.readdir` → `storageService.list`
+   * `fs.unlink` / `fs.unlinkSync` → `storageService.delete`
+   * **Procédures locales non critiques** (ICC profile, logo) laissées telles quelles.
+
+4. **Adaptation du code existant**
+
+   * `embedFacturXInPdf` : lecture du PDF, lecture du Factur-X et pièces jointes → via `storageService.get`.
+   * Nettoyage des fichiers orphelins (`cleanupAttachments`) → lecture de la liste via `storageService.list`, suppression via `storageService.delete`.
+   * Fonction `sendInvoiceMail` → récupération du PDF/A-3 via `storageService.get`.
+
+5. **Tests et vérification**
+
+   * Vérification dans les logs que chaque fichier est correctement créé dans les répertoires standards (`factur-x`, `invoices`, `pdf-a3`).
+   * Contrôle que les PDF/A-3 sont bien conformes via le lab Iopole.
+   * Tout le code continue de fonctionner sans `fs` direct, aucune régression constatée.
+
+---
+
+## 🌱 Points humains / ressentis
+
+* Reprendre le **pourquoi** de chaque opération permet de ne pas se perdre dans le remplacement technique.
+* Même si les changements ne sont pas visibles à l’UI, c’est **la fondation pour que le projet survive à n’importe quel hébergeur**.
+* Voir les fichiers créés correctement et validés côté lab Iopole **renforce la confiance** dans cette nouvelle architecture.
+
+---
+
+## ✅ Bilan du jour
+
+* Stockage abstrait : ✅ `StorageService` + `LocalAdapter` prêt pour n’importe quel backend.
+* Tous les fichiers PDF/A-3, Factur-X et attachments passent maintenant par `storageService`.
+* Nettoyage des fichiers orphelins opérationnel via `list` + `delete`.
+* Lecture et envoi par email des PDF/A-3 fonctionnels.
+* Logs et vérification PDF/A-3 sur le lab Iopole : ✅ conformité et génération correcte.
+
+> Avec cette abstraction, **le projet est maintenant indépendant du système de fichiers local**, prêt à évoluer vers un stockage cloud, tout en gardant la cohérence et la robustesse des opérations PDF/A-3 et Factur-X.
+
+
+\newpage
+
+# Jour 143 – L’envie de partager autrement ✍️🌱
+
+Depuis le début, j’écris ces journaux pour moi. Pour garder une trace, comprendre ce que je fais, et peut-être me souvenir de comment tout a commencé.
+Mais plus les jours passent, plus je me rends compte que ces pages racontent quelque chose de plus large : **la construction d’un produit, oui — mais surtout la construction d’une aventure**.
+
+Ces derniers temps, j’ai eu envie de **rendre tout ça un peu plus vivant**, de le partager ailleurs que dans mes fichiers locaux.
+J’ai repensé à Medium — cet endroit à mi-chemin entre le carnet personnel et le blog technique.
+C’est un espace simple, où l’on peut écrire sous un pseudo, sans chercher à “performer”, juste pour **le plaisir de raconter**.
+
+Alors j’ai décidé d’y publier une série d’articles.
+Une série qui ne parlera pas seulement de code, mais de **la route**, des doutes, des moments où tout s’éclaire, des choix techniques qui finissent par devenir des choix de vie.
+
+Je ne sais pas qui lira. Et ce n’est pas très grave.
+L’idée, c’est de **laisser une trace honnête** — pas parfaite, pas polie, mais fidèle.
+Une histoire en cours, écrite avec recul mais sans maquillage.
+
+Je crois que c’est ça, le cœur du projet :
+**construire, comprendre et transmettre**.
+Et continuer à prendre du plaisir à le faire.
+
+✨📖🚀
+
+
+\newpage
+
+# Jour 144 – Un week-end pour réfléchir et affiner 🧠🌱
+
+Ce week-end, le rythme a été plus **tranquille côté code**, mais ce n’est pas moins productif. Plutôt que de taper des fonctions ou corriger des bugs, j’ai pris le temps de **penser le produit et son expérience**, et de me poser sur quelques sujets qui font sens pour la suite.
+
+---
+
+## 🔍 Points techniques / réflexion produit
+
+* **README & communication**
+  J’ai revu le README pour le rendre plus **humain et compréhensible**, pas seulement technique. L’objectif : que quelqu’un qui découvre le projet puisse comprendre **la vision et la philosophie** derrière chaque décision.
+  J’ai aussi réfléchi au **badge à afficher** : compliant ou ISO‑19005 ? Même si ce n’est pas urgent, je veux que le projet **donne confiance dès la première page**.
+
+* **Landing page & expérience utilisateur**
+  Quelques ajustements pour que la **bannière d’avertissement et le menu restent visibles**, et pour améliorer la navigation sur mobile.
+  Rien de révolutionnaire, juste des **micro‑améliorations qui rendent l’interface plus fluide et agréable**.
+
+* **Série d’articles Medium**
+  J’ai commencé à **écrire une série pour raconter mon expérience** : le cheminement solo, le côté humain, et ce que chaque étape du projet m’apprend.
+  J’ai listé les épisodes et les sujets que je veux aborder, pour garder une **ligne éditoriale claire et cohérente**.
+
+  > L’idée : transmettre non seulement la technique, mais le parcours, les doutes, les petites victoires et les choix de vie derrière le projet.
+
+* **Réflexion sur le pricing et le stockage**
+  Même sans clients, j’ai réfléchi aux **tarifs cohérents pour le futur** et aux **coûts potentiels liés à un stockage hébergé**.
+  Cela me sert de **boussole pour construire une offre réaliste**, et pour anticiper les évolutions techniques et financières du projet.
+
+* **Déploiement et DB**
+  J’ai repensé à la manière dont la base sera déployée : scripts, Docker Compose, et migration éventuelle.
+  Pas encore de développement ici, mais le **plan mental est posé**, ce qui me fera gagner du temps quand j’attaquerai cette étape.
+
+---
+
+## 🌱 Points humains / ressentis
+
+* Un week-end **axé réflexion plutôt que développement pur**, mais je sens que c’est du temps bien investi.
+* Pouvoir **poser les idées, clarifier les choix et les objectifs** est aussi important que coder.
+* Voir le projet **prendre forme dans les articles et les documents de planification** renforce ma motivation.
+
+---
+
+## ✅ Bilan du week-end
+
+* README plus **clair et humain** : ✅
+* Landing page et UX mobile **améliorées** : ✅
+* **Série Medium** en préparation avec liste des épisodes : ✅
+* **Réflexion pricing / stockage** posée : ✅
+* Déploiement DB et migrations **structurés mentalement** : ✅
+
+> Parfois, avancer ce n’est pas écrire une ligne de code, c’est **mettre de l’ordre dans ses idées et préparer le terrain pour les prochaines semaines**.
+
+
+\newpage
+
+# Jour 145 – Mise en place de Backblaze B2 pour le stockage 📂☁️
+
+Ce week-end, j’ai avancé sur un gros chantier : rendre mon stockage **agnostique** et **cloud-ready**, en testant Backblaze B2.
+
+---
+
+## 🎯 Objectif
+
+* Pouvoir **stocker tous les fichiers** (PDF, Factur-X, justificatifs) dans un backend cloud.
+* Maintenir la compatibilité avec le stockage **local** pour le développement.
+* Faire en sorte que le code reste **portable et agnostique**.
+
+---
+
+## ✅ Étapes déjà réalisées
+
+| État | Tâche                                       |
+| ---- | ------------------------------------------- |
+| ✅    | Création du compte B2                       |
+| ✅    | Création du bucket privé                    |
+| ✅    | Génération des clés API                     |
+| ✅    | Configuration `.env`                        |
+| ⏳    | Intégration dans le backend Express         |
+| ⏳    | Remplacer le `LocalAdapter` par `B2Adapter` |
+
+> Pour le moment, j’ai **validé l’écriture sur Backblaze** avec mes premiers tests.
+
+---
+
+## 🛠️ Travail technique
+
+1. **Création du `B2Adapter`**
+
+   * Utilisation du SDK S3 (`@aws-sdk/client-s3`) pour Backblaze.
+   * Méthodes implémentées : `save`, `get`, `delete`, `list`.
+   * Conversion des streams S3 en `Buffer` pour la compatibilité avec le reste du code.
+   * Exemple :
+
+   ```js
+   async get(fileName) {
+     const res = await this.s3.send(new GetObjectCommand({
+       Bucket: this.bucketName,
+       Key: fileName,
+     }));
+     const data = await buffer(res.Body);
+     return data;
+   }
+   ```
+
+2. **Centralisation via `StorageService`**
+
+   * `StorageService` reste le point unique d’accès au stockage.
+   * Permet de **switcher entre Local et B2** selon `process.env.STORAGE_BACKEND`.
+   * Extrait la logique d’adaptation du reste de l’application.
+
+3. **Configuration dynamique**
+
+   * `.env` définit :
+
+     * `STORAGE_BACKEND` → `"local"` ou `"b2"`
+     * `B2_ENDPOINT`, `B2_BUCKET_NAME`, `B2_KEY_ID`, `B2_APPLICATION_KEY`
+   * Le code est **agnostique au backend**, ce qui facilite les tests et le déploiement.
+
+---
+
+## ⚠️ Points encore à traiter
+
+* Adapter la logique pour **stocker et récupérer les justificatifs de factures** via B2.
+* Assurer que tous les chemins et noms de fichiers soient **cohérents avec les précédents adapters**.
+* Tester les **opérations combinées** : Factur-X + PDF principal + attachments + B2.
+* Gérer les erreurs de réseau ou d’accès B2 pour ne pas bloquer la génération de factures.
+
+---
+
+## 🌱 Ressenti
+
+* C’est excitant de **voir les premiers fichiers s’écrire sur B2**.
+* Le code reste clair et réutilisable, ce qui renforce la confiance dans l’architecture **agnostique**.
+* L’adaptation des justificatifs semble le prochain vrai challenge, mais je sens que l’approche **adapter + StorageService** me donnera la flexibilité nécessaire.
+
+---
+
+## ✅ Bilan du jour
+
+* Adapter B2 fonctionnel pour **write/read/list/delete**.
+* `StorageService` centralise désormais le stockage, local ou cloud.
+* Début de tests d’intégration sur les fichiers critiques (PDF principal, Factur-X) réussis.
+* Prochaine étape : **justificatifs et attachments**, intégration complète sur le backend.
+
+> Avec cette approche, le projet peut évoluer facilement vers n’importe quel backend cloud, tout en gardant la compatibilité locale pour le développement.
+
+
+\newpage
+
+# Jour 146 – Validation du PDF/A-3 sur Backblaze B2 📂☁️✅
+
+Aujourd’hui, j’ai avancé sur la génération et le stockage des **PDF/A-3** avec Backblaze B2, tout en maintenant la compatibilité locale.
+
+---
+
+## 🎯 Objectif
+
+* Pouvoir générer et **stocker des PDF/A-3 conformes** sur B2.
+* Vérifier que **le code local continue de fonctionner**.
+* Préparer le front pour récupérer le PDF/A-3 depuis B2 via une **URL publique ou signée**.
+
+---
+
+## ✅ Étapes réalisées
+
+| État | Tâche                                                                            |
+| ---- | -------------------------------------------------------------------------------- |
+| ✅    | Validation de l’écriture sur B2                                                  |
+| ✅    | Validation de la lecture sur B2                                                  |
+| ✅    | Correction des chemins pour que les fichiers soient dans les bons répertoires B2 |
+| ✅    | Vérification que tout fonctionne en local                                        |
+| ✅    | Génération d’un PDF/A-3 conforme à l’ISO 19005                                   |
+| ✅    | Vérification que le PDF/A-3 créé sur B2 est également conforme                   |
+
+> Le PDF/A-3 est maintenant **correctement créé et stocké** sur B2 tout en restant compatible avec le workflow local.
+
+---
+
+## 🛠️ Travail technique
+
+1. **Normalisation des chemins**
+
+   * Tous les fichiers sont maintenant passés en **chemins relatifs** vers le `storageService`.
+   * Le code `_getPath` permet de gérer correctement les chemins B2 ou locaux sans casser le fonctionnement existant.
+
+2. **PDF/A-3 et attachments**
+
+   * Les fichiers Factur-X et pièces jointes sont attachés au PDF principal.
+   * Le nom final du PDF/A-3 est normalisé : `<invoiceId>_pdf-a3.pdf`.
+   * Sauvegarde via `storageService.save()` sur B2 ou local.
+
+3. **Logs et traçabilité**
+
+   * Ajout de logs détaillés pour vérifier les chemins, les fichiers traités et le résultat final.
+   * Permet de confirmer que le PDF/A-3 a bien été généré et stocké.
+
+4. **Compatibilité locale**
+
+   * La génération locale reste intacte.
+   * Le workflow front continue de fonctionner avec `API_ROOT/pdf-a3/...` pour le téléchargement en dev.
+
+---
+
+## ⚠️ Points encore à traiter
+
+* Récupérer le PDF/A-3 sur le front via **l’URL publique B2** (ou URL signée pour sécuriser l’accès).
+* Adapter le front pour **utiliser B2 en production** tout en conservant le comportement local en dev.
+* Ajouter éventuellement des logs côté front pour confirmer la disponibilité du fichier.
+
+---
+
+## 🌱 Ressenti
+
+* Satisfaction de voir que **tout fonctionne côté B2** sans casser le local.
+* La génération PDF/A-3 est désormais **stable et conforme**.
+* La prochaine étape consiste à **connecter le front et B2**, pour que l’utilisateur puisse télécharger le PDF/A-3 directement depuis le cloud.
+
+---
+
+## ✅ Bilan du jour
+
+* Lecture et écriture sur B2 validées.
+* PDF/A-3 généré et conforme sur B2 et en local.
+* Chemins et workflow d’attachments normalisés.
+* Prochaine étape : **récupération du PDF/A-3 via URL depuis le front**.
+
+> Cette session marque une étape importante : le projet est maintenant prêt à basculer vers le cloud sans perdre la compatibilité locale.
+
+
+\newpage
+
+# Jour 147 – Adapter, agnostique et pragmatique : la tech au service du produit ⚙️✨
+
+Aujourd’hui, j’ai pris un moment pour réfléchir à l’architecture de eInvoicing et aux choix techniques qui ont émergé **au fil des besoins réels**. Plutôt que de suivre un dogme d’architecture, j’ai laissé le produit dicter la tech.
+
+🎯 Objectif
+Rendre le code **souple, testable et prêt à évoluer**, tout en restant simple et compréhensible. Adapter là où c’est nécessaire pour que chaque partie puisse évoluer indépendamment : base de données, stockage, PDF, PDP.
+
+✅ Décisions et observations
+
+* **DB agnostique**
+  Initialement, la base était liée à un seul schéma local. Aujourd’hui, elle peut gérer plusieurs instances (`staging`, `preprod`, `prod`) sans toucher au cœur métier. Cela permet de tester, déployer et itérer rapidement.
+
+* **PDP flexible**
+  Chaque plateforme de dématérialisation est maintenant un **adapter** derrière une interface commune. Le cœur métier n’a aucune idée de quel PDP est utilisé. Ajouter un nouveau partenaire est trivial et ne casse rien.
+
+* **Stockage cloud ou local**
+  Le même service gère à la fois le stockage local et Backblaze B2. Le code métier ne connaît pas la destination finale des fichiers. Cela rend le projet prêt pour le cloud tout en conservant le workflow local pour le développement et les tests.
+
+* **PDF et Factur-X découplés**
+  La génération des PDF/A-3 et des fichiers Factur-X est isolée du stockage et du front. Chaque étape est indépendante, testable et facilement remplaçable si besoin.
+
+* **Tests et mocks**
+  Grâce aux adapters, le cœur métier peut être testé isolément. Je peux simuler des PDP, des fichiers ou la base de données sans toucher à la production. Les tests sont rapides et fiables.
+
+🌱 Ressenti
+Ce que j’ai compris, c’est que **l’agnosticisme et l’usage d’adapters n’est pas une fin en soi**, mais une réponse pragmatique aux besoins :
+
+* J’ai voulu basculer sur le cloud → j’ai ajouté un adapter B2 sans toucher au métier.
+* J’ai voulu multiplier les PDP → chaque plateforme a son propre adapter.
+* Le cœur métier reste **stable, clair et testable**, peu importe le nombre d’environnements ou de services externes.
+
+C’est exactement la dimension que je recherchais : **la tech sert le produit, pas l’inverse**. Chaque abstraction, chaque interface est là pour que l’application reste simple à utiliser, robuste et prête à évoluer.
+
+🖼️ Schéma simplifié de l’architecture
+
+```
+        🌐 FRONTEND (React / Vite)
+        ------------------------
+        Pages / Composants
+        Services API
+                |
+                v
+       ⚡ CŒUR MÉTIER (Services)
+       -------------------------
+       Factures | Clients | Vendeurs
+       Génération PDF/A-3 / Factur-X
+                |
+   +------------+------------+
+   |            |            |
+   v            v            v
+📦 DATABASE   📂 STORAGE   🔗 PDP / EXTERNAL
+PostgreSQL   Local / B2   API Sandbox
+CRUD Models  save/load()  sendInvoice()
+```
+
+✅ Bilan du jour
+
+* Prise de recul sur l’architecture et sa cohérence.
+* Validation que le choix d’adapters et d’agnosticisme est **pragmatique et utile**.
+* Confirmation que eInvoicing est maintenant prêt à évoluer facilement : nouveaux PDP, stockage cloud, environnements multiples, sans compromettre le cœur métier.
