@@ -144,3 +144,5 @@
 - [Jour 141 – Déployer eInvoicing localement, stable et automatique 🖥️🚀](jour-141.md)
 - [Jour 142 – Rendre le stockage agnostique et centralisé 📂🌐](jour-142.md)
 - [Jour 143 – L’envie de partager autrement ✍️🌱](jour-143.md)
+- [Jour 144 – Un week-end pour réfléchir et affiner 🧠🌱](jour-144.md)
+- [Jour 145 – Mise en place de Backblaze B2 pour le stockage 📂☁️](jour-145.md)
