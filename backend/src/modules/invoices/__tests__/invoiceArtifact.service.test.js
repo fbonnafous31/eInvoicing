@@ -65,16 +65,19 @@ describe('InvoiceArtifactService', () => {
 
     const result = await generateInvoiceArtifacts(mockInvoice);
 
+    // ✅ On ne fige plus le chemin absolu → on vérifie juste le dossier et l’option
     expect(fs.mkdir).toHaveBeenCalledWith(
-      '/home/francois/dev/eInvoicing/backend/src/uploads/factur-x',
-      { recursive: true }
+      expect.stringContaining('factur-x'),
+      expect.objectContaining({ recursive: true })
     );
+
     expect(fs.writeFile).toHaveBeenCalledWith(
-      '/home/francois/dev/eInvoicing/backend/src/uploads/factur-x/123-factur-x.xml',
+      expect.stringContaining('factur-x/123-factur-x.xml'),
       '<xml></xml>'
     );
+
     expect(result).toEqual({
-      xmlPath: '/home/francois/dev/eInvoicing/backend/src/uploads/factur-x/123-factur-x.xml',
+      xmlPath: expect.stringContaining('factur-x/123-factur-x.xml'),
       pdfA3Path: '/fake/final.pdf',
     });
   });
@@ -86,7 +89,7 @@ describe('InvoiceArtifactService', () => {
     const result = await generateInvoiceArtifacts(mockInvoice);
 
     expect(result).toEqual({
-      xmlPath: '/home/francois/dev/eInvoicing/backend/src/uploads/factur-x/123-factur-x.xml',
+      xmlPath: expect.stringContaining('factur-x/123-factur-x.xml'),
       pdfA3Path: null,
     });
   });
