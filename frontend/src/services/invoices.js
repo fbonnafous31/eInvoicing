@@ -171,6 +171,26 @@ export function useInvoiceService() {
     [request]
   );
 
+  const getInvoicePdfA3Url = useCallback(
+    async (id) => {
+      const token = await getToken();
+      const res = await fetch(`${API_BASE}/${id}/pdf-a3-url`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Erreur ${res.status}`);
+      }
+
+      const { url } = await res.json();
+      return url; // URL signée B2 ou locale
+    },
+    [getToken]
+  );
+
   return {
     API_ROOT,
     fetchInvoicesBySeller,
@@ -187,6 +207,7 @@ export function useInvoiceService() {
     getInvoiceLifecycle,
     pollInvoiceLifecycle,
     cashInvoice,
-    getInvoiceStatusComment
+    getInvoiceStatusComment,
+    getInvoicePdfA3Url
   };
 }

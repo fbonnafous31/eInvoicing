@@ -1,6 +1,7 @@
 // backend/src/services/adapters/b2.js
 const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command } = require("@aws-sdk/client-s3");
 const { buffer } = require('stream/consumers');
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
 class B2Adapter {
   constructor({ endpoint, bucketName, keyID, applicationKey }) {
@@ -46,6 +47,19 @@ class B2Adapter {
     }));
     return res.Contents ? res.Contents.map(f => f.Key) : [];
   }
+
+  async getPublicUrl(fileName, expiresInSeconds = 60 * 5) {
+    if (!fileName) return null;
+
+    const command = new GetObjectCommand({
+      Bucket: this.bucketName,
+      Key: fileName,
+    });
+
+    // Génère une URL signée valable 5 minutes
+    const signedUrl = await getSignedUrl(this.s3, command, { expiresIn: expiresInSeconds });
+    return signedUrl;
+  }  
 }
 
 module.exports = B2Adapter; 

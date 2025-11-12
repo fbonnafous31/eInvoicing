@@ -354,6 +354,28 @@ const getInvoiceStatusComment = asyncHandler(async (req, res) => {
   res.json({ comment });
 });
 
+const storageService = require('../../services');
+const getInvoicePdfA3Url = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Nom de fichier standardisé
+    const fileName = `${id}_pdf-a3.pdf`;
+
+    // Récupération de l’URL depuis le service de stockage
+    const url = await storageService.getPublicUrl(`pdf-a3/${fileName}`);
+
+    if (!url) {
+      return res.status(404).json({ message: "PDF/A-3 non trouvé" });
+    }
+
+    res.json({ url });
+  } catch (err) {
+    console.error("[getInvoicePdfA3Url]", err);
+    res.status(500).json({ message: "Erreur lors de la récupération de l'URL du PDF/A-3" });
+  }
+};
+
 module.exports = {
   listInvoices,
   getInvoice,
@@ -368,5 +390,6 @@ module.exports = {
   refreshInvoiceStatus,
   getInvoiceLifecycle,
   markInvoicePaid,
-  getInvoiceStatusComment
+  getInvoiceStatusComment,
+  getInvoicePdfA3Url
 };

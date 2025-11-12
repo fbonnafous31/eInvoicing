@@ -1,9 +1,6 @@
-const fs = require('fs');
-const path = require('path');
-
 class StorageService {
   constructor(adapter) {
-    this.adapter = adapter; // ex: LocalAdapter, S3Adapter
+    this.adapter = adapter; 
   }
 
   async save(fileBuffer, fileName) {
@@ -24,6 +21,13 @@ class StorageService {
     }
     return this.adapter.list(dir);
   }
+  
+  async getPublicUrl(relativePath) {
+    if (typeof this.adapter.getPublicUrl !== 'function') {
+      throw new Error('Adapter does not implement getPublicUrl()');
+    }
+    return this.adapter.getPublicUrl(relativePath);
+  }  
 }
 
 module.exports = StorageService;

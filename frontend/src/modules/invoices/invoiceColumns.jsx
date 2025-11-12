@@ -12,9 +12,9 @@ import { useSellerService } from '@/services/sellers';
 import { useState, useEffect } from 'react';
 import InvoiceEmailButton from '../../components/invoices/InvoiceEmailButton';
 
-export default function useInvoiceColumns(invoiceService, onTechnicalStatusChange, onBusinessStatusChange, onInvoiceUpdate) {
-  const navigate = useNavigate();
-  const { generateInvoicePdf, sendInvoiceMail, API_ROOT } = useInvoiceService();
+  export default function useInvoiceColumns(invoiceService, onTechnicalStatusChange, onBusinessStatusChange, onInvoiceUpdate) {
+    const navigate = useNavigate();
+    const { generateInvoicePdf, sendInvoiceMail, getInvoicePdfA3Url, API_ROOT } = useInvoiceService();
 
   // -------------------- Polling du statut technique --------------------
   const pollStatus = async (invoiceId, interval = 2000, timeout = 60000) => {
@@ -118,7 +118,7 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
                 const data = await generateInvoicePdf(row.id);
                 if (!data?.path) return console.error("❌ Pas de chemin PDF renvoyé");
 
-                const pdfUrl = `${API_ROOT}${data.path}`;
+                const pdfUrl = `${API_ROOT}/pdf-a3/${row.id}_pdf-a3.pdf`;
                 const filename = `facture_${row.invoice_number}.pdf`;
 
                 downloadFile(pdfUrl, filename);
@@ -134,13 +134,20 @@ export default function useInvoiceColumns(invoiceService, onTechnicalStatusChang
           <button
             className="btn btn-sm btn-link p-0 m-0 align-middle text-decoration-none"
             title="Télécharger la facture au format PDF/A-3"
-            onClick={() => {
+            onClick={async () => {
               if (!row?.id) return;
 
-              const pdfUrl = `${API_ROOT}/pdf-a3/${row.id}_pdf-a3.pdf`;
-              const filename = `facture_${row.invoice_number}_PDF-A3.pdf`;
+              try {
+                // Récupère l'URL signée depuis le hook
+                const pdfUrl = await getInvoicePdfA3Url(row.id);
+                const filename = `facture_${row.invoice_number}_PDF-A3.pdf`;
 
-              downloadFile(pdfUrl, filename);
+                // Télécharge le fichier
+                downloadFile(pdfUrl, filename);
+              } catch (err) {
+                console.error("Erreur lors de la récupération du PDF/A-3 :", err);
+                alert("Impossible de récupérer le PDF/A-3. Veuillez réessayer.");
+              }
             }}
           >
             <FaFilePdf size={18} color="red" style={{ position: "relative", top: "-2px" }} />

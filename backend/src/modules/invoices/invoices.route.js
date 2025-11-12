@@ -12,6 +12,9 @@ const checkJwt = require('../../middlewares/auth');
 router.use(checkJwt);    
 router.use(attachSeller);
 
+// Route spécifique pour récupérer l'URL du PDF A3 d'une facture
+router.get('/:id/pdf-a3-url', InvoicesController.getInvoicePdfA3Url);
+
 // Route spécifique pour envoyer la facture (nouvelle)
 router.post('/:id/send-mail', InvoiceMailController.sendInvoiceMail);
 

@@ -38,6 +38,10 @@ class LocalAdapter {
       return []; 
     }
   }
+
+  async getPublicUrl(relativePath) {
+    return `http://localhost:3000/uploads/${relativePath}`;
+  }
 }
 
 module.exports = LocalAdapter;

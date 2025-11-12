@@ -6,6 +6,9 @@ const path = require("path");
 const errorHandler = require("./src/middlewares/errorHandler");
 const { register, metricsMiddleware } = require("./src/monitoring/metrics");
 
+// Services
+const storageService = require("./src/services"); // ton service de stockage B2
+
 // Routes métier
 const sellersRoutes = require("./src/modules/sellers/sellers.route");
 const clientsRoutes = require("./src/modules/clients/clients.route");
@@ -25,8 +28,7 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function(origin, callback) {
-    // autorise les requêtes sans origin (ex: curl, Postman)
-    if (!origin) return callback(null, true);
+    if (!origin) return callback(null, true); // autorise les requêtes sans origin (Postman, curl)
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
@@ -68,6 +70,32 @@ app.get("/metrics", async (req, res) => {
 // 📂 Rendre accessible le répertoire uploads
 app.use("/uploads", express.static(path.join(__dirname, "src/uploads")));
 app.use("/pdf-a3", express.static(path.join(__dirname, "src/uploads/pdf-a3")));
+
+// ----------------------
+// Proxy sécurisé pour PDF/A-3 depuis B2
+// ----------------------
+app.get("/api/invoices/:id/pdf-a3-proxy", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const filePath = `pdf-a3/${id}_pdf-a3.pdf`;
+
+    // Récupère le fichier depuis B2 (ou local si tu veux tester en dev)
+    const fileBuffer = await storageService.get(filePath);
+
+    if (!fileBuffer) {
+      return res.status(404).json({ message: "PDF/A-3 non trouvé" });
+    }
+
+    // En-têtes pour le navigateur
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `inline; filename="facture_${id}_PDF-A3.pdf"`);
+
+    res.send(fileBuffer);
+  } catch (err) {
+    console.error("[PDF Proxy]", err);
+    res.status(500).json({ message: "Erreur téléchargement PDF/A-3" });
+  }
+});
 
 // Middleware global d'erreurs
 app.use(errorHandler);
