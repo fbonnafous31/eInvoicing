@@ -61,7 +61,6 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
     if (!invoice) return console.error("❌ invoice missing");
 
     try {
-      // 🔹 Récupération audience centralisée
       const env = getEnv();
 
       const token = await getToken({
@@ -69,6 +68,7 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
       });
 
       console.log("[Auth] Token pour génération PDF:", token);
+
       const res = await fetch("/api/invoices/generate-pdf", {
         method: "POST",
         headers: {
@@ -85,9 +85,18 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
 
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
 
-      console.log("✅ PDF généré et ouvert dans un nouvel onglet");
+      // Téléchargement automatique avec le même nom que sur le serveur
+      const link = document.createElement("a");
+      const filename = `facture_${invoice.header?.invoice_number || 'preview'}.pdf`;
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      URL.revokeObjectURL(url);
+      console.log("✅ PDF téléchargé avec succès");
     } catch (err) {
       console.error("❌ Erreur génération PDF :", err);
     }

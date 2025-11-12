@@ -35,6 +35,7 @@ function formatDateFr(dateStr) {
 async function generateQuotePdf(quote) {
   console.log("quote:", quote);
   const pdfDoc = await PDFDocument.create();
+  const ASSETS_PATH = path.join(process.cwd(), "public/pdf-assets");
 
   // --- Début des modifications pour conformité PDF/A ---
 
@@ -106,7 +107,7 @@ async function generateQuotePdf(quote) {
   pdfDoc.catalog.set(PDFName.of('Metadata'), pdfDoc.context.register(metadataStream));
 
   // 3. Ajouter un "OutputIntent" pour la gestion des couleurs (corrige l'erreur DeviceRGB)
-  const iccProfilePath = path.join(__dirname, "color-profiles/sRGB_IEC61966-2-1_black_scaled.icc");
+  const iccProfilePath = path.join(ASSETS_PATH, "icc/sRGB.icc");
   if (fs.existsSync(iccProfilePath)) {
     const iccProfileBytes = fs.readFileSync(iccProfilePath);
     const outputIntent = pdfDoc.context.stream(iccProfileBytes);
@@ -135,8 +136,8 @@ async function generateQuotePdf(quote) {
 
   // Polices
   // 5. Embarquer les polices pour la conformité PDF/A (corrige l'erreur sur les polices non-embarquées)
-  const fontPath = path.join(__dirname, "fonts/DejaVuSans.ttf");
-  const fontBoldPath = path.join(__dirname, "fonts/DejaVuSans-Bold.ttf");
+  const fontPath = path.join(ASSETS_PATH, "fonts/DejaVuSans.ttf");
+  const fontBoldPath = path.join(ASSETS_PATH, "fonts/DejaVuSans-Bold.ttf");
 
   if (!fs.existsSync(fontPath) || !fs.existsSync(fontBoldPath)) {
     console.error("Fichiers de police manquants ! Assurez-vous que DejaVuSans.ttf et DejaVuSans-Bold.ttf existent dans le dossier 'src/utils/invoice-pdf/fonts/'.");
@@ -153,7 +154,7 @@ async function generateQuotePdf(quote) {
   const margin = 50;
 
   // ---------------- Logo ----------------
-  const logoPath = path.join(__dirname, "logo.png");
+  const logoPath = path.join(ASSETS_PATH, "logo.png");
   const logoWidthMax = 120 * 2.5; // largeur max multipliée par 2.5
   const logoHeightMax = 60 * 2.5; // hauteur max multipliée par 2.5
 
@@ -421,9 +422,9 @@ async function generateInvoicePdfBuffer(invoice) {
     console.log('Invoice header:', invoice.header);
     console.log('Seller object:', invoice.seller);
     console.log('Client object:', invoice.client);
-    console.log('__dirname:', __dirname);
 
     const pdfDoc = await PDFDocument.create();
+    const ASSETS_PATH = path.join(process.cwd(), "public/pdf-assets");
 
     // 1. Enregistrer fontkit pour la gestion des polices .ttf
     pdfDoc.registerFontkit(fontkit);
@@ -499,8 +500,7 @@ async function generateInvoicePdfBuffer(invoice) {
     console.log('📑 Métadonnées XMP enregistrées');
 
     // 3. Ajouter un "OutputIntent" pour la gestion des couleurs
-    // const iccProfilePath = path.join(__dirname, "color-profiles/sRGB_IEC61966-2-1_black_scaled.icc");
-    const iccProfilePath = path.join(__dirname, "icc/sRGB.icc");
+    const iccProfilePath = path.join(ASSETS_PATH, "icc/sRGB.icc");
     console.log('ICC profile path:', iccProfilePath);
 
     if (fs.existsSync(iccProfilePath)) {
@@ -522,13 +522,12 @@ async function generateInvoicePdfBuffer(invoice) {
 
     const page = pdfDoc.addPage([595, 842]); // A4 portrait
     const { width, height } = page.getSize();
-    const fontPath = path.join(__dirname, "fonts/DejaVuSans.ttf");
-    const fontBoldPath = path.join(__dirname, "fonts/DejaVuSans-Bold.ttf");
+    const fontPath = path.join(ASSETS_PATH, "fonts/DejaVuSans.ttf");
+    const fontBoldPath = path.join(ASSETS_PATH, "fonts/DejaVuSans-Bold.ttf");
 
     console.log('Vérification fichiers critiques...');
     console.log('Font regular exists:', fs.existsSync(fontPath));
     console.log('Font bold exists:', fs.existsSync(fontBoldPath));
-    console.log('Logo exists:', fs.existsSync(path.join(__dirname, "logo.png")));
 
     if (!fs.existsSync(fontPath) || !fs.existsSync(fontBoldPath)) {
       console.error("Fichiers de police manquants ! Assurez-vous que DejaVuSans.ttf et DejaVuSans-Bold.ttf existent dans le dossier 'src/utils/invoice-pdf/fonts/'.");
@@ -553,7 +552,7 @@ async function generateInvoicePdfBuffer(invoice) {
     const lines = invoice.lines || [];
 
     // ---------------- Logo ----------------
-    const logoPath = path.join(__dirname, "logo.png");
+    const logoPath = path.join(ASSETS_PATH, "logo.png");
     console.log('Logo exists:', fs.existsSync(logoPath));
     let logoHeight = 0;
     

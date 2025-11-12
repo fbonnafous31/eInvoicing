@@ -147,27 +147,31 @@ const createInvoicePdf = asyncHandler(async (req, res) => {
 const { getSellerById } = require('../sellers/sellers.service'); 
 
 const generateInvoicePdfBuffer = asyncHandler(async (req, res) => {
-    const invoiceBody = { ...req.body };
+  const invoiceBody = { ...req.body };
 
-    // ---------------- Récupérer le seller complet ----------------
-    let seller = {};
-    const sellerId = invoiceBody.header?.seller_id;
-    if (sellerId) {
-      seller = await getSellerById(sellerId); 
-    }
+  // ---------------- Récupérer le seller complet ----------------
+  let seller = {};
+  const sellerId = invoiceBody.header?.seller_id;
+  if (sellerId) {
+    seller = await getSellerById(sellerId); 
+  }
 
-    // ---------------- Composer l'objet invoice complet ----------------
-    const invoice = {
-      ...invoiceBody,
-      seller
-    };
+  // ---------------- Composer l'objet invoice complet ----------------
+  const invoice = {
+    ...invoiceBody,
+    seller
+  };
 
-    const pdfBytes = await generatePdfUtil(invoice); 
+  // ---------------- Générer le PDF en mémoire ----------------
+  const pdfBytes = await generatePdfUtil(invoice); 
 
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'inline; filename=facture_preview.pdf');
-    res.send(pdfBytes);
-
+  // ---------------- Envoyer le PDF en mémoire ----------------
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename="facture_${invoice.header?.invoice_number || 'preview'}.pdf"`
+  );
+  res.send(pdfBytes);
 });
 
 const getInvoices = asyncHandler(async (req, res) => {
