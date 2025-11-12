@@ -26,8 +26,6 @@ router.post('/:id/send', InvoicesController.sendInvoice);
 
 // Routes factures
 router.get('/', InvoicesController.getInvoices);
-
-router.get('/:id/generate-pdf', InvoicesController.createInvoicePdf);
 router.get('/:id', InvoicesController.getInvoice);
 
 router.post(

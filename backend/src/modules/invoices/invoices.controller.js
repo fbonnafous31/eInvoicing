@@ -139,7 +139,7 @@ const createInvoicePdf = asyncHandler(async (req, res) => {
   res.json({ path: publicPath });
 });
 
-const { getSellerById } = require('../sellers/sellers.service'); // adapte le chemin
+const { getSellerById } = require('../sellers/sellers.service'); 
 
 const generateInvoicePdfBuffer = asyncHandler(async (req, res) => {
     const invoiceBody = { ...req.body };

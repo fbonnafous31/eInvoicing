@@ -69,8 +69,6 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
       });
 
       console.log("[Auth] Token pour génération PDF:", token);
-      console.log("➡️ Génération PDF pour facture:", invoice.id);
-
       const res = await fetch("/api/invoices/generate-pdf", {
         method: "POST",
         headers: {
