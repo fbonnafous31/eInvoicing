@@ -503,9 +503,10 @@ async function generateInvoicePdfBuffer(invoice) {
     console.log('📑 Métadonnées XMP enregistrées');
 
     // 3. Ajouter un "OutputIntent" pour la gestion des couleurs
-    const iccProfilePath = path.join(__dirname, "color-profiles/sRGB_IEC61966-2-1_black_scaled.icc");
+    // const iccProfilePath = path.join(__dirname, "color-profiles/sRGB_IEC61966-2-1_black_scaled.icc");
+    const iccProfilePath = path.join(__dirname, "icc/sRGB.icc");
     console.log('ICC profile path:', iccProfilePath);
-    
+
     if (fs.existsSync(iccProfilePath)) {
       const iccProfileBytes = fs.readFileSync(iccProfilePath);
       const outputIntent = pdfDoc.context.stream(iccProfileBytes);
