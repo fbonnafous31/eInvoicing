@@ -113,43 +113,9 @@ import { useAuth } from '@/hooks/useAuth';
             className="btn btn-sm btn-link p-0 m-0 align-middle text-decoration-none"
             title="Télécharger le devis"
             onClick={async () => {
-              if (!row?.id) return;
-
               try {
-                const token = await getToken({
-                  audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-                });
-
-                const res = await fetch(`/api/invoices/${row.id}/generate-pdf`, {
-                  method: "POST",
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                  },
-                });
-
-                if (!res.ok) {
-                  const text = await res.text();
-                  throw new Error(`Erreur génération PDF : ${res.status} - ${text}`);
-                }
-
-                // Lire la réponse comme PDF
-                const blob = await res.blob();
-                const url = URL.createObjectURL(blob);
-
-                // Nettoyer le numéro de facture pour le nom de fichier
-                const safeInvoiceNumber = row.invoice_number
-                  ? row.invoice_number.trim().replace(/[\/\\?%*:|"<>#]/g, "_")
-                  : row.id;
-
-                const link = document.createElement("a");
-                link.href = url;
-                link.download = `facture_${safeInvoiceNumber}.pdf`;
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
-                URL.revokeObjectURL(url);
-
-                console.log("✅ PDF téléchargé avec succès");
+                await invoiceService.downloadInvoicePdf(row);
+                console.log("✅ PDF téléchargé");
               } catch (err) {
                 console.error("❌ Erreur génération PDF :", err);
               }
@@ -157,7 +123,6 @@ import { useAuth } from '@/hooks/useAuth';
           >
             📄
           </button>
-
 
           {/* Facture PDF/A-3 */}
           <button

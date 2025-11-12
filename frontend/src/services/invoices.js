@@ -192,19 +192,76 @@ export function useInvoiceService() {
   );
 
   const getInvoicePdfA3Proxy = useCallback(
-  async (id) => {
-    const token = await getToken();
-    const res = await fetch(`${API_BASE}/${id}/pdf-a3-proxy`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    async (id) => {
+      const token = await getToken();
+      const res = await fetch(`${API_BASE}/${id}/pdf-a3-proxy`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    if (!res.ok) throw new Error(`Erreur serveur (${res.status})`);
+      if (!res.ok) throw new Error(`Erreur serveur (${res.status})`);
 
-    const blob = await res.blob();
-    return blob; 
-  },
-  [getToken]
-);
+      const blob = await res.blob();
+      return blob; 
+    },
+    [getToken]
+  );
+
+  const fetchInvoicePdf = useCallback(
+    async (id) => {
+      const token = await getToken();
+      const res = await fetch(`${API_BASE}/${id}/generate-pdf`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Erreur génération PDF: ${res.status} - ${text}`);
+      }
+
+      const blob = await res.blob();
+      return blob;
+    },
+    [getToken]
+  );
+
+  const downloadInvoicePdf = useCallback(
+    async (invoice) => {
+      if (!invoice?.id) throw new Error("Invoice missing ID");
+
+      const token = await getToken();
+      const res = await fetch(`${API_BASE}/${invoice.id}/generate-pdf`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Erreur génération PDF : ${res.status} - ${text}`);
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+
+      const safeInvoiceNumber = invoice.invoice_number
+        ? invoice.invoice_number.trim().replace(/[\/\\?%*:|"<>#]/g, "_")
+        : invoice.id;
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `facture_${safeInvoiceNumber}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    },
+    [getToken]
+  );
 
   return {
     API_ROOT,
@@ -224,6 +281,8 @@ export function useInvoiceService() {
     cashInvoice,
     getInvoiceStatusComment,
     getInvoicePdfA3Url,
-    getInvoicePdfA3Proxy
+    getInvoicePdfA3Proxy,
+    fetchInvoicePdf,
+    downloadInvoicePdf,
   };
 }

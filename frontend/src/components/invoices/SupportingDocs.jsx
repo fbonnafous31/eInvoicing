@@ -62,18 +62,13 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
 
     try {
       const env = getEnv();
-
-      const token = await getToken({
-        audience: env.VITE_AUTH0_AUDIENCE,
-      });
-
-      console.log("[Auth] Token pour génération PDF:", token);
+      const token = await getToken({ audience: env.VITE_AUTH0_AUDIENCE });
 
       const res = await fetch("/api/invoices/generate-pdf", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(invoice),
       });
@@ -85,18 +80,9 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
 
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
 
-      // Téléchargement automatique avec le même nom que sur le serveur
-      const link = document.createElement("a");
-      const filename = `facture_${invoice.header?.invoice_number || 'preview'}.pdf`;
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-
-      URL.revokeObjectURL(url);
-      console.log("✅ PDF téléchargé avec succès");
+      console.log("✅ PDF généré et ouvert dans un nouvel onglet (prévisualisation)");
     } catch (err) {
       console.error("❌ Erreur génération PDF :", err);
     }
