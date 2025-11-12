@@ -186,10 +186,25 @@ export function useInvoiceService() {
       }
 
       const { url } = await res.json();
-      return url; // URL signée B2 ou locale
+      return url; 
     },
     [getToken]
   );
+
+  const getInvoicePdfA3Proxy = useCallback(
+  async (id) => {
+    const token = await getToken();
+    const res = await fetch(`${API_BASE}/${id}/pdf-a3-proxy`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!res.ok) throw new Error(`Erreur serveur (${res.status})`);
+
+    const blob = await res.blob();
+    return blob; 
+  },
+  [getToken]
+);
 
   return {
     API_ROOT,
@@ -208,6 +223,7 @@ export function useInvoiceService() {
     pollInvoiceLifecycle,
     cashInvoice,
     getInvoiceStatusComment,
-    getInvoicePdfA3Url
+    getInvoicePdfA3Url,
+    getInvoicePdfA3Proxy
   };
 }

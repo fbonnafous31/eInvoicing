@@ -28,6 +28,13 @@ class StorageService {
     }
     return this.adapter.getPublicUrl(relativePath);
   }  
+
+  async getFileStream(relativePath) {
+    if (typeof this.adapter.getFileStream !== 'function') {
+      throw new Error('Adapter does not implement getFileStream()');
+    }
+    return this.adapter.getFileStream(relativePath);
+  }  
 }
 
 module.exports = StorageService;

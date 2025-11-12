@@ -376,6 +376,65 @@ const getInvoicePdfA3Url = async (req, res) => {
   }
 };
 
+const { Readable, pipeline } = require('stream');
+const { promisify } = require('util');
+const pipe = promisify(pipeline);
+const getInvoicePdfA3Proxy = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const fileName = `${id}_pdf-a3.pdf`;
+    console.log('[PDF Proxy] Requête pour PDF/A-3 id =', id);
+
+    // 🔹 Mode LOCAL
+    if (process.env.STORAGE_BACKEND === 'local') {
+      const filePath = path.join(__dirname, '../../uploads/pdf-a3', fileName);
+      console.log('[PDF Proxy] Mode LOCAL, chemin fichier =', filePath);
+
+      if (!fs.existsSync(filePath)) {
+        console.warn('[PDF Proxy] Fichier non trouvé en local');
+        return res.status(404).json({ message: 'PDF/A-3 non trouvé en local' });
+      }
+
+      const stats = fs.statSync(filePath);
+      console.log('[PDF Proxy] Taille fichier local =', stats.size, 'octets');
+
+      return res.sendFile(filePath);
+    }
+
+    // 🔹 Mode B2
+    if (process.env.STORAGE_BACKEND === 'b2') {
+      const relativePath = `pdf-a3/${fileName}`;
+      console.log('[PDF Proxy] Mode B2, récupération du fichier via storageService');
+      console.log('[PDF Proxy] Clé demandée B2 =', relativePath);
+
+      const data = await storageService.get(relativePath); // Buffer
+      console.log('[PDF Proxy] Buffer reçu depuis B2, longueur =', data?.length);
+
+      if (!data || !data.length) {
+        console.warn('[PDF Proxy] Aucun contenu récupéré depuis B2');
+        return res.status(404).json({ message: 'PDF/A-3 non trouvé sur B2' });
+      }
+
+      const stream = Readable.from(data);
+      console.log('[PDF Proxy] Stream créé, envoi vers le client');
+
+      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+      res.setHeader('Content-Type', 'application/pdf');
+
+      // 🔹 Utilisation de pipeline pour éviter les flux incomplets
+      await pipe(stream, res);
+      return;
+    }
+
+    console.error('[PDF Proxy] Storage backend non configuré');
+    return res.status(500).json({ message: 'Storage backend non configuré' });
+
+  } catch (err) {
+    console.error('[PDF Proxy] Erreur lors de la récupération du PDF/A-3 :', err);
+    res.status(500).json({ message: 'Erreur lors de la récupération du PDF/A-3' });
+  }
+};
+
 module.exports = {
   listInvoices,
   getInvoice,
@@ -391,5 +450,6 @@ module.exports = {
   getInvoiceLifecycle,
   markInvoicePaid,
   getInvoiceStatusComment,
-  getInvoicePdfA3Url
+  getInvoicePdfA3Url,
+  getInvoicePdfA3Proxy
 };

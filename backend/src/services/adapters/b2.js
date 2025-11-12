@@ -1,6 +1,7 @@
 // backend/src/services/adapters/b2.js
 const { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command } = require("@aws-sdk/client-s3");
 const { buffer } = require('stream/consumers');
+const { PassThrough } = require('stream');
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
 class B2Adapter {
@@ -60,6 +61,20 @@ class B2Adapter {
     const signedUrl = await getSignedUrl(this.s3, command, { expiresIn: expiresInSeconds });
     return signedUrl;
   }  
+
+  async getFileStream(fileName) {
+    if (!fileName) return null;
+
+    const command = new GetObjectCommand({
+      Bucket: this.bucketName,
+      Key: fileName,
+    });
+
+    const res = await this.s3.send(command);
+    const pass = new PassThrough();
+    res.Body.pipe(pass);
+    return pass;
+  }
 }
 
 module.exports = B2Adapter; 

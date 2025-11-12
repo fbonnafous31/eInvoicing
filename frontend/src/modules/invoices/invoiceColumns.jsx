@@ -14,7 +14,7 @@ import InvoiceEmailButton from '../../components/invoices/InvoiceEmailButton';
 
   export default function useInvoiceColumns(invoiceService, onTechnicalStatusChange, onBusinessStatusChange, onInvoiceUpdate) {
     const navigate = useNavigate();
-    const { generateInvoicePdf, sendInvoiceMail, getInvoicePdfA3Url, API_ROOT } = useInvoiceService();
+    const { generateInvoicePdf, sendInvoiceMail, getInvoicePdfA3Proxy, API_ROOT } = useInvoiceService();
 
   // -------------------- Polling du statut technique --------------------
   const pollStatus = async (invoiceId, interval = 2000, timeout = 60000) => {
@@ -138,12 +138,21 @@ import InvoiceEmailButton from '../../components/invoices/InvoiceEmailButton';
               if (!row?.id) return;
 
               try {
-                // Récupère l'URL signée depuis le hook
-                const pdfUrl = await getInvoicePdfA3Url(row.id);
+                // 🔹 Ici on utilise le proxy pour B2 ou local
+                const blob = await getInvoicePdfA3Proxy(row.id);
+
+                console.log("✅ Blob reçu :", blob);
+                console.log("🔹 Type :", blob.type);
+                console.log("🔹 Taille :", blob.size, "octets");
+
                 const filename = `facture_${row.invoice_number}_PDF-A3.pdf`;
 
+                // 🔹 Crée un objet URL pour vérifier si le téléchargement va fonctionner
+                const blobUrl = URL.createObjectURL(blob);
+                console.log("🔹 Blob URL :", blobUrl);
+
                 // Télécharge le fichier
-                downloadFile(pdfUrl, filename);
+                downloadFile(blobUrl, filename);
               } catch (err) {
                 console.error("Erreur lors de la récupération du PDF/A-3 :", err);
                 alert("Impossible de récupérer le PDF/A-3. Veuillez réessayer.");
@@ -152,6 +161,7 @@ import InvoiceEmailButton from '../../components/invoices/InvoiceEmailButton';
           >
             <FaFilePdf size={18} color="red" style={{ position: "relative", top: "-2px" }} />
           </button>
+
 
           {/* Bouton envoi mail */}
           {sellerActive && (
