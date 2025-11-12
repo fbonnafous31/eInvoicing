@@ -60,6 +60,8 @@ jest.mock("../invoices.controller", () => ({
   generateInvoicePdfBuffer: jest.fn(),
   updateInvoice: jest.fn(),
   deleteInvoice: jest.fn(),
+  getInvoicePdfA3Url: jest.fn((req, res) => res.status(200).json({ url: "http://example.com/fake.pdf" })),
+  getInvoicePdfA3Proxy: jest.fn((req, res) => res.status(200).send(Buffer.from("mock-pdf"))),
 }));
 
 // --- Setup Express ---
