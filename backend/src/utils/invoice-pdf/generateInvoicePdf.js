@@ -411,12 +411,8 @@ async function generateQuotePdf(quote) {
   const uploadDir = path.join(__dirname, "../../uploads/pdf");
   if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-  const filePath = path.join(uploadDir, `${quote.id}_invoice.pdf`);
   const pdfBytes = await pdfDoc.save();
-  await fs.promises.writeFile(filePath, pdfBytes);
-
-  console.log("Écriture du PDF :", filePath);
-  return filePath;
+  return pdfBytes;
 }
 
 async function generateInvoicePdfBuffer(invoice) {

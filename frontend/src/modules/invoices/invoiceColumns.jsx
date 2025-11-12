@@ -11,8 +11,10 @@ import { downloadFile } from '../../utils/downloadFile';
 import { useSellerService } from '@/services/sellers';
 import { useState, useEffect } from 'react';
 import InvoiceEmailButton from '../../components/invoices/InvoiceEmailButton';
+import { useAuth } from '@/hooks/useAuth';
 
   export default function useInvoiceColumns(invoiceService, onTechnicalStatusChange, onBusinessStatusChange, onInvoiceUpdate) {
+    const { getToken } = useAuth();
     const navigate = useNavigate();
     const { generateInvoicePdf, sendInvoiceMail, getInvoicePdfA3Proxy, API_ROOT } = useInvoiceService();
 
@@ -107,28 +109,55 @@ import InvoiceEmailButton from '../../components/invoices/InvoiceEmailButton';
             ✏️
           </button>
 
-          {/* Devis PDF */}
-          <button
-            className="btn btn-sm btn-link p-0 m-0 align-middle text-decoration-none"
-            title="Télécharger le devis"
-            onClick={async () => {
-              if (!row?.id) return;
+<button
+  className="btn btn-sm btn-link p-0 m-0 align-middle text-decoration-none"
+  title="Télécharger le devis"
+  onClick={async () => {
+    if (!row?.id) return;
 
-              try {
-                const data = await generateInvoicePdf(row.id);
-                if (!data?.path) return console.error("❌ Pas de chemin PDF renvoyé");
+    try {
+      const token = await getToken({
+        audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+      });
 
-                const pdfUrl = `${API_ROOT}/pdf-a3/${row.id}_pdf-a3.pdf`;
-                const filename = `facture_${row.invoice_number}.pdf`;
+      const res = await fetch(`/api/invoices/${row.id}/generate-pdf`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-                downloadFile(pdfUrl, filename);
-              } catch (err) {
-                console.error("❌ Erreur génération PDF :", err);
-              }
-            }}
-          >
-            📄
-          </button>
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Erreur génération PDF : ${res.status} - ${text}`);
+      }
+
+      // Lire la réponse comme PDF
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+
+      // Nettoyer le numéro de facture pour le nom de fichier
+      const safeInvoiceNumber = row.invoice_number
+        ? row.invoice_number.trim().replace(/[\/\\?%*:|"<>#]/g, "_")
+        : row.id;
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `facture_${safeInvoiceNumber}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+
+      console.log("✅ PDF téléchargé avec succès");
+    } catch (err) {
+      console.error("❌ Erreur génération PDF :", err);
+    }
+  }}
+>
+  📄
+</button>
+
 
           {/* Facture PDF/A-3 */}
           <button

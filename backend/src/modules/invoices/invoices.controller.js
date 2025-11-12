@@ -132,11 +132,16 @@ const createInvoicePdf = asyncHandler(async (req, res) => {
     return res.status(404).json({ error: "Facture introuvable" });
   }
 
-  const pdfPath = await generateQuotePdf(invoice);
-  const fileName = path.basename(pdfPath);
-  const publicPath = `/uploads/pdf/${fileName}`;
+  // Génération du PDF en mémoire
+  const pdfBytes = await generateQuotePdf(invoice); 
 
-  res.json({ path: publicPath });
+  // Définir les headers pour téléchargement
+  const fileName = `facture_${invoice.invoice_number?.trim().replace(/[\/\\?%*:|"<>#]/g, "_") || invoice.id}.pdf`;
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+
+  // Envoyer le PDF
+  res.send(Buffer.from(pdfBytes));
 });
 
 const { getSellerById } = require('../sellers/sellers.service'); 
