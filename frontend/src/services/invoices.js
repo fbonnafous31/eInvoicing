@@ -207,14 +207,15 @@ export function useInvoiceService() {
   );
 
   const fetchInvoicePdf = useCallback(
-    async (id) => {
+    async (invoice) => {
       const token = await getToken();
-      const res = await fetch(`${API_BASE}/${id}/generate-pdf`, {
+      const res = await fetch(`${API_BASE}/generate-pdf`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify(invoice),
       });
 
       if (!res.ok) {

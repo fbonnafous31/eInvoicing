@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
 import { SmallDeleteButton } from "@/components/ui/buttons";
 import { useAuth } from "@/hooks/useAuth";
-import { getEnv } from "@/utils/getEnv";
+import { useInvoiceService } from "@/services/invoices";
 
 export default function SupportingDocs({ data, onChange, disabled, hideLabelsInView, invoice, canEditAdditional }) {
-  const { getToken } = useAuth();
+  const invoiceService = useInvoiceService();
 
   useEffect(() => {
     console.log("📎 SupportingDocs - current attachments:", data);
@@ -61,28 +61,18 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
     if (!invoice) return console.error("❌ invoice missing");
 
     try {
-      const env = getEnv();
-      const token = await getToken({ audience: env.VITE_AUTH0_AUDIENCE });
-
-      const res = await fetch("/api/invoices/generate-pdf", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(invoice),
-      });
-
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`Erreur génération PDF: ${res.status} - ${errText}`);
-      }
-
-      const blob = await res.blob();
+      const blob = await invoiceService.fetchInvoicePdf(invoice);
       const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
 
-      console.log("✅ PDF généré et ouvert dans un nouvel onglet (prévisualisation)");
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `facture_${invoice.header?.invoice_number || "preview"}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      URL.revokeObjectURL(url);
+      console.log("✅ PDF généré avec succès");
     } catch (err) {
       console.error("❌ Erreur génération PDF :", err);
     }
