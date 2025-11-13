@@ -22,6 +22,7 @@ app.enable('trust proxy');
 // 🌍 CORS dynamique selon l'origin
 const allowedOrigins = [
   "http://localhost:5173",
+  "http://localhost:8080",
   "https://einvoicing-preprod-frontend.onrender.com",
   "http://e-invoicing.local"
 ];
