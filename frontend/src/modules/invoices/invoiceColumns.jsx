@@ -8,17 +8,17 @@ import { FaFilePdf } from "react-icons/fa";
 import { canSendInvoice } from '../../utils/businessRules/invoiceStatus';
 import { useInvoiceService } from '../../services/invoices';
 import { downloadFile } from '../../utils/downloadFile';
-import { useSellerService } from '@/services/sellers';
-import { useState, useEffect } from 'react';
 import InvoiceEmailButton from '../../components/invoices/InvoiceEmailButton';
 import { useAuth } from '@/hooks/useAuth';
+import { useSellerInfo } from "@/hooks/useSellerInfo";
 
   export default function useInvoiceColumns(invoiceService, onTechnicalStatusChange, onBusinessStatusChange, onInvoiceUpdate) {
     const { getToken } = useAuth();
     const navigate = useNavigate();
     const { sendInvoiceMail, getInvoicePdfA3Proxy, API_ROOT } = useInvoiceService();
+    const { sellerPlan, sellerActive, isLoading } = useSellerInfo();
 
-  // -------------------- Polling du statut technique --------------------
+    // -------------------- Polling du statut technique --------------------
   const pollStatus = async (invoiceId, interval = 2000, timeout = 60000) => {
     const start = Date.now();
 
@@ -42,38 +42,6 @@ import { useAuth } from '@/hooks/useAuth';
       check();
     });
   };
-
-  const sellerService = useSellerService();
-  const [sellerPlan, setSellerPlan] = useState("essentiel");
-  const [sellerActive, setSellerActive] = useState(false);
-
-  // On récupère les infos du vendeur connecté
-  useEffect(() => {
-    const fetchSellerInfo = async () => {
-      try {
-        const seller = await sellerService.fetchMySeller();
-        console.log("Seller raw from service:", seller);
-
-        // Plan principal du vendeur
-        const plan = seller?.plan || "essentiel";
-        setSellerPlan(plan);
-
-        // L'active correspond au SMTP actif
-        const isActive = seller?.smtp?.active === true;
-        setSellerActive(isActive);
-
-        console.log("Seller plan:", plan, "Active:", isActive);
-      } catch (err) {
-        console.error("Impossible de récupérer le vendeur :", err);
-        setSellerPlan("essentiel");
-        setSellerActive(false);
-      }
-    };
-
-    fetchSellerInfo();
-  }, [sellerService]);
-
-  console.log("Seller plan:", sellerPlan, "Active:", sellerActive);
   
   // -------------------- Colonnes du tableau --------------------
   const allColumns = [

@@ -149,3 +149,4 @@
 - [Jour 146 – Validation du PDF/A-3 sur Backblaze B2 📂☁️✅](jour-146.md)
 - [Jour 147 – Adapter, agnostique et pragmatique : la tech au service du produit ⚙️✨](jour-147.md)
 - [Jour 148 – Proxy PDF/A-3 et téléchargement front/back 🚀📄](jour-148.md)
+- [Jour 149 – Générer et télécharger les devis et justificatifs PDF 💾📄](jour-149.md)
