@@ -8,15 +8,17 @@ const { types } = require('pg');
 // Cela évite tous les problèmes de conversion de fuseau horaire.
 types.setTypeParser(1082, val => val);
 
+const useSSL = process.env.DB_SSL === 'true';
+
 const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
   port: Number(process.env.DB_PORT),
-  ssl: {
-    rejectUnauthorized: false // Render 
-  },
+  ssl: useSSL
+    ? { rejectUnauthorized: false } // SSL prod / hosting
+    : false,                        // local / Docker dev
 });
 
 module.exports = pool;
