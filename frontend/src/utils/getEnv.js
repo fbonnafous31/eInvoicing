@@ -1,23 +1,21 @@
 export function getEnv() {
-  // 1️⃣ Dev local → Vite .env
-  if (import.meta.env.DEV || window.location.hostname === "localhost") {
-    console.log("[Env] Mode DEV local → import.meta.env utilisé", import.meta.env);
-    return import.meta.env;
-  }
+  console.log("🏷️ window.__ENV__ existe ?", typeof window !== "undefined" && window.__ENV__);
+  console.log("🏷️ import.meta.env.DEV ?", import.meta.env.DEV);
+  console.log("🏷️ window.location.hostname", typeof window !== "undefined" ? window.location.hostname : "N/A");
 
-  // 2️⃣ Serveur dédié / Docker → config.js injecté côté serveur
-  // On détecte Docker / serveur dédié avec une variable spécifique, ex: window.__ENV__ non vide et pas Render
-  if (
-    typeof window !== "undefined" &&
-    window.__ENV__ &&
-    Object.keys(window.__ENV__).length > 0 &&
-    !window.__ENV__.IS_RENDER 
-  ) {
-    console.log("[Env] Mode serveur dédié / Docker → window.__ENV__ utilisé");
+  // 1️⃣ Serveur dédié / Docker → config.js injecté côté serveur
+  if (typeof window !== "undefined" && window.__ENV__ && window.__ENV__.VITE_API_URL) {
+    console.log("[Env] Mode serveur dédié / Docker → window.__ENV__ utilisé :", window.__ENV__);
     return window.__ENV__;
   }
 
-  // 3️⃣ Render / Netlify / Vercel → variables Vite dans le bundle
-  console.log("[Env] Mode PROD Render → import.meta.env utilisé");
-  return import.meta.env;
+  // 2️⃣ Dev local → Vite .env
+  if (import.meta.env.DEV || (typeof window !== "undefined" && window.location.hostname === "localhost")) {
+    console.log("[Env] Mode DEV local → import.meta.env utilisé :", import.meta.env);
+    return import.meta.env;
+  }
+
+  // 3️⃣ Production cloud → fallback
+  console.warn("[Env] Mode PROD cloud → fallback sur import.meta.env :", import.meta.env);
+  return import.meta.env || {};
 }
