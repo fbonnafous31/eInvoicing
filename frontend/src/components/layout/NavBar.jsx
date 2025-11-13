@@ -11,9 +11,10 @@ export default function NavBar() {
   const env = getEnv();
 
   // URL de retour après logout
-  const logoutUrl = import.meta.env.PROD
-    ? `${env.VITE_APP_URL || window.location.origin}/login`
-    : "http://localhost:5173/login";
+  const logoutUrl =
+    env.VITE_APP_ENV === "docker-local" || import.meta.env.DEV || window.location.hostname === "localhost"
+      ? "http://localhost:5173/login"
+      : `${env.VITE_APP_URL || window.location.origin}/login`;
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm">

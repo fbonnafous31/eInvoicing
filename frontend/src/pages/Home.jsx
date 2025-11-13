@@ -307,7 +307,7 @@ export default function Home() {
           </div>        
         </div>
       )}
-      {sellerPlan !== "Pro" && (
+      {sellerPlan !== "pro" && (
         <div className="text-center mt-4 text-gray-600">
           Des statistiques détaillées sont réservées au plan <strong>Pro</strong>.
         </div>

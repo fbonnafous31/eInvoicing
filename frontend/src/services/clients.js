@@ -1,7 +1,9 @@
 import { useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { getEnv } from "@/utils/getEnv";
 
-const API_BASE = `${import.meta.env.VITE_API_URL}/api/clients`;
+const env = getEnv();
+const API_BASE = `${env.VITE_API_URL}/api/clients`;
 
 export function useClientService() {
   const { getToken } = useAuth();
