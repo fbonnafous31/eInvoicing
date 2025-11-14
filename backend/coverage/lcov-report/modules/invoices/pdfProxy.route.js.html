@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for modules/invoices/invoiceClient.service.js</title>
+    <title>Code coverage report for modules/invoices/pdfProxy.route.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,13 +19,13 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">modules/invoices</a> invoiceClient.service.js</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">modules/invoices</a> pdfProxy.route.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">42.85% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>7/7</span>
+                <span class='fraction'>6/14</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>4/4</span>
+                <span class='fraction'>0/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">42.85% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>7/7</span>
+                <span class='fraction'>6/14</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -86,52 +86,61 @@
 <a name='L21'></a><a href='#L21'>21</a>
 <a name='L22'></a><a href='#L22'>22</a>
 <a name='L23'></a><a href='#L23'>23</a>
-<a name='L24'></a><a href='#L24'>24</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// backend/src/modules/invoices/invoiceClient.service.js
-const InvoiceClientModel = require("./invoiceClient.model.js");
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// src/modules/invoices/pdfProxy.route.js
+const express = require("express");
+const { GetObjectCommand } = require("@aws-sdk/client-s3");
+const { s3Client } = require("../../../config/s3Client"); // adapter selon ton arborescence
 &nbsp;
-const InvoiceClientService = {
-  async create(invoiceId, clientData) {
-    return await InvoiceClientModel.create(invoiceId, clientData);
-  },
+const router = express.Router();
 &nbsp;
-  async getByInvoiceId(invoiceId) {
-    return await InvoiceClientModel.findByInvoiceId(invoiceId);
-  },
+router.get("/:filename", <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+  const { filename } = <span class="cstat-no" title="statement not covered" >req.params;</span>
 &nbsp;
-  async update(invoiceId, clientData) {
-    return await InvoiceClientModel.update(invoiceId, clientData);
-  },
+<span class="cstat-no" title="statement not covered" >  try {</span>
+    const command = <span class="cstat-no" title="statement not covered" >new GetObjectCommand({</span>
+      Bucket: process.env.B2_BUCKET_NAME,
+      Key: filename,
+    });
 &nbsp;
-  async delete(invoiceId) {
-    return await InvoiceClientModel.delete(invoiceId);
-  },
-};
+    const response = <span class="cstat-no" title="statement not covered" >await s3Client.send(command);</span>
+<span class="cstat-no" title="statement not covered" >    res.setHeader("Content-Type", "application/pdf");</span>
+<span class="cstat-no" title="statement not covered" >    response.Body.pipe(res);</span>
+  } catch (err) {
+<span class="cstat-no" title="statement not covered" >    console.error(err);</span>
+<span class="cstat-no" title="statement not covered" >    res.status(500).send("Erreur lors de la récupération du PDF");</span>
+  }
+});
 &nbsp;
-// ✅ Ici on exporte avec CommonJS
-module.exports = InvoiceClientService;
+module.exports = router;
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->

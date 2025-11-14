@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1762954611209" clover="3.2.0">
-  <project timestamp="1762954611209" name="All files">
-    <metrics statements="796" coveredstatements="593" conditionals="446" coveredconditionals="208" methods="137" coveredmethods="94" elements="1379" coveredelements="895" complexity="0" loc="796" ncloc="796" packages="8" files="30" classes="30"/>
+<coverage generated="1763111261293" clover="3.2.0">
+  <project timestamp="1763111261293" name="All files">
+    <metrics statements="813" coveredstatements="602" conditionals="448" coveredconditionals="209" methods="138" coveredmethods="94" elements="1399" coveredelements="905" complexity="0" loc="813" ncloc="813" packages="8" files="31" classes="31"/>
     <package name="config">
-      <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
+      <metrics statements="7" coveredstatements="7" conditionals="2" coveredconditionals="1" methods="1" coveredmethods="0"/>
       <file name="db.js" path="/home/francois/dev/eInvoicing/backend/src/config/db.js">
-        <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
+        <metrics statements="7" coveredstatements="7" conditionals="2" coveredconditionals="1" methods="1" coveredmethods="0"/>
         <line num="1" count="11" type="stmt"/>
         <line num="2" count="11" type="stmt"/>
         <line num="3" count="11" type="stmt"/>
         <line num="9" count="11" type="stmt"/>
         <line num="11" count="11" type="stmt"/>
-        <line num="22" count="11" type="stmt"/>
+        <line num="13" count="11" type="stmt"/>
+        <line num="24" count="11" type="stmt"/>
       </file>
     </package>
     <package name="middlewares">
@@ -223,7 +224,7 @@
       </file>
     </package>
     <package name="modules.invoices">
-      <metrics statements="333" coveredstatements="189" conditionals="220" coveredconditionals="51" methods="59" coveredmethods="29"/>
+      <metrics statements="349" coveredstatements="197" conditionals="220" coveredconditionals="51" methods="60" coveredmethods="29"/>
       <file name="invoiceArtifact.service.js" path="/home/francois/dev/eInvoicing/backend/src/modules/invoices/invoiceArtifact.service.js">
         <metrics statements="26" coveredstatements="26" conditionals="20" coveredconditionals="14" methods="4" coveredmethods="4"/>
         <line num="1" count="2" type="stmt"/>
@@ -534,7 +535,7 @@
         <line num="503" count="2" type="stmt"/>
       </file>
       <file name="invoices.route.js" path="/home/francois/dev/eInvoicing/backend/src/modules/invoices/invoices.route.js">
-        <metrics statements="26" coveredstatements="26" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <metrics statements="28" coveredstatements="28" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
         <line num="3" count="1" type="stmt"/>
@@ -542,25 +543,27 @@
         <line num="5" count="1" type="stmt"/>
         <line num="6" count="1" type="stmt"/>
         <line num="7" count="1" type="stmt"/>
-        <line num="12" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
         <line num="13" count="1" type="stmt"/>
-        <line num="16" count="1" type="stmt"/>
-        <line num="19" count="1" type="stmt"/>
-        <line num="22" count="1" type="stmt"/>
-        <line num="25" count="1" type="stmt"/>
-        <line num="28" count="1" type="stmt"/>
+        <line num="14" count="1" type="stmt"/>
+        <line num="17" count="1" type="stmt"/>
+        <line num="20" count="1" type="stmt"/>
+        <line num="23" count="1" type="stmt"/>
+        <line num="26" count="1" type="stmt"/>
         <line num="29" count="1" type="stmt"/>
-        <line num="31" count="1" type="stmt"/>
-        <line num="38" count="1" type="stmt"/>
+        <line num="30" count="1" type="stmt"/>
+        <line num="32" count="1" type="stmt"/>
         <line num="39" count="1" type="stmt"/>
-        <line num="42" count="1" type="stmt"/>
-        <line num="45" count="1" type="stmt"/>
-        <line num="48" count="1" type="stmt"/>
-        <line num="51" count="1" type="stmt"/>
-        <line num="53" count="1" type="stmt"/>
-        <line num="55" count="1" type="stmt"/>
-        <line num="61" count="1" type="stmt"/>
-        <line num="63" count="1" type="stmt"/>
+        <line num="40" count="1" type="stmt"/>
+        <line num="43" count="1" type="stmt"/>
+        <line num="46" count="1" type="stmt"/>
+        <line num="49" count="1" type="stmt"/>
+        <line num="52" count="1" type="stmt"/>
+        <line num="54" count="1" type="stmt"/>
+        <line num="56" count="1" type="stmt"/>
+        <line num="58" count="1" type="stmt"/>
+        <line num="64" count="1" type="stmt"/>
+        <line num="66" count="1" type="stmt"/>
       </file>
       <file name="invoices.service.js" path="/home/francois/dev/eInvoicing/backend/src/modules/invoices/invoices.service.js">
         <metrics statements="22" coveredstatements="18" conditionals="2" coveredconditionals="0" methods="8" coveredmethods="5"/>
@@ -586,6 +589,23 @@
         <line num="56" count="0" type="stmt"/>
         <line num="60" count="1" type="stmt"/>
         <line num="63" count="2" type="stmt"/>
+      </file>
+      <file name="pdfProxy.route.js" path="/home/francois/dev/eInvoicing/backend/src/modules/invoices/pdfProxy.route.js">
+        <metrics statements="14" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="6" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="9" count="0" type="stmt"/>
+        <line num="11" count="0" type="stmt"/>
+        <line num="12" count="0" type="stmt"/>
+        <line num="17" count="0" type="stmt"/>
+        <line num="18" count="0" type="stmt"/>
+        <line num="19" count="0" type="stmt"/>
+        <line num="21" count="0" type="stmt"/>
+        <line num="22" count="0" type="stmt"/>
+        <line num="26" count="1" type="stmt"/>
       </file>
     </package>
     <package name="modules.sellers">

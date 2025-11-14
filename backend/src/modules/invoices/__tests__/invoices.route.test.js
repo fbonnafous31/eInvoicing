@@ -64,6 +64,17 @@ jest.mock("../invoices.controller", () => ({
   getInvoicePdfA3Proxy: jest.fn((req, res) => res.status(200).send(Buffer.from("mock-pdf"))),
 }));
 
+// === Mock du client S3 pour éviter les appels réels dans les tests 
+jest.mock("../../../../config/s3Client", () => ({
+  s3Client: {
+    send: jest.fn().mockResolvedValue({
+      Body: {
+        pipe: jest.fn(), 
+      },
+    }),
+  },
+}));
+
 // --- Setup Express ---
 const app = express();
 app.use(express.json());
