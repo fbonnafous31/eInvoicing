@@ -31,11 +31,13 @@ Créer le fichier `backend/.env` avec les variables suivantes :
 
 ``` bash
 # Configuration base de données
+NODE_ENV=development
 DB_USER=
 DB_HOST=
 DB_NAME=
 DB_PASSWORD=
 DB_PORT=
+DB_SSL=false
 PORT=
 
 # Auth0
@@ -53,6 +55,13 @@ ENCRYPTION_KEY=
 
 # Resend configuration (envoi de mail)
 RESEND_API_KEY=
+
+# Storage backend configuration 
+STORAGE_BACKEND=  # options: local, b2
+B2_ENDPOINT=
+B2_BUCKET_NAME=
+B2_KEY_ID=
+B2_APPLICATION_KEY=
 ```
 
 🟡 **Remarque** :\
@@ -142,6 +151,9 @@ docker cp frontend/default.conf einvoicing-frontend:/etc/nginx/conf.d/default.co
 
 # Recharger Nginx
 docker exec einvoicing-frontend nginx -s reload
+
+# Création du dossier et du symlink pour les invoices
+docker exec einvoicing-backend /bin/sh -c "mkdir -p /app/src/uploads/app && ln -sf /app/src/uploads/invoices /app/src/uploads/app/invoices"
 
 # Test rapide de l'API backend
 echo "Test de l'API backend :"

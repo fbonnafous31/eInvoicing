@@ -5,6 +5,7 @@ const upload = require('../../middlewares/upload');
 const attachSeller = require('../../middlewares/attachSeller'); 
 const InvoiceMailController = require('./invoiceMail.controller');
 const checkJwt = require('../../middlewares/auth'); 
+const pdfProxy = require('./pdfProxy.route');
 
 // Routes publiques (si besoin)
 
@@ -51,6 +52,8 @@ router.get('/:id/lifecycle', InvoicesController.getInvoiceLifecycle);
 router.get('/:id/status/:statusCode/comment', InvoicesController.getInvoiceStatusComment);
 
 router.post('/generate-pdf', InvoicesController.generateInvoicePdfBuffer);
+
+router.use("/pdf", pdfProxy);
 
 router.put(
   '/:id',
