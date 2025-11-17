@@ -152,3 +152,4 @@
 - [Jour 149 – Générer et télécharger les devis et justificatifs PDF 💾📄](jour-149.md)
 - [Jour 150 – Docker, volumes et configuration unifiée pour dev local et Render 🐳⚡](jour-150.md)
 - [Jour 151 – Proxy PDF via B2/S3 pour visualisation sur Render 📄☁️](jour-151.md)
+- [Jour 152 – Envoyer le Factur-X depuis B2 vers la plateforme agréée (PA) 🚀📄](jour-152.md)

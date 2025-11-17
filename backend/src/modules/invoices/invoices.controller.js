@@ -1,11 +1,12 @@
 const fs = require('fs');
+const tmp = require('tmp');
+const path = require('path');
 const InvoicesService = require('./invoices.service');
 const InvoicePdpService = require('./invoicePdp.service');
 const PDPService = require('../pdp/PDPService');
 const { getInvoiceById } = require('./invoices.model');
 const { generateQuotePdf, generateInvoicePdfBuffer: generatePdfUtil } = require('../../utils/invoice-pdf/generateInvoicePdf');
 const InvoiceStatusModel = require('../invoices/invoiceStatus.model');
-const path = require("path");
 
 /**
  * Helper pour envelopper les gestionnaires de routes asynchrones et attraper les erreurs.
@@ -183,29 +184,45 @@ const getInvoices = asyncHandler(async (req, res) => {
     res.json(invoices);
 });
 
-// invoices.controller.js
 const sendInvoice = asyncHandler(async (req, res) => {
   const invoiceId = req.params.id;
   const invoice = await InvoicesService.getInvoiceById(invoiceId);
+
   if (!invoice) {
     return res.status(404).json({ error: 'Facture introuvable' });
   }
 
-  const finalXmlPath = path.join(__dirname, `../../uploads/factur-x/${invoiceId}-factur-x.xml`);
-  if (!fs.existsSync(finalXmlPath)) {
-    return res.status(404).json({
-      error: `Le fichier XML final pour la facture ${invoiceId} est introuvable.`,
-    });
+  let xmlBuffer;
+
+  // 🔹 Récupération du Factur-X selon le backend
+  if (process.env.STORAGE_BACKEND === 'local') {
+    const localPath = path.join(__dirname, `../../uploads/factur-x/${invoiceId}-factur-x.xml`);
+    if (!fs.existsSync(localPath)) {
+      return res.status(404).json({ error: `Le fichier XML final pour la facture ${invoiceId} est introuvable.` });
+    }
+    xmlBuffer = fs.readFileSync(localPath);
+  } else if (process.env.STORAGE_BACKEND === 'b2') {
+    const remotePath = `factur-x/${invoiceId}-factur-x.xml`;
+    xmlBuffer = await storageService.get(remotePath); // retourne un Buffer
+    if (!xmlBuffer || !xmlBuffer.length) {
+      return res.status(404).json({ error: `Le fichier XML final pour la facture ${invoiceId} est introuvable sur B2.` });
+    }
+  } else {
+    return res.status(500).json({ error: 'Storage backend non configuré' });
   }
 
   const provider = process.env.PDP_PROVIDER || 'mock';
   const pdp = new PDPService(provider);
 
+  // 🔹 Création d'un fichier temporaire si besoin pour le PDP
+  const tempFile = tmp.fileSync({ postfix: '.xml' });
+  fs.writeFileSync(tempFile.name, xmlBuffer);
+
   try {
-    const result = await pdp.sendInvoice({ invoiceLocalId: invoiceId, filePath: finalXmlPath });
+    const result = await pdp.sendInvoice({ invoiceLocalId: invoiceId, filePath: tempFile.name });
 
     // ✅ Envoi réussi → statut validated
-    const submissionId = result?.id || result?.submissionId;
+    const submissionId = result?.id || result?.submissionId || null;
     await InvoiceStatusModel.updateTechnicalStatus(invoiceId, {
       technicalStatus: 'validated',
       submissionId,
@@ -237,6 +254,9 @@ const sendInvoice = asyncHandler(async (req, res) => {
       provider,
       error,
     });
+  } finally {
+    // Supprime le fichier temporaire
+    tempFile.removeCallback();
   }
 });
 
