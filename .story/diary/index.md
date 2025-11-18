@@ -153,3 +153,6 @@
 - [Jour 150 – Docker, volumes et configuration unifiée pour dev local et Render 🐳⚡](jour-150.md)
 - [Jour 151 – Proxy PDF via B2/S3 pour visualisation sur Render 📄☁️](jour-151.md)
 - [Jour 152 – Envoyer le Factur-X depuis B2 vers la plateforme agréée (PA) 🚀📄](jour-152.md)
+- [Jour 153 – Construire le blog pour raconter l’histoire du projet 📝💻](jour-153.md)
+- [Jour 154 – À la croisée des chemins 🌿✨](jour-154.md)
+- [Jour 155 – Faire évoluer le blog petit à petit 🎨🚧](jour-155.md)
