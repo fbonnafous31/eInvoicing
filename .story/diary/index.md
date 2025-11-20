@@ -156,3 +156,4 @@
 - [Jour 153 – Construire le blog pour raconter l’histoire du projet 📝💻](jour-153.md)
 - [Jour 154 – À la croisée des chemins 🌿✨](jour-154.md)
 - [Jour 155 – Faire évoluer le blog petit à petit 🎨🚧](jour-155.md)
+- [Jour 156 -- Le blog est terminé : le plaisir d'un outil bien fini 🏁](jour-156.md)
