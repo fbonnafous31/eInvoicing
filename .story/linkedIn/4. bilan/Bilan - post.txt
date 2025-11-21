@@ -1,0 +1,77 @@
+🎉 **Un grand merci, et une dernière page avant la pause de fin d’année**
+
+Ces derniers mois ont été intenses.
+Le 10 août 2024, j’ai lancé un défi un peu fou : construire, seul, une solution complète de facturation électronique.
+Pas un prototype. Pas une démo. Une vraie application : conforme, solide, documentée, pensée pour durer.
+
+Aujourd’hui, j’ai atteint la première ligne d’arrivée.
+Et avant de faire une pause, j’avais envie de dire merci.
+
+🙏 Merci pour vos encouragements, vos retours et vos messages.
+🙏 Merci à ceux qui ont lu mes billets, testé l’app, ou simplement suivi l’aventure.
+🙏 Merci à ceux qui m’ont poussé à montrer mon travail — ce n’était pas naturel pour moi.
+
+
+🌱 **Pourquoi j’ai fait tout ça**
+
+Après vingt ans dans l’édition de logiciels financiers, j’avais envie de retrouver le plaisir de créer.
+Pour moi.
+À mon rythme.
+Sans contrainte extérieure.
+
+J’ai voulu construire une application simple, souveraine et conforme, qui réconcilie :
+
+* les standards officiels (Factur-X, PDF/A-3)
+* une architecture saine
+* et une expérience utilisateur épurée
+
+C’est ainsi qu’est née **mon application de facturation** : un laboratoire d’idées autant qu’un produit.
+
+
+🧪 **Ce que j’ai créé**
+
+En 100 jours, j’ai construit :
+
+* une application complète (front + back)
+* un environnement de staging public
+* une vitrine claire
+* un espace d’hébergement bêta
+* un simulateur de gains
+* un blog “making-of”, où je raconte chaque étape, chaque choix technique, chaque hésitation
+* un eBook qui retrace les 100 jours de création
+
+J’ai aussi mis en place une vraie industrialisation : CI/CD, tests, monitoring, Docker, infrastructure reproductible…
+Ce projet m’a permis d’apprendre ou réapprendre une liste impressionnante d’outils.
+
+C’était un laboratoire personnel, mais aussi un terrain d’expérimentation extrêmement formateur.
+
+
+📘 **Le making-of**
+
+Si vous voulez entrer dans les coulisses — la technique, les doutes, les solutions, les découvertes — j’ai tenu un journal complet :
+
+👉 [https://journal-dev-xi.vercel.app/](https://journal-dev-xi.vercel.app/)
+
+C’est probablement le contenu le plus authentique et le plus “vrai” que j’ai créé.
+
+
+🎄 **Et maintenant ?**
+
+Je vais faire une pause.
+Profiter des fêtes.
+Laisser le projet vivre un peu sans moi.
+Observer ce qui se passe.
+Écouter les signaux.
+
+Je ne suis pas commercial dans l’âme .
+Je ne force rien.
+Mais je reste à l’écoute des opportunités que ce chemin pourrait ouvrir.
+
+En 2025, peut-être que ce projet continuera à évoluer.
+Peut-être qu’il m’amènera ailleurs.
+Je n’en sais rien — et c’est très bien comme ça.
+
+
+✨ **Merci encore, et très belles fêtes à tous**
+
+Que la fin d’année vous apporte du calme, de la lumière et un peu de temps pour créer, vous aussi, à votre rythme.
