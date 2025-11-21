@@ -1,7 +1,7 @@
 // src/modules/invoices/pdfProxy.route.js
 const express = require("express");
 const { GetObjectCommand } = require("@aws-sdk/client-s3");
-const { s3Client } = require("../../../config/s3Client"); // adapter selon ton arborescence
+const { s3Client } = require("../../../config/s3Client"); 
 
 const router = express.Router();
 

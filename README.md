@@ -14,6 +14,16 @@ L'application est aujourd'hui un **produit fonctionnel, sécurisé et conforme**
 
 ---
 
+## ✍️ Journal de bord : Chronique d’un dev en liberté
+
+Ce projet est bien plus qu’une application.
+C’est le parcours d’un développeur qui quitte le salariat pour construire seul un produit, entre défis techniques, moments de doute et quête de liberté retrouvée.
+
+Découvrez le journal de bord complet ici :
+➡️ https://journal-dev-xi.vercel.app/
+
+---
+
 ## 📜 Ma Vision : La Facturation Électronique Simple, Souveraine et Conforme
 
 La facturation électronique ne doit pas être une contrainte. Mon ambition est de proposer une alternative aux ERP lourds et aux SaaS fermés. Un outil :
