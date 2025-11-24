@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const InvoicesController = require('./invoices.controller');
-const upload = require('../../middlewares/upload'); 
 const attachSeller = require('../../middlewares/attachSeller'); 
 const InvoiceMailController = require('./invoiceMail.controller');
 const checkJwt = require('../../middlewares/auth'); 
 const pdfProxy = require('./pdfProxy.route');
+const { upload } = require('../../middlewares/upload');
 
 // Routes publiques (si besoin)
 

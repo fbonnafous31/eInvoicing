@@ -10,7 +10,7 @@ jest.mock("fs", () => ({
 // Mock de multer directement dans jest.mock
 jest.mock("multer", () => {
   const multerFn = jest.fn(() => "mocked-multer");
-  multerFn.diskStorage = jest.fn((config) => config); // retourne la config pour tester callbacks
+  multerFn.diskStorage = jest.fn((config) => config); 
   return multerFn;
 });
 
@@ -25,7 +25,7 @@ describe("upload middleware", () => {
     multer = require("multer");
 
     fs.existsSync.mockReturnValue(false);
-    uploadPath = path.join(__dirname, "../../uploads/invoices");
+    uploadPath = path.join(__dirname, "../../uploads/tmp");
 
     require("../upload");
   });
@@ -54,7 +54,7 @@ describe("upload middleware", () => {
   });
 
   it("exporte le middleware multer", () => {
-    const upload = require("../upload");
+    const { upload } = require("../upload");
     expect(upload).toBe("mocked-multer");
   });
 });

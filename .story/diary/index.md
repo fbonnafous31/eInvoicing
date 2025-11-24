@@ -157,3 +157,5 @@
 - [Jour 154 – À la croisée des chemins 🌿✨](jour-154.md)
 - [Jour 155 – Faire évoluer le blog petit à petit 🎨🚧](jour-155.md)
 - [Jour 156 -- Le blog est terminé : le plaisir d'un outil bien fini 🏁](jour-156.md)
+- [](jour-157.md)
+- [Jour 158 -- Renforcer les fondations 🔐🧱](jour-158.md)
