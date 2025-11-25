@@ -159,3 +159,4 @@
 - [Jour 156 -- Le blog est terminé : le plaisir d'un outil bien fini 🏁](jour-156.md)
 - [](jour-157.md)
 - [Jour 158 -- Renforcer les fondations 🔐🧱](jour-158.md)
+- [Jour 159 — Construire une série pédagogique sur LinkedIn 🎬📊](jour-159.md)
