@@ -42,3 +42,6 @@ backend/uploads/*
 
 startDB.sh
 .story/strategy
+
+# Audit files
+/scripts/audit/audit-result.json

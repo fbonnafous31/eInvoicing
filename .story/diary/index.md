@@ -161,3 +161,4 @@
 - [Jour 158 — Construire une série pédagogique sur LinkedIn 🎬📊](jour-158.md)
 - [Jour 159 — Mon constat sur le e-reporting : une brique plus importante qu’elle n’en a l’air 📡🧩](jour-159.md)
 - [Jour 160 — L’écosystème des PA : ouverture, adoption… et ce que ça révèle 🔍🏗️](jour-160.md)
+- [Jour 161 — Sécurité : audits de dépendances et premiers garde-fous 🛡️🔍](jour-161.md)

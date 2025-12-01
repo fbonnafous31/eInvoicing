@@ -3,6 +3,7 @@
 [![codecov](https://codecov.io/gh/fbonnafous31/eInvoicing/branch/main/graph/badge.svg?token=VOTRE_TOKEN_CODECOV)](https://codecov.io/gh/fbonnafous31/eInvoicing)
 [![PDF/A Compliant](https://img.shields.io/badge/PDF/A--3-ISO_19005--3-red.svg)](https://www.pdfa.org/solution-center/)
 [![Licence](https://img.shields.io/badge/Licence-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+![CI](https://github.com/fbonnafous31/eInvoicing/actions/workflows/ci.yml/badge.svg)
 
 ## 📖 Contexte
 
