@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">3.44% </span>
+                <span class="strong">5.08% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>2/58</span>
+                <span class='fraction'>3/59</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">3.27% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/59</span>
+                <span class='fraction'>2/61</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">4.25% </span>
+                <span class="strong">6.25% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>2/47</span>
+                <span class='fraction'>3/48</span>
             </div>
         
             
@@ -285,7 +285,9 @@
 <a name='L220'></a><a href='#L220'>220</a>
 <a name='L221'></a><a href='#L221'>221</a>
 <a name='L222'></a><a href='#L222'>222</a>
-<a name='L223'></a><a href='#L223'>223</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L223'></a><a href='#L223'>223</a>
+<a name='L224'></a><a href='#L224'>224</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -508,6 +510,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const pool = require('../../config/db');
+const SCHEMA = process.env.DB_SCHEMA || 'public';
 &nbsp;
 function <span class="fstat-no" title="function not covered" >validateClientData(</span>clientData) {
   const {
@@ -541,7 +544,7 @@ function <span class="fstat-no" title="function not covered" >validateClientData
 async function <span class="fstat-no" title="function not covered" >checkSiretUnique(</span>siret, clientId = <span class="branch-0 cbranch-no" title="branch not covered" >null)</span> {
 <span class="cstat-no" title="statement not covered" >  if (!siret) <span class="cstat-no" title="statement not covered" >return;</span></span>
   const cleaned = <span class="cstat-no" title="statement not covered" >siret.replace(/\D/g, '');</span>
-  let query = <span class="cstat-no" title="statement not covered" >'SELECT id FROM invoicing.clients WHERE siret = $1';</span>
+  let query = <span class="cstat-no" title="statement not covered" >`SELECT id FROM ${SCHEMA}.clients WHERE siret = $1`;</span>
   const params = <span class="cstat-no" title="statement not covered" >[cleaned];</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  if (clientId) {</span>
@@ -561,7 +564,7 @@ async function <span class="fstat-no" title="function not covered" >getAllClient
     `SELECT id, is_company, legal_name, firstname, lastname, siret, legal_identifier,
             address, city, postal_code, country_code, vat_number, email, phone,
             created_at, updated_at
-     FROM invoicing.clients
+     FROM ${SCHEMA}.clients
      ORDER BY legal_name`
   );
 <span class="cstat-no" title="statement not covered" >  return result.rows;</span>
@@ -573,7 +576,7 @@ async function <span class="fstat-no" title="function not covered" >getClientsBy
     `SELECT id, is_company, legal_name, firstname, lastname, siret, legal_identifier,
             address, city, postal_code, country_code, vat_number, email, phone,
             created_at, updated_at
-     FROM invoicing.clients
+     FROM ${SCHEMA}.clients
      WHERE seller_id = $1
      ORDER BY legal_name`,
     [sellerId]
@@ -584,7 +587,7 @@ async function <span class="fstat-no" title="function not covered" >getClientsBy
 // ----------------- Get client by ID -----------------
 async function <span class="fstat-no" title="function not covered" >getClientById(</span>id, sellerId) {
   const result = <span class="cstat-no" title="statement not covered" >await pool.query(</span>
-    'SELECT * FROM invoicing.clients WHERE id = $1 AND seller_id = $2',
+    `SELECT * FROM ${SCHEMA}.clients WHERE id = $1 AND seller_id = $2`,
     [id, sellerId]
   );
 <span class="cstat-no" title="statement not covered" >  return result.rows[0];</span>
@@ -617,7 +620,7 @@ async function <span class="fstat-no" title="function not covered" >insertClient
   const cleanedSiret = <span class="cstat-no" title="statement not covered" >country_code === 'FR' &amp;&amp; siret ? siret.replace(/\D/g, '') : siret;</span>
 &nbsp;
   const result = <span class="cstat-no" title="statement not covered" >await pool.query(</span>
-    `INSERT INTO invoicing.clients
+    `INSERT INTO ${SCHEMA}.clients
       (is_company, legal_name, firstname, lastname, siret, legal_identifier,
        address, city, postal_code, country_code, vat_number, email, phone, seller_id)
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
@@ -646,7 +649,7 @@ async function <span class="fstat-no" title="function not covered" >insertClient
 // ----------------- Remove client -----------------
 async function <span class="fstat-no" title="function not covered" >removeClient(</span>id, sellerId) {
   const result = <span class="cstat-no" title="statement not covered" >await pool.query(</span>
-    'DELETE FROM invoicing.clients WHERE id = $1 AND seller_id = $2 RETURNING *',
+    `DELETE FROM ${SCHEMA}.clients WHERE id = $1 AND seller_id = $2 RETURNING *`,
     [id, sellerId]
   );
 <span class="cstat-no" title="statement not covered" >  if (result.rowCount === 0) <span class="cstat-no" title="statement not covered" >throw new Error('Client not found');</span></span>
@@ -680,7 +683,7 @@ async function <span class="fstat-no" title="function not covered" >updateClient
   const cleanedSiret = <span class="cstat-no" title="statement not covered" >country_code === 'FR' &amp;&amp; siret ? siret.replace(/\D/g, '') : siret;</span>
 &nbsp;
   const result = <span class="cstat-no" title="statement not covered" >await pool.query(</span>
-    `UPDATE invoicing.clients
+    `UPDATE ${SCHEMA}.clients
      SET is_company = $1,
          legal_name = $2,
          firstname = $3,
@@ -736,7 +739,7 @@ module.exports = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-14T14:53:17.533Z
+                at 2025-12-02T17:09:10.581Z
             </div>
         <script src="prettify.js"></script>
         <script>

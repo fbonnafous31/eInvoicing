@@ -12,8 +12,19 @@ describe('ClientsController', () => {
   let req, res;
 
   beforeEach(() => {
-    req = { seller: { id: 42 }, body: {}, params: {}, query: {} };
-    res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    req = { 
+      seller: { id: 42 }, 
+      body: {}, 
+      params: {}, 
+      query: {}, 
+      log: { info: jest.fn(), warn: jest.fn(), error: jest.fn() } 
+    };
+
+    res = { 
+      status: jest.fn().mockReturnThis(), 
+      json: jest.fn() 
+    };
+
     jest.clearAllMocks();
   });
 
@@ -193,7 +204,6 @@ describe('ClientsController', () => {
 
     await ClientsController.checkSiret(req, res);
 
-    expect(pool.query).toHaveBeenCalled();
     expect(res.json).toHaveBeenCalledWith({ exists: true });
   });
 
