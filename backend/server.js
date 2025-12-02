@@ -5,6 +5,7 @@ const cors = require("cors");
 const path = require("path");
 const errorHandler = require("./src/middlewares/errorHandler");
 const { register, metricsMiddleware } = require("./src/monitoring/metrics");
+const logger = require("./src/utils/logger");
 
 // Services
 const storageService = require("./src/services"); // ton service de stockage B2
@@ -40,12 +41,9 @@ app.use(cors({
   credentials: true
 }));
 
-// Log simple des requêtes
-app.use((req, res, next) => {
-  if (req.originalUrl === '/favicon.ico') return next();
-  console.log("⚡ Requête reçue :", req.method, req.originalUrl);
-  next();
-});
+// Logger middleware
+const loggerMiddleware = require("./src/middlewares/loggerMiddleware");
+app.use(loggerMiddleware);
 
 // Middlewares JSON / URL-encoded
 app.use(express.json());
@@ -93,7 +91,7 @@ app.get("/api/invoices/:id/pdf-a3-proxy", async (req, res) => {
 
     res.send(fileBuffer);
   } catch (err) {
-    console.error("[PDF Proxy]", err);
+    req.log.error({ err, invoiceId: req.params.id }, "Erreur téléchargement PDF/A-3");
     res.status(500).json({ message: "Erreur téléchargement PDF/A-3" });
   }
 });
@@ -104,5 +102,5 @@ app.use(errorHandler);
 // Démarrage du serveur
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Backend démarré sur http://localhost:${PORT}`);
+  logger.info(`Backend démarré sur http://localhost:${PORT}`);
 });
