@@ -1,11 +1,12 @@
 const SellersService = require('./sellers.service');
+const logger = require('../../utils/logger');
 
 async function getSellers(req, res) {
   try {
     const sellers = await SellersService.listSellers();
     res.json(sellers);
   } catch (err) {
-    console.error(err);
+    logger.error({ err }, "Erreur dans getSellers");
     res.status(500).json({ error: 'Erreur serveur' });
   }
 }
@@ -14,7 +15,9 @@ async function createSeller(req, res) {
   try {
     // Vérifie si l'utilisateur a déjà un vendeur attaché
     if (req.seller) {
-      return res.status(400).json({ error: "Un vendeur existe déjà pour cet utilisateur" });
+      return res.status(400).json({
+        error: "Un vendeur existe déjà pour cet utilisateur"
+      });
     }
 
     const sellerData = req.body;
@@ -23,7 +26,7 @@ async function createSeller(req, res) {
     const newSeller = await SellersService.createSeller(sellerData, auth0_id);
     res.status(201).json(newSeller);
   } catch (err) {
-    console.error(err);
+    logger.error({ err }, "Erreur dans createSeller");
     res.status(500).json({ error: 'Erreur serveur lors de la création' });
   }
 }
@@ -33,11 +36,13 @@ async function getSellerById(req, res) {
     const { id } = req.params;
     const seller = await SellersService.getSellerById(id);
 
-    if (!seller) return res.status(404).json({ message: 'Vendeur non trouvé' });
+    if (!seller) {
+      return res.status(404).json({ message: 'Vendeur non trouvé' });
+    }
 
     res.json(seller);
   } catch (err) {
-    console.error(err);
+    logger.error({ err }, "Erreur dans getSellerById");
     res.status(500).json({ error: 'Erreur serveur' });
   }
 }
@@ -48,7 +53,7 @@ async function deleteSeller(req, res) {
     const deleted = await SellersService.deleteSeller(id);
     res.json({ message: 'Seller deleted', seller: deleted });
   } catch (err) {
-    console.error(err);
+    logger.error({ err }, "Erreur dans deleteSeller");
     res.status(404).json({ error: err.message });
   }
 }
@@ -60,32 +65,38 @@ async function updateSeller(req, res) {
     const updatedSeller = await SellersService.updateSellerData(id, sellerData);
     res.json(updatedSeller);
   } catch (err) {
-    console.error(err);
+    logger.error({ err }, "Erreur dans updateSeller");
     res.status(404).json({ error: err.message });
   }
 }
 
 async function getMySeller(req, res, next) {
   try {
-    // 🔹 Utilise le service existant getSellerByAuth0Id
     const seller = await SellersService.getSellerByAuth0Id(req.user.sub);
 
     if (!seller) {
-      console.warn("[Backend] Aucun vendeur trouvé pour cet utilisateur");
-      return res.status(404).json({ message: "Aucun vendeur trouvé pour cet utilisateur" });
+      logger.warn("Aucun vendeur trouvé pour cet utilisateur");
+      return res.status(404).json({
+        message: "Aucun vendeur trouvé pour cet utilisateur"
+      });
     }
 
     res.json(seller);
   } catch (err) {
-    console.error("[Backend] Erreur getMySeller :", err);
+    logger.error({ err }, "Erreur dans getMySeller");
     next(err);
   }
 }
 
 async function checkIdentifier(req, res) {
-  const { identifier, id } = req.query;
-  const exists = await SellersService.checkIdentifierExists(identifier, id);
-  res.json({ exists });
+  try {
+    const { identifier, id } = req.query;
+    const exists = await SellersService.checkIdentifierExists(identifier, id);
+    res.json({ exists });
+  } catch (err) {
+    logger.error({ err }, "Erreur dans checkIdentifier");
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
 }
 
 async function testSmtpResend(req, res) {
@@ -115,6 +126,7 @@ async function testSmtpResend(req, res) {
     });
 
   } catch (error) {
+    logger.error({ error }, "Erreur dans testSmtpResend");
     return res.status(400).json({
       success: false,
       error: error.message
@@ -129,6 +141,6 @@ module.exports = {
   deleteSeller,
   updateSeller,
   getMySeller,
-  checkIdentifier, 
+  checkIdentifier,
   testSmtpResend
 };

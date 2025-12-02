@@ -1,6 +1,7 @@
 const pool = require('../../config/db');
 const { encrypt } = require('../../utils/encryption');
 const SCHEMA = process.env.DB_SCHEMA || 'public';
+const logger = require('../../utils/logger');
 
 /* --- Récupérer tous les vendeurs (sans SMTP) --- */
 async function getAllSellers() {
@@ -146,8 +147,8 @@ async function removeSeller(id) {
 async function updateSeller(id, data) {
   const client = await pool.connect();
   try {
-    console.log('[updateSeller] START id:', id);
-    console.log('[updateSeller] incoming data:', data);
+    logger.info({ id }, '[updateSeller] START');
+    logger.info({ data }, '[updateSeller] incoming data');  
 
     await client.query('BEGIN');
 
@@ -165,9 +166,8 @@ async function updateSeller(id, data) {
 
     const sellerDbId = seller_id || id;
 
-    console.log('[updateSeller] mainData:', mainData);
-    console.log('[updateSeller] SMTP data:', { smtp_host, smtp_port, smtp_user, smtp_pass, smtp_secure, smtp_from });
-    console.log('[updateSeller] sellerDbId:', sellerDbId);
+    logger.info({ mainData }, '[updateSeller] mainData');
+    logger.info({ sellerDbId }, '[updateSeller] sellerDbId');
 
     // --- Mise à jour des données principales
     const query = `
@@ -205,11 +205,11 @@ async function updateSeller(id, data) {
     const { rows } = await client.query(query, values);
     if (!rows[0]) throw new Error(`[updateSeller] Seller with id ${sellerDbId} not found`);
     const updatedSeller = rows[0];
-    console.log('[updateSeller] updatedSeller:', updatedSeller);
+    logger.info({ updatedSeller }, '[updateSeller] updatedSeller');
 
     // --- Gestion du bloc SMTP sécurisé
     if (smtp_host || smtp_user || smtp_pass || smtp_from) {
-      console.log('[updateSeller] checking existing SMTP settings...');
+      logger.info('[updateSeller] checking existing SMTP settings...');
       const existingRes = await client.query(
         `SELECT * FROM ${SCHEMA}.seller_smtp_settings WHERE seller_id = $1 FOR UPDATE`,
         [sellerDbId]
@@ -223,7 +223,7 @@ async function updateSeller(id, data) {
       }
 
       if (existing) {
-        console.log('[updateSeller] updating existing SMTP settings...');
+        logger.info('[updateSeller] checking existing SMTP settings...');
         await client.query(
           `
           UPDATE ${SCHEMA}.seller_smtp_settings
@@ -249,7 +249,7 @@ async function updateSeller(id, data) {
           ]
         );
       } else {
-        console.log('[updateSeller] inserting new SMTP settings...');
+        logger.info('[updateSeller] inserting new SMTP settings...');
         await client.query(
           `
           INSERT INTO ${SCHEMA}.seller_smtp_settings
@@ -271,15 +271,15 @@ async function updateSeller(id, data) {
     }
 
     await client.query('COMMIT');
-    console.log('[updateSeller] COMMIT successful');
+    logger.info('[updateSeller] COMMIT successful');
     return updatedSeller;
   } catch (err) {
     await client.query('ROLLBACK');
-    console.error('[updateSeller] ROLLBACK due to error:', err);
+    logger.error({ err }, '[updateSeller] ROLLBACK due to error');
     throw err;
   } finally {
     client.release();
-    console.log('[updateSeller] connection released');
+    logger.info('[updateSeller] connection released');
   }
 }
 

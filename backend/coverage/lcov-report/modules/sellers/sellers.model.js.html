@@ -358,6 +358,7 @@
 <a name='L293'></a><a href='#L293'>293</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -524,7 +525,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
@@ -650,6 +650,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const pool = require('../../config/db');
 const { encrypt } = require('../../utils/encryption');
 const SCHEMA = process.env.DB_SCHEMA || <span class="branch-1 cbranch-no" title="branch not covered" >'public';</span>
+const logger = require('../../utils/logger');
 &nbsp;
 /* --- Récupérer tous les vendeurs (sans SMTP) --- */
 async function getAllSellers() {
@@ -795,8 +796,8 @@ async function removeSeller(id) {
 async function updateSeller(id, data) {
   const client = await pool.connect();
   try {
-    console.log('[updateSeller] START id:', id);
-    console.log('[updateSeller] incoming data:', data);
+    logger.info({ id }, '[updateSeller] START');
+    logger.info({ data }, '[updateSeller] incoming data');  
 &nbsp;
     await client.query('BEGIN');
 &nbsp;
@@ -814,9 +815,8 @@ async function updateSeller(id, data) {
 &nbsp;
     const sellerDbId = seller_id || id;
 &nbsp;
-    console.log('[updateSeller] mainData:', mainData);
-    console.log('[updateSeller] SMTP data:', { smtp_host, smtp_port, smtp_user, smtp_pass, smtp_secure, smtp_from });
-    console.log('[updateSeller] sellerDbId:', sellerDbId);
+    logger.info({ mainData }, '[updateSeller] mainData');
+    logger.info({ sellerDbId }, '[updateSeller] sellerDbId');
 &nbsp;
     // --- Mise à jour des données principales
     const query = `
@@ -854,11 +854,11 @@ async function updateSeller(id, data) {
     const { rows } = await client.query(query, values);
     <span class="missing-if-branch" title="if path not taken" >I</span>if (!rows[0]) <span class="cstat-no" title="statement not covered" >throw new Error(`[updateSeller] Seller with id ${sellerDbId} not found`);</span>
     const updatedSeller = rows[0];
-    console.log('[updateSeller] updatedSeller:', updatedSeller);
+    logger.info({ updatedSeller }, '[updateSeller] updatedSeller');
 &nbsp;
     // --- Gestion du bloc SMTP sécurisé
     <span class="missing-if-branch" title="else path not taken" >E</span>if (smtp_host || <span class="branch-1 cbranch-no" title="branch not covered" >smtp_user </span>|| <span class="branch-2 cbranch-no" title="branch not covered" >smtp_pass </span>|| <span class="branch-3 cbranch-no" title="branch not covered" >smtp_from)</span> {
-      console.log('[updateSeller] checking existing SMTP settings...');
+      logger.info('[updateSeller] checking existing SMTP settings...');
       const existingRes = await client.query(
         `SELECT * FROM ${SCHEMA}.seller_smtp_settings WHERE seller_id = $1 FOR UPDATE`,
         [sellerDbId]
@@ -872,7 +872,7 @@ async function updateSeller(id, data) {
       }
 &nbsp;
       <span class="missing-if-branch" title="if path not taken" >I</span>if (existing) {
-<span class="cstat-no" title="statement not covered" >        console.log('[updateSeller] updating existing SMTP settings...');</span>
+<span class="cstat-no" title="statement not covered" >        logger.info('[updateSeller] checking existing SMTP settings...');</span>
 <span class="cstat-no" title="statement not covered" >        await client.query(</span>
           `
           UPDATE ${SCHEMA}.seller_smtp_settings
@@ -898,7 +898,7 @@ async function updateSeller(id, data) {
           ]
         );
       } else {
-        console.log('[updateSeller] inserting new SMTP settings...');
+        logger.info('[updateSeller] inserting new SMTP settings...');
         await client.query(
           `
           INSERT INTO ${SCHEMA}.seller_smtp_settings
@@ -920,15 +920,15 @@ async function updateSeller(id, data) {
     }
 &nbsp;
     await client.query('COMMIT');
-    console.log('[updateSeller] COMMIT successful');
+    logger.info('[updateSeller] COMMIT successful');
     return updatedSeller;
   } catch (err) {
     await client.query('ROLLBACK');
-    console.error('[updateSeller] ROLLBACK due to error:', err);
+    logger.error({ err }, '[updateSeller] ROLLBACK due to error');
     throw err;
   } finally {
     client.release();
-    console.log('[updateSeller] connection released');
+    logger.info('[updateSeller] connection released');
   }
 }
 &nbsp;
@@ -946,7 +946,7 @@ module.exports = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-12-02T09:34:15.267Z
+                at 2025-12-02T17:22:58.911Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
