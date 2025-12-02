@@ -2,6 +2,7 @@ const PDPInterface = require('../PDPInterface');
 const InvoiceStatusModel = require('../../invoices/invoiceStatus.model');
 const InvoicesService = require('../../invoices/invoices.service');
 const fs = require('fs');
+const logger = require('../../../utils/logger');
 
 class MockPDPAdapter extends PDPInterface {
   constructor() {
@@ -20,7 +21,7 @@ class MockPDPAdapter extends PDPInterface {
       lifecycle: [{ code: 202, label: 'Créée', createdAt: new Date().toISOString() }],
     };
 
-    console.log(`[MockPDPAdapter] 📥 Facture ${invoiceLocalId} reçue. SubmissionId: ${submissionId}`);
+    logger.info(`[MockPDPAdapter] 📥 Facture ${invoiceLocalId} reçue. SubmissionId: ${submissionId}`);
 
     // Changement final asynchrone
     setTimeout(async () => {
@@ -33,7 +34,7 @@ class MockPDPAdapter extends PDPInterface {
         submissionId
       });
 
-      console.log(`[MockPDPAdapter] ⏳ Traitement terminé pour ${submissionId} → ${finalStatus.toUpperCase()}`);
+      logger.info(`[MockPDPAdapter] ⏳ Traitement terminé pour ${submissionId} → ${finalStatus.toUpperCase()}`);
     }, 4000 + Math.random() * 3000);
 
     // Retour immédiat avec received
@@ -46,19 +47,19 @@ class MockPDPAdapter extends PDPInterface {
    * @returns {Promise<{ code: string, label?: string, date: string }>}
    */
   async fetchStatus(submissionId) {
-    console.log('[MockPDPAdapter] fetchStatus called for', submissionId);
+    logger.info('[MockPDPAdapter] fetchStatus called for', submissionId);
 
     // 🔹 Extraction de l'ID réel depuis le submissionId
     const invoiceId = parseInt(submissionId.split('_')[1], 10);
     const invoice = await InvoicesService.getInvoiceById(invoiceId);
     if (!invoice) {
-      console.warn('[MockPDPAdapter] Facture introuvable en DB pour', submissionId);
+      logger.warn('[MockPDPAdapter] Facture introuvable en DB pour', submissionId);
       return null;
     }
 
     // 🔹 On ne simule un business status que si la facture est déjà techniquement "validated"
     if (invoice.technical_status !== 'validated') {
-      console.log(`[MockPDPAdapter] Statut technique "${invoice.technical_status}"`);
+      logger.info(`[MockPDPAdapter] Statut technique "${invoice.technical_status}"`);
       return {
         code: invoice.business_status || 202,
         label: invoice.business_status_label || 'Pending',
@@ -116,7 +117,7 @@ class MockPDPAdapter extends PDPInterface {
           clientComment: comment
         });
 
-        console.log(`[MockPDPAdapter] 💼 Nouveau business_status simulé pour ${submissionId} → ${candidate.label}`);
+        logger.info(`[MockPDPAdapter] 💼 Nouveau business_status simulé pour ${submissionId} → ${candidate.label}`);
         newStatus = { ...candidate, comment, createdAt: new Date().toISOString() };
         break;
       }
@@ -131,13 +132,13 @@ class MockPDPAdapter extends PDPInterface {
   }
 
   async sendStatus(invoicePdpId, { code }) {
-    console.log(`[MockPDPAdapter] sendStatus pour ${invoicePdpId} => code ${code}`);
+    logger.info(`[MockPDPAdapter] sendStatus pour ${invoicePdpId} => code ${code}`);
 
     // 🔹 Extraction de l'ID réel
     const invoiceId = parseInt(invoicePdpId.split('_')[1], 10);
     const invoice = await InvoicesService.getInvoiceById(invoiceId);
     if (!invoice) {
-      console.warn(`[MockPDPAdapter] Facture introuvable en DB pour ${invoicePdpId}`);
+      logger.warn(`[MockPDPAdapter] Facture introuvable en DB pour ${invoicePdpId}`);
       return { success: false };
     }
 
@@ -147,7 +148,7 @@ class MockPDPAdapter extends PDPInterface {
       statusLabel: 'Encaissement reçu',
     });
 
-    console.log(`[MockPDPAdapter] Business status mis à jour pour ${invoicePdpId} => 212`);
+    logger.info(`[MockPDPAdapter] Business status mis à jour pour ${invoicePdpId} => 212`);
     return { success: true };
   }
 

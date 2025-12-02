@@ -4,6 +4,7 @@ const PDPInterface = require('../PDPInterface.js');
 const { URLSearchParams } = require('url');
 const fs = require('fs');
 const FormData = require('form-data');
+const logger = require('../../../utils/logger');
 
 class IopoleAdapter extends PDPInterface {
   constructor({ baseURL, authURL, clientId, clientSecret }) {
@@ -60,15 +61,15 @@ class IopoleAdapter extends PDPInterface {
       });
 
       const invoiceId = response.data?.id;
-      console.log(`[IopoleAdapter] ✅ Facture envoyée → ID PDP: ${invoiceId}`);
+      logger.info(`[IopoleAdapter] ✅ Facture envoyée → ID PDP: ${invoiceId}`);
 
       let status = null;
       if (invoiceId && !isSandbox) {
         try {
           status = await this.fetchStatus(invoiceId);
-          console.log(`[IopoleAdapter] 📦 Statut récupéré pour ${invoiceId}:`, status);
+          logger.info(`[IopoleAdapter] 📦 Statut récupéré pour ${invoiceId}:`, status);
         } catch (err) {
-          console.warn('[IopoleAdapter] ⚠️ fetchStatus a échoué (sandbox probable):', err.message);
+          logger.warn('[IopoleAdapter] ⚠️ fetchStatus a échoué (sandbox probable):', err.message);
         }
       }
 
@@ -81,7 +82,7 @@ class IopoleAdapter extends PDPInterface {
         status,
       };
     } catch (error) {
-      console.error('[IopoleAdapter] ❌ Erreur lors de l’envoi:', error.message);
+      logger.error('[IopoleAdapter] ❌ Erreur lors de l’envoi:', error.message);
       throw this._normalizeError(error);
     }
   }
@@ -94,11 +95,11 @@ class IopoleAdapter extends PDPInterface {
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log(`[IopoleAdapter] Réponse PDP pour invoice ${invoicePdpId}:`, response.data);
+      logger.info(`[IopoleAdapter] Réponse PDP pour invoice ${invoicePdpId}:`, response.data);
       return { success: true, message: response.data?.message || null };
     } catch (error) {
-      console.error('[IopoleAdapter] sendStatus error:', error.message);
-      if (error.response) console.error('[IopoleAdapter] Détails réponse PDP:', error.response.data);
+      logger.error('[IopoleAdapter] sendStatus error:', error.message);
+      if (error.response) logger.error('[IopoleAdapter] Détails réponse PDP:', error.response.data);
       throw this._normalizeError(error);
     }
   }
@@ -135,16 +136,16 @@ class IopoleAdapter extends PDPInterface {
         rejectionMessage: entry.json?.responses?.[0]?.rejectionDetail?.message || null,
       }));
 
-      console.log(`[IopoleAdapter] ✅ ${statuses.length} statut(s) récupéré(s) pour ${invoiceId}`);
+      logger.info(`[IopoleAdapter] ✅ ${statuses.length} statut(s) récupéré(s) pour ${invoiceId}`);
       statuses.forEach(s => {
         const extra = s.code === 'REJECTED' && s.rejectionMessage ? ` ⚠️ ${s.rejectionReason}: ${s.rejectionMessage}` : '';
-        console.log(`   → ${s.date} | ${s.code || 'N/A'} (${s.networkCode || '-'}) via ${s.destType}${extra}`);
+        logger.info(`   → ${s.date} | ${s.code || 'N/A'} (${s.networkCode || '-'}) via ${s.destType}${extra}`);
       });
 
       return statuses;
     } catch (err) {
-      console.error(`[IopoleAdapter] ❌ Erreur récupération statuts pour ${invoiceId}`);
-      console.error(`[IopoleAdapter] → ${err.message}`);
+      logger.error(`[IopoleAdapter] ❌ Erreur récupération statuts pour ${invoiceId}`);
+      logger.error(`[IopoleAdapter] → ${err.message}`);
       throw this._normalizeError(err);
     }
   }
