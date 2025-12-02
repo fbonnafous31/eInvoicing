@@ -1,6 +1,7 @@
 // backend/src/middlewares/auth.js
 const { expressjwt: jwt } = require("express-jwt");
 const jwksRsa = require("jwks-rsa");
+const logger = require("../utils/logger");
 
 // Middleware principal pour vérifier le JWT
 const checkJwt = jwt({
@@ -21,14 +22,14 @@ function withLogging(req, res, next) {
 
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    console.warn("⚠️ Aucun header Authorization trouvé !");
+    logger.warn("⚠️ Aucun header Authorization trouvé !");
   } else {
     const rawToken = authHeader.split(" ")[1];
     if (rawToken) {
       try {
         JSON.parse(Buffer.from(rawToken.split(".")[1], "base64").toString("utf8"));
       } catch (err) {
-        console.error("❌ Impossible de décoder le token :", err.message);
+        logger.error("❌ Impossible de décoder le token :", err.message);
       }
     }
   }
@@ -36,7 +37,7 @@ function withLogging(req, res, next) {
   // Appel du middleware express-jwt
   return checkJwt(req, res, (err) => {
     if (err) {
-      console.error("❌ checkJwt a échoué :", err.name, "-", err.message);
+      logger.error("❌ checkJwt a échoué :", err.name, "-", err.message);
       // On peut renvoyer le statut 401/403 personnalisé pour tester
       return res.status(err.status || 401).json({ error: err.message });
     }

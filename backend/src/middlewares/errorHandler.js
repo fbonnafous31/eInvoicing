@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
+
 function errorHandler(err, req, res, next) { 
-  console.error(err); 
+  logger.error(err); 
 
   // Cas PostgreSQL - violation contrainte d'unicité
   if (err.code === '23505') {

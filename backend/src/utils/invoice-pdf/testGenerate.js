@@ -1,4 +1,5 @@
 const { generateInvoicePdf } = require("./generateInvoicePdf");
+const logger = require("../logger");
 
 async function test() {
   const dummyInvoice = {
@@ -11,9 +12,9 @@ async function test() {
 
   try {
     const filePath = await generateInvoicePdf(dummyInvoice);
-    console.log("PDF généré ici :", filePath);
+    logger.info("PDF généré ici :", filePath);
   } catch (err) {
-    console.error("Erreur génération PDF :", err);
+    logger.error("Erreur génération PDF :", err);
   }
 }
 

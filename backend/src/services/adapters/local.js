@@ -1,5 +1,6 @@
 const fs = require('fs/promises');
 const path = require('path');
+const logger = require('../../utils/logger');
 
 class LocalAdapter {
   constructor() {
@@ -34,7 +35,7 @@ class LocalAdapter {
       const files = await fs.readdir(dirPath);
       return files;
     } catch (err) {
-      console.log(err);
+      logger.log(err);
       return []; 
     }
   }

@@ -4,6 +4,7 @@ const { PDFDocument, rgb, PDFName } = require("pdf-lib");
 const { paymentMethodsOptions } = require("../../../constants/paymentMethods");
 const { paymentTermsOptions } = require("../../../constants/paymentTerms");
 const fontkit = require('@pdf-lib/fontkit');
+const logger = require("../../utils/logger");
 
 // ---------------- wrapText ----------------
 function wrapText(text, font, size, maxWidth) {
@@ -33,7 +34,7 @@ function formatDateFr(dateStr) {
 }
 
 async function generateQuotePdf(quote) {
-  console.log("quote:", quote);
+  logger.info("quote:", quote);
   const pdfDoc = await PDFDocument.create();
   const ASSETS_PATH = path.join(process.cwd(), "public/pdf-assets");
 
@@ -120,7 +121,7 @@ async function generateQuotePdf(quote) {
       }])
     );
   } else {
-    console.warn("Profil ICC manquant pour la conformité PDF/A. Le PDF généré ne sera pas conforme.");
+    logger.warn("Profil ICC manquant pour la conformité PDF/A. Le PDF généré ne sera pas conforme.");
   }
 
   // 4. Synchroniser le dictionnaire d'informations du document
@@ -140,7 +141,7 @@ async function generateQuotePdf(quote) {
   const fontBoldPath = path.join(ASSETS_PATH, "fonts/DejaVuSans-Bold.ttf");
 
   if (!fs.existsSync(fontPath) || !fs.existsSync(fontBoldPath)) {
-    console.error("Fichiers de police manquants ! Assurez-vous que DejaVuSans.ttf et DejaVuSans-Bold.ttf existent dans le dossier 'src/utils/invoice-pdf/fonts/'.");
+    logger.error("Fichiers de police manquants ! Assurez-vous que DejaVuSans.ttf et DejaVuSans-Bold.ttf existent dans le dossier 'src/utils/invoice-pdf/fonts/'.");
     throw new Error("Fichiers de police requis pour la génération de PDF non trouvés.");
   }
 
@@ -418,17 +419,17 @@ async function generateQuotePdf(quote) {
 
 async function generateInvoicePdfBuffer(invoice) {
   try {
-    console.log('➡️ Début generateInvoicePdfBuffer');
-    console.log('Invoice header:', invoice.header);
-    console.log('Seller object:', invoice.seller);
-    console.log('Client object:', invoice.client);
+    logger.info('➡️ Début generateInvoicePdfBuffer');
+    logger.info('Invoice header:', invoice.header);
+    logger.info('Seller object:', invoice.seller);
+    logger.info('Client object:', invoice.client);
 
     const pdfDoc = await PDFDocument.create();
     const ASSETS_PATH = path.join(process.cwd(), "public/pdf-assets");
 
     // 1. Enregistrer fontkit pour la gestion des polices .ttf
     pdfDoc.registerFontkit(fontkit);
-    console.log('📄 Fontkit enregistré');
+    logger.info('📄 Fontkit enregistré');
 
     // 2. Définir les métadonnées XMP pour l'identification PDF/A-3B
     const now = new Date();
@@ -497,19 +498,19 @@ async function generateInvoicePdfBuffer(invoice) {
 
     // Enregistrer dans le catalogue PDF
     pdfDoc.catalog.set(PDFName.of('Metadata'), pdfDoc.context.register(metadataStream));
-    console.log('📑 Métadonnées XMP enregistrées');
+    logger.info('📑 Métadonnées XMP enregistrées');
 
     // 3. Ajouter un "OutputIntent" pour la gestion des couleurs
     const iccProfilePath = path.join(ASSETS_PATH, "icc/sRGB.icc");
-    console.log('ICC profile path:', iccProfilePath);
+    logger.info('ICC profile path:', iccProfilePath);
 
     if (fs.existsSync(iccProfilePath)) {
       const iccProfileBytes = fs.readFileSync(iccProfilePath);
       const outputIntent = pdfDoc.context.stream(iccProfileBytes);
       pdfDoc.catalog.set(PDFName.of('OutputIntents'), pdfDoc.context.obj([{ Type: 'OutputIntent', S: 'GTS_PDFA1', OutputConditionIdentifier: 'sRGB IEC61966-2.1', DestOutputProfile: outputIntent }]));
-      console.log('🎨 OutputIntent ICC ajouté');
+      logger.info('🎨 OutputIntent ICC ajouté');
     } else {
-      console.log('⚠️ ICC profile manquant, pas d’OutputIntent');
+      logger.info('⚠️ ICC profile manquant, pas d’OutputIntent');
     }
 
     // 4. Synchroniser le dictionnaire d'informations du document
@@ -525,12 +526,12 @@ async function generateInvoicePdfBuffer(invoice) {
     const fontPath = path.join(ASSETS_PATH, "fonts/DejaVuSans.ttf");
     const fontBoldPath = path.join(ASSETS_PATH, "fonts/DejaVuSans-Bold.ttf");
 
-    console.log('Vérification fichiers critiques...');
-    console.log('Font regular exists:', fs.existsSync(fontPath));
-    console.log('Font bold exists:', fs.existsSync(fontBoldPath));
+    logger.info('Vérification fichiers critiques...');
+    logger.info('Font regular exists:', fs.existsSync(fontPath));
+    logger.info('Font bold exists:', fs.existsSync(fontBoldPath));
 
     if (!fs.existsSync(fontPath) || !fs.existsSync(fontBoldPath)) {
-      console.error("Fichiers de police manquants ! Assurez-vous que DejaVuSans.ttf et DejaVuSans-Bold.ttf existent dans le dossier 'src/utils/invoice-pdf/fonts/'.");
+      logger.error("Fichiers de police manquants ! Assurez-vous que DejaVuSans.ttf et DejaVuSans-Bold.ttf existent dans le dossier 'src/utils/invoice-pdf/fonts/'.");
       throw new Error("Fichiers de police requis pour la génération de PDF non trouvés.");
     }
 
@@ -538,7 +539,7 @@ async function generateInvoicePdfBuffer(invoice) {
     const fontBoldBytes = fs.readFileSync(fontBoldPath);
     const fontRegular = await pdfDoc.embedFont(fontBytes, { subset: true });
     const fontBold = await pdfDoc.embedFont(fontBoldBytes, { subset: true });
-    console.log('📄 Polices embeded avec succès');
+    logger.info('📄 Polices embeded avec succès');
 
     const margin = 50;
     let y = height - margin;
@@ -553,7 +554,7 @@ async function generateInvoicePdfBuffer(invoice) {
 
     // ---------------- Logo ----------------
     const logoPath = path.join(ASSETS_PATH, "logo.png");
-    console.log('Logo exists:', fs.existsSync(logoPath));
+    logger.info('Logo exists:', fs.existsSync(logoPath));
     let logoHeight = 0;
     
     if (fs.existsSync(logoPath)) {
@@ -565,8 +566,8 @@ async function generateInvoicePdfBuffer(invoice) {
       const ratio = Math.min(logoWidthMax / logoDims.width, logoHeightMax / logoDims.height);
       const logoWidth = logoDims.width * ratio;
       logoHeight = logoDims.height * ratio;
-      console.log('Logo path:', logoPath);
-      console.log('Logo embedé avec succès, hauteur calculée:', logoHeight);
+      logger.info('Logo path:', logoPath);
+      logger.info('Logo embedé avec succès, hauteur calculée:', logoHeight);
       
       page.drawImage(logoImage, {
         x: margin,
@@ -574,7 +575,7 @@ async function generateInvoicePdfBuffer(invoice) {
         width: logoWidth,
         height: logoHeight,
       });
-      console.log('Logo embedé avec succès, hauteur:', logoHeight);
+      logger.info('Logo embedé avec succès, hauteur:', logoHeight);
     } else {
       logoHeight = 50;
       page.drawRectangle({
@@ -592,7 +593,7 @@ async function generateInvoicePdfBuffer(invoice) {
         font: fontBold,
         color: rgb(0.5, 0.5, 0.5),
       });
-      console.log('⚠️ Logo manquant, bloc substitut affiché');
+      logger.info('⚠️ Logo manquant, bloc substitut affiché');
     }
 
     const yTop = y;
@@ -798,7 +799,7 @@ async function generateInvoicePdfBuffer(invoice) {
         font: fontRegular,
       });
       y -= 15;
-      console.log("seller:", seller);
+      logger.info("seller:", seller);
 
       // 👉 IBAN + BIC si virement bancaire
       if (header.payment_method === "bank_transfer") {
@@ -858,11 +859,11 @@ async function generateInvoicePdfBuffer(invoice) {
 
     // ---------------- Retour PDF bytes ----------------
     const pdfBytes = await pdfDoc.save();
-    console.log('➡️ PDF généré, taille bytes:', pdfBytes.length);
+    logger.info('➡️ PDF généré, taille bytes:', pdfBytes.length);
 
     return pdfBytes; 
   } catch (err) {
-    console.error('❌ ERREUR génération PDF:', err);
+    logger.error('❌ ERREUR génération PDF:', err);
     throw err;
   }  
 }

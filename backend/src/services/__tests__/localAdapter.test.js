@@ -12,6 +12,13 @@ jest.mock('fs/promises', () => ({
   readdir: jest.fn().mockResolvedValue([]),
 }));
 
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  log: jest.fn(), 
+}));
+
 describe('LocalAdapter', () => {
   let adapter;
 
