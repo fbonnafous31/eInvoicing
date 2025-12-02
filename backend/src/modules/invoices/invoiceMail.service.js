@@ -3,6 +3,7 @@ const { Resend } = require('resend');
 const { getInvoiceById } = require('./invoices.service');
 const { getSellerById } = require('../sellers/sellers.model');
 const storageService = require('../../services');
+const logger = require('../../utils/logger');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -14,7 +15,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
  * @param {string} [to] - Destinataire personnalisé
  */
 async function sendInvoiceMail(invoiceId, message, subject, to) {
-  console.log(`[sendInvoiceMail] Début pour invoiceId=${invoiceId}`);
+  logger.info(`[sendInvoiceMail] Début pour invoiceId=${invoiceId}`);
 
   // Récupération de la facture
   const invoice = await getInvoiceById(invoiceId);
@@ -68,11 +69,11 @@ async function sendInvoiceMail(invoiceId, message, subject, to) {
       attachments,
     });
 
-    console.log(`[sendInvoiceMail] Email envoyé à ${clientEmail}`);
-    console.log('[sendInvoiceMail] Réponse Resend :', response);
+    logger.info(`[sendInvoiceMail] Email envoyé à ${clientEmail}`);
+    logger.info('[sendInvoiceMail] Réponse Resend :', response);
     return response;
   } catch (err) {
-    console.error('[sendInvoiceMail] Erreur lors de l’envoi :', err);
+    logger.error('[sendInvoiceMail] Erreur lors de l’envoi :', err);
     throw err;
   }
 }

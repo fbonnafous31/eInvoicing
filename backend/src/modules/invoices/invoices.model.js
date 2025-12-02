@@ -4,6 +4,7 @@ const { getSellerById } = require('../sellers/sellers.model');
 const { saveAttachment, cleanupAttachments } = require("./invoiceAttachments.model");
 const storageService = require('../../services');
 const SCHEMA = process.env.DB_SCHEMA || 'public';
+const logger = require('../../utils/logger');
 
 /**
  * Récupère toutes les factures avec leurs lignes, taxes et justificatifs
@@ -433,7 +434,7 @@ async function updateInvoice(
         try {
           await storageService.delete(`${relativeDir}/${file}`);
         } catch (err) {
-          console.error("❌ Failed to remove file:", file, err);
+          logger.error("❌ Failed to remove file:", file, err);
         }
       }
     }
@@ -443,7 +444,7 @@ async function updateInvoice(
     return await getInvoiceById(id);
   } catch (err) {
     await conn.query("ROLLBACK");
-    console.error("Transaction rolled back due to error:", err);
+    logger.error("Transaction rolled back due to error:", err);
     throw err;
   } finally {
     conn.release();

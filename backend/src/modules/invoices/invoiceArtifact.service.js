@@ -2,6 +2,7 @@ const { generateFacturXXML } = require('../../utils/facturx/facturx-generator');
 const { embedFacturXInPdf } = require('../../utils/invoice-pdf/pdf-generator');
 const InvoicesAttachmentsModel = require('./invoiceAttachments.model');
 const storageService = require('../../services');
+const logger = require('../../utils/logger');
 
 /**
  * Normalisation côté XML
@@ -27,7 +28,7 @@ async function _saveFacturXXML(id, invoiceData) {
   // storageService.save accepte un Buffer ou string
   await storageService.save(xml, relativePath);
 
-  console.log(`✅ Factur-X généré pour la facture ${id} à : ${relativePath}`);
+  logger.info(`✅ Factur-X généré pour la facture ${id} à : ${relativePath}`);
   return relativePath; 
 }
 
@@ -76,7 +77,7 @@ async function generateInvoiceArtifacts(invoice) {
     );
 
   } catch (err) {
-    console.error(`❌ Erreur lors de la génération des artefacts pour la facture ${invoice.id} :`, err.message);
+    logger.error(`❌ Erreur lors de la génération des artefacts pour la facture ${invoice.id} :`, err.message);
   }
 
   return { xmlPath, pdfA3Path };

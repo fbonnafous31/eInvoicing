@@ -2,6 +2,7 @@
 const InvoicesModel = require('./invoices.model');
 const InvoiceArtifactService = require('./invoiceArtifact.service');
 const InvoiceStatusModel = require('./invoiceStatus.model');
+const logger = require('../../utils/logger');
 
 async function listInvoices() {
   return await InvoicesModel.getAllInvoices();
@@ -15,7 +16,7 @@ async function getInvoice(id) {
 async function createInvoice(data) {
   const { invoice, client, lines, taxes, attachments } = data;
   const createdInvoice = await InvoicesModel.createInvoice({ invoice, client, lines, taxes, attachments });
-  console.log("✅ Invoice created, id:", createdInvoice.id);
+  logger.info("✅ Invoice created, id:", createdInvoice.id);
   
   // Délégation de la génération des artefacts
   const { xmlPath, pdfA3Path } = await InvoiceArtifactService.generateInvoiceArtifacts(createdInvoice);
@@ -26,7 +27,7 @@ async function createInvoice(data) {
 async function updateInvoice(id, data) {
   const { invoice, client, lines, taxes, newAttachments, existingAttachments } = data;
 
-  console.log("=== updateInvoice called for id:", id, "===");
+  logger.info("=== updateInvoice called for id:", id, "===");
 
   const updatedInvoice = await InvoicesModel.updateInvoice(id, {
     invoice,
@@ -36,7 +37,7 @@ async function updateInvoice(id, data) {
     newAttachments,
     existingAttachments
   });
-  console.log("✅ Invoice updated, updatedInvoice:", updatedInvoice);
+  logger.info("✅ Invoice updated, updatedInvoice:", updatedInvoice);
 
   // Délégation de la génération des artefacts
   const { xmlPath, pdfA3Path } = await InvoiceArtifactService.generateInvoiceArtifacts(updatedInvoice);

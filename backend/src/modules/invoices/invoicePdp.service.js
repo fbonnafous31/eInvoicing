@@ -7,6 +7,7 @@ const InvoiceStatusModel = require('./invoiceStatus.model');
 const SellersModel = require('../sellers/sellers.service');
 const ClientsModel = require('../clients/clients.service');
 const PDPService = require('../pdp/PDPService');
+const logger = require('../../utils/logger');
 
 const PDP_URL = process.env.PDP_BASE_URL || 'http://localhost:4000/invoices';
 const POLLING_INTERVAL = 2000; // 2 secondes
@@ -22,7 +23,7 @@ axios.interceptors.request.use(request => {
     dataInfo = { file: fileName };
   }
 
-  console.log('📤 Axios envoi :', {
+  logger.info('📤 Axios envoi :', {
     url: request.url,
     method: request.method,
     headers: request.headers,
@@ -56,7 +57,7 @@ async function sendInvoice(invoiceId, pdfPath) {
   form.append('invoice', fs.createReadStream(pdfPath));
   form.append('metadata', JSON.stringify(metadata));
 
-  console.log(`📤 Envoi facture ${invoiceId} au PDP avec :`, {
+  logger.info(`📤 Envoi facture ${invoiceId} au PDP avec :`, {
     fileName,
     size: fileStats.size,
     metadata
@@ -71,7 +72,7 @@ async function sendInvoice(invoiceId, pdfPath) {
   const { status: initialStatus, submissionId } = response.data;
 
   await InvoiceStatusModel.updateTechnicalStatus(invoiceId, { technicalStatus: initialStatus, submissionId });
-  console.log(`✅ Facture ${invoiceId} envoyée :`, response.data);
+  logger.info(`✅ Facture ${invoiceId} envoyée :`, response.data);
 
   // Lancer le polling en arrière-plan
   pollInvoiceStatusPDP(invoiceId, submissionId);
@@ -101,7 +102,7 @@ async function pollInvoiceStatusPDP(invoiceId, submissionId) {
       // Normalisation de la casse
       const normalizedStatus = technicalStatus?.toLowerCase() || 'pending';
 
-      console.log(`📡 Polling invoice ${invoiceId}: technicalStatus = ${technicalStatus} (normalized = ${normalizedStatus})`);
+      logger.info(`📡 Polling invoice ${invoiceId}: technicalStatus = ${technicalStatus} (normalized = ${normalizedStatus})`);
 
       // Mise à jour du statut technique en DB
       await InvoiceStatusModel.updateTechnicalStatus(invoiceId, { technicalStatus, submissionId });
@@ -109,13 +110,13 @@ async function pollInvoiceStatusPDP(invoiceId, submissionId) {
       // Vérification si le statut est final
       if (normalizedStatus === 'validated' || normalizedStatus === 'rejected') {
         finalStatus = true;
-        console.log(`✅ Invoice ${invoiceId} reached final status: ${technicalStatus}`);
+        logger.info(`✅ Invoice ${invoiceId} reached final status: ${technicalStatus}`);
 
         let businessData;
         if (normalizedStatus === 'validated') {
           if (currentBusinessStatus === 208) {
             businessData = { statusCode: 209, statusLabel: 'Réémission après suspension' };
-            console.log(`🔄 Statut métier de la facture ${invoiceId} mis à jour à 209 après réception PDP`);
+            logger.info(`🔄 Statut métier de la facture ${invoiceId} mis à jour à 209 après réception PDP`);
           } else {
             businessData = { statusCode: 202, statusLabel: 'Facture conforme' };
           }
@@ -124,19 +125,19 @@ async function pollInvoiceStatusPDP(invoiceId, submissionId) {
         }
 
         await InvoiceStatusModel.updateBusinessStatus(invoiceId, businessData);
-        console.log(`📌 Statut métier mis à jour pour invoice ${invoiceId}`);
+        logger.info(`📌 Statut métier mis à jour pour invoice ${invoiceId}`);
       } else {
         // Attente avant le prochain poll
         await new Promise(res => setTimeout(res, POLLING_INTERVAL));
       }
     } catch (err) {
-      console.error(`❌ Polling failed for invoice ${invoiceId}:`, err.message);
+      logger.error(`❌ Polling failed for invoice ${invoiceId}:`, err.message);
       await new Promise(res => setTimeout(res, POLLING_INTERVAL));
     }
   }
 
   if (!finalStatus) {
-    console.warn(`⚠️ Invoice ${invoiceId} polling timeout après ${POLLING_TIMEOUT}ms`);
+    logger.warn(`⚠️ Invoice ${invoiceId} polling timeout après ${POLLING_TIMEOUT}ms`);
   }
 
   return finalStatus;
@@ -153,7 +154,7 @@ async function requestInvoiceLifecycle(invoiceId) {
     clientComment
   });
 
-  console.log(`📤 Lifecycle requested for invoice ${invoiceId}: submissionId = ${submissionId}, status = ${initialStatus}, comment = ${clientComment || 'aucun'}`);
+  logger.info(`📤 Lifecycle requested for invoice ${invoiceId}: submissionId = ${submissionId}, status = ${initialStatus}, comment = ${clientComment || 'aucun'}`);
   return { invoiceId, submissionId, initialStatus, clientComment };
 }
 
@@ -163,7 +164,7 @@ async function refreshInvoiceLifecycle(invoiceId, submissionId) {
     const { businessStatus, comment } = response.data;
     const clientComment = comment || null;
 
-    console.log(`📡 Lifecycle refresh for invoice ${invoiceId}: status = ${businessStatus}, comment = ${clientComment || 'aucun'}`);
+    logger.info(`📡 Lifecycle refresh for invoice ${invoiceId}: status = ${businessStatus}, comment = ${clientComment || 'aucun'}`);
 
     await InvoiceStatusModel.updateBusinessStatus(invoiceId, { 
       businessStatus, 
@@ -173,7 +174,7 @@ async function refreshInvoiceLifecycle(invoiceId, submissionId) {
 
     return { businessStatus, clientComment };
   } catch (err) {
-    console.error(`❌ Erreur refreshInvoiceLifecycle invoice ${invoiceId}:`, err);
+    logger.error(`❌ Erreur refreshInvoiceLifecycle invoice ${invoiceId}:`, err);
     throw new Error("Erreur serveur");
   }
 }
@@ -193,7 +194,7 @@ async function updateInvoiceLifecycle(invoiceId, lifecycle) {
       clientComment
     });
   } else {
-    console.log(`⚠️ Invoice ${invoiceId} : pas de statut métier à appliquer`);
+    logger.info(`⚠️ Invoice ${invoiceId} : pas de statut métier à appliquer`);
   }
 
   return await InvoicesModel.getInvoiceById(invoiceId);

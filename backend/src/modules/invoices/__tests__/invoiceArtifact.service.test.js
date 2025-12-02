@@ -7,6 +7,7 @@ const { embedFacturXInPdf } = require('../../../utils/invoice-pdf/pdf-generator'
 const { generateFacturXXML } = require('../../../utils/facturx/facturx-generator');
 const InvoicesAttachmentsModel = require('../invoiceAttachments.model');
 const { getFinalPath } = require('../../../utils/fileNaming');
+const logger = require('../../../utils/logger');
 
 jest.mock('../../../utils/facturx/facturx-generator', () => ({
   generateFacturXXML: jest.fn(),
@@ -35,11 +36,11 @@ describe('InvoiceArtifactService', () => {
   const uploadsDir = '/home/francois/dev/eInvoicing/backend/src/uploads';
 
   beforeAll(() => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(logger, 'error').mockImplementation(() => {});
   });
 
   afterAll(() => {
-    console.error.mockRestore();
+    logger.error.mockRestore();
   });
 
   beforeEach(() => {
@@ -100,6 +101,6 @@ describe('InvoiceArtifactService', () => {
     const result = await generateInvoiceArtifacts(mockInvoice);
 
     expect(result).toEqual({ xmlPath: null, pdfA3Path: null });
-    expect(console.error).toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalled();
   });
 });

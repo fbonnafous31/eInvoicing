@@ -2,6 +2,7 @@
 const express = require("express");
 const { GetObjectCommand } = require("@aws-sdk/client-s3");
 const { s3Client } = require("../../../config/s3Client"); 
+const logger = require("../../utils/logger");
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ router.get("/:filename", async (req, res) => {
     res.setHeader("Content-Type", "application/pdf");
     response.Body.pipe(res);
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     res.status(500).send("Erreur lors de la récupération du PDF");
   }
 });

@@ -7,6 +7,7 @@ const PDPService = require('../pdp/PDPService');
 const { getInvoiceById } = require('./invoices.model');
 const { generateQuotePdf, generateInvoicePdfBuffer: generatePdfUtil } = require('../../utils/invoice-pdf/generateInvoicePdf');
 const InvoiceStatusModel = require('../invoices/invoiceStatus.model');
+const logger = require('../../utils/logger');
 
 /**
  * Helper pour envelopper les gestionnaires de routes asynchrones et attraper les erreurs.
@@ -28,7 +29,7 @@ function _parseMultipartBody(body) {
       try {
         parsed[key] = JSON.parse(body[key]);
       } catch (e) {       
-        console.error(`Erreur parsing ${key}:`, e.message); 
+        logger.error(`Erreur parsing ${key}:`, e.message); 
         const err = new Error(`Le champ '${key}' contient du JSON invalide.`);
         err.statusCode = 400;
         throw err;
@@ -228,7 +229,7 @@ const sendInvoice = asyncHandler(async (req, res) => {
       submissionId,
     });
 
-    console.log(`[IopoleAdapter] 🟢 Facture ${invoiceId} envoyée avec succès → submissionId: ${submissionId}`);
+    logger.info(`[IopoleAdapter] 🟢 Facture ${invoiceId} envoyée avec succès → submissionId: ${submissionId}`);
 
     res.json({
       success: true,
@@ -239,7 +240,7 @@ const sendInvoice = asyncHandler(async (req, res) => {
       result,
     });
   } catch (error) {
-    console.error(`[IopoleAdapter] 🔴 Erreur envoi facture ${invoiceId}:`, error.message);
+    logger.error(`[IopoleAdapter] 🔴 Erreur envoi facture ${invoiceId}:`, error.message);
 
     // ❌ Échec → statut rejected
     await InvoiceStatusModel.updateTechnicalStatus(invoiceId, {
@@ -280,7 +281,7 @@ const getInvoiceStatus = asyncHandler(async (req, res) => {
 });
 
 const refreshInvoiceStatus = asyncHandler(async (req, res) => {
-  console.log(`[refreshInvoiceStatus] invoiceId=${req.params.id}`);
+  logger.info(`[refreshInvoiceStatus] invoiceId=${req.params.id}`);
 
   const invoiceId = req.params.id;
   const invoice = await InvoicesService.getInvoiceById(invoiceId);
@@ -292,7 +293,7 @@ const refreshInvoiceStatus = asyncHandler(async (req, res) => {
   const pdp = new PDPService(provider);
 
   // Récupère le dernier statut depuis l’adapter (mock ou réel)
-  console.log('[refreshInvoiceStatus] Appel PDPService.fetchStatus pour', invoice.submission_id);
+  logger.info('[refreshInvoiceStatus] Appel PDPService.fetchStatus pour', invoice.submission_id);
   const lastStatus = await pdp.fetchStatus(invoice.submission_id);
 
   res.json({
@@ -400,7 +401,7 @@ const getInvoicePdfA3Url = async (req, res) => {
 
     res.json({ url });
   } catch (err) {
-    console.error("[getInvoicePdfA3Url]", err);
+    logger.error("[getInvoicePdfA3Url]", err);
     res.status(500).json({ message: "Erreur lors de la récupération de l'URL du PDF/A-3" });
   }
 };
@@ -412,20 +413,20 @@ const getInvoicePdfA3Proxy = async (req, res) => {
   try {
     const { id } = req.params;
     const fileName = `${id}_pdf-a3.pdf`;
-    console.log('[PDF Proxy] Requête pour PDF/A-3 id =', id);
+    logger.info('[PDF Proxy] Requête pour PDF/A-3 id =', id);
 
     // 🔹 Mode LOCAL
     if (process.env.STORAGE_BACKEND === 'local') {
       const filePath = path.join(__dirname, '../../uploads/pdf-a3', fileName);
-      console.log('[PDF Proxy] Mode LOCAL, chemin fichier =', filePath);
+      logger.info('[PDF Proxy] Mode LOCAL, chemin fichier =', filePath);
 
       if (!fs.existsSync(filePath)) {
-        console.warn('[PDF Proxy] Fichier non trouvé en local');
+        logger.warn('[PDF Proxy] Fichier non trouvé en local');
         return res.status(404).json({ message: 'PDF/A-3 non trouvé en local' });
       }
 
       const stats = fs.statSync(filePath);
-      console.log('[PDF Proxy] Taille fichier local =', stats.size, 'octets');
+      logger.info('[PDF Proxy] Taille fichier local =', stats.size, 'octets');
 
       return res.sendFile(filePath);
     }
@@ -433,19 +434,19 @@ const getInvoicePdfA3Proxy = async (req, res) => {
     // 🔹 Mode B2
     if (process.env.STORAGE_BACKEND === 'b2') {
       const relativePath = `pdf-a3/${fileName}`;
-      console.log('[PDF Proxy] Mode B2, récupération du fichier via storageService');
-      console.log('[PDF Proxy] Clé demandée B2 =', relativePath);
+      logger.info('[PDF Proxy] Mode B2, récupération du fichier via storageService');
+      logger.info('[PDF Proxy] Clé demandée B2 =', relativePath);
 
       const data = await storageService.get(relativePath); // Buffer
-      console.log('[PDF Proxy] Buffer reçu depuis B2, longueur =', data?.length);
+      logger.info('[PDF Proxy] Buffer reçu depuis B2, longueur =', data?.length);
 
       if (!data || !data.length) {
-        console.warn('[PDF Proxy] Aucun contenu récupéré depuis B2');
+        logger.warn('[PDF Proxy] Aucun contenu récupéré depuis B2');
         return res.status(404).json({ message: 'PDF/A-3 non trouvé sur B2' });
       }
 
       const stream = Readable.from(data);
-      console.log('[PDF Proxy] Stream créé, envoi vers le client');
+      logger.info('[PDF Proxy] Stream créé, envoi vers le client');
 
       res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
       res.setHeader('Content-Type', 'application/pdf');
@@ -455,11 +456,11 @@ const getInvoicePdfA3Proxy = async (req, res) => {
       return;
     }
 
-    console.error('[PDF Proxy] Storage backend non configuré');
+    logger.error('[PDF Proxy] Storage backend non configuré');
     return res.status(500).json({ message: 'Storage backend non configuré' });
 
   } catch (err) {
-    console.error('[PDF Proxy] Erreur lors de la récupération du PDF/A-3 :', err);
+    logger.error('[PDF Proxy] Erreur lors de la récupération du PDF/A-3 :', err);
     res.status(500).json({ message: 'Erreur lors de la récupération du PDF/A-3' });
   }
 };
