@@ -164,3 +164,4 @@
 - [Jour 161 — Sécurité : audits de dépendances et premiers garde-fous 🛡️🔍](jour-161.md)
 - [Jour 162 — Logs : mise en place de Pino pour centraliser et exploiter mes journaux 📑✨](jour-162.md)
 - [Jour 163 — Logs : enrichir le contexte et fiabiliser les routes 🚀📊](jour-163.md)
+- [Jour 164 — Centralisation des logs avec Loki pour eInvoicing 📑✨](jour-164.md)

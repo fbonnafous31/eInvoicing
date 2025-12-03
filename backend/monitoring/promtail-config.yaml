@@ -1,0 +1,26 @@
+server:
+  http_listen_port: 9080
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+positions:
+  filename: /tmp/positions.yaml
+
+scrape_configs:
+  - job_name: app_logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: eInvoicing
+          __path__: /var/log/app/*.log
+    pipeline_stages:
+      - json:
+          expressions:
+            level: level
+            time: time
+            msg: msg
+            sellerId: sellerId
+            clientId: clientId
+            requestId: requestId
