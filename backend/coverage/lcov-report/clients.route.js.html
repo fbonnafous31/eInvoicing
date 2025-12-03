@@ -3,15 +3,15 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for modules/clients/clients.route.js</title>
+    <title>Code coverage report for clients.route.js</title>
     <meta charset="utf-8" />
-    <link rel="stylesheet" href="../../prettify.css" />
-    <link rel="stylesheet" href="../../base.css" />
-    <link rel="shortcut icon" type="image/x-icon" href="../../favicon.png" />
+    <link rel="stylesheet" href="prettify.css" />
+    <link rel="stylesheet" href="base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style type='text/css'>
         .coverage-summary .sorter {
-            background-image: url(../../sort-arrow-sprite.png);
+            background-image: url(sort-arrow-sprite.png);
         }
     </style>
 </head>
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">modules/clients</a> clients.route.js</h1>
+        <h1><a href="index.html">All files</a> clients.route.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">96.96% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>32/33</span>
+                <span class='fraction'>26/26</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">50% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>1/2</span>
+                <span class='fraction'>0/0</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">88.88% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>8/9</span>
+                <span class='fraction'>6/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">96.96% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>32/33</span>
+                <span class='fraction'>26/26</span>
             </div>
         
             
@@ -114,39 +114,11 @@
 <a name='L49'></a><a href='#L49'>49</a>
 <a name='L50'></a><a href='#L50'>50</a>
 <a name='L51'></a><a href='#L51'>51</a>
-<a name='L52'></a><a href='#L52'>52</a>
-<a name='L53'></a><a href='#L53'>53</a>
-<a name='L54'></a><a href='#L54'>54</a>
-<a name='L55'></a><a href='#L55'>55</a>
-<a name='L56'></a><a href='#L56'>56</a>
-<a name='L57'></a><a href='#L57'>57</a>
-<a name='L58'></a><a href='#L58'>58</a>
-<a name='L59'></a><a href='#L59'>59</a>
-<a name='L60'></a><a href='#L60'>60</a>
-<a name='L61'></a><a href='#L61'>61</a>
-<a name='L62'></a><a href='#L62'>62</a>
-<a name='L63'></a><a href='#L63'>63</a>
-<a name='L64'></a><a href='#L64'>64</a>
-<a name='L65'></a><a href='#L65'>65</a>
-<a name='L66'></a><a href='#L66'>66</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L52'></a><a href='#L52'>52</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -200,24 +172,10 @@ const attachSeller = require('../../middlewares/attachSeller');
 const checkJwt = require('../../middlewares/auth'); 
 &nbsp;
 // ----------------------------
-// Middleware safe logger
-// ----------------------------
-router.use((req, res, next) =&gt; {
-  <span class="missing-if-branch" title="else path not taken" >E</span>if (!req.log) {
-    const logger = require('../../utils/logger');
-    req.log = {
-      info: (...args) =&gt; logger.info(...args),
-      error: <span class="fstat-no" title="function not covered" >(.</span>..args) =&gt; <span class="cstat-no" title="statement not covered" >logger.error(...args),</span>
-    };
-  }
-  next();
-});
-&nbsp;
-// ----------------------------
 // Vérification SIRET (public)
 // ----------------------------
 router.get('/check-siret/:siret', (req, res, next) =&gt; {
-  req.log.info(`Vérification SIRET: ${req.params.siret}`);
+  req.logger.info(`Vérification SIRET: ${req.params.siret}`);
   ClientsController.checkSiret(req, res, next);
 });
 &nbsp;
@@ -229,31 +187,31 @@ router.use(attachSeller);
 &nbsp;
 // Liste des clients
 router.get('/', (req, res, next) =&gt; {
-  req.log.info('Récupération de la liste des clients');
+  req.logger.info('Récupération de la liste des clients');
   ClientsController.getClients(req, res, next);
 });
 &nbsp;
 // Création d’un client
 router.post('/', (req, res, next) =&gt; {
-  req.log.info('Création d’un client', { body: req.body });
+  req.logger.info('Création d’un client', { body: req.body });
   ClientsController.createClient(req, res, next);
 });
 &nbsp;
 // Détail client
 router.get('/:id', (req, res, next) =&gt; {
-  req.log.info(`Récupération du client ${req.params.id}`);
+  req.logger.info(`Récupération du client ${req.params.id}`);
   ClientsController.getClientById(req, res, next);
 });
 &nbsp;
 // Suppression client
 router.delete('/:id', (req, res, next) =&gt; {
-  req.log.info(`Suppression du client ${req.params.id}`);
+  req.logger.info(`Suppression du client ${req.params.id}`);
   ClientsController.deleteClient(req, res, next);
 });
 &nbsp;
 // Mise à jour client
 router.put('/:id', (req, res, next) =&gt; {
-  req.log.info(`Mise à jour du client ${req.params.id}`, { body: req.body });
+  req.logger.info(`Mise à jour du client ${req.params.id}`, { body: req.body });
   ClientsController.updateClient(req, res, next);
 });
 &nbsp;
@@ -265,16 +223,16 @@ module.exports = router;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-12-03T08:13:26.828Z
+                at 2025-12-03T07:54:02.858Z
             </div>
-        <script src="../../prettify.js"></script>
+        <script src="prettify.js"></script>
         <script>
             window.onload = function () {
                 prettyPrint();
             };
         </script>
-        <script src="../../sorter.js"></script>
-        <script src="../../block-navigation.js"></script>
+        <script src="sorter.js"></script>
+        <script src="block-navigation.js"></script>
     </body>
 </html>
     

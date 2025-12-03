@@ -10,6 +10,10 @@ jest.mock("../../../middlewares/attachSeller", () => (req, res, next) => {
   req.seller = { id: 1 };
   next();
 });
+jest.mock("../../../middlewares/requestLogger", () => (req, res, next) => {
+  req.log = { info: jest.fn(), error: jest.fn() }; // correspond à ton utilisation dans les routes
+  next();
+});
 
 // === Mock du contrôleur ===
 jest.mock("../clients.controller", () => ({
@@ -48,8 +52,16 @@ jest.mock("../clients.controller", () => ({
 
 // === Setup express ===
 const app = express();
-app.use(express.json());
+app.use(express.json()); // <- important pour parser le body en POST/PUT
+
+// Mock du logger attendu par les routes
+app.use((req, res, next) => {
+  req.logger = { info: jest.fn(), error: jest.fn() };
+  next();
+});
+
 app.use("/api/clients", clientsRouter);
+
 
 // === Tests ===
 describe("Clients routes (réelles)", () => {

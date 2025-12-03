@@ -4,23 +4,51 @@ const SellersController = require('./sellers.controller');
 const checkJwt = require('../../middlewares/auth');
 const attachSeller = require('../../middlewares/attachSeller');
 
-// Route publique (optionnelle)
-router.get('/check-identifier', SellersController.checkIdentifier);
+// Helper pour logger sans planter
+function safeLog(req, ...args) {
+  if (req.log?.info) {
+    req.log.info(...args);
+  } else {
+    console.log(...args);
+  }
+}
 
-// Routes protégées
+// ----------------------------
+// Route publique (optionnelle)
+// ----------------------------
+router.get('/check-identifier', (req, res, next) => {
+  safeLog(req, 'Vérification de l’identifiant vendeur');
+  SellersController.checkIdentifier(req, res, next);
+});
+
+// ----------------------------
+// Routes protégées par Auth0
+// ----------------------------
 router.use(checkJwt);
 router.use(attachSeller);
 
 // Récupérer son vendeur
-router.get('/me', SellersController.getMySeller);
+router.get('/me', (req, res, next) => {
+  safeLog(req, 'Récupération du vendeur connecté');
+  SellersController.getMySeller(req, res, next);
+});
 
 // Créer son vendeur (si pas encore créé)
-router.post('/', SellersController.createSeller);
+router.post('/', (req, res, next) => {
+  safeLog(req, 'Création d’un vendeur', { body: req.body });
+  SellersController.createSeller(req, res, next);
+});
 
 // Mettre à jour son vendeur
-router.put('/:id', SellersController.updateSeller);
+router.put('/:id', (req, res, next) => {
+  safeLog(req, `Mise à jour du vendeur ${req.params.id}`, { body: req.body });
+  SellersController.updateSeller(req, res, next);
+});
 
-// Tester l’envoi via Resend (pas de ports SMTP → fonctionne sur Render)
-router.post('/smtp/test-resend', SellersController.testSmtpResend);
+// Tester l’envoi via Resend
+router.post('/smtp/test-resend', (req, res, next) => {
+  safeLog(req, 'Test d’envoi SMTP via Resend');
+  SellersController.testSmtpResend(req, res, next);
+});
 
 module.exports = router;

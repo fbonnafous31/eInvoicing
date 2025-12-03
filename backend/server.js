@@ -42,8 +42,9 @@ app.use(cors({
 }));
 
 // Logger middleware
-const loggerMiddleware = require("./src/middlewares/loggerMiddleware");
-app.use(loggerMiddleware);
+const requestLogger = require("./src/middlewares/requestLogger");
+app.use(requestLogger);
+
 
 // Middlewares JSON / URL-encoded
 app.use(express.json());

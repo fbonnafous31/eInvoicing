@@ -1,9 +1,18 @@
 /* global describe, it, expect, beforeEach */
 
 const fs = require('fs');
-const path = require('path');
 const db = require('../../../config/db');
 const storageService = require('../../../services');
+
+// Mock partiel de path pour ne mocker que ce qu'on veut
+jest.mock('path', () => {
+  const actualPath = jest.requireActual('path'); // ✅ doit être à l'intérieur
+  return {
+    ...actualPath,
+    relative: jest.fn().mockReturnValue('/123_main_file.pdf'), // mock pour relativePath
+  };
+});
+
 const { generateStoredName, getFinalPath } = require('../../../utils/fileNaming');
 const {
   saveAttachment,
@@ -11,7 +20,6 @@ const {
   getAdditionalAttachments,
 } = require('../invoiceAttachments.model');
 
-jest.mock('path');
 jest.mock('../../../config/db');
 jest.mock('../../../utils/fileNaming', () => ({
   generateStoredName: jest.fn(),
@@ -26,11 +34,6 @@ describe('invoiceAttachments.model', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Patch path pour tests
-    path.join.mockImplementation((...args) => args.join('/'));
-    path.resolve.mockImplementation((p) => `/abs/${p}`);
-    path.relative = jest.fn().mockReturnValue('/123_main_file.pdf'); // <-- fix pour relativePath
 
     // Mocks fs.promises
     fs.promises.rename = jest.fn().mockResolvedValue();
@@ -89,11 +92,12 @@ describe('invoiceAttachments.model', () => {
       ],
     });
 
+    const path = require('path'); // utilise le vrai path
     const result = await getAdditionalAttachments(123);
 
     expect(result).toEqual([
-      { file_name: 'a.pdf', file_path: '/abs/a.pdf' },
-      { file_name: 'b.pdf', file_path: '/abs/b.pdf' },
+      { file_name: 'a.pdf', file_path: path.resolve('a.pdf') },
+      { file_name: 'b.pdf', file_path: path.resolve('b.pdf') },
     ]);
   });
 });

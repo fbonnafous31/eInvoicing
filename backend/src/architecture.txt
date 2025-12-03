@@ -5,14 +5,18 @@
 │   └── tests
 │       └── db.test.js
 ├── middlewares
+│   ├── architecture.txt
 │   ├── attachSeller.js
 │   ├── auth.js
 │   ├── errorHandler.js
+│   ├── requestId.js
+│   ├── requestLogger.js
 │   ├── tests
 │   │   ├── attachSeller.test.js
 │   │   ├── auth.test.js
 │   │   ├── errorHandler.test.js
 │   │   └── upload.test.js
+│   ├── timing.js
 │   └── upload.js
 ├── modules
 │   ├── architeture.txt
@@ -35,6 +39,7 @@
 │   │   ├── invoices.route.js
 │   │   ├── invoices.service.js
 │   │   ├── invoiceStatus.model.js
+│   │   ├── pdfProxy.route.js
 │   │   └── __tests__
 │   ├── pdp
 │   │   ├── adapters
@@ -50,13 +55,13 @@
 │   └── metrics.js
 ├── services
 │   ├── adapters
+│   │   ├── b2.js
 │   │   └── local.js
 │   ├── index.js
-│   └── storage.js
-├── uploads
-│   ├── factur-x
-│   ├── invoices
-│   ├── pdf
+│   ├── storage.js
+│   └── __tests__
+│       ├── localAdapter.test.js
+│       └── storageService.test.js
 │   ├── pdp
 │   └── tmp
 └── utils
@@ -72,9 +77,11 @@
     │   ├── logo.png
     │   ├── pdf-generator.js
     │   └── testGenerate.js
+    ├── logger.js
     ├── siret.js
     └── __tests__
         ├── encryption.test.js
         ├── fileNaming.test.js
         └── siret.test.js
+
 

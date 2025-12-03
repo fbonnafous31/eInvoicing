@@ -34,13 +34,9 @@ jest.mock("../../../utils/invoice-pdf/pdf-generator", () => ({
   embedFacturXInPdf: jest.fn(() => Buffer.from("mock-pdf")),
 }));
 
-// === Mock des constantes pour éviter les imports ESM ===
-jest.mock("../../../../constants/paymentMethods", () => ({
-  paymentMethodsOptions: [],
-}));
-jest.mock("../../../../constants/paymentTerms", () => ({
-  paymentTermsOptions: [],
-}));
+// === Mock des constantes ===
+jest.mock("../../../../constants/paymentMethods", () => ({ paymentMethodsOptions: [] }));
+jest.mock("../../../../constants/paymentTerms", () => ({ paymentTermsOptions: [] }));
 
 // === Mock du controller ===
 jest.mock("../invoices.controller", () => ({
@@ -64,24 +60,25 @@ jest.mock("../invoices.controller", () => ({
   getInvoicePdfA3Proxy: jest.fn((req, res) => res.status(200).send(Buffer.from("mock-pdf"))),
 }));
 
-// === Mock du client S3 pour éviter les appels réels dans les tests 
+// === Mock S3 pour éviter les appels réels ===
 jest.mock("../../../../config/s3Client", () => ({
-  s3Client: {
-    send: jest.fn().mockResolvedValue({
-      Body: {
-        pipe: jest.fn(), 
-      },
-    }),
-  },
+  s3Client: { send: jest.fn().mockResolvedValue({ Body: { pipe: jest.fn() } }) },
 }));
 
 // --- Setup Express ---
 const app = express();
 app.use(express.json());
+
+// --- Mock logger pour éviter les 500 ---
+app.use((req, res, next) => {
+  req.log = { info: jest.fn(), error: jest.fn() };
+  next();
+});
+
 app.use("/api/invoices", invoicesRouter);
 
 // --- Tests ---
-describe("Invoices routes (réelles, mockées pour CI)", () => {
+describe("Invoices routes (mockées pour CI)", () => {
   it("GET /api/invoices retourne un tableau de factures", async () => {
     const res = await request(app).get("/api/invoices");
     expect(res.status).toBe(200);
