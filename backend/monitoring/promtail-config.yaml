@@ -24,3 +24,12 @@ scrape_configs:
             sellerId: sellerId
             clientId: clientId
             requestId: requestId
+            method: method
+            url: url
+            statusCode: statusCode
+            duration: duration
+            user: user
+          optional: true
+      - timestamp:
+          source: time
+          format: unixms

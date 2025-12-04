@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./loki-config.yaml:/etc/loki/local-config.yaml
+      - ./loki-data:/loki
+    networks:
+      - monitoring_logs_net
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: promtail_logs
+    volumes:
+      - ../logs:/var/log/app
+      - ./promtail-config.yaml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - monitoring_logs_net
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana_logs
+    ports:
+      - "3002:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - monitoring_logs_net
+    depends_on:
+      - loki
+    volumes:
+      - ./grafana-data:/var/lib/grafana      
+
+networks:
+  monitoring_logs_net:
+    name: monitoring_logs_net
+    driver: bridge
