@@ -45,3 +45,7 @@ startDB.sh
 
 # Audit files
 /scripts/audit/audit-result.json
+
+# Monitoring data
+backend/monitoring/grafana-data/
+backend/monitoring/loki-data/

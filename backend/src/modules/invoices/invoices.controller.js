@@ -153,6 +153,10 @@ const generateInvoicePdfBuffer = asyncHandler(async (req, res) => {
 
   // ---------------- Récupérer le seller complet ----------------
   let seller = {};
+  if (invoice.seller_id !== req.seller.id) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+  
   const sellerId = invoiceBody.header?.seller_id;
   if (sellerId) {
     seller = await getSellerById(sellerId); 

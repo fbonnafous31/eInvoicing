@@ -1,0 +1,292 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 0,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "df62o9mtzu8zkd"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "hideFrom": {
+              "viz": false
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "url"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 454
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "method"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 64
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "time"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 157
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "statusCode"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 91
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "level"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 50
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 54
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "log"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 519
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 21,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "time"
+          }
+        ]
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "df62o9mtzu8zkd"
+          },
+          "direction": "backward",
+          "editorMode": "builder",
+          "expr": "{job=\"eInvoicing\"} |= ``",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "New panel",
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "delimiter": ",",
+            "replace": true,
+            "source": "Line"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "3": true,
+              "15": true,
+              "16": true,
+              "34": true,
+              "39": true,
+              "2025": true,
+              "03": true,
+              "CET": true,
+              "Dec": true,
+              "Test": true,
+              "UTC": true,
+              "Wed": true,
+              "déc.": true,
+              "log": true,
+              "mer.": true
+            },
+            "includeByName": {},
+            "indexByName": {
+              "3": 28,
+              "15": 29,
+              "16": 19,
+              "34": 30,
+              "39": 20,
+              "2025": 21,
+              "03": 25,
+              "CET": 27,
+              "Dec": 32,
+              "Test": 22,
+              "UTC": 33,
+              "Wed": 31,
+              "app": 7,
+              "clientData": 18,
+              "clientId": 12,
+              "code": 38,
+              "constraint": 39,
+              "data": 16,
+              "duration": 6,
+              "déc.": 26,
+              "env": 8,
+              "err": 36,
+              "hostname": 35,
+              "id": 17,
+              "level": 1,
+              "log": 23,
+              "mainData": 15,
+              "mer.": 24,
+              "method": 2,
+              "msg": 5,
+              "pid": 34,
+              "requestId": 9,
+              "sellerDbId": 14,
+              "sellerId": 11,
+              "statusCode": 4,
+              "time": 0,
+              "unexpected": 37,
+              "updatedSeller": 13,
+              "url": 3,
+              "user": 10
+            },
+            "renameByName": {
+              "msg": "log",
+              "statusCode": "status",
+              "url": ""
+            }
+          }
+        },
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "dateFormat": "DD/MM/YYYY HH24:MI:SS",
+                "destinationType": "time",
+                "targetField": "time"
+              }
+            ],
+            "fields": {}
+          }
+        }
+      ],
+      "type": "table"
+    }
+  ],
+  "preload": false,
+  "schemaVersion": 42,
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Logs eInvoicing",
+  "uid": "adjp47j",
+  "version": 7
+}

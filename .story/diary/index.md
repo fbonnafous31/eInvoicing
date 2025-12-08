@@ -165,3 +165,6 @@
 - [Jour 162 — Logs : mise en place de Pino pour centraliser et exploiter mes journaux 📑✨](jour-162.md)
 - [Jour 163 — Logs : enrichir le contexte et fiabiliser les routes 🚀📊](jour-163.md)
 - [Jour 164 — Centralisation des logs avec Loki pour eInvoicing 📑✨](jour-164.md)
+- [Jour 165 — Visualisation des logs avec Grafana pour eInvoicing 📊✨](jour-165.md)
+- [Jour 166 --- Réflexion sur la souveraineté d'eInvoicing 🇫🇷🛡️](jour-166.md)
+- [Jour 167 – Audit sécurité eInvoicing : JWT et isolation 🔒](jour-167.md)
