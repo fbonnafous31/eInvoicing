@@ -8,9 +8,19 @@ async function listInvoices() {
   return await InvoicesModel.getAllInvoices();
 }
 
-async function getInvoice(id) {
+async function getInvoice(id, currentSeller) {
+  if (!currentSeller) throw new Error('Forbidden');
+
   const invoice = await InvoicesModel.getInvoiceById(id);
-  return invoice || null;
+
+  if (!invoice) return null;
+
+  // Contrôle d'appartenance
+  if (invoice.seller?.id !== currentSeller.id) {
+    throw new Error('Forbidden');
+  }
+
+  return invoice;
 }
 
 async function createInvoice(data) {

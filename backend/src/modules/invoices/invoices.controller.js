@@ -51,9 +51,16 @@ const listInvoices = asyncHandler(async (req, res) => {
  * Récupère une facture par ID
  */
 const getInvoice = asyncHandler(async (req, res) => {
-  const invoice = await InvoicesService.getInvoice(req.params.id);
-  if (!invoice) return res.status(404).json({ message: 'Facture non trouvée' });
-  res.json(invoice);
+  try {
+    const invoice = await InvoicesService.getInvoice(req.params.id, req.seller);
+    if (!invoice) return res.status(404).json({ message: 'Facture non trouvée' });
+    res.json(invoice);
+  } catch (err) {
+    if (err.message === 'Forbidden') {
+      return res.status(403).json({ message: 'Accès interdit' });
+    }
+    throw err;
+  }
 });
 
 /**

@@ -45,10 +45,9 @@ app.use(cors({
 const requestLogger = require("./src/middlewares/requestLogger");
 app.use(requestLogger);
 
-
 // Middlewares JSON / URL-encoded
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ limit: '10kb', extended: true }));
 
 // Prometheus avant les routes
 app.use(metricsMiddleware);
