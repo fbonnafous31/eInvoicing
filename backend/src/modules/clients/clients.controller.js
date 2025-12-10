@@ -6,16 +6,16 @@ const SCHEMA = process.env.DB_SCHEMA || 'public';
 async function getClients(req, res) {
   try {
     if (!req.seller) {
-      req.log.warn("Accès refusé : seller non identifié");
+      req.log?.warn("Accès refusé : seller non identifié");
       return res.status(403).json({ error: 'Seller non identifié' });
     }
 
-    req.log.info({ sellerId: req.seller.id }, "Récupération des clients du seller");
+    req.log?.info({ sellerId: req.seller.id }, "Récupération des clients du seller");
 
     const clients = await ClientsService.getClientsBySeller(req.seller.id);
     res.json(clients);
   } catch (err) {
-    req.log.error({ err }, "Erreur lors de getClients");
+    req.log?.error({ err }, "Erreur lors de getClients");
     res.status(500).json({ error: 'Erreur serveur' });
   }
 }
@@ -58,6 +58,13 @@ async function getClientById(req, res) {
     }
 
     const { id } = req.params;
+    const MAX_INT32 = 2147483647;
+
+    if (!/^\d+$/.test(id) || parseInt(id, 10) > MAX_INT32) {
+      req.log.warn({ clientId: id }, "ID client invalide ou trop grand");
+      return res.status(400).json({ error: 'ID client invalide' });
+    }
+
     req.log.info({ sellerId: req.seller.id, clientId: id }, "Récupération d'un client");
 
     const client = await ClientsService.getClientById(id, req.seller.id);

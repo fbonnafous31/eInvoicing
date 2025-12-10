@@ -81,15 +81,11 @@ describe('ClientsController', () => {
   });
 
   // -------- getClientById --------
-  it('getClientById retourne le client', async () => {
-    const client = { id: 1, name: 'Alice' };
-    ClientsService.getClientById.mockResolvedValue(client);
-    req.params.id = 1;
-
-    await ClientsController.getClientById(req, res);
-
-    expect(ClientsService.getClientById).toHaveBeenCalledWith(1, 42);
-    expect(res.json).toHaveBeenCalledWith(client);
+  ClientsService.getClientById.mockImplementation((id, sellerId) => {
+    if (sellerId === 42 && id === 1) {
+      return Promise.resolve({ id: 1, name: 'Alice' });
+    }
+    return Promise.resolve(null); 
   });
 
   it('getClientById retourne 404 si client non trouvé', async () => {

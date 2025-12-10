@@ -3,8 +3,8 @@
 ├── attachSeller.js
 ├── auth.js
 ├── errorHandler.js
-├── loggerMiddleware.js
 ├── requestId.js
+├── requestLogger.js
 ├── tests
 │   ├── attachSeller.test.js
 │   ├── auth.test.js

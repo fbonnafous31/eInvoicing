@@ -8,6 +8,7 @@ const { getInvoiceById } = require('./invoices.model');
 const { generateQuotePdf, generateInvoicePdfBuffer: generatePdfUtil } = require('../../utils/invoice-pdf/generateInvoicePdf');
 const InvoiceStatusModel = require('../invoices/invoiceStatus.model');
 const logger = require('../../utils/logger');
+const ClientsService = require('../clients/clients.service');
 
 /**
  * Helper pour envelopper les gestionnaires de routes asynchrones et attraper les erreurs.
@@ -67,9 +68,21 @@ const getInvoice = asyncHandler(async (req, res) => {
  * Crée une facture avec lignes, taxes et justificatifs
  */
 const createInvoice = asyncHandler(async (req, res) => {
+  // ---------------- Extraire les données du body ----------------
   const { invoice, client, lines, taxes, attachments_meta = [] } = _parseMultipartBody(req.body);
 
-  const attachments = (req.files.attachments || []).map((file, i) => ({
+  // ---------------- Vérifier que le client est bien un ID ----------------
+  // Si `client` est un objet complet, on prend juste client_id
+  const clientId = typeof client === 'object' ? client.client_id : client;
+
+  // ---------------- Vérifier que le client appartient au seller ----------------
+  const clientRecord = await ClientsService.getClientById(clientId, req.seller.id);
+  if (!clientRecord) {
+    return res.status(404).json({ error: "Resource not found" }); // message neutre
+  }
+
+  // ---------------- Traiter les attachments ----------------
+  const attachments = (req.files?.attachments || []).map((file, i) => ({
     file_name: file.originalname,
     file_path: file.path,
     attachment_type: attachments_meta[i]?.attachment_type || 'additional'
@@ -77,10 +90,18 @@ const createInvoice = asyncHandler(async (req, res) => {
 
   const mainCount = attachments.filter(f => f.attachment_type === 'main').length;
   if (mainCount !== 1) {
-    return res.status(400).json({ message: "Une facture doit avoir exactement un justificatif principal." });
+    return res.status(400).json({ error: "Une facture doit avoir exactement un justificatif principal." });
   }
 
-  const newInvoice = await InvoicesService.createInvoice({ invoice, client, lines, taxes, attachments });
+  // ---------------- Création en base ----------------
+  const newInvoice = await InvoicesService.createInvoice({
+    invoice,
+    client_id: clientRecord.id, // important : ne jamais passer l'objet entier
+    lines,
+    taxes,
+    attachments
+  });
+
   res.status(201).json(newInvoice);
 });
 
@@ -158,15 +179,16 @@ const { getSellerById } = require('../sellers/sellers.service');
 const generateInvoicePdfBuffer = asyncHandler(async (req, res) => {
   const invoiceBody = { ...req.body };
 
-  // ---------------- Récupérer le seller complet ----------------
-  let seller = {};
-  if (invoice.seller_id !== req.seller.id) {
+  // ---------------- Vérifier seller_id avant création de l'objet invoice ----------------
+  const sellerIdFromBody = invoiceBody.seller_id || invoiceBody.header?.seller_id;
+  if (sellerIdFromBody && sellerIdFromBody !== req.seller.id) {
     return res.status(403).json({ error: "Forbidden" });
   }
-  
-  const sellerId = invoiceBody.header?.seller_id;
-  if (sellerId) {
-    seller = await getSellerById(sellerId); 
+
+  // ---------------- Récupérer le seller complet ----------------
+  let seller = {};
+  if (sellerIdFromBody) {
+    seller = await getSellerById(sellerIdFromBody); 
   }
 
   // ---------------- Composer l'objet invoice complet ----------------

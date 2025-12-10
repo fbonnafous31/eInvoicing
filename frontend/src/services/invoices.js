@@ -1,10 +1,10 @@
 import { useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { getEnv } from "@/utils/getEnv"; 
+import { getEnv } from "@/utils/getEnv";
 
 const env = getEnv();
 export const API_ROOT = env.VITE_API_URL;
-export const API_BASE = `${API_ROOT}/api/invoices`; 
+export const API_BASE = `${API_ROOT}/api/invoices`;
 
 export function useInvoiceService() {
   const { getToken } = useAuth();
@@ -12,6 +12,7 @@ export function useInvoiceService() {
   const request = useCallback(
     async (url, options = {}) => {
       const token = await getToken();
+      // console.log(`token used in request to ${url}:`, token);
       const res = await fetch(url, {
         ...options,
         headers: {
@@ -70,7 +71,7 @@ export function useInvoiceService() {
       }),
     [request]
   );
-  
+
   const getInvoiceStatus = useCallback((id) => request(`${API_BASE}/${id}/status`), [request]);
 
   // Polling pour le statut PDP
@@ -188,7 +189,7 @@ export function useInvoiceService() {
       }
 
       const { url } = await res.json();
-      return url; 
+      return url;
     },
     [getToken]
   );
@@ -203,7 +204,7 @@ export function useInvoiceService() {
       if (!res.ok) throw new Error(`Erreur serveur (${res.status})`);
 
       const blob = await res.blob();
-      return blob; 
+      return blob;
     },
     [getToken]
   );
@@ -277,7 +278,7 @@ export function useInvoiceService() {
     sendInvoice,
     sendInvoiceMail,
     getInvoiceStatus,
-    pollInvoiceStatusPDP, 
+    pollInvoiceStatusPDP,
     refreshInvoiceLifecycle,
     getInvoiceLifecycle,
     pollInvoiceLifecycle,
