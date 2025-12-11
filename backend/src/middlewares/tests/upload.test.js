@@ -1,23 +1,41 @@
 /* global describe, it, expect, beforeEach, jest */
 const path = require("path");
 
-// Mock de fs
+// -------------------------
+// 🔹 Mocks
+// -------------------------
+
 jest.mock("fs", () => ({
   existsSync: jest.fn(),
   mkdirSync: jest.fn(),
+  renameSync: jest.fn(),
+  statSync: jest.fn(() => ({ size: 1024 * 100 })), // 100 Ko
+  readFileSync: jest.fn(() => Buffer.from("%PDF-1.4")),
 }));
 
-// Mock de multer directement dans jest.mock
 jest.mock("multer", () => {
   const multerFn = jest.fn(() => "mocked-multer");
-  multerFn.diskStorage = jest.fn((config) => config); 
+  multerFn.diskStorage = jest.fn((config) => config);
+  multerFn.fields = jest.fn(() => (req, res, cb) => cb());
   return multerFn;
 });
 
+jest.mock("file-type", () => ({
+  fromFile: jest.fn().mockResolvedValue({ mime: "application/pdf" }),
+}));
+
+jest.mock("child_process", () => ({
+  execFile: jest.fn((cmd, args, opts, cb) => cb(null, "ok")),
+}));
+
+jest.mock("pdf-parse", () => jest.fn(() => Promise.resolve({ text: "PDF sample" })));
+
+// -------------------------
+// 🔹 Tests
+// -------------------------
 describe("upload middleware", () => {
   let fs;
   let multer;
-  let uploadPath;
 
   beforeEach(() => {
     jest.resetModules();
@@ -25,14 +43,17 @@ describe("upload middleware", () => {
     multer = require("multer");
 
     fs.existsSync.mockReturnValue(false);
-    uploadPath = path.join(__dirname, "../../uploads/tmp");
-
     require("../upload");
   });
 
   it("devrait créer le dossier s'il n'existe pas", () => {
-    expect(fs.existsSync).toHaveBeenCalledWith(uploadPath);
-    expect(fs.mkdirSync).toHaveBeenCalledWith(uploadPath, { recursive: true });
+    const tmpDir = path.join(__dirname, "../../uploads/tmp");
+    const finalDir = path.join(__dirname, "../../uploads/invoices");
+
+    expect(fs.existsSync).toHaveBeenCalledWith(tmpDir);
+    expect(fs.existsSync).toHaveBeenCalledWith(finalDir);
+    expect(fs.mkdirSync).toHaveBeenCalledWith(tmpDir, { recursive: true });
+    expect(fs.mkdirSync).toHaveBeenCalledWith(finalDir, { recursive: true });
   });
 
   it("devrait configurer multer avec diskStorage", () => {
@@ -44,7 +65,7 @@ describe("upload middleware", () => {
 
     const destCb = jest.fn();
     storageConfig.destination({}, {}, destCb);
-    expect(destCb).toHaveBeenCalledWith(null, uploadPath);
+    expect(destCb).toHaveBeenCalledWith(null, path.join(__dirname, "../../uploads/tmp"));
 
     const fileCb = jest.fn();
     const fakeFile = { originalname: "facture.pdf" };
@@ -53,8 +74,9 @@ describe("upload middleware", () => {
     expect(calledArg).toMatch(/facture\.pdf$/);
   });
 
-  it("exporte le middleware multer", () => {
-    const { upload } = require("../upload");
-    expect(upload).toBe("mocked-multer");
+  it("exporte le middleware multer et secureUpload", () => {
+    const { upload, secureUpload } = require("../upload");
+    expect(upload).toBeDefined();
+    expect(typeof secureUpload).toBe("function");
   });
 });
