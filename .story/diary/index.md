@@ -171,3 +171,4 @@
 - [Jour 168 – Audit sécurité eInvoicing : JWT, isolation et robustesse 🔒](jour-168.md)
 - [Jour 169 – Consolider ce que l’interface bloque déjà, mais au niveau “hack” 🛡️](jour-169.md)
 - [Jour 169 – Sécuriser les uploads PDF et les requêtes SQL 🛡️](jour-170.md)
+- [Jour 171 – Hardening JWT et gestion globale des erreurs 🔒](jour-171.md)

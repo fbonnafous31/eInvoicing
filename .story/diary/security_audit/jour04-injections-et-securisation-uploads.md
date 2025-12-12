@@ -1,7 +1,7 @@
 # 🛡️ Audit technique de sécurité — eInvoicing
 
 **Date :** 11 décembre 2025
-**Version :** 1.0 — Parties 1, 2 & 3 (SQL + Upload PDF sécurisé)
+**Objet :** tester les failles classiques et l'upload sécurisé.
 
 ---
 
