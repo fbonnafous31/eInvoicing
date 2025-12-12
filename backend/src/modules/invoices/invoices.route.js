@@ -3,7 +3,7 @@ const router = express.Router();
 const InvoicesController = require('./invoices.controller');
 const InvoiceMailController = require('./invoiceMail.controller');
 const attachSeller = require('../../middlewares/attachSeller'); 
-const checkJwt = require('../../middlewares/auth'); 
+const withLogging = require('../../middlewares/auth'); 
 const pdfProxy = require('./pdfProxy.route');
 const { upload } = require('../../middlewares/upload');
 
@@ -24,7 +24,7 @@ router.use((req, res, next) => {
 // ----------------------------
 // Routes protégées par Auth0 et attachSeller
 // ----------------------------
-router.use(checkJwt);
+router.use(withLogging);
 router.use(attachSeller);
 
 // ----------------------------

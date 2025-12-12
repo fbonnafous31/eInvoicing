@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const SellersController = require('./sellers.controller');
-const checkJwt = require('../../middlewares/auth');
+const withLogging = require('../../middlewares/auth');
 const attachSeller = require('../../middlewares/attachSeller');
 
 // Helper pour logger sans planter
@@ -24,7 +24,7 @@ router.get('/check-identifier', (req, res, next) => {
 // ----------------------------
 // Routes protégées par Auth0
 // ----------------------------
-router.use(checkJwt);
+router.use(withLogging);
 router.use(attachSeller);
 
 // Récupérer son vendeur

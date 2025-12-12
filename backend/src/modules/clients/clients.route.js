@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const ClientsController = require('./clients.controller');
 const attachSeller = require('../../middlewares/attachSeller'); 
-const checkJwt = require('../../middlewares/auth'); 
+const withLogging = require('../../middlewares/auth'); 
 
 // ----------------------------
 // Middleware safe logger
@@ -29,7 +29,7 @@ router.get('/check-siret/:siret', (req, res, next) => {
 // ----------------------------
 // Routes protégées par Auth0
 // ----------------------------
-router.use(checkJwt);
+router.use(withLogging);
 router.use(attachSeller);
 
 // Liste des clients
