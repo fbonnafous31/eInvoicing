@@ -1,4 +1,4 @@
-# Jour 166 --- Réflexion sur la souveraineté d'eInvoicing 🇫🇷🛡️
+# Jour 166 - Réflexion sur la souveraineté d'eInvoicing 🇫🇷🛡️
 
 ## Notions expliquées
 

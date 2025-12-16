@@ -1,4 +1,4 @@
-# Jour 156 -- Le blog est terminé : le plaisir d'un outil bien fini 🏁
+# Jour 156 - Le blog est terminé : le plaisir d'un outil bien fini 🏁
 
 Ça y est, après de nombreuses sessions de peaufinage, je peux considérer
 le blog comme "terminé". Bien sûr, un projet web n'est jamais vraiment

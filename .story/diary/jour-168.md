@@ -1,4 +1,4 @@
-# Jour 168 – Audit sécurité eInvoicing : JWT, isolation et robustesse 🔒
+# Jour 168 - Audit sécurité eInvoicing : JWT, isolation et robustesse 🔒
 
 Aujourd'hui, je me suis concentré sur la **sécurité et l’isolation des données** dans eInvoicing, avec une approche structurée en **4 phases de tests** pour m’assurer que chaque utilisateur ne peut accéder **qu’à ses propres clients et factures**, et que le backend reste robuste face aux requêtes extrêmes.
 

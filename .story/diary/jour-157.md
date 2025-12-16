@@ -1,4 +1,4 @@
-# Jour 157 -- Renforcer les fondations 🔐🧱
+# Jour 157 - Renforcer les fondations 🔐🧱
 
 Aujourd'hui, j'ai continué à travailler sur un sujet que je prends
 vraiment au sérieux depuis les premières briques de l'application : la

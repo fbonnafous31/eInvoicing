@@ -1,4 +1,4 @@
-# Jour 167 – Audit sécurité eInvoicing : JWT et isolation 🔒
+# Jour 167 - Audit sécurité eInvoicing : JWT et isolation 🔒
 
 Cette semaine, je me concentre sur la **sécurité et l’isolation des données** dans eInvoicing. L’objectif est de m’assurer que chaque utilisateur ne peut accéder **qu’à ses propres clients et factures**, tout en examinant **le bon usage des JWT** et en identifiant les axes d’amélioration pour renforcer le backend.
 

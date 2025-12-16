@@ -1,4 +1,4 @@
-# Jour 169 – Sécuriser les uploads PDF et les requêtes SQL 🛡️
+# Jour 169 - Sécuriser les uploads PDF et les requêtes SQL 🛡️
 
 Aujourd’hui, j’ai passé la journée à travailler sur ce que j’appelle la **sécurité invisible mais critique** du projet : tout ce qui se passe avant même que l’utilisateur voie quoi que ce soit. 😄
 

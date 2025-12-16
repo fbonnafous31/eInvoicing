@@ -1,4 +1,4 @@
-# Jour 169 – Consolider ce que l’interface bloque déjà, mais au niveau “hack” 🛡️
+# Jour 169 - Consolider ce que l’interface bloque déjà, mais au niveau “hack” 🛡️
 
 Aujourd’hui, j’ai travaillé sur une partie un peu invisible mais essentielle du projet : la **sécurité deep‑backend**.  
 L’interface empêche déjà tout un tas d’actions non autorisées (consulter des clients d’un autre utilisateur, créer une facture pour quelqu’un d’autre, manipuler les attachments…).  

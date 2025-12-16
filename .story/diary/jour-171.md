@@ -1,4 +1,4 @@
-# Jour 171 – Hardening JWT et gestion globale des erreurs 🔒
+# Jour 171 - Hardening JWT et gestion globale des erreurs 🔒
 
 Aujourd’hui, j’ai continué le travail sur la **sécurité invisible mais critique** de l’API eInvoicing. 😄
 L’objectif : que l’authentification et la gestion des erreurs soient solides, fiables et compréhensibles, même pour un attaquant curieux.
