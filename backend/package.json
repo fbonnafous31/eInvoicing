@@ -23,6 +23,7 @@
     "resend": "^6.4.0",
     "rotating-file-stream": "^3.2.7",
     "sanitize-filename": "^1.6.3",
+    "tmp": "^0.2.5",
     "uuid": "^11.1.0",
     "xmlbuilder": "^15.1.1",
     "xmlbuilder2": "^3.1.1"
