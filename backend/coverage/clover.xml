@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1765529191783" clover="3.2.0">
-  <project timestamp="1765529191783" name="All files">
+<coverage generated="1767623061826" clover="3.2.0">
+  <project timestamp="1767623061826" name="All files">
     <metrics statements="1012" coveredstatements="695" conditionals="505" coveredconditionals="221" methods="193" coveredmethods="111" elements="1710" coveredelements="1027" complexity="0" loc="1012" ncloc="1012" packages="8" files="32" classes="32"/>
     <package name="config">
       <metrics statements="7" coveredstatements="7" conditionals="2" coveredconditionals="1" methods="1" coveredmethods="0"/>
@@ -888,32 +888,32 @@
         <line num="169" count="2" type="stmt"/>
         <line num="170" count="2" type="stmt"/>
         <line num="173" count="2" type="stmt"/>
-        <line num="190" count="2" type="stmt"/>
-        <line num="205" count="2" type="stmt"/>
-        <line num="206" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="207" count="1" type="stmt"/>
-        <line num="208" count="1" type="stmt"/>
-        <line num="211" count="1" type="cond" truecount="2" falsecount="4"/>
+        <line num="192" count="2" type="stmt"/>
+        <line num="209" count="2" type="stmt"/>
+        <line num="210" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="211" count="1" type="stmt"/>
         <line num="212" count="1" type="stmt"/>
-        <line num="213" count="1" type="stmt"/>
+        <line num="215" count="1" type="cond" truecount="2" falsecount="4"/>
+        <line num="216" count="1" type="stmt"/>
         <line num="217" count="1" type="stmt"/>
-        <line num="220" count="1" type="stmt"/>
-        <line num="221" count="1" type="cond" truecount="3" falsecount="1"/>
-        <line num="222" count="1" type="stmt"/>
-        <line num="225" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="226" count="0" type="stmt"/>
-        <line num="227" count="0" type="stmt"/>
-        <line num="252" count="1" type="stmt"/>
-        <line num="253" count="1" type="stmt"/>
-        <line num="273" count="1" type="stmt"/>
-        <line num="274" count="1" type="stmt"/>
-        <line num="275" count="1" type="stmt"/>
+        <line num="221" count="1" type="stmt"/>
+        <line num="224" count="1" type="stmt"/>
+        <line num="225" count="1" type="cond" truecount="3" falsecount="1"/>
+        <line num="226" count="1" type="stmt"/>
+        <line num="229" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="230" count="0" type="stmt"/>
+        <line num="231" count="0" type="stmt"/>
+        <line num="256" count="1" type="stmt"/>
+        <line num="257" count="1" type="stmt"/>
         <line num="277" count="1" type="stmt"/>
         <line num="278" count="1" type="stmt"/>
         <line num="279" count="1" type="stmt"/>
-        <line num="281" count="2" type="stmt"/>
-        <line num="282" count="2" type="stmt"/>
-        <line num="286" count="4" type="stmt"/>
+        <line num="281" count="1" type="stmt"/>
+        <line num="282" count="1" type="stmt"/>
+        <line num="283" count="1" type="stmt"/>
+        <line num="285" count="2" type="stmt"/>
+        <line num="286" count="2" type="stmt"/>
+        <line num="290" count="4" type="stmt"/>
       </file>
       <file name="sellers.route.js" path="/home/francois/dev/eInvoicing/backend/src/modules/sellers/sellers.route.js">
         <metrics statements="26" coveredstatements="25" conditionals="2" coveredconditionals="1" methods="6" coveredmethods="6"/>

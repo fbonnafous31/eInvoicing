@@ -183,8 +183,10 @@ async function updateSeller(id, data) {
           share_capital = $9,
           phone_number = $10,
           contact_email = $11,
+          additional_1 = $12,
+          additional_2 = $13,          
           updated_at = NOW()
-      WHERE id = $12
+      WHERE id = $14
       RETURNING *;
     `;
     const values = [
@@ -199,6 +201,8 @@ async function updateSeller(id, data) {
       mainData.share_capital,
       mainData.phone_number,
       mainData.contact_email,
+      mainData.additional_1,
+      mainData.additional_2,      
       sellerDbId
     ];
 
