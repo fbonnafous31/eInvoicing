@@ -101,6 +101,6 @@ app.use(errorHandler);
 
 // Démarrage du serveur
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  logger.info(`Backend démarré sur http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  logger.info(`Backend démarré sur http://0.0.0.0:${PORT}`);
 });
