@@ -1,6 +1,6 @@
 const { S3Client } = require("@aws-sdk/client-s3");
 
-export const s3Client = new S3Client({
+const s3Client = new S3Client({
   endpoint: process.env.B2_ENDPOINT,
   region: "us-east-005",
   credentials: {
@@ -8,3 +8,5 @@ export const s3Client = new S3Client({
     secretAccessKey: process.env.B2_APPLICATION_KEY,
   },
 });
+
+module.exports = { s3Client };
