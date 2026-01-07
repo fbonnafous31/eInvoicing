@@ -1,20 +1,24 @@
-# Utiliser l'image Node officielle
-FROM node:18-alpine
+FROM node:18-bookworm-slim
 
-# Définir le dossier de travail
+# Dépendances système requises par canvas
+RUN apt-get update && apt-get install -y \
+    libcairo2 \
+    libcairo2-dev \
+    libpango-1.0-0 \
+    libpango1.0-dev \
+    libjpeg-dev \
+    libgif-dev \
+    librsvg2-dev \
+    build-essential \
+    python3 \
+ && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
-# Copier uniquement package.json et package-lock.json pour installer les dépendances d'abord (cache Docker)
 COPY package*.json ./
+RUN npm ci --omit=dev
 
-# Installer les dépendances
-RUN npm install --production
-
-# Copier tout le reste du code (src, constants, server.js, etc.)
 COPY . .
 
-# Exposer le port utilisé par le backend
 EXPOSE 3000
-
-# Lancer le serveur
-CMD ["node", "server.js"]
+CMD ["npm", "start"]
