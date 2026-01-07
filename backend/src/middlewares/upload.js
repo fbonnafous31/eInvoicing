@@ -2,6 +2,9 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const sanitize = require('sanitize-filename');
+const { DOMMatrix } = require('canvas');
+/* global global */
+global.DOMMatrix = DOMMatrix;
 const pdfParse = require('pdf-parse');
 const FileType = require('file-type');
 const { execFile } = require('child_process');

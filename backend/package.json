@@ -4,6 +4,7 @@
     "@aws-sdk/s3-request-presigner": "^3.929.0",
     "@pdf-lib/fontkit": "^1.1.1",
     "axios": "^1.11.0",
+    "canvas": "^3.2.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
