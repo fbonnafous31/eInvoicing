@@ -8,7 +8,7 @@ const { register, metricsMiddleware } = require("./src/monitoring/metrics");
 const logger = require("./src/utils/logger");
 
 // Services
-const storageService = require("./src/services"); // ton service de stockage B2
+const storageService = require("./src/services"); 
 
 // Routes métier
 const sellersRoutes = require("./src/modules/sellers/sellers.route");

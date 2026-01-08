@@ -72,14 +72,28 @@ const createInvoice = asyncHandler(async (req, res) => {
   const { invoice, client, lines, taxes, attachments_meta = [] } = _parseMultipartBody(req.body);
 
   // ---------------- Vérifier que le client est bien un ID ----------------
-  // Si `client` est un objet complet, on prend juste client_id
   const clientId = typeof client === 'object' ? client.client_id : client;
-
-  // ---------------- Vérifier que le client appartient au seller ----------------
   const clientRecord = await ClientsService.getClientById(clientId, req.seller.id);
+
   if (!clientRecord) {
     return res.status(404).json({ error: "Resource not found" }); // message neutre
   }
+
+  // ---------------- Reconstituer l'objet client complet ----------------
+  const clientData = {
+    client_id: clientRecord.id,
+    client_legal_name: clientRecord.legal_name,
+    client_first_name: clientRecord.first_name,
+    client_last_name: clientRecord.last_name,
+    client_siret: clientRecord.siret,
+    client_vat_number: clientRecord.vat_number,
+    client_address: clientRecord.address,
+    client_city: clientRecord.city,
+    client_postal_code: clientRecord.postal_code,
+    client_country_code: clientRecord.country_code,
+    client_email: clientRecord.email,
+    client_phone: clientRecord.phone,
+  };
 
   // ---------------- Traiter les attachments ----------------
   const attachments = (req.files?.attachments || []).map((file, i) => ({
@@ -96,7 +110,7 @@ const createInvoice = asyncHandler(async (req, res) => {
   // ---------------- Création en base ----------------
   const newInvoice = await InvoicesService.createInvoice({
     invoice,
-    client_id: clientRecord.id, // important : ne jamais passer l'objet entier
+    client: clientData,  
     lines,
     taxes,
     attachments

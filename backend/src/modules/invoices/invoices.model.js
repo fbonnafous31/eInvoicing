@@ -167,7 +167,7 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
           client.client_siret ? "SIRET" : client.client_vat_number ? "VAT" : "NAME",
           client.client_siret ||
             client.client_vat_number ||
-            `${client.client_first_name || ""} ${client.client_last_name || ""}`.trim(),
+            client.client_legal_name,
           client.client_address || null,
           client.client_city || null,
           client.client_postal_code || null,
