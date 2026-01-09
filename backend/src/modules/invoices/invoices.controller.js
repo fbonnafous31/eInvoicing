@@ -72,28 +72,50 @@ const createInvoice = asyncHandler(async (req, res) => {
   const { invoice, client, lines, taxes, attachments_meta = [] } = _parseMultipartBody(req.body);
 
   // ---------------- Vérifier que le client est bien un ID ----------------
-  const clientId = typeof client === 'object' ? client.client_id : client;
-  const clientRecord = await ClientsService.getClientById(clientId, req.seller.id);
+  let clientRecord = null;
+
+  if (client?.client_id) {
+    clientRecord = await ClientsService.getClientById(client.client_id, req.seller.id);
+  }
 
   if (!clientRecord) {
-    return res.status(404).json({ error: "Resource not found" }); // message neutre
+    // Client inexistant → création
+    clientRecord = await ClientsService.createClient(
+      {
+        legal_name: client.client_legal_name || `${client.client_first_name || ""} ${client.client_last_name || ""}`.trim(),
+        siret: client.client_siret || null,
+        vat_number: client.client_vat_number || null,
+        address: client.client_address || null,
+        city: client.client_city || null,
+        postal_code: client.client_postal_code || null,
+        country_code: client.client_country_code || null,
+        firstname: client.client_first_name || null,
+        lastname: client.client_last_name || null,
+        is_company: !!(client.client_siret || client.client_vat_number),
+        email: client.client_email || null,
+        phone: client.client_phone || null,
+      },
+      req.seller.id
+    );
   }
 
   // ---------------- Reconstituer l'objet client complet ----------------
-  const clientData = {
-    client_id: clientRecord.id,
-    client_legal_name: clientRecord.legal_name,
-    client_first_name: clientRecord.first_name,
-    client_last_name: clientRecord.last_name,
-    client_siret: clientRecord.siret,
-    client_vat_number: clientRecord.vat_number,
-    client_address: clientRecord.address,
-    client_city: clientRecord.city,
-    client_postal_code: clientRecord.postal_code,
-    client_country_code: clientRecord.country_code,
-    client_email: clientRecord.email,
-    client_phone: clientRecord.phone,
-  };
+  const clientData = clientRecord
+    ? {
+        client_id: clientRecord.id,
+        client_legal_name: clientRecord.legal_name,
+        client_first_name: clientRecord.first_name,
+        client_last_name: clientRecord.last_name,
+        client_siret: clientRecord.siret,
+        client_vat_number: clientRecord.vat_number,
+        client_address: clientRecord.address,
+        client_city: clientRecord.city,
+        client_postal_code: clientRecord.postal_code,
+        client_country_code: clientRecord.country_code,
+        client_email: clientRecord.email,
+        client_phone: clientRecord.phone,
+      }
+    : client;
 
   // ---------------- Traiter les attachments ----------------
   const attachments = (req.files?.attachments || []).map((file, i) => ({
@@ -151,6 +173,66 @@ const updateInvoice = asyncHandler(async (req, res) => {
 
   const { invoice, client, lines, taxes, attachments_meta = [], existing_attachments = [] } = _parseMultipartBody(req.body);
 
+  // ---------------- Gestion du client ----------------
+  let clientRecord = null;
+
+  if (client?.client_id) {
+    // Client existant → récupérer et éventuellement mettre à jour
+    clientRecord = await ClientsService.getClientById(client.client_id, req.seller.id);
+    if (clientRecord) {
+      clientRecord = await ClientsService.updateClientData(client.client_id, {
+        legal_name: client.client_legal_name || `${client.client_first_name || ""} ${client.client_last_name || ""}`.trim(),
+        siret: client.client_siret || null,
+        vat_number: client.client_vat_number || null,
+        address: client.client_address || null,
+        city: client.client_city || null,
+        postal_code: client.client_postal_code || null,
+        country_code: client.client_country_code || null,
+        firstname: client.client_first_name || null,
+        lastname: client.client_last_name || null,
+        is_company: !!(client.client_siret || client.client_vat_number),
+        email: client.client_email || null,
+        phone: client.client_phone || null
+      }, req.seller.id);
+    }
+  } else if (client) {
+    // Client inexistant → création
+    clientRecord = await ClientsService.createClient({
+      legal_name: client.client_legal_name || `${client.client_first_name || ""} ${client.client_last_name || ""}`.trim(),
+      siret: client.client_siret || null,
+      vat_number: client.client_vat_number || null,
+      address: client.client_address || null,
+      city: client.client_city || null,
+      postal_code: client.client_postal_code || null,
+      country_code: client.client_country_code || null,
+      firstname: client.client_first_name || null,
+      lastname: client.client_last_name || null,
+      is_company: !!(client.client_siret || client.client_vat_number),
+      email: client.client_email || null,
+      phone: client.client_phone || null
+    }, req.seller.id);
+  }
+  
+  if (!clientRecord) {
+    return res.status(400).json({ error: "Client manquant ou invalide" });
+  }
+
+  // ---------------- Préparer clientData ----------------
+  const clientData = {
+    client_id: clientRecord.id,
+    client_legal_name: clientRecord.legal_name,
+    client_first_name: clientRecord.first_name,
+    client_last_name: clientRecord.last_name,
+    client_siret: clientRecord.siret,
+    client_vat_number: clientRecord.vat_number,
+    client_address: clientRecord.address,
+    client_city: clientRecord.city,
+    client_postal_code: clientRecord.postal_code,
+    client_country_code: clientRecord.country_code,
+    client_email: clientRecord.email,
+    client_phone: clientRecord.phone
+  };
+
   const newAttachments = (req.files?.attachments || []).map((file, i) => ({
     file_name: file.originalname,
     file_path: file.path,
@@ -159,7 +241,7 @@ const updateInvoice = asyncHandler(async (req, res) => {
 
   const updatedInvoice = await InvoicesService.updateInvoice(req.params.id, {
     invoice,
-    client,
+    client: clientData,
     lines,
     taxes,
     newAttachments,
