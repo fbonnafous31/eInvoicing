@@ -70,6 +70,23 @@ nécessaire.\
 - Si tu connectes l'adaptateur PDP réel, configure les 4 variables
 correspondantes.
 
+## 2bis️⃣ Installer Ollama et télécharger le modèle LLaMA3
+
+Avant de lancer le backend, installez Ollama et le modèle LLaMA3 sur votre machine locale (backend).
+
+```bash
+# Installer Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Vérifier l'installation
+ollama --version
+
+# Télécharger le modèle LLaMA3
+ollama pull llama3
+
+# Tester en ligne de commande
+ollama run llama3
+
 ------------------------------------------------------------------------
 
 ## 3️⃣ Initialiser les variables de configuration (frontend)
