@@ -52,6 +52,10 @@ app.use(express.urlencoded({ limit: '10kb', extended: true }));
 // Prometheus avant les routes
 app.use(metricsMiddleware);
 
+// Serveur MCP
+const mcpServer = require('./src/modules/mcp/mcp.server');
+app.use('/mcp', mcpServer);
+
 // Routes API
 app.use("/api/sellers", sellersRoutes);
 app.use("/api/clients", clientsRoutes);
