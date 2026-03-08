@@ -561,8 +561,8 @@ async function generateInvoicePdfBuffer(invoice) {
       const logoBytes = await fs.promises.readFile(logoPath);
       const logoImage = await pdfDoc.embedPng(logoBytes);
       const logoDims = logoImage.scale(1);
-      const logoWidthMax = 120 * 2.5;
-      const logoHeightMax = 60 * 2.5;
+      const logoWidthMax = 120 ;
+      const logoHeightMax = 60 ;
       const ratio = Math.min(logoWidthMax / logoDims.width, logoHeightMax / logoDims.height);
       const logoWidth = logoDims.width * ratio;
       logoHeight = logoDims.height * ratio;
@@ -641,7 +641,7 @@ async function generateInvoicePdfBuffer(invoice) {
     if (client.client_vat_number) clientText += `TVA: ${client.client_vat_number}\n`;
 
     const clientLines = clientText.split("\n").filter(Boolean);
-    let clientY = yTop - logoHeight - 10;
+    let clientY = yTop - logoHeight - 20;
     clientLines.forEach((line, i) => {
       const font = i === 0 ? fontBold : fontRegular;
       page.drawText(line, { x: margin, y: clientY, size: 10, font });
