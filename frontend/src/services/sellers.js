@@ -3,9 +3,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { getEnv } from "@/utils/getEnv"; 
 
 const env = getEnv();
-const API_BASE = `${env.VITE_API_URL}/api/sellers`;
 
-console.log("API_BASE sellers =", env.VITE_API_URL);
+// retire un / final si présent pour éviter double //
+const API_ROOT = env.VITE_API_URL.replace(/\/$/, '');
+const API_BASE = `${API_ROOT}/api/sellers`;
+
+console.log("API_BASE sellers =", API_BASE);
 
 export function useSellerService() {
   const { getToken } = useAuth();
@@ -47,7 +50,7 @@ export function useSellerService() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
         }),
-      deleteSeller: () => request(`${API_BASE}`, { method: "DELETE" }), // supprime le vendeur connecté
+      deleteSeller: () => request(API_BASE, { method: "DELETE" }),
       checkIdentifier: (identifier, sellerId) =>
         request(`${API_BASE}/check-identifier?identifier=${identifier}${sellerId ? `&id=${sellerId}` : ''}`),
       testSmtpResend: (smtpData) =>
