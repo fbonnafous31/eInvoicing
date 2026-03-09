@@ -3,9 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { getEnv } from "@/utils/getEnv"; 
 
 const env = getEnv();
-
-// retire un / final si présent pour éviter double //
-const API_ROOT = env.VITE_API_URL.replace(/\/$/, '');
+const API_ROOT = (env.VITE_API_URL || 'http://localhost:8080').replace(/\/$/, '');
 const API_BASE = `${API_ROOT}/api/sellers`;
 
 console.log("API_BASE sellers =", API_BASE);

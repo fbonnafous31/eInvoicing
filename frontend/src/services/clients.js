@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { getEnv } from "@/utils/getEnv";
 
 const env = getEnv();
-const API_ROOT = env.VITE_API_URL.replace(/\/$/, '');
+const API_ROOT = (env.VITE_API_URL || 'http://localhost:8080').replace(/\/$/, '');
 const API_BASE = `${API_ROOT}/api/clients`;
 
 export function useClientService() {
