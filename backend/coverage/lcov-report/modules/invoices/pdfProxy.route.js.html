@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">40% </span>
+                <span class="strong">33.33% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>6/15</span>
+                <span class='fraction'>6/18</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/0</span>
+                <span class='fraction'>0/6</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">40% </span>
+                <span class="strong">33.33% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>6/15</span>
+                <span class='fraction'>6/18</span>
             </div>
         
             
@@ -89,7 +89,21 @@
 <a name='L24'></a><a href='#L24'>24</a>
 <a name='L25'></a><a href='#L25'>25</a>
 <a name='L26'></a><a href='#L26'>26</a>
-<a name='L27'></a><a href='#L27'>27</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -97,16 +111,30 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -117,26 +145,40 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const express = require("express");
 const { GetObjectCommand } = require("@aws-sdk/client-s3");
-const { s3Client } = require("../../../config/s3Client"); 
+const { s3Client } = require("../../../config/s3Client");
 &nbsp;
 const router = express.Router();
 &nbsp;
-router.get("/:filename", <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
-  const { filename } = <span class="cstat-no" title="statement not covered" >req.params;</span>
-<span class="cstat-no" title="statement not covered" >  req.log.info(`Récupération PDF proxy: ${filename}`);</span>
+router.get(/.*/, <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+  const key = <span class="cstat-no" title="statement not covered" >req.path.replace(/^\/+/, "");</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  req.log.info(`Récupération PDF proxy: ${key}`);</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  if (!key || key.includes("..")) {</span>
+<span class="cstat-no" title="statement not covered" >    return res.status(400).send("Clé invalide");</span>
+  }
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const command = <span class="cstat-no" title="statement not covered" >new GetObjectCommand({</span>
       Bucket: process.env.B2_BUCKET_NAME,
-      Key: filename,
+      Key: key,
     });
 &nbsp;
     const response = <span class="cstat-no" title="statement not covered" >await s3Client.send(command);</span>
-<span class="cstat-no" title="statement not covered" >    res.setHeader("Content-Type", "application/pdf");</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    res.setHeader(</span>
+      "Content-Type",
+      response.ContentType || "application/pdf"
+    );
+<span class="cstat-no" title="statement not covered" >    res.setHeader(</span>
+      "Content-Disposition",
+      `inline; filename="${key.split("/").pop()}"`
+    );
+&nbsp;
 <span class="cstat-no" title="statement not covered" >    response.Body.pipe(res);</span>
   } catch (err) {
-<span class="cstat-no" title="statement not covered" >    req.log.error(`Erreur lors de la récupération du PDF ${filename}:`, err);</span>
-<span class="cstat-no" title="statement not covered" >    res.status(500).send("Erreur lors de la récupération du PDF");</span>
+<span class="cstat-no" title="statement not covered" >    req.log.error({ err, key }, "Erreur récupération PDF B2");</span>
+<span class="cstat-no" title="statement not covered" >    res.status(404).send("PDF introuvable");</span>
   }
 });
 &nbsp;
@@ -148,7 +190,7 @@ module.exports = router;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-09T08:07:48.846Z
+                at 2026-03-10T16:11:09.380Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

@@ -107,12 +107,14 @@ function generateFacturXXML(invoice) {
   const agreement = transaction.ele('ram:ApplicableHeaderTradeAgreement');
 
   // SellerTradeParty
+  const sellerIdentifier = resolveSellerIdentifier(seller);
+
   const sellerParty = agreement.ele('ram:SellerTradeParty');
   let schemeId = process.env.PDP_PROVIDER === 'iopole' ? '0009' : '0007';
 
   sellerParty.ele('ram:Name').txt(seller.legal_name).up();
   sellerParty.ele('ram:SpecifiedLegalOrganization')
-      .ele('ram:ID', { schemeID: schemeId }).txt(seller.legal_identifier).up()
+      .ele('ram:ID', { schemeID: schemeId }).txt(sellerIdentifier).up()
     .up();
   sellerParty.ele('ram:PostalTradeAddress')
       .ele('ram:PostcodeCode').txt((seller.postal_code || '').trim()).up()
@@ -120,6 +122,14 @@ function generateFacturXXML(invoice) {
       .ele('ram:CityName').txt(seller.city || '').up()
       .ele('ram:CountryID').txt(seller.country_code || '').up()
     .up();
+
+  if (seller.contact_email) {
+    sellerParty.ele('ram:URIUniversalCommunication')
+      .ele('ram:URIID', { schemeID: 'EM' })
+      .txt(seller.contact_email.trim())
+      .up()
+    .up();
+  }
 
   let vatNumber = seller.vat_number;
   let finalSchemeID;
@@ -131,9 +141,9 @@ function generateFacturXXML(invoice) {
   } else if (vatNumber) {
     // Vendeur normal avec VAT
     finalSchemeID = 'VA'; 
-  } else if (seller.legal_identifier) {
+  } else if (sellerIdentifier) {
     // Fallback si pas de VAT 
-    vatNumber = seller.legal_identifier;
+    vatNumber = sellerIdentifier;
     finalSchemeID = '0002';
   }
 
@@ -236,6 +246,17 @@ function generateFacturXXML(invoice) {
   .up();
 
   return root.end({ prettyPrint: true });
+}
+
+function resolveSellerIdentifier(seller) {
+  const provider = process.env.PDP_PROVIDER;
+  const env = process.env.PDP_ENV;
+
+  if (provider === "superpdp" && env === "sandbox") {
+    return "000000002";
+  }
+
+  return seller.legal_identifier;
 }
 
 module.exports = { generateFacturXXML };

@@ -1,7 +1,7 @@
-// pdp/PDPService.js
 const PDPInterface = require('./PDPInterface');
 const IopoleAdapter = require('./adapters/IopoleAdapter');
 const MockPDPAdapter = require('./adapters/MockPDPAdapter');
+const SuperPDPAdapter = require('./adapters/SuperPDPAdapter');
 
 class PDPService {
   constructor() {
@@ -14,6 +14,13 @@ class PDPService {
           authURL: process.env.IOPOLE_AUTH_URL,
           clientId: process.env.IOPOLE_CLIENT_ID,
           clientSecret: process.env.IOPOLE_CLIENT_SECRET,
+        });
+        break;
+
+      case 'superpdp':
+        this.adapter = new SuperPDPAdapter({
+          baseURL: process.env.SUPERPDP_BASE_URL,
+          token: 'sandbox-token',
         });
         break;
 

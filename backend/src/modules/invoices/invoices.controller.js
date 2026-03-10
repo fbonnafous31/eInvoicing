@@ -358,7 +358,7 @@ const sendInvoice = asyncHandler(async (req, res) => {
       submissionId,
     });
 
-    logger.info(`[IopoleAdapter] 🟢 Facture ${invoiceId} envoyée avec succès → submissionId: ${submissionId}`);
+    logger.info(`[Adapter] 🟢 Facture ${invoiceId} envoyée avec succès → submissionId: ${submissionId}`);
 
     res.json({
       success: true,
@@ -369,7 +369,7 @@ const sendInvoice = asyncHandler(async (req, res) => {
       result,
     });
   } catch (error) {
-    logger.error(`[IopoleAdapter] 🔴 Erreur envoi facture ${invoiceId}:`, error.message);
+    logger.error(`[Adapter] 🔴 Erreur envoi facture ${invoiceId}:`, error.message);
 
     // ❌ Échec → statut rejected
     await InvoiceStatusModel.updateTechnicalStatus(invoiceId, {
