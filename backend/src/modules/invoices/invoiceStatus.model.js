@@ -83,9 +83,21 @@ async function getInvoiceStatusComment(invoiceId, statusCode) {
   return rows[0]?.client_comment || null;
 }
 
+async function getInvoiceIdByPdpId(submissionId) {
+  const query = `
+    SELECT id
+    FROM ${SCHEMA}.invoices
+    WHERE submission_id = $1
+    LIMIT 1;
+  `;
+  const { rows } = await pool.query(query, [submissionId]);
+  return rows[0]?.id || null;
+}
+
 module.exports = {
   updateTechnicalStatus,
   updateBusinessStatus,
   getInvoiceStatusHistory,
   getInvoiceStatusComment,
+  getInvoiceIdByPdpId
 };
