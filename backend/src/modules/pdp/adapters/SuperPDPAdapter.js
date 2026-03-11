@@ -270,25 +270,42 @@ class SuperPDPAdapter extends PDPInterface {
   /** Création d'un event / statut */
   async sendStatus(invoicePdpId, payload) {
     try {
+      // 🔐 Récupération des headers OAuth
       const headers = await this._getAuthHeaders();
 
+      // 🔹 Préparation du JSON à envoyer
       const eventJson = {
-        invoice_id: invoicePdpId,
-        status_code: payload.code,
+        invoice_id: Number(invoicePdpId),           
+        status_code: `fr:${payload.code}`,          
         attachments: payload.attachments || [],
         details: payload.details || [],
       };
 
+      logger.info(`[SuperPDPAdapter] 🔹 Préparation envoi status`, {
+        invoicePdpId,
+        typeInvoicePdpId: typeof invoicePdpId,
+        payload,
+        eventJson,
+      });
+
+      // 📤 Envoi vers l’API
       const response = await this.client.post('/v1.beta/invoice_events', eventJson, { headers });
 
-      logger.info(`[SuperPDPAdapter] ✅ Event créé pour invoice ${invoicePdpId}`);
+      logger.info(`[SuperPDPAdapter] ✅ Event créé pour invoice ${invoicePdpId}`, {
+        responseStatus: response.status,
+        responseData: response.data,
+      });
+
       return { success: true, raw: response.data };
+
     } catch (error) {
       logger.error(
         {
           message: error.message,
           status: error.response?.status,
           data: error.response?.data,
+          invoicePdpId,
+          payload,
         },
         '[SuperPDPAdapter] ❌ Erreur sendStatus'
       );

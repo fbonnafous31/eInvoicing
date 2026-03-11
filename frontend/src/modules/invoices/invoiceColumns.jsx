@@ -145,9 +145,6 @@ import { useSellerInfo } from "@/hooks/useSellerInfo";
           !isFinalStatus &&                
           ["received", "validated"].includes(row.technical_status); 
 
-
-        const canCash = String(row.business_status) === "211";
-
         return (
           <div className="flex gap-1 justify-end">
             {/* Bouton envoi facture */}
@@ -269,21 +266,43 @@ import { useSellerInfo } from "@/hooks/useSellerInfo";
                 background: "transparent",
                 border: "none",
                 padding: "2px 6px",
-                cursor: canCash ? "pointer" : "not-allowed",
-                opacity: canCash ? 1 : 0.5,
+                cursor:
+                  ["received", "validated"].includes(row.technical_status) &&
+                  row.business_status !== "210"
+                    ? "pointer"
+                    : "not-allowed",
+                opacity:
+                  ["received", "validated"].includes(row.technical_status) &&
+                  row.business_status !== "210"
+                    ? 1
+                    : 0.5,
               }}
-              title={canCash ? "Encaisser la facture" : "Encaissement possible uniquement si Paiement transmis"}
-              disabled={isFinalStatus || !canCash}
+              title={
+                ["received", "validated"].includes(row.technical_status) &&
+                row.business_status !== "210"
+                  ? "Encaisser la facture"
+                  : "Encaissement possible uniquement si facture transmise et non refusée"
+              }
+              disabled={
+                isFinalStatus ||
+                !(
+                  ["received", "validated"].includes(row.technical_status) &&
+                  row.business_status !== "210"
+                )
+              }
               onClick={async () => {
-                if (!row?.id || !canCash) return;
+                if (
+                  !row?.id ||
+                  !["received", "validated"].includes(row.technical_status) ||
+                  row.business_status === "210"
+                )
+                  return;
 
                 try {
                   console.log(`💰 Encaissement invoice id: ${row.id}`);
 
-                  // Appel backend pour marquer la facture comme payée
                   const res = await invoiceService.cashInvoice(row.id);
 
-                  // Mise à jour immédiate côté front
                   if (res?.newStatus) {
                     onBusinessStatusChange?.(row.id, res.newStatus.code, res.newStatus.label);
                     console.log(`[InvoiceColumns] Facture ${row.id} encaissée, statut:`, res.newStatus);
@@ -297,7 +316,7 @@ import { useSellerInfo } from "@/hooks/useSellerInfo";
               }}
             >
               💰
-            </button>
+            </button>          
           </div>
         );
       },
