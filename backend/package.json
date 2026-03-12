@@ -40,6 +40,7 @@
     "test": "jest --coverage",
     "test:watch": "jest --watch",
     "vitest": "vitest",
-    "lint": "eslint . --ext .js"
+    "lint": "eslint . --ext .js",
+    "migrate": "node scripts/migrate.js"
   }
 }
