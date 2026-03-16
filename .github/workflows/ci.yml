@@ -38,7 +38,9 @@ jobs:
         working-directory: ./backend
 
       - name: Audit backend dependencies
-        run: npm audit --audit-level=high
+        run: |
+          npm audit --json > audit.json
+          node scripts/audit/check-audit.js audit.json
         working-directory: ./backend
 
       - name: Lint backend

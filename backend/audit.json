@@ -1,0 +1,56 @@
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {
+    "file-type": {
+      "name": "file-type",
+      "severity": "moderate",
+      "isDirect": true,
+      "via": [
+        {
+          "source": 1114301,
+          "name": "file-type",
+          "dependency": "file-type",
+          "title": "file-type affected by infinite loop in ASF parser on malformed input with zero-size sub-header",
+          "url": "https://github.com/advisories/GHSA-5v7r-6r5c-r473",
+          "severity": "moderate",
+          "cwe": [
+            "CWE-835"
+          ],
+          "cvss": {
+            "score": 5.3,
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+          },
+          "range": ">=13.0.0 <21.3.1"
+        }
+      ],
+      "effects": [],
+      "range": "13.0.0 - 21.3.0",
+      "nodes": [
+        "node_modules/file-type"
+      ],
+      "fixAvailable": {
+        "name": "file-type",
+        "version": "21.3.2",
+        "isSemVerMajor": true
+      }
+    }
+  },
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 1,
+      "high": 0,
+      "critical": 0,
+      "total": 1
+    },
+    "dependencies": {
+      "prod": 376,
+      "dev": 470,
+      "optional": 88,
+      "peer": 0,
+      "peerOptional": 0,
+      "total": 856
+    }
+  }
+}
