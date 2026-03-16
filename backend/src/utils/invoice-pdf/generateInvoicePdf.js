@@ -660,6 +660,17 @@ async function generateInvoicePdfBuffer(invoice) {
       });
     y -= 20;
 
+    if (header.invoice_type === "deposit" || header.invoice_type === "acompte") {
+      page.drawText("⚡ Facture d’acompte", {
+        x: margin,
+        y,
+        size: 10,
+        font: fontBold,
+        color: rgb(0.8, 0.1, 0.1), 
+      });
+      y -= 20;
+    }    
+
     if (header.issue_date)
       page.drawText(`Date d'émission : ${formatDateFr(header.issue_date)}`, {
         x: margin,

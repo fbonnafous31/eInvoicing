@@ -28,18 +28,6 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
     attachments: [],
   });
 
-  const initialHeader = {
-    invoice_number: invoiceData.header?.invoice_number || initialData?.header?.invoice_number || "",
-    issue_date: invoiceData.header?.issue_date || "",
-    fiscal_year: invoiceData.header?.fiscal_year || "",
-    contract_number: invoiceData.header?.contract_number || "",
-    purchase_order_number: invoiceData.header?.purchase_order_number || "",
-    payment_method: invoiceData.header?.payment_method || "",
-    payment_terms: invoiceData.header?.payment_terms || "",
-    supply_date: invoiceData.header?.supply_date || "",
-    seller_id: invoiceData.header?.seller_id || "",
-  };
-
   const [isEditing, setIsEditing] = useState(!initialData && !readOnly);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -120,7 +108,13 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialData]); // invoiceData volontairement exclu
 
-  const headerFields = ["invoice_number", "issue_date", "fiscal_year", "seller_id"];
+  const headerFields = [
+    "invoice_number",
+    "issue_date",
+    "fiscal_year",
+    "seller_id",
+    "invoice_type"
+  ];
 
   // Calcul des totaux et TVA
   const { subtotal, totalTaxes, total, linesWithTotals, taxesSummary } = useMemo(() => {
@@ -287,6 +281,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
         payment_method: invoiceData.header.payment_method || null,
         client_id: invoiceData.client.client_id || null,
         supply_date: invoiceData.header.supply_date || null,
+        invoice_type: invoiceData.header.invoice_type || "standard",
       }));
 
       formData.append("seller", JSON.stringify(invoiceData.seller));
@@ -358,7 +353,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
 
       {invoiceData.header && (
         <InvoiceHeader
-          data={initialHeader}
+          data={invoiceData.header}       
           onChange={val => handleChange("header", val)}   
           disabled={!isEditing}
           submitted={submitted}

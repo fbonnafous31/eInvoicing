@@ -6,6 +6,7 @@ import { FormSection, InputField, SelectField, DatePickerField } from '@/compone
 import { useSellerService } from "../../services/sellers";
 import { validateInvoiceField } from "../../utils/validators/invoice";
 import { validateIssueDate } from "../../utils/validators/issueDate";
+import { invoiceTypeOptions } from "../../constants/invoiceTypes";
 
 export default function InvoiceHeader({ data, onChange, submitted, errors = {}, disabled }) {
   const [fieldErrors, setFieldErrors] = useState({});
@@ -14,32 +15,20 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
 
   const { fetchMySeller } = useSellerService();
 
-  // --- Initial header avec valeurs par défaut ---
-  const initialHeader = {
-    invoice_number: data?.invoice_number || "",
-    issue_date: data?.issue_date || new Date().toISOString().split("T")[0],
-    fiscal_year: data?.fiscal_year || new Date().getFullYear(),
-    seller_id: data?.seller_id || "",
-    contract_number: data?.contract_number || "",
-    purchase_order_number: data?.purchase_order_number || "",
-    payment_method: data?.payment_method || "",
-    payment_terms: data?.payment_terms || "",
-  };
-
   // --- Validation ---
   const validateField = useCallback((field, value) => {
     // Ne pas valider à l'ouverture si le champ n'a pas été touché et pas de soumission
     if (!touchedFields[field] && !submitted) return;
 
     let error = null;
-    const fullData = { ...data, ...initialHeader };
+    const fullData = { ...data, [field]: value };
     if (field === "issue_date") {
       error = validateIssueDate(value);
     } else {
       error = validateInvoiceField(field, fullData[field], fullData);
     }
     setFieldErrors(prev => ({ ...prev, [field]: error }));
-  }, [data, touchedFields, submitted, initialHeader]);
+  }, [data, touchedFields, submitted]);
 
   // --- Gestion du changement ---
   const handleChange = useCallback((field, value) => {
@@ -106,7 +95,18 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
         openSections={openSections}
         toggleSection={toggleSection}
         hasError={sectionHasError(["invoice_number", "issue_date", "fiscal_year", "seller_id", "client_id"])}
-      >
+      >        
+        <SelectField
+          id="invoice_type"
+          label="Type de facture"
+          value={data.invoice_type || ""}
+          onChange={val => handleChange("invoice_type", val)}
+          onBlur={() => handleBlur("invoice_type")}
+          options={invoiceTypeOptions}
+          required
+          disabled={disabled}
+        />
+
         <InputField
           id="invoice_number"
           label="Référence facture"

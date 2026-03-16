@@ -112,6 +112,7 @@ export default function InvoiceDetail() {
         purchase_order_number: invoice.purchase_order_number,
         payment_terms: invoice.payment_terms,
         payment_method: invoice.payment_method,
+        invoice_type: invoice.invoice_type,
       },
       client: mappedClient,
       lines: invoice.lines || [],
