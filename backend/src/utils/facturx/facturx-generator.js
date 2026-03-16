@@ -43,6 +43,7 @@ function generateFacturXXML(invoice) {
 
   // ExchangedDocument
   const exchangedDoc = root.ele('rsm:ExchangedDocument');
+
   exchangedDoc
     .ele('ram:ID').txt(header.invoice_number.trim()).up()
     .ele('ram:TypeCode').txt('380').up()
@@ -52,7 +53,7 @@ function generateFacturXXML(invoice) {
       .up()
     .up();
 
-  // Mention légale auto-entrepreneur (si applicable)
+  // Mention légale auto-entrepreneur
   if (isAuto) {
     exchangedDoc
       .ele('ram:IncludedNote')
@@ -61,8 +62,19 @@ function generateFacturXXML(invoice) {
         .up()
       .up();
   }
-  exchangedDoc.up();
 
+  // Mention facture d’acompte
+  if (header.invoice_type === 'deposit') {
+    exchangedDoc
+      .ele('ram:IncludedNote')
+        .ele('ram:Content')
+          .txt('Facture d’acompte — montant partiel réglé')
+        .up()
+      .up();
+  }
+
+  // fermeture propre
+  exchangedDoc.up();
   const transaction = root.ele('rsm:SupplyChainTradeTransaction');
 
   // SupplyChainTradeLineItems
@@ -76,7 +88,7 @@ function generateFacturXXML(invoice) {
       .up();
     item.ele('ram:SpecifiedLineTradeAgreement')
         .ele('ram:NetPriceProductTradePrice')
-          .ele('ram:ChargeAmount', { currencyID: currency })
+          .ele('ram:ChargeAmount')
             .txt(parseFloat(line.unit_price).toFixed(2))
           .up()
         .up()
@@ -97,7 +109,7 @@ function generateFacturXXML(invoice) {
     .up();
 
     settlement.ele('ram:SpecifiedTradeSettlementLineMonetarySummation')
-      .ele('ram:LineTotalAmount', { currencyID: currency })
+      .ele('ram:LineTotalAmount')
         .txt(parseFloat(line.line_net).toFixed(2))
       .up()
     .up();
@@ -167,27 +179,51 @@ function generateFacturXXML(invoice) {
     .up();
   buyerParty.up();
 
-  // ApplicableHeaderTradeDelivery (vide pour Basic)
-  transaction.ele('ram:ApplicableHeaderTradeDelivery');
+  const delivery = transaction.ele('ram:ApplicableHeaderTradeDelivery');
+  delivery.ele('ram:ActualDeliverySupplyChainEvent')
+    .ele('ram:OccurrenceDateTime')
+      .ele('udt:DateTimeString', { format: '102' })
+        .txt(header.issue_date.replace(/-/g,'')) // on met la date de la facture si pas de date livraison réelle
+      .up()
+    .up()
+  .up();
 
   // ApplicableHeaderTradeSettlement
   const settlement = transaction.ele('ram:ApplicableHeaderTradeSettlement');
   settlement.ele('ram:InvoiceCurrencyCode').txt(currency).up();
 
   // Payment Means
-  const paymentMeans = settlement.ele('ram:SpecifiedTradeSettlementPaymentMeans');
-  paymentMeans.ele('ram:TypeCode').txt('30').up();
-  paymentMeans.ele('ram:PayerPartyDebtorFinancialAccount')
-      .ele('ram:IBANID').txt(invoice.payer_iban || '').up().up();
-  paymentMeans.ele('ram:PayeePartyCreditorFinancialAccount')
-      .ele('ram:IBANID').txt(invoice.payee_iban || '').up().up();
+  if (invoice.payee_iban || invoice.payer_iban) {
+
+    const paymentMeans = settlement.ele('ram:SpecifiedTradeSettlementPaymentMeans');
+    paymentMeans.ele('ram:TypeCode').txt('30').up();
+
+    if (invoice.payer_iban) {
+      paymentMeans
+        .ele('ram:PayerPartyDebtorFinancialAccount')
+          .ele('ram:IBANID')
+            .txt(invoice.payer_iban)
+          .up()
+        .up();
+    }
+
+    if (invoice.payee_iban) {
+      paymentMeans
+        .ele('ram:PayeePartyCreditorFinancialAccount')
+          .ele('ram:IBANID')
+            .txt(invoice.payee_iban)
+          .up()
+        .up();
+    }
+
+  }
 
   // ApplicableTradeTax (TVA globale)
   if (taxes.length === 0) {
     const tradeTax = settlement.ele('ram:ApplicableTradeTax');
-    tradeTax.ele('ram:CalculatedAmount', { currencyID: currency }).txt('0.00').up();
+    tradeTax.ele('ram:CalculatedAmount').txt('0.00').up();
     tradeTax.ele('ram:TypeCode').txt('VAT').up();
-    tradeTax.ele('ram:BasisAmount', { currencyID: currency }).txt(lineTotalAmount.toFixed(2)).up();
+    tradeTax.ele('ram:BasisAmount').txt(lineTotalAmount.toFixed(2)).up();
     if (isAuto) {
       tradeTax.ele('ram:CategoryCode').txt('Z').up();
       tradeTax.ele('ram:RateApplicablePercent').txt('0.00').up();
@@ -198,9 +234,9 @@ function generateFacturXXML(invoice) {
   } else {
     taxes.forEach(tax => {
       const tradeTax = settlement.ele('ram:ApplicableTradeTax');
-      tradeTax.ele('ram:CalculatedAmount', { currencyID: currency }).txt(tax.tax_amount).up();
+      tradeTax.ele('ram:CalculatedAmount').txt(tax.tax_amount).up();
       tradeTax.ele('ram:TypeCode').txt('VAT').up();
-      tradeTax.ele('ram:BasisAmount', { currencyID: currency }).txt(tax.base_amount).up();
+      tradeTax.ele('ram:BasisAmount').txt(tax.base_amount).up();
       tradeTax.ele('ram:CategoryCode').txt(tax.category_code || 'S').up();
       tradeTax.ele('ram:RateApplicablePercent').txt(tax.vat_rate).up();
     });
@@ -220,11 +256,11 @@ function generateFacturXXML(invoice) {
 
   // Totaux
   settlement.ele('ram:SpecifiedTradeSettlementHeaderMonetarySummation')
-      .ele('ram:LineTotalAmount', { currencyID: currency }).txt(lineTotalAmount.toFixed(2)).up()
-      .ele('ram:TaxBasisTotalAmount', { currencyID: currency }).txt(lineTotalAmount.toFixed(2)).up()
+      .ele('ram:LineTotalAmount').txt(lineTotalAmount.toFixed(2)).up()
+      .ele('ram:TaxBasisTotalAmount').txt(lineTotalAmount.toFixed(2)).up()
       .ele('ram:TaxTotalAmount', { currencyID: currency }).txt(taxTotalAmount.toFixed(2)).up()
-      .ele('ram:GrandTotalAmount', { currencyID: currency }).txt(grandTotalAmount.toFixed(2)).up()
-      .ele('ram:DuePayableAmount', { currencyID: currency }).txt(grandTotalAmount.toFixed(2)).up()
+      .ele('ram:GrandTotalAmount').txt(grandTotalAmount.toFixed(2)).up()
+      .ele('ram:DuePayableAmount').txt(grandTotalAmount.toFixed(2)).up()
     .up();
 
   // InvoiceReferencedDocument
@@ -241,9 +277,14 @@ function generateFacturXXML(invoice) {
   }
 
   // Receivable account (optionnel)
-  settlement.ele('ram:ReceivableSpecifiedTradeAccountingAccount')
-    .ele('ram:ID').txt(invoice.buyer_account_ref || '').up()
-  .up();
+  if (invoice.buyer_account_ref) {
+    settlement
+      .ele('ram:ReceivableSpecifiedTradeAccountingAccount')
+        .ele('ram:ID')
+          .txt(invoice.buyer_account_ref)
+        .up()
+      .up();
+  }
 
   return root.end({ prettyPrint: true });
 }

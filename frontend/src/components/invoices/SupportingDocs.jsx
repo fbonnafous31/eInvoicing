@@ -86,7 +86,7 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
       <div className="mb-3">
         <label>Justificatif principal (format PDF) *</label>
 
-        {!mainAttachment && (
+        {!hideLabelsInView && (
           <div className="mt-3 pb-3">
             <button
               type="button"
@@ -94,7 +94,7 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
               disabled={disabled}
               onClick={handleGeneratePdf}
             >
-              Générer le PDF
+              {mainAttachment ? "Regénérer le PDF" : "Générer le PDF"}
             </button>
           </div>
         )}
