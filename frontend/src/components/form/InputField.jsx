@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function InputField({
   id,
   name,
@@ -14,9 +12,9 @@ export default function InputField({
   submitted = false,
   hideLabel = false,
   helpText = "",
+  maxLength,
   ...props
 }) {
-  // Détermination si le champ est en erreur
   const hasError = Boolean(error) || (required && (touched || submitted) && !value);
 
   return (
@@ -35,8 +33,15 @@ export default function InputField({
         value={value ?? ""}
         onChange={(e) => onChange?.(e.target.value)}
         onBlur={() => onBlur?.(name)}
+        maxLength={maxLength}    
         {...props}
       />
+
+      {maxLength && (
+        <small className="text-muted d-block text-end">
+          {value?.length || 0}/{maxLength}
+        </small>
+      )}
 
       {hasError && (
         <small className="text-danger">

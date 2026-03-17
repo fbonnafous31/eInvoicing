@@ -115,7 +115,8 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
           onBlur={() => handleBlur("invoice_number")}
           error={getError("invoice_number")}
           required
-          disabled={disabled} 
+          disabled={disabled}
+          maxLength={20}
         />
 
         <DatePickerField

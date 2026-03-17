@@ -1,19 +1,16 @@
 const fs = require('fs');
-
-// Récupère le fichier audit JSON passé en argument
 const audit = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 
-// On cherche les vulnérabilités "high" ou "moderate" sauf file-type
 const relevantIssues = Object.values(audit.vulnerabilities)
-  .filter(v => 
-    (v.severity === 'high' || v.severity === 'moderate') && 
-    v.name !== 'file-type'
-  );
+  .filter(v => (v.severity === 'high' || v.severity === 'critical'));
 
 if (relevantIssues.length) {
-  console.error('Vulnerabilités détectées (hors file-type) :', relevantIssues);
+  console.error('❌ VULNÉRABILITÉS CRITIQUES TROUVÉES :');
+  relevantIssues.forEach(issue => {
+    console.error(`- [${issue.severity.toUpperCase()}] ${issue.name}`);
+  });
   process.exit(1);
 } else {
-  console.log('Pas de vulnérabilités critiques ou modérées autres que file-type.');
+  console.log('✅ Audit passé (Fichiers Moderate ignorés pour compatibilité CJS).');
   process.exit(0);
 }

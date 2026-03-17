@@ -39,7 +39,8 @@ jobs:
 
       - name: Audit backend dependencies
         run: |
-          npm audit --json > audit.json
+          npm audit --json > audit.json || true
+          cat audit.json 
           node scripts/audit/check-audit.js audit.json
         working-directory: ./backend
 
