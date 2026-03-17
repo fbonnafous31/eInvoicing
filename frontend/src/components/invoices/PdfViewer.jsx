@@ -1,10 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { Button, ButtonGroup } from "react-bootstrap";
-import workerSrc from "../../assets/pdf.worker.min.mjs?url";
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
+import workerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 
+// CDN (non recommandé pour la production)
+// pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+
+// Local
 pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
 
 const PdfViewer = ({ fileUrl, invoiceId }) => {

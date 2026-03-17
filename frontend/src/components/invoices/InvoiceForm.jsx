@@ -17,9 +17,16 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
   const navigate = useNavigate();
   const [invoiceData, setInvoiceData] = useState({
     header: {
-      // Initialiser la date d'émission à aujourd'hui et l'année fiscale correspondante
-      issue_date: new Date().toISOString().split("T")[0], 
-      fiscal_year: new Date().getFullYear()
+      invoice_number: initialData?.header?.invoice_number || "",                
+      issue_date: initialData?.header?.issue_date || new Date().toISOString().split("T")[0],
+      fiscal_year: initialData?.header?.fiscal_year || new Date().getFullYear(),
+      seller_id: initialData?.header?.seller_id || null,                   
+      invoice_type: initialData?.header?.invoice_type || "standard",          
+      contract_number: initialData?.header?.contract_number || null,
+      purchase_order_number: initialData?.header?.purchase_order_number || null,
+      payment_terms: initialData?.header?.payment_terms || null,
+      payment_method: initialData?.header?.payment_method || null,
+      supply_date: initialData?.header?.supply_date || null,
     },
     client: {},
     lines: [],
@@ -213,6 +220,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
     setErrorMessage("");
 
     const headerErrors = validateAll();
+    console.log("headerErrors après validation :", headerErrors);
     setHeaderTouched(headerFields.reduce((acc, f) => ({ ...acc, [f]: true }), {}));
     if (Object.keys(headerErrors).length > 0) {
       setErrorMessage("Certains champs obligatoires sont manquants !");

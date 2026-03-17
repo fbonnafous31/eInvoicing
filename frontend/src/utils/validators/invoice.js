@@ -3,9 +3,11 @@ export function validateInvoiceField(field, value, data = {}) {
   let error;
 
   switch(field) {
-    case "invoice_number":
-      if (!value) error = "Ce champ est obligatoire.";
-      break;
+case "invoice_number":
+  if (!value?.trim()) {
+    error = "Ce champ est obligatoire.";
+  }
+  break;
     case "issue_date":
       if (!value) error = "Ce champ est obligatoire";
       break;
@@ -24,7 +26,8 @@ export function validateInvoiceField(field, value, data = {}) {
       break;
   }
 
-  return error; // undefined si pas d'erreur
+  console.log("[validateInvoiceField]", { field, value, error });
+  return error; 
 }
 
 /**

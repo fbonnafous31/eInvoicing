@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/package.json",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.931.0",
     "@aws-sdk/s3-request-presigner": "^3.929.0",
@@ -22,7 +23,7 @@
     "pino-daily-rotate-file": "^0.0.1",
     "pino-pretty": "^13.1.3",
     "prom-client": "^15.1.3",
-    "resend": "^6.4.0",
+    "resend": "^6.3.0",
     "rotating-file-stream": "^3.2.7",
     "sanitize-filename": "^1.6.3",
     "tmp": "^0.2.5",
@@ -40,7 +41,7 @@
     "test": "jest --coverage",
     "test:watch": "jest --watch",
     "vitest": "vitest",
-    "lint": "eslint . --ext .js",
+    "lint": "eslint .",
     "migrate": "node scripts/migrate.js"
   }
 }
