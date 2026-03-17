@@ -125,8 +125,6 @@ describe("useInvoiceColumns", () => {
       const row = {
         invoice_number: "INV-001",
         issue_date: "2025-10-29",
-        contract_number: "C-001",
-        purchase_order_number: "PO-001",
         client: { legal_name: "Client A" },
         subtotal: 100,
         total_taxes: 20,
@@ -140,8 +138,6 @@ describe("useInvoiceColumns", () => {
       const colNames = [
         "Référence",
         "Emise le",
-        "Contrat",
-        "Commande",
         "Client",
         "HT",
         "TVA",
