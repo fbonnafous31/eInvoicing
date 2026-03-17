@@ -11,6 +11,7 @@ import { downloadFile } from '../../utils/downloadFile';
 import InvoiceEmailButton from '../../components/invoices/InvoiceEmailButton';
 import { useAuth } from '@/hooks/useAuth';
 import { useSellerInfo } from "@/hooks/useSellerInfo";
+import InvoiceTypeTag from '../../components/invoices/InvoiceTypeTag';
 
   export default function useInvoiceColumns(invoiceService, onTechnicalStatusChange, onBusinessStatusChange, onInvoiceUpdate) {
     const { getToken } = useAuth();
@@ -322,6 +323,15 @@ import { useSellerInfo } from "@/hooks/useSellerInfo";
       },
     },
     {
+      name: 'Type',
+      selector: row => row.invoice_type || 'standard',
+      sortable: true,
+      width: '110px',
+      cell: row => (
+        <InvoiceTypeTag type={row.invoice_type || "standard"} />
+      )
+    },    
+    {
       name: 'Référence',
       selector: row => row.invoice_number || '',
       sortable: true,
@@ -333,20 +343,6 @@ import { useSellerInfo } from "@/hooks/useSellerInfo";
       selector: row => row.issue_date ? formatDate(row.issue_date) : '',
       sortable: true,
       width: '100px',
-    },
-    {
-      name: 'Contrat',
-      selector: row => row.contract_number || '',
-      sortable: true,
-      width: '120px',
-      cell: row => <EllipsisCell value={row.contract_number || ''} style={{ minWidth: '120px' }} />
-    },
-    {
-      name: 'Commande',
-      selector: row => row.purchase_order_number || '',
-      sortable: true,
-      width: '120px',
-      cell: row => <EllipsisCell value={row.purchase_order_number || ''} style={{ minWidth: '120px' }} />
     },
     {
       name: 'Client',

@@ -37,12 +37,6 @@ export default function InputField({
         {...props}
       />
 
-      {maxLength && (
-        <small className="text-muted d-block text-end">
-          {value?.length || 0}/{maxLength}
-        </small>
-      )}
-
       {hasError && (
         <small className="text-danger">
           {error || "Ce champ est obligatoire"}
