@@ -119,6 +119,19 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
           maxLength={20}
         />
 
+        {data.invoice_type === "final" && (
+          <InputField
+            id="original_invoice_number"
+            label="Référence facture d'origine"
+            value={data.original_invoice_number || ""}
+            onChange={val => handleChange("original_invoice_number", val)}
+            onBlur={() => handleBlur("original_invoice_number")}
+            error={getError("original_invoice_number")}
+            disabled={disabled}
+            maxLength={20}
+          />
+        )}        
+
         <DatePickerField
           id="issue_date"
           label="Date émission"

@@ -145,6 +145,7 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
       "payment_method",
       "invoice_type",
       "client_id",
+      "original_invoice_number",
     ];
     const invoiceValues = invoiceColumns.map((col) => invoice[col] || null);
     const placeholders = invoiceColumns.map((_, i) => `$${i + 1}`).join(", ");
@@ -265,6 +266,7 @@ async function updateInvoice(
         "payment_method",
         "supply_date",
         "invoice_type",
+        "original_invoice_number",
       ];
       const filteredColumns = invoiceColumns.filter(col => invoice[col] !== undefined);
       const updates = filteredColumns.map((col, i) => `${col} = $${i + 2}`);

@@ -27,6 +27,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
       payment_terms: initialData?.header?.payment_terms || null,
       payment_method: initialData?.header?.payment_method || null,
       supply_date: initialData?.header?.supply_date || null,
+      original_invoice_number: initialData?.header?.original_invoice_number || null
     },
     client: {},
     lines: [],
@@ -120,7 +121,8 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
     "issue_date",
     "fiscal_year",
     "seller_id",
-    "invoice_type"
+    "invoice_type",
+    "original_invoice_number"
   ];
 
   // Calcul des totaux et TVA
@@ -290,6 +292,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
         client_id: invoiceData.client.client_id || null,
         supply_date: invoiceData.header.supply_date || null,
         invoice_type: invoiceData.header.invoice_type || "standard",
+        original_invoice_number: invoiceData.header.original_invoice_number || null
       }));
 
       formData.append("seller", JSON.stringify(invoiceData.seller));

@@ -113,6 +113,7 @@ export default function InvoiceDetail() {
         payment_terms: invoice.payment_terms,
         payment_method: invoice.payment_method,
         invoice_type: invoice.invoice_type,
+        original_invoice_number: invoice.original_invoice_number || "",
       },
       client: mappedClient,
       lines: invoice.lines || [],
