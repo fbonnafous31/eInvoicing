@@ -4,7 +4,7 @@ const path = require('path');
 const InvoicesService = require('./invoices.service');
 const InvoicePdpService = require('./invoicePdp.service');
 const PDPService = require('../pdp/PDPService');
-const { getInvoiceById } = require('./invoices.model');
+const InvoicesModel = require('./invoices.model');
 const { generateQuotePdf, generateInvoicePdfBuffer: generatePdfUtil } = require('../../utils/invoice-pdf/generateInvoicePdf');
 const InvoiceStatusModel = require('../invoices/invoiceStatus.model');
 const logger = require('../../utils/logger');
@@ -63,6 +63,28 @@ const getInvoice = asyncHandler(async (req, res) => {
     throw err;
   }
 });
+
+/**
+ * Récupère les factures d'acompte pour le vendeur connecté
+ */
+async function getDepositInvoices(req, res, next, seller, clientId = null) {
+  try {
+    if (!seller?.id) {
+      return res.status(400).json({ error: "Seller is required" });
+    }
+
+    req.log.info(`[Controller] getDepositInvoices - sellerId: ${seller.id}, clientId: ${clientId}`);
+
+    const deposits = await InvoicesModel.getDepositInvoices(seller, clientId);
+
+    req.log.info(`[Controller] getDepositInvoices - rows fetched: ${deposits.length}`);
+
+    res.json(deposits);
+  } catch (err) {
+    req.log.error('[Controller] getDepositInvoices error:', err);
+    next(err);
+  }
+}
 
 /**
  * Crée une facture avec lignes, taxes et justificatifs
@@ -253,7 +275,7 @@ const updateInvoice = asyncHandler(async (req, res) => {
 
 const createInvoicePdf = asyncHandler(async (req, res) => {
   const invoiceId = req.params.id;
-  const invoice = await getInvoiceById(invoiceId);
+  const invoice = await InvoicesService.getInvoiceById(invoiceId);
   if (!invoice) {
     return res.status(404).json({ error: "Facture introuvable" });
   }
@@ -597,6 +619,7 @@ const getInvoicePdfA3Proxy = async (req, res) => {
 module.exports = {
   listInvoices,
   getInvoice,
+  getDepositInvoices,
   createInvoice,
   updateInvoice, 
   deleteInvoice,

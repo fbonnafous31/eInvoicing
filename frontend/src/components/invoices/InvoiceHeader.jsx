@@ -7,6 +7,8 @@ import { useSellerService } from "../../services/sellers";
 import { validateInvoiceField } from "../../utils/validators/invoice";
 import { validateIssueDate } from "../../utils/validators/issueDate";
 import { invoiceTypeOptions } from "../../constants/invoiceTypes";
+import { useInvoiceService } from "../../services/invoices";
+import CreatableSelect from "react-select/creatable";
 
 export default function InvoiceHeader({ data, onChange, submitted, errors = {}, disabled }) {
   const [fieldErrors, setFieldErrors] = useState({});
@@ -14,6 +16,25 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
   const [openSections, setOpenSections] = useState({ info: true, contract: true });
 
   const { fetchMySeller } = useSellerService();
+
+  const { fetchDepositInvoices } = useInvoiceService();
+  const [depositInvoices, setDepositInvoices] = useState([]);
+  
+  // Récupérer les factures d’acompte pour le dropdown
+  useEffect(() => {
+    const fetchDeposits = async () => {
+      try {
+        // Si data.client_id est défini, on filtre par client
+        const deposits = await fetchDepositInvoices(data.client_id);
+        setDepositInvoices(deposits);
+      } catch (err) {
+        console.error("Erreur récupération factures d’acompte :", err);
+        setDepositInvoices([]);
+      }
+    };
+
+    fetchDeposits();
+  }, [data.client_id, fetchDepositInvoices]);
 
   // --- Validation ---
   const validateField = useCallback((field, value) => {
@@ -120,17 +141,26 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
         />
 
         {data.invoice_type === "final" && (
-          <InputField
-            id="original_invoice_number"
-            label="Référence facture d'origine"
-            value={data.original_invoice_number || ""}
-            onChange={val => handleChange("original_invoice_number", val)}
-            onBlur={() => handleBlur("original_invoice_number")}
-            error={getError("original_invoice_number")}
-            disabled={disabled}
-            maxLength={20}
-          />
-        )}        
+          <div className="form-group">
+            <label htmlFor="original_invoice_number">Référence facture d’acompte</label>
+            <CreatableSelect
+              id="original_invoice_number"
+              value={
+                data.original_invoice_number
+                  ? { value: data.original_invoice_number, label: data.original_invoice_number }
+                  : null
+              }
+              onChange={val => handleChange("original_invoice_number", val?.value || "")}
+              options={depositInvoices.map(inv => ({
+                value: inv.invoice_number,
+                label: `${inv.invoice_number} - ${inv.client_name} - ${inv.total} €`
+              }))}
+              placeholder="Sélectionnez ou saisissez une facture d’acompte..."
+              isDisabled={disabled}
+              formatCreateLabel={inputValue => `Créer "${inputValue}"`}
+            />
+          </div>
+        )} 
 
         <DatePickerField
           id="issue_date"

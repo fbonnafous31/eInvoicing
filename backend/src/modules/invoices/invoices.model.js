@@ -55,6 +55,41 @@ async function getAllInvoices() {
 }
 
 /**
+ * Récupère les factures d'acompte pour un vendeur donné
+ */
+async function getDepositInvoices(seller, clientId = null) {
+  if (!seller?.id) throw new Error("Seller is required");
+
+  let query = `
+    SELECT 
+      i.id,
+      i.invoice_number,
+      i.fiscal_year,
+      i.total,
+      c.legal_name AS client_name
+    FROM ${SCHEMA}.invoices i
+    LEFT JOIN ${SCHEMA}.clients c ON i.client_id = c.id
+    WHERE i.invoice_type = 'deposit'
+      AND i.seller_id = $1
+  `;
+
+  const params = [seller.id];
+
+  if (clientId) {
+    query += ` AND i.client_id = $2`;
+    params.push(clientId);
+  }
+
+  console.log('[Model] getDepositInvoicesBySeller SQL query:', query);
+  console.log('[Model] params:', params);
+
+  const { rows } = await pool.query(query, params);
+
+  console.log('[Model] getDepositInvoicesBySeller rows fetched:', rows.length);
+  return rows;
+}
+
+/**
  * Récupère une facture par son ID
  */
 async function getInvoiceById(id) {
@@ -507,6 +542,7 @@ async function getInvoicesBySeller(sellerId) {
 // Export de toutes les fonctions du modèle
 module.exports = {
   getAllInvoices,
+  getDepositInvoices,   
   getInvoiceById,
   createInvoice,
   deleteInvoice,

@@ -50,6 +50,23 @@ router.post('/:id/send', (req, res, next) => {
   InvoicesController.sendInvoice(req, res, next);
 });
 
+router.get('/deposits', async (req, res, next) => {
+  try {
+    const seller = req.seller; // <-- utilise le même seller que les autres routes
+    const clientId = req.query.client_id || null;
+
+    if (!seller) {
+      return res.status(401).json({ error: "Seller is required" });
+    }
+
+    req.log.info(`[Router] Fetch deposit invoices - sellerId: ${seller.id}, clientId: ${clientId}`);
+
+    await InvoicesController.getDepositInvoices(req, res, next, seller, clientId);
+  } catch (err) {
+    next(err);
+  }
+});
+
 // ----------------------------
 // Routes CRUD factures
 // ----------------------------

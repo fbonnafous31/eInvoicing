@@ -32,19 +32,35 @@ export function useInvoiceService() {
   );
 
   const fetchInvoicesBySeller = useCallback(() => request(API_BASE), [request]);
+
   const fetchInvoice = useCallback((id) => request(`${API_BASE}/${id}`), [request]);
+
+  const fetchDepositInvoices = useCallback(
+    async (clientId) => {
+      const url = clientId ? `${API_BASE}/deposits?client_id=${clientId}` : `${API_BASE}/deposits`;
+      console.log('[fetchDepositInvoices] URL:', url); 
+      const data = await request(url);
+      console.log('[fetchDepositInvoices] data received:', data); 
+      return data;
+    },
+    [request]
+  );
+
   const createInvoice = useCallback(
     (formData) => request(API_BASE, { method: "POST", body: formData }),
     [request]
   );
+
   const updateInvoice = useCallback(
     (id, formData) => request(`${API_BASE}/${id}`, { method: "PUT", body: formData }),
     [request]
   );
+
   const deleteInvoice = useCallback(
     (id) => request(`${API_BASE}/${id}`, { method: "DELETE" }),
     [request]
   );
+
   const generateInvoicePdf = useCallback(
     (id) =>
       request(`${API_BASE}/${id}/generate-pdf`, {
@@ -53,6 +69,7 @@ export function useInvoiceService() {
       }),
     [request]
   );
+
   const sendInvoice = useCallback(
     (id) =>
       request(`${API_BASE}/${id}/send`, {
@@ -271,6 +288,7 @@ export function useInvoiceService() {
     API_ROOT,
     fetchInvoicesBySeller,
     fetchInvoice,
+    fetchDepositInvoices,
     createInvoice,
     updateInvoice,
     deleteInvoice,

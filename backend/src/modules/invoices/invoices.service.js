@@ -23,6 +23,11 @@ async function getInvoice(id, currentSeller) {
   return invoice;
 }
 
+async function getDepositInvoicesBySeller(seller) {
+  if (!seller) throw new Error("Seller is required");
+  return await InvoicesModel.getDepositInvoices(seller.id);
+}
+
 async function createInvoice(data) {
   const { invoice, client, lines, taxes, attachments } = data;
   const createdInvoice = await InvoicesModel.createInvoice({ invoice, client, lines, taxes, attachments });
@@ -74,6 +79,7 @@ async function getInvoiceStatusComment(invoiceId, statusCode) {
 module.exports = {
   listInvoices,
   getInvoice,
+  getDepositInvoicesBySeller,
   createInvoice,
   updateInvoice,
   deleteInvoice,
