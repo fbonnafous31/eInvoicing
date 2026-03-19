@@ -1,6 +1,0 @@
-{
-  "ignored": [
-    "file-type",                
-    "@aws-sdk/xml-builder"      
-  ]
-}
