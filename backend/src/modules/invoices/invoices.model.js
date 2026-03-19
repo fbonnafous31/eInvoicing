@@ -68,6 +68,7 @@ async function getDepositInvoices(seller, clientId = null) {
       i.id,
       i.invoice_number,
       i.fiscal_year,
+      i.issue_date,
       i.total,
       c.legal_name AS client_name
     FROM ${SCHEMA}.invoices i

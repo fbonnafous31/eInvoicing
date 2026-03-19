@@ -37,14 +37,39 @@ async function _saveFacturXXML(id, invoiceData) {
  * Génère XML + PDF/A-3
  */
 async function generateInvoiceArtifacts(invoice) {
+  const InvoiceService = require('./invoices.service');
+
   let xmlPath = null;
   let pdfA3Path = null;
 
-  try {
-    // 1) Génération des données XML
+  try {   
+    // 1) Génération des données XML    
+    let depositAmount = 0;
+    let depositDate = null;    
+
+    if (invoice.invoice_type === 'final' && invoice.original_invoice_id) {
+      try {
+        const originalInvoice = await InvoiceService.getInvoiceById(invoice.original_invoice_id);
+        if (originalInvoice) {
+          depositAmount = originalInvoice.total;
+          depositDate = originalInvoice.issue_date;
+          logger.info(`🔗 Acompte trouvé pour le XML : ${originalInvoice.invoice_number} (${depositAmount}€)`);
+        }
+      } catch (err) {
+        logger.warn(`⚠️ Impossible de récupérer l'acompte ${invoice.original_invoice_id} pour le XML - error: ${err.message}`);
+      }
+    }
+
     const clientForXML = _prepareClientForXML(invoice.client);
-    const invoiceDataForXML = {
-      header: invoice,
+
+    const invoiceWithDeposit = {
+      ...invoice,
+      deposit_amount: depositAmount,      
+      original_invoice_date: depositDate  
+    };
+
+    const invoiceDataForXML = {      
+      header: invoiceWithDeposit,
       seller: invoice.seller,
       client: clientForXML,
       lines: invoice.lines,

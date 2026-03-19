@@ -170,20 +170,31 @@ function generateFacturXXML(invoice) {
 
   // BuyerTradeParty
   const buyerParty = agreement.ele('ram:BuyerTradeParty');
-  buyerParty.ele('ram:Name').txt(buyer.legal_name).up();
-  buyerParty.ele('ram:PostalTradeAddress')
-      .ele('ram:PostcodeCode').txt(buyer.postal_code || '').up()
-      .ele('ram:LineOne').txt(buyer.address || '').up()
-      .ele('ram:CityName').txt(buyer.city || '').up()
-      .ele('ram:CountryID').txt(buyer.country_code || '').up()
-    .up();
+  buyerParty.ele('ram:Name').txt(buyer.legal_name || 'Client').up();
+  
+  const buyerAddress = buyerParty.ele('ram:PostalTradeAddress');
+
+  if (buyer.postal_code && buyer.postal_code.trim()) {
+    buyerAddress.ele('ram:PostcodeCode').txt(buyer.postal_code.trim()).up();
+  }
+  if (buyer.address && buyer.address.trim()) {
+    buyerAddress.ele('ram:LineOne').txt(buyer.address.trim()).up();
+  }
+  if (buyer.city && buyer.city.trim()) {
+    buyerAddress.ele('ram:CityName').txt(buyer.city.trim()).up();
+  }
+  if (buyer.country_code && buyer.country_code.trim()) {
+    buyerAddress.ele('ram:CountryID').txt(buyer.country_code.trim()).up();
+  }
+  
+  buyerAddress.up();
   buyerParty.up();
 
   const delivery = transaction.ele('ram:ApplicableHeaderTradeDelivery');
   delivery.ele('ram:ActualDeliverySupplyChainEvent')
     .ele('ram:OccurrenceDateTime')
       .ele('udt:DateTimeString', { format: '102' })
-        .txt(header.issue_date.replace(/-/g,'')) // on met la date de la facture si pas de date livraison réelle
+        .txt(header.issue_date.replace(/-/g,'')) 
       .up()
     .up()
   .up();
@@ -255,25 +266,49 @@ function generateFacturXXML(invoice) {
     .up();
 
   // Totaux
-  settlement.ele('ram:SpecifiedTradeSettlementHeaderMonetarySummation')
-      .ele('ram:LineTotalAmount').txt(lineTotalAmount.toFixed(2)).up()
+  const prepaidAmount = parseFloat(header.deposit_amount || 0); 
+  const currentInvoiceTotal = grandTotalAmount; 
+  
+  // Le total de l'opération (1000 €)
+  const operationTotal = currentInvoiceTotal + prepaidAmount; 
+
+  const summation = settlement.ele('ram:SpecifiedTradeSettlementHeaderMonetarySummation');
+  
+  summation.ele('ram:LineTotalAmount').txt(lineTotalAmount.toFixed(2)).up()
       .ele('ram:TaxBasisTotalAmount').txt(lineTotalAmount.toFixed(2)).up()
-      .ele('ram:TaxTotalAmount', { currencyID: currency }).txt(taxTotalAmount.toFixed(2)).up()
-      .ele('ram:GrandTotalAmount').txt(grandTotalAmount.toFixed(2)).up()
-      .ele('ram:DuePayableAmount').txt(grandTotalAmount.toFixed(2)).up()
-    .up();
+      .ele('ram:TaxTotalAmount', { currencyID: currency }).txt(taxTotalAmount.toFixed(2)).up();
+
+  // Ici, on affiche le total de l'opération complète (Acompte + Solde)
+  summation.ele('ram:GrandTotalAmount').txt(operationTotal.toFixed(2)).up();
+
+  if (prepaidAmount > 0) {
+    // On indique ce qui a déjà été payé (600 €)
+    summation.ele('ram:TotalPrepaidAmount').txt(prepaidAmount.toFixed(2)).up();
+  }
+
+  // Ce qu'il reste à payer aujourd'hui (400 €)
+  summation.ele('ram:DuePayableAmount').txt(currentInvoiceTotal.toFixed(2)).up();
+  
+  summation.up();
 
   // InvoiceReferencedDocument
-  if (invoice.reference_invoice_number) {
-    const invoiceRef = settlement.ele('ram:InvoiceReferencedDocument');
-    invoiceRef.ele('ram:IssuerAssignedID').txt(invoice.reference_invoice_number).up();
-    if (invoice.reference_invoice_date) {
+  const refNumber = header.original_invoice_number || invoice.reference_invoice_number;
+  const refDate = header.original_invoice_date || invoice.reference_invoice_date;
+
+  if (refNumber && refNumber.trim() !== '') {
+    const invoiceRef = settlement.ele('ram:InvoiceReferencedDocument'); 
+
+    invoiceRef.ele('ram:IssuerAssignedID').txt(refNumber.trim()).up();
+
+    if (refDate) {
       invoiceRef.ele('ram:FormattedIssueDateTime')
-        .ele('qdt:DateTimeString', { format: '102' })
-          .txt(invoice.reference_invoice_date.replace(/-/g, ''))
+        .ele('qdt:DateTimeString', { format: '102' }) 
+          .txt(refDate.replace(/-/g, '')) 
         .up()
       .up();
     }
+    
+    invoiceRef.up(); 
   }
 
   // Receivable account (optionnel)
