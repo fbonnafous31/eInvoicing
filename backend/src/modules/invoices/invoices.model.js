@@ -58,7 +58,10 @@ async function getAllInvoices() {
  * Récupère les factures d'acompte pour un vendeur donné
  */
 async function getDepositInvoices(seller, clientId = null) {
-  if (!seller?.id) throw new Error("Seller is required");
+  if (!seller?.id) {
+    logger.error('[Model] getDepositInvoicesBySeller - Seller missing');
+    throw new Error("Seller is required");
+  }
 
   let query = `
     SELECT 
@@ -80,13 +83,16 @@ async function getDepositInvoices(seller, clientId = null) {
     params.push(clientId);
   }
 
-  console.log('[Model] getDepositInvoicesBySeller SQL query:', query);
-  console.log('[Model] params:', params);
+  logger.info({ query, params }, '[Model] getDepositInvoicesBySeller - executing query');
 
-  const { rows } = await pool.query(query, params);
-
-  console.log('[Model] getDepositInvoicesBySeller rows fetched:', rows.length);
-  return rows;
+  try {
+    const { rows } = await pool.query(query, params);
+    logger.info({ rowCount: rows.length }, '[Model] getDepositInvoicesBySeller - rows fetched');
+    return rows;
+  } catch (err) {
+    logger.error({ err }, '[Model] getDepositInvoicesBySeller - query failed');
+    throw err;
+  }
 }
 
 /**
@@ -181,6 +187,7 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
       "invoice_type",
       "client_id",
       "original_invoice_number",
+      "original_invoice_id",
     ];
     const invoiceValues = invoiceColumns.map((col) => invoice[col] || null);
     const placeholders = invoiceColumns.map((_, i) => `$${i + 1}`).join(", ");
@@ -302,6 +309,7 @@ async function updateInvoice(
         "supply_date",
         "invoice_type",
         "original_invoice_number",
+        "original_invoice_id",
       ];
       const filteredColumns = invoiceColumns.filter(col => invoice[col] !== undefined);
       const updates = filteredColumns.map((col, i) => `${col} = $${i + 2}`);

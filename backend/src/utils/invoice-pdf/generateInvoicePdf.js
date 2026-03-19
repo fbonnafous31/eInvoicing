@@ -671,6 +671,33 @@ async function generateInvoicePdfBuffer(invoice) {
       y -= 20;
     }    
 
+    if (header.invoice_type === "final" || header.invoice_type === "solde") {
+      // Titre principal
+      page.drawText("⚡ Facture de solde", {
+        x: margin,
+        y,
+        size: 10,
+        font: fontBold,
+        color: rgb(0.1, 0.6, 0.1), 
+      });
+      y -= 20;
+
+      // Référence de la facture d'acompte
+      if (header.original_invoice_number) {
+        page.drawText(
+          `ℹ️ Facture d'acompte : ${header.original_invoice_number}`,
+          {
+            x: margin,
+            y,
+            size: 9,
+            font: fontRegular,
+            color: rgb(0.3, 0.3, 0.3),
+          }
+        );
+        y -= 20;
+      }
+    }
+
     if (header.issue_date)
       page.drawText(`Date d'émission : ${formatDateFr(header.issue_date)}`, {
         x: margin,

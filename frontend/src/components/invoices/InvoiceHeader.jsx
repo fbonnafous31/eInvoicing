@@ -141,26 +141,91 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
         />
 
         {data.invoice_type === "final" && (
-          <div className="form-group">
+          <div className="form-group mb-3"> 
             <label htmlFor="original_invoice_number">Référence facture d’acompte</label>
             <CreatableSelect
               id="original_invoice_number"
+              isClearable
               value={
                 data.original_invoice_number
-                  ? { value: data.original_invoice_number, label: data.original_invoice_number }
+                  ? { 
+                      value: data.original_invoice_number, 
+                      label: data.original_invoice_number.trim() 
+                    }
                   : null
               }
-              onChange={val => handleChange("original_invoice_number", val?.value || "")}
+              onChange={(selectedOption) => {
+                // 1. On prépare la mise à jour de l'objet header
+                const newData = { ...data };
+
+                if (!selectedOption) {
+                  // Si l'utilisateur efface la sélection
+                  newData.original_invoice_number = "";
+                  newData.original_invoice_id = null;
+                } else if (selectedOption.__isNew__) {
+                  // Si l'utilisateur saisit un numéro manuellement
+                  newData.original_invoice_number = selectedOption.value;
+                  newData.original_invoice_id = null;
+                } else {
+                  // SÉLECTION D'UNE FACTURE EXISTANTE
+                  // On cherche l'objet facture complet dans la liste pour extraire l'ID (UUID)
+                  const selectedInv = depositInvoices.find(
+                    inv => inv.invoice_number === selectedOption.value
+                  );
+                  
+                  newData.original_invoice_number = selectedOption.value;
+                  // On récupère l'UUID (vérifie que ton API renvoie bien .id)
+                  newData.original_invoice_id = selectedInv ? selectedInv.id : null;
+                }
+
+                // 2. On transmet l'objet complet (avec les 2 clés) au parent
+                onChange(newData);
+                
+                // 3. On déclenche la validation manuellement pour ce champ
+                validateField("original_invoice_number", newData.original_invoice_number);
+              }}
               options={depositInvoices.map(inv => ({
                 value: inv.invoice_number,
-                label: `${inv.invoice_number} - ${inv.client_name} - ${inv.total} €`
+                label: `${inv.invoice_number.trim()} - ${inv.client_name || 'Client'} - ${inv.total} €`
               }))}
               placeholder="Sélectionnez ou saisissez une facture d’acompte..."
               isDisabled={disabled}
-              formatCreateLabel={inputValue => `Créer "${inputValue}"`}
+              formatCreateLabel={inputValue => `Saisir manuellement : "${inputValue}"`}
+              styles={{
+                control: (provided, state) => ({
+                  ...provided,
+                  backgroundColor: state.isDisabled ? '#e8ebeefa' : '#fff', 
+                  borderColor: '#ced4da',
+                  boxShadow: state.isFocused ? '0 0 0 0.2rem rgba(0,123,255,.25)' : 'none',
+                  '&:hover': {
+                    borderColor: '#adb5bd', 
+                  },
+                }),
+                singleValue: (provided) => ({
+                  ...provided,
+                  color: '#212529', 
+                }),
+                input: (provided) => ({
+                  ...provided,
+                  color: '#212529', 
+                }),
+                placeholder: (provided) => ({
+                  ...provided,
+                  color: '#6c757d', 
+                }),
+                menu: (provided) => ({
+                  ...provided,
+                  backgroundColor: '#fff', 
+                  zIndex: 9999 // Pour être sûr que le menu s'affiche au-dessus des autres champs
+                }),
+              }}            
             />
+            {/* Affichage de l'erreur si elle existe */}
+            {(touchedFields.original_invoice_number || submitted) && errors.original_invoice_number && (
+              <div className="text-danger small mt-1">{errors.original_invoice_number}</div>
+            )}
           </div>
-        )} 
+        )}
 
         <DatePickerField
           id="issue_date"
