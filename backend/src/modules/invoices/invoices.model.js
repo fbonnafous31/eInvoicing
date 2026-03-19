@@ -75,6 +75,11 @@ async function getDepositInvoices(seller, clientId = null) {
     LEFT JOIN ${SCHEMA}.clients c ON i.client_id = c.id
     WHERE i.invoice_type = 'deposit'
       AND i.seller_id = $1
+      AND NOT EXISTS (
+        SELECT 1
+        FROM ${SCHEMA}.invoices i2
+        WHERE i2.original_invoice_number = i.invoice_number
+      )      
   `;
 
   const params = [seller.id];
