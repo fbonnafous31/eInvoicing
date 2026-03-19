@@ -36,6 +36,29 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
     fetchDeposits();
   }, [data.client_id, fetchDepositInvoices]);
 
+  useEffect(() => {
+    // Si on a un numéro de facture d'acompte mais PAS d'ID
+    if (data.original_invoice_number && !data.original_invoice_id && depositInvoices.length > 0) {
+      const cleanNumber = data.original_invoice_number.trim();
+      
+      // On cherche dans la liste chargée depuis l'API
+      const match = depositInvoices.find(
+        inv => inv.invoice_number.trim() === cleanNumber
+      );
+
+      if (match) {
+        console.log("🔗 Raccordement auto de l'ID d'acompte trouvé :", match.id);
+        // On déclenche le changement vers le parent
+        onChange({
+          ...data,
+          original_invoice_id: match.id,
+          // On passe aussi le montant pour le payload du PDF
+          deposit_amount: match.total 
+        });
+      }
+    }
+  }, [depositInvoices, data.original_invoice_number, data.original_invoice_id, onChange]);  
+
   // --- Validation ---
   const validateField = useCallback((field, value) => {
     // Ne pas valider à l'ouverture si le champ n'a pas été touché et pas de soumission
@@ -147,46 +170,42 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
               id="original_invoice_number"
               isClearable
               value={
-                data.original_invoice_number
+                data.original_invoice_id
                   ? { 
-                      value: data.original_invoice_number, 
-                      label: data.original_invoice_number.trim() 
+                      value: data.original_invoice_id,
+                      label: data.original_invoice_number.trim(),
+                      invoice_number: data.original_invoice_number
                     }
-                  : null
+                  : data.original_invoice_number
+                    ? {
+                        value: data.original_invoice_number, 
+                        label: data.original_invoice_number.trim(),
+                        __isNew__: true 
+                      }
+                    : null
               }
               onChange={(selectedOption) => {
-                // 1. On prépare la mise à jour de l'objet header
                 const newData = { ...data };
 
                 if (!selectedOption) {
-                  // Si l'utilisateur efface la sélection
                   newData.original_invoice_number = "";
                   newData.original_invoice_id = null;
                 } else if (selectedOption.__isNew__) {
-                  // Si l'utilisateur saisit un numéro manuellement
                   newData.original_invoice_number = selectedOption.value;
                   newData.original_invoice_id = null;
                 } else {
-                  // SÉLECTION D'UNE FACTURE EXISTANTE
-                  // On cherche l'objet facture complet dans la liste pour extraire l'ID (UUID)
-                  const selectedInv = depositInvoices.find(
-                    inv => inv.invoice_number === selectedOption.value
-                  );
-                  
-                  newData.original_invoice_number = selectedOption.value;
-                  // On récupère l'UUID (vérifie que ton API renvoie bien .id)
-                  newData.original_invoice_id = selectedInv ? selectedInv.id : null;
+                  newData.original_invoice_number = selectedOption.invoice_number;
+                  newData.original_invoice_id = selectedOption.value;
                 }
 
-                // 2. On transmet l'objet complet (avec les 2 clés) au parent
                 onChange(newData);
-                
-                // 3. On déclenche la validation manuellement pour ce champ
+
                 validateField("original_invoice_number", newData.original_invoice_number);
               }}
               options={depositInvoices.map(inv => ({
-                value: inv.invoice_number,
-                label: `${inv.invoice_number.trim()} - ${inv.client_name || 'Client'} - ${inv.total} €`
+                value: inv.id,
+                label: `${inv.invoice_number.trim()} - ${inv.client_name || 'Client'} - ${inv.total} €`,
+                invoice_number: inv.invoice_number
               }))}
               placeholder="Sélectionnez ou saisissez une facture d’acompte..."
               isDisabled={disabled}
@@ -197,30 +216,14 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
                   backgroundColor: state.isDisabled ? '#e8ebeefa' : '#fff', 
                   borderColor: '#ced4da',
                   boxShadow: state.isFocused ? '0 0 0 0.2rem rgba(0,123,255,.25)' : 'none',
-                  '&:hover': {
-                    borderColor: '#adb5bd', 
-                  },
+                  '&:hover': { borderColor: '#adb5bd' },
                 }),
-                singleValue: (provided) => ({
-                  ...provided,
-                  color: '#212529', 
-                }),
-                input: (provided) => ({
-                  ...provided,
-                  color: '#212529', 
-                }),
-                placeholder: (provided) => ({
-                  ...provided,
-                  color: '#6c757d', 
-                }),
-                menu: (provided) => ({
-                  ...provided,
-                  backgroundColor: '#fff', 
-                  zIndex: 9999 // Pour être sûr que le menu s'affiche au-dessus des autres champs
-                }),
+                singleValue: (provided) => ({ ...provided, color: '#212529' }),
+                input: (provided) => ({ ...provided, color: '#212529' }),
+                placeholder: (provided) => ({ ...provided, color: '#6c757d' }),
+                menu: (provided) => ({ ...provided, backgroundColor: '#fff', zIndex: 9999 }),
               }}            
             />
-            {/* Affichage de l'erreur si elle existe */}
             {(touchedFields.original_invoice_number || submitted) && errors.original_invoice_number && (
               <div className="text-danger small mt-1">{errors.original_invoice_number}</div>
             )}

@@ -89,6 +89,11 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
 
       const safeData = {
         ...initialData,
+        header: {
+          ...initialData.header,
+          original_invoice_id: initialData.header?.original_invoice_id || initialData.original_invoice_id || null,
+          original_invoice_number: initialData.header?.original_invoice_number || initialData.original_invoice_number || null,
+        },        
         lines: (initialData.lines || []).map(line => ({
           ...line,
           quantity: Number(line.quantity || 0),

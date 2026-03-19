@@ -5,6 +5,7 @@ const { paymentMethodsOptions } = require("../../../constants/paymentMethods");
 const { paymentTermsOptions } = require("../../../constants/paymentTerms");
 const fontkit = require('@pdf-lib/fontkit');
 const logger = require("../../utils/logger");
+const InvoiceService = require("../../modules/invoices/invoices.service");
 
 // ---------------- wrapText ----------------
 function wrapText(text, font, size, maxWidth) {
@@ -420,10 +421,10 @@ async function generateQuotePdf(quote) {
 async function generateInvoicePdfBuffer(invoice) {
   try {
     logger.info('➡️ Début generateInvoicePdfBuffer');
-    logger.info('Invoice header:', invoice.header);
-    logger.info('Seller object:', invoice.seller);
-    logger.info('Client object:', invoice.client);
-
+    logger.info({ header: invoice.header }, "Invoice header");
+    logger.info({ seller: invoice.seller }, "Seller object");
+    logger.info({ client: invoice.client }, "Client object");
+    
     const pdfDoc = await PDFDocument.create();
     const ASSETS_PATH = path.join(process.cwd(), "public/pdf-assets");
 
@@ -682,20 +683,39 @@ async function generateInvoicePdfBuffer(invoice) {
       });
       y -= 20;
 
-      // Référence de la facture d'acompte
-      if (header.original_invoice_number) {
-        page.drawText(
-          `ℹ️ Facture d'acompte : ${header.original_invoice_number}`,
-          {
-            x: margin,
-            y,
-            size: 9,
-            font: fontRegular,
-            color: rgb(0.3, 0.3, 0.3),
+      // --- RÉCUPÉRATION DU MONTANT DE L'ACOMPTE ---
+      const depositNumber = header.original_invoice_number?.trim() || 'N/A';
+      let depositInfoText = `ℹ️ Facture d'acompte : ${depositNumber}`;
+      
+      if (header.original_invoice_id) {
+        logger.info(`🔍 [PDF-Gen] Recherche de l'acompte lié (ID: ${header.original_invoice_id})`);
+        try {
+          // Appel direct au service (Assure-toi que generateInvoicePdfBuffer est async)
+          const originalInvoice = await InvoiceService.getInvoiceById(header.original_invoice_id);
+          
+          if (originalInvoice) {
+            const amount = originalInvoice.total || 0;
+            logger.info(`✅ [PDF-Gen] Acompte trouvé : ${originalInvoice.invoice_number.trim()} | Montant : ${amount}€`);
+            depositInfoText += ` (Montant : ${amount} €)`;
+          } else {
+            logger.warn(`⚠️ [PDF-Gen] Aucun enregistrement trouvé pour l'ID : ${header.original_invoice_id}`);
           }
-        );
-        y -= 20;
+        } catch (err) {
+          logger.error(`❌ [PDF-Gen] Erreur lors de la récupération de l'acompte ${header.original_invoice_id}:`, err);
+        }
+      } else {
+        logger.info("ℹ️ [PDF-Gen] Pas d'original_invoice_id (liaison manuelle ou absente).");
       }
+
+      // Affichage de la ligne enrichie sur le PDF
+      page.drawText(depositInfoText, {
+        x: margin,
+        y,
+        size: 9,
+        font: fontRegular,
+        color: rgb(0.3, 0.3, 0.3),
+      });
+      y -= 20;
     }
 
     if (header.issue_date)

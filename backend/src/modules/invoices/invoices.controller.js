@@ -295,6 +295,7 @@ const createInvoicePdf = asyncHandler(async (req, res) => {
 const { getSellerById } = require('../sellers/sellers.service'); 
 
 const generateInvoicePdfBuffer = asyncHandler(async (req, res) => {
+  logger.info("BODY:", JSON.stringify(req.body, null, 2));
   const invoiceBody = { ...req.body };
 
   // ---------------- Vérifier seller_id avant création de l'objet invoice ----------------
