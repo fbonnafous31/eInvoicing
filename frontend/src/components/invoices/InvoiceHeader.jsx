@@ -2,13 +2,12 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { paymentTermsOptions } from "../../constants/paymentTerms";
 import { paymentMethodsOptions } from '../../constants/paymentMethods';
-import { FormSection, InputField, SelectField, DatePickerField } from '@/components/form';
+import { FormSection, InputField, SelectField, DatePickerField, CreatableSelect } from '@/components/form';
 import { useSellerService } from "../../services/sellers";
 import { validateInvoiceField } from "../../utils/validators/invoice";
 import { validateIssueDate } from "../../utils/validators/issueDate";
 import { invoiceTypeOptions } from "../../constants/invoiceTypes";
 import { useInvoiceService } from "../../services/invoices";
-import CreatableSelect from "react-select/creatable";
 
 export default function InvoiceHeader({ data, onChange, submitted, errors = {}, disabled }) {
   const [fieldErrors, setFieldErrors] = useState({});
@@ -20,6 +19,7 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
   const { fetchDepositInvoices, fetchInvoicesBySeller } = useInvoiceService();
   const [depositInvoices, setDepositInvoices] = useState([]);
   const [allInvoices, setAllInvoices] = useState([]);
+  const [referenceStatus, setReferenceStatus] = useState(null);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -50,24 +50,37 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
     fetchDeposits();
   }, [data.client_id, fetchDepositInvoices]);
 
+  // Racordement automatique de l’ID de la facture d’origine à partir de la référence saisie
   useEffect(() => {
-    if (data.original_invoice_number && !data.original_invoice_id) {
-      const cleanNumber = data.original_invoice_number.trim();
+    const refNumber = data.original_invoice_number?.trim();
 
-      const sourceInvoices = data.invoice_type === 'final'
-        ? depositInvoices
-        : allInvoices; // <-- toutes factures pour avoir
+    // 1️⃣ Champ vide → rien à signaler
+    if (!refNumber) {
+      setReferenceStatus(null);
+      return;
+    }
 
-      const match = sourceInvoices.find(inv => inv.invoice_number.trim() === cleanNumber);
+    // 2️⃣ ID déjà présent → tout est ok
+    if (data.original_invoice_id) {
+      setReferenceStatus('found');
+      return;
+    }
 
-      if (match) {
-        console.log("🔗 Raccordement auto de l'ID trouvé :", match.id);
-        onChange({
-          ...data,
-          original_invoice_id: match.id,
-          deposit_amount: match.total 
-        });
-      }
+    // 3️⃣ Chercher la facture correspondante
+    const sourceInvoices = data.invoice_type === 'final' ? depositInvoices : allInvoices;
+    const match = sourceInvoices.find(inv => inv.invoice_number.trim() === refNumber);
+
+    if (match) {
+      console.log("🔗 Raccordement auto de l'ID trouvé :", match.id);
+      setReferenceStatus('found');
+      onChange({
+        ...data,
+        original_invoice_id: match.id,
+        deposit_amount: match.total,
+      });
+    } else {
+      console.log("⚠️ Aucun ID trouvé pour la référence :", refNumber);
+      setReferenceStatus('not_found');
     }
   }, [depositInvoices, allInvoices, data.original_invoice_number, data.original_invoice_id, data.invoice_type, onChange]);
 
@@ -176,82 +189,78 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
         />
 
         {(data.invoice_type === "final" || data.invoice_type === "credit_note") && (
-          <div className="form-group mb-3"> 
-            <label htmlFor="original_invoice_number">
-              {data.invoice_type === "final"
+          <CreatableSelect
+            id="original_invoice_number"
+            label={
+              data.invoice_type === "final"
                 ? "Référence facture d’acompte"
-                : "Référence facture d’origine"}
-            </label>
-            <CreatableSelect
-              id="original_invoice_number"
-              isClearable
-              value={
-                data.original_invoice_id
-                  ? { 
-                      value: data.original_invoice_id,
+                : "Référence facture d’origine"
+            }
+            value={
+              data.original_invoice_id
+                ? { 
+                    value: data.original_invoice_id,
+                    label: data.original_invoice_number.trim(),
+                    invoice_number: data.original_invoice_number
+                  }
+                : data.original_invoice_number
+                  ? {
+                      value: data.original_invoice_number, 
                       label: data.original_invoice_number.trim(),
-                      invoice_number: data.original_invoice_number
+                      __isNew__: true 
                     }
-                  : data.original_invoice_number
-                    ? {
-                        value: data.original_invoice_number, 
-                        label: data.original_invoice_number.trim(),
-                        __isNew__: true 
-                      }
-                    : null
-              }
-              onChange={(selectedOption) => {
-                const newData = { ...data };
+                  : null
+            }
+            onChange={(selectedOption) => {
+              const newData = { ...data };
 
-                if (!selectedOption) {
-                  newData.original_invoice_number = "";
-                  newData.original_invoice_id = null;
-                } else if (selectedOption.__isNew__) {
-                  newData.original_invoice_number = selectedOption.value;
-                  newData.original_invoice_id = null;
-                } else {
-                  newData.original_invoice_number = selectedOption.invoice_number;
-                  newData.original_invoice_id = selectedOption.value;
-                }
-
-                onChange(newData);
-
-                validateField("original_invoice_number", newData.original_invoice_number);
-              }}
-              options={
-                data.invoice_type === "final"
-                  ? depositInvoices.map(inv => ({
-                      value: inv.id,
-                      label: `${inv.invoice_number.trim()} - ${inv.client_name || 'Client'} - ${inv.total} €`,
-                      invoice_number: inv.invoice_number
-                    }))
-                  : []
+              if (!selectedOption) {
+                newData.original_invoice_number = "";
+                newData.original_invoice_id = null;
+              } else if (selectedOption.__isNew__) {
+                newData.original_invoice_number = selectedOption.value;
+                newData.original_invoice_id = null;
+              } else {
+                newData.original_invoice_number = selectedOption.invoice_number;
+                newData.original_invoice_id = selectedOption.value;
               }
-              placeholder={
-                data.invoice_type === "final"
-                  ? "Sélectionnez ou saisissez une facture d’acompte..."
-                  : "Saisissez la référence de la facture d’origine..."
-              }
-              isDisabled={disabled}
-              formatCreateLabel={inputValue => `Saisir manuellement : "${inputValue}"`}
-              styles={{
-                control: (provided, state) => ({
-                  ...provided,
-                  backgroundColor: state.isDisabled ? '#e8ebeefa' : '#fff', 
-                  borderColor: '#ced4da',
-                  boxShadow: state.isFocused ? '0 0 0 0.2rem rgba(0,123,255,.25)' : 'none',
-                  '&:hover': { borderColor: '#adb5bd' },
-                }),
-                singleValue: (provided) => ({ ...provided, color: '#212529' }),
-                input: (provided) => ({ ...provided, color: '#212529' }),
-                placeholder: (provided) => ({ ...provided, color: '#6c757d' }),
-                menu: (provided) => ({ ...provided, backgroundColor: '#fff', zIndex: 9999 }),
-              }}            
-            />
-            {(touchedFields.original_invoice_number || submitted) && errors.original_invoice_number && (
-              <div className="text-danger small mt-1">{errors.original_invoice_number}</div>
-            )}
-          </div>
+
+              onChange(newData);
+              validateField("original_invoice_number", newData.original_invoice_number);
+            }}
+            onBlur={handleBlur}
+            options={
+              data.invoice_type === "final"
+                ? depositInvoices.map(inv => ({
+                    value: inv.id,
+                    label: `${inv.invoice_number.trim()} - ${inv.client_name || 'Client'} - ${inv.total} €`,
+                    invoice_number: inv.invoice_number
+                  }))
+                : []
+            }
+            placeholder={
+              data.invoice_type === "final"
+                ? "Sélectionnez ou saisissez une facture d’acompte..."
+                : "Saisissez la référence de la facture d’origine..."
+            }
+            formatCreateLabel={inputValue => `Saisir manuellement : "${inputValue}"`}
+            disabled={disabled}
+            error={getError("original_invoice_number")}
+            feedbackText={
+              referenceStatus === "found"
+                ? "✅ Facture correspondante trouvée"
+                : referenceStatus === "not_found"
+                ? "⚠️ Aucune facture correspondante trouvée"
+                : ""
+            }
+            feedbackClass={
+              referenceStatus === "found"
+                ? "text-success"
+                : referenceStatus === "not_found"
+                ? "text-warning"
+                : ""
+            }
+          />
         )}
 
         <DatePickerField

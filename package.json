@@ -51,6 +51,7 @@
     "@typescript-eslint/eslint-plugin": "^8.46.0",
     "@typescript-eslint/parser": "^8.46.0",
     "concurrently": "^9.2.0",
+    "flat-cache": "^6.1.21",
     "jest": "^30.0.5",
     "vitest": "^3.2.4"
   }
