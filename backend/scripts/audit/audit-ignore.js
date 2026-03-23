@@ -35,5 +35,15 @@ module.exports = {
     // Problème : pas corrigible sans mise à jour du package parent
     // Plan de correction futur : mettre à jour le package AWS SDK quand une version safe est publiée
     "@aws-sdk/xml-builder",
+
+    // -------------------------
+    // flatted
+    // -------------------------
+    // Connu : vulnérabilité "Prototype Pollution via parse() in NodeJS flatted"
+    // Source : https://github.com/advisories/GHSA-rf6f-7fwh-wjgh
+    // Dépendance transitive via flat-cache (utilisé par @typescript-eslint/eslint-plugin)
+    // Problème : aucune version fixée compatible CommonJS pour le moment sans casser flat-cache
+    // Plan de correction futur : mettre à jour flat-cache quand une version safe de flatted est supportée
+    "flatted"
   ]
 };
