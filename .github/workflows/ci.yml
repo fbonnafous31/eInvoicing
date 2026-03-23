@@ -87,7 +87,9 @@ jobs:
         working-directory: ./frontend
 
       - name: Audit frontend dependencies
-        run: npm audit --audit-level=high
+        run: |
+          npm audit --json > audit.json || true
+          node scripts/audit/check-audit.js audit.json
         working-directory: ./frontend
 
       - name: Lint frontend
