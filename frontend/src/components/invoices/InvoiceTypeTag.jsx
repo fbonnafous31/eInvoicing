@@ -16,7 +16,7 @@ const styles = {
     background: "#d4edda",
     color: "#155724",
   },
-  credit: {
+  credit_note: {
     label: "Avoir",
     background: "#f8d7da",
     color: "#721c24",

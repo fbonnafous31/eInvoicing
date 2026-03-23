@@ -1,4 +1,4 @@
-# Jour #186 -- Référencer les factures d’acompte dans le solde 📌
+# Jour #186 - Référencer les factures d’acompte dans le solde 📌
 
 ## Une liste d’acomptes plus riche et plus pratique 👀
 

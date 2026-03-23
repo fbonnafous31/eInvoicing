@@ -672,9 +672,17 @@ async function generateInvoicePdfBuffer(invoice) {
       y -= 20;
     }    
 
-    if (header.invoice_type === "final" || header.invoice_type === "solde") {
+    if (header.invoice_type === "final" || header.invoice_type === "credit_note") {
+      let titleText = "⚡ Facture";
+
+      if (header.invoice_type === "final") {
+        titleText += " de solde";
+      } else if (header.invoice_type === "credit_note") {
+        titleText += " d'avoir"; 
+      }
+
       // Titre principal
-      page.drawText("⚡ Facture de solde", {
+      page.drawText(titleText, {
         x: margin,
         y,
         size: 10,
@@ -683,39 +691,31 @@ async function generateInvoicePdfBuffer(invoice) {
       });
       y -= 20;
 
-      // --- RÉCUPÉRATION DU MONTANT DE L'ACOMPTE ---
-      const depositNumber = header.original_invoice_number?.trim() || 'N/A';
-      let depositInfoText = `ℹ️ Facture d'acompte : ${depositNumber}`;
-      
-      if (header.original_invoice_id) {
-        logger.info(`🔍 [PDF-Gen] Recherche de l'acompte lié (ID: ${header.original_invoice_id})`);
-        try {
-          // Appel direct au service (Assure-toi que generateInvoicePdfBuffer est async)
-          const originalInvoice = await InvoiceService.getInvoiceById(header.original_invoice_id);
-          
-          if (originalInvoice) {
-            const amount = originalInvoice.total || 0;
-            logger.info(`✅ [PDF-Gen] Acompte trouvé : ${originalInvoice.invoice_number.trim()} | Montant : ${amount}€`);
-            depositInfoText += ` (Montant : ${amount} €)`;
-          } else {
-            logger.warn(`⚠️ [PDF-Gen] Aucun enregistrement trouvé pour l'ID : ${header.original_invoice_id}`);
+      // --- Récupération du montant de l'acompte (si final) ---
+      if (header.invoice_type === "final" && header.original_invoice_number) {
+        const depositNumber = header.original_invoice_number?.trim() || 'N/A';
+        let depositInfoText = `ℹ️ Facture d'acompte : ${depositNumber}`;
+        
+        if (header.original_invoice_id) {
+          try {
+            const originalInvoice = await InvoiceService.getInvoiceById(header.original_invoice_id);
+            if (originalInvoice) {
+              depositInfoText += ` (Montant : ${originalInvoice.total} €)`;
+            }
+          } catch (err) {
+            logger.error(`❌ Erreur récupération acompte ID ${header.original_invoice_id}:`, err);
           }
-        } catch (err) {
-          logger.error(`❌ [PDF-Gen] Erreur lors de la récupération de l'acompte ${header.original_invoice_id}:`, err);
         }
-      } else {
-        logger.info("ℹ️ [PDF-Gen] Pas d'original_invoice_id (liaison manuelle ou absente).");
-      }
 
-      // Affichage de la ligne enrichie sur le PDF
-      page.drawText(depositInfoText, {
-        x: margin,
-        y,
-        size: 9,
-        font: fontRegular,
-        color: rgb(0.3, 0.3, 0.3),
-      });
-      y -= 20;
+        page.drawText(depositInfoText, {
+          x: margin,
+          y,
+          size: 9,
+          font: fontRegular,
+          color: rgb(0.3, 0.3, 0.3),
+        });
+        y -= 20;
+      }
     }
 
     if (header.issue_date)

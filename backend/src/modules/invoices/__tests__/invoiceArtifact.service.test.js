@@ -9,6 +9,7 @@ const InvoicesAttachmentsModel = require('../invoiceAttachments.model');
 const { getFinalPath } = require('../../../utils/fileNaming');
 const logger = require('../../../utils/logger');
 
+// 🔹 Mocks existants
 jest.mock('../../../utils/facturx/facturx-generator', () => ({
   generateFacturXXML: jest.fn(),
 }));
@@ -36,6 +37,10 @@ describe('InvoiceArtifactService', () => {
   const uploadsDir = '/home/francois/dev/eInvoicing/backend/src/uploads';
 
   beforeAll(() => {
+    // 🔹 Mock de la clé de chiffrement pour éviter Buffer.from(undefined) en CI
+    process.env.ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || '01234567890123456789012345678901'; // 32 chars pour aes-256
+
+    // 🔹 Mock logger.error pour ne pas polluer les logs de tests
     jest.spyOn(logger, 'error').mockImplementation(() => {});
   });
 
@@ -46,10 +51,10 @@ describe('InvoiceArtifactService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // On mock getFinalPath pour renvoyer le vrai dossier uploads local
+    // 🔹 On mock getFinalPath pour renvoyer le vrai dossier uploads local
     getFinalPath.mockImplementation((subPath) => `${uploadsDir}/${subPath}`);
 
-    // Mock fs
+    // 🔹 Mock fs
     jest.spyOn(fs, 'mkdir').mockResolvedValue();
     jest.spyOn(fs, 'writeFile').mockResolvedValue();
 
@@ -66,7 +71,6 @@ describe('InvoiceArtifactService', () => {
 
     const result = await generateInvoiceArtifacts(mockInvoice);
 
-    // ✅ On ne fige plus le chemin absolu → on vérifie juste le dossier et l’option
     expect(fs.mkdir).toHaveBeenCalledWith(
       expect.stringContaining('factur-x'),
       expect.objectContaining({ recursive: true })

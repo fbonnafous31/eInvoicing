@@ -1,4 +1,4 @@
-# Jour #185 -- Consolider les fondations avant la facture de solde 🧱
+# Jour #185 - Consolider les fondations avant la facture de solde 🧱
 
 ## Prendre le temps d'ajuster 🤔
 

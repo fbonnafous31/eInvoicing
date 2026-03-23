@@ -17,9 +17,24 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
 
   const { fetchMySeller } = useSellerService();
 
-  const { fetchDepositInvoices } = useInvoiceService();
+  const { fetchDepositInvoices, fetchInvoicesBySeller } = useInvoiceService();
   const [depositInvoices, setDepositInvoices] = useState([]);
-  
+  const [allInvoices, setAllInvoices] = useState([]);
+
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        const invoices = await fetchInvoicesBySeller();
+        setAllInvoices(invoices);
+      } catch (err) {
+        console.error("Erreur récupération factures:", err);
+        setAllInvoices([]);
+      }
+    };
+
+    fetchAll();
+  }, [fetchInvoicesBySeller]);
+
   // Récupérer les factures d’acompte pour le dropdown
   useEffect(() => {
     const fetchDeposits = async () => {
@@ -32,32 +47,29 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
         setDepositInvoices([]);
       }
     };
-
     fetchDeposits();
   }, [data.client_id, fetchDepositInvoices]);
 
   useEffect(() => {
-    // Si on a un numéro de facture d'acompte mais PAS d'ID
-    if (data.original_invoice_number && !data.original_invoice_id && depositInvoices.length > 0) {
+    if (data.original_invoice_number && !data.original_invoice_id) {
       const cleanNumber = data.original_invoice_number.trim();
-      
-      // On cherche dans la liste chargée depuis l'API
-      const match = depositInvoices.find(
-        inv => inv.invoice_number.trim() === cleanNumber
-      );
+
+      const sourceInvoices = data.invoice_type === 'final'
+        ? depositInvoices
+        : allInvoices; // <-- toutes factures pour avoir
+
+      const match = sourceInvoices.find(inv => inv.invoice_number.trim() === cleanNumber);
 
       if (match) {
-        console.log("🔗 Raccordement auto de l'ID d'acompte trouvé :", match.id);
-        // On déclenche le changement vers le parent
+        console.log("🔗 Raccordement auto de l'ID trouvé :", match.id);
         onChange({
           ...data,
           original_invoice_id: match.id,
-          // On passe aussi le montant pour le payload du PDF
           deposit_amount: match.total 
         });
       }
     }
-  }, [depositInvoices, data.original_invoice_number, data.original_invoice_id, onChange]);  
+  }, [depositInvoices, allInvoices, data.original_invoice_number, data.original_invoice_id, data.invoice_type, onChange]);
 
   // --- Validation ---
   const validateField = useCallback((field, value) => {
@@ -163,9 +175,13 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
           maxLength={20}
         />
 
-        {data.invoice_type === "final" && (
+        {(data.invoice_type === "final" || data.invoice_type === "credit_note") && (
           <div className="form-group mb-3"> 
-            <label htmlFor="original_invoice_number">Référence facture d’acompte</label>
+            <label htmlFor="original_invoice_number">
+              {data.invoice_type === "final"
+                ? "Référence facture d’acompte"
+                : "Référence facture d’origine"}
+            </label>
             <CreatableSelect
               id="original_invoice_number"
               isClearable
@@ -202,12 +218,20 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
 
                 validateField("original_invoice_number", newData.original_invoice_number);
               }}
-              options={depositInvoices.map(inv => ({
-                value: inv.id,
-                label: `${inv.invoice_number.trim()} - ${inv.client_name || 'Client'} - ${inv.total} €`,
-                invoice_number: inv.invoice_number
-              }))}
-              placeholder="Sélectionnez ou saisissez une facture d’acompte..."
+              options={
+                data.invoice_type === "final"
+                  ? depositInvoices.map(inv => ({
+                      value: inv.id,
+                      label: `${inv.invoice_number.trim()} - ${inv.client_name || 'Client'} - ${inv.total} €`,
+                      invoice_number: inv.invoice_number
+                    }))
+                  : []
+              }
+              placeholder={
+                data.invoice_type === "final"
+                  ? "Sélectionnez ou saisissez une facture d’acompte..."
+                  : "Saisissez la référence de la facture d’origine..."
+              }
               isDisabled={disabled}
               formatCreateLabel={inputValue => `Saisir manuellement : "${inputValue}"`}
               styles={{

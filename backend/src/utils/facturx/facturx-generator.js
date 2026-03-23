@@ -43,10 +43,14 @@ function generateFacturXXML(invoice) {
 
   // ExchangedDocument
   const exchangedDoc = root.ele('rsm:ExchangedDocument');
+  const isCreditNote = header.invoice_type === 'credit_note';
+  const isFinalInvoice = header.invoice_type === 'final';
 
   exchangedDoc
     .ele('ram:ID').txt(header.invoice_number.trim()).up()
-    .ele('ram:TypeCode').txt('380').up()
+    .ele('ram:TypeCode')
+    .txt(isCreditNote ? '381' : (header.invoice_type === 'deposit' ? '380' : '380'))
+    .up()
     .ele('ram:IssueDateTime')
       .ele('udt:DateTimeString', { format: '102' })
         .txt(header.issue_date.replace(/-/g, ''))
@@ -291,11 +295,25 @@ function generateFacturXXML(invoice) {
   
   summation.up();
 
-  // InvoiceReferencedDocument
+  // Référence facture originale (obligatoire pour un avoir)
   const refNumber = header.original_invoice_number || invoice.reference_invoice_number;
   const refDate = header.original_invoice_date || invoice.reference_invoice_date;
+  if (isCreditNote) {
+    if (refNumber && refNumber.trim() !== '') {
+      const invoiceRef = settlement.ele('ram:InvoiceReferencedDocument');
+      invoiceRef.ele('ram:IssuerAssignedID').txt(refNumber.trim()).up();
+      if (refDate) {
+        invoiceRef.ele('ram:FormattedIssueDateTime')
+          .ele('qdt:DateTimeString', { format: '102' })
+          .txt(refDate.replace(/-/g, ''))
+          .up()
+        .up();
+      }
+    }
+  }
 
-  if (refNumber && refNumber.trim() !== '') {
+  // InvoiceReferencedDocument
+  if (isFinalInvoice && refNumber && refNumber.trim() !== '') {
     const invoiceRef = settlement.ele('ram:InvoiceReferencedDocument'); 
 
     invoiceRef.ele('ram:IssuerAssignedID').txt(refNumber.trim()).up();
