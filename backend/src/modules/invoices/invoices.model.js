@@ -273,11 +273,13 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
 }
 
 /**
- * Supprime une facture uniquement si elle est en draft
+ * "Supprime" une facture uniquement si elle est en draft
+ * => passe en cancelled au lieu de DELETE
  */
 async function deleteInvoice(id) {
   const result = await pool.query(
-    `DELETE FROM ${SCHEMA}.invoices
+    `UPDATE ${SCHEMA}.invoices
+     SET status = 'cancelled'
      WHERE id = $1 AND status = 'draft'
      RETURNING *`,
     [id]

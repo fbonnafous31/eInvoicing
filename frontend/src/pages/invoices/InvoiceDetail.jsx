@@ -66,7 +66,7 @@ export default function InvoiceDetail() {
     if (!window.confirm("Voulez-vous vraiment supprimer cette facture ?")) return;
 
     try {
-      await invoiceService.deleteInvoice(id); // token géré automatiquement
+      await invoiceService.deleteInvoice(id); 
       alert("Facture supprimée avec succès !");
       navigate("/invoices");
     } catch (err) {
@@ -100,6 +100,7 @@ export default function InvoiceDetail() {
     if (!invoice) return null;
     return {
       id: invoice.id,
+      status: invoice.status,
       technical_status: invoice.technical_status,
       business_status: invoice.business_status,
       header: {

@@ -149,6 +149,19 @@ export default function InvoicesList() {
         expandOnRowClicked
         progressPending={!invoices.length}
         customStyles={datatableStyles}
+
+        // 🔹 Ajout conditionnel pour lignes annulées
+        conditionalRowStyles={[
+          {
+            when: row => row.status === "cancelled",
+            style: {
+              backgroundColor: "#f8f9fa", // gris clair
+              color: "#6c757d",           // texte gris sombre
+              fontStyle: "italic",
+              pointerEvents: "none",       // optionnel : désactive clic si nécessaire
+            }
+          }
+        ]}
       />
     </div>
   );

@@ -67,11 +67,14 @@ import InvoiceTypeTag from '../../components/invoices/InvoiceTypeTag';
           <button
             className="btn btn-sm btn-link p-0 m-0 align-middle text-decoration-none"
             onClick={() => row?.id && navigate(`/invoices/${row.id}`)}
+            // Désactivé si la facture est annulée ou si le statut technique n'est pas "draft" ou "pending" et que le statut métier n'est pas "208"
             disabled={
-              // Désactiver uniquement si ce n'est pas un brouillon/pending et pas business_status 208
-              row.technical_status &&
-              !["draft", "pending"].includes(row.technical_status.toLowerCase()) &&
-              row.business_status !== "208"
+              row.status === "cancelled" ||
+              (
+                row.technical_status &&
+                !["draft", "pending"].includes(row.technical_status.toLowerCase()) &&
+                row.business_status !== "208"
+              )
             }
             title="Modifier la facture"
           >
@@ -322,15 +325,13 @@ import InvoiceTypeTag from '../../components/invoices/InvoiceTypeTag';
         );
       },
     },
-    {
-      name: 'Type',
-      selector: row => row.invoice_type || 'standard',
-      sortable: true,
-      width: '110px',
-      cell: row => (
-        <InvoiceTypeTag type={row.invoice_type || "standard"} />
-      )
-    },    
+{
+  name: 'Type',
+  selector: row => row.invoice_type || 'standard',
+  sortable: true,
+  width: '110px',
+  cell: row => <InvoiceTypeTag type={row.invoice_type || "standard"} status={row.status} />
+},   
     {
       name: 'Référence',
       selector: row => row.invoice_number || '',

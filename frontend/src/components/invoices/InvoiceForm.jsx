@@ -28,7 +28,8 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
       payment_method: initialData?.header?.payment_method || null,
       supply_date: initialData?.header?.supply_date || null,
       original_invoice_number: initialData?.header?.original_invoice_number || null,
-      original_invoice_id: initialData?.header?.original_invoice_id || null // AJOUTER CECI      
+      original_invoice_id: initialData?.header?.original_invoice_id || null,
+      status: initialData?.status || "draft",
     },
     client: {},
     lines: [],
@@ -88,9 +89,10 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
       }
 
       const safeData = {
-        ...initialData,
+        ...initialData,        
         header: {
           ...initialData.header,
+          status: initialData.status,
           original_invoice_id: initialData.header?.original_invoice_id || initialData.original_invoice_id || null,
           original_invoice_number: initialData.header?.original_invoice_number || initialData.original_invoice_number || null,
         },        
@@ -289,6 +291,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
 
       formData.append("invoice", JSON.stringify({
         invoice_number: invoiceData.header.invoice_number,
+        status: invoiceData.header.status,
         issue_date: invoiceData.header.issue_date,
         fiscal_year: invoiceData.header.fiscal_year,
         seller_id: invoiceData.header.seller_id,
@@ -365,6 +368,8 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
     return initialData?.business_status === "208";
   }, [initialData]);
 
+  const isCancelled = invoiceData.header.status === "cancelled"
+
   return (
     <form onSubmit={handleSubmit}>
       {successMessage && <div className="alert alert-success">{successMessage}</div>}
@@ -435,7 +440,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
       </div>
 
       <div className="mt-4 mb-5 d-flex justify-content-end gap-2">
-        {!readOnly && initialData && (
+        {!readOnly && initialData && !isCancelled && (
           <>
             {canEditAttachments ? (
               // Mode suspension : uniquement Annuler / Enregistrer

@@ -20,24 +20,31 @@ const styles = {
     label: "Avoir",
     background: "#f8d7da",
     color: "#721c24",
-  }
+  },
+  cancelled: {
+    label: "⚠️ Annulée",
+    background: "#ffe5b4", 
+    color: "#b36b00",      
+  },
 };
 
-export default function InvoiceTypeTag({ type }) {
-  const config = styles[type] || styles.standard;
+export default function InvoiceTypeTag({ type, status }) {
+  // Si la facture est annulée, on utilise le style cancelled
+  const config = status === "cancelled" ? styles.cancelled : (styles[type] || styles.standard);
 
   return (
     <span
       style={{
         display: "inline-block",
-        width: "80px",          
-        textAlign: "center",    
-        padding: "3px 0",
+        minWidth: "80px",
+        textAlign: "center",
+        padding: "3px 6px",
         borderRadius: "6px",
         fontSize: "12px",
         fontWeight: 500,
         background: config.background,
         color: config.color,
+        whiteSpace: "nowrap", // force à rester sur une ligne
       }}
     >
       {config.label}
