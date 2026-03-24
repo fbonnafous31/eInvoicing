@@ -1,4 +1,4 @@
-# Jour #187 -- Facture d’avoir : référence et Factur-X 📌
+# Jour #188 - Facture d’avoir : référence et Factur-X 📌
 
 ## Un type dédié pour les factures d’avoir 💳
 
