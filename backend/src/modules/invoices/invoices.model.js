@@ -276,15 +276,28 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
  * "Supprime" une facture uniquement si elle est en draft
  * => passe en cancelled au lieu de DELETE
  */
-async function deleteInvoice(id) {
-  const result = await pool.query(
-    `UPDATE ${SCHEMA}.invoices
-     SET status = 'cancelled'
-     WHERE id = $1 AND status = 'draft'
-     RETURNING *`,
-    [id]
-  );
-  return result.rows[0] || null;
+async function deleteInvoice(id, cancelReason = null) {
+  try {
+    const result = await pool.query(
+      `UPDATE invoices
+       SET status = 'cancelled',
+           cancelled_at = NOW(),
+           cancel_reason = $2
+       WHERE id = $1 AND status = 'draft'
+       RETURNING *`,
+      [id, cancelReason]
+    );
+
+    logger.info(
+      { event: "invoice_update", id, cancelReason, rows: result.rows },
+      "InvoicesModel.deleteInvoice updated rows"
+    );
+
+    return result.rows[0] || null;
+  } catch (err) {
+    logger.error({ event: "invoice_update_error", id, cancelReason, err }, "Erreur lors de la mise à jour de la facture");
+    throw err;
+  }
 }
 
 /**

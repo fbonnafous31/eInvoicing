@@ -57,9 +57,14 @@ export function useInvoiceService() {
   );
 
   const deleteInvoice = useCallback(
-    (id) => request(`${API_BASE}/${id}`, { method: "DELETE" }),
+    (id, cancelReason = null) =>
+      request(`${API_BASE}/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cancelReason }),
+      }),
     [request]
-  );
+  );  
 
   const generateInvoicePdf = useCallback(
     (id) =>

@@ -325,13 +325,24 @@ import InvoiceTypeTag from '../../components/invoices/InvoiceTypeTag';
         );
       },
     },
-{
-  name: 'Type',
-  selector: row => row.invoice_type || 'standard',
-  sortable: true,
-  width: '110px',
-  cell: row => <InvoiceTypeTag type={row.invoice_type || "standard"} status={row.status} />
-},   
+    {
+      name: 'Type',
+      selector: row => row.invoice_type || 'standard',
+      sortable: true,
+      width: '110px',
+      cell: row => (
+        <span
+          style={{ pointerEvents: 'auto' }} // ← permet le hover pour le tooltip
+          title={
+            row.status === "cancelled"
+              ? `Annulée : ${row.cancel_reason || "Motif non renseigné"}`
+              : undefined
+          }
+        >
+          <InvoiceTypeTag type={row.invoice_type || "standard"} status={row.status} />
+        </span>
+      )
+    },
     {
       name: 'Référence',
       selector: row => row.invoice_number || '',

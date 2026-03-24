@@ -81,8 +81,10 @@ describe('InvoicesService', () => {
 
   it('deleteInvoice appelle le modèle', async () => {
     InvoicesModel.deleteInvoice.mockResolvedValue(true);
-    const result = await InvoicesService.deleteInvoice(123);
-    expect(InvoicesModel.deleteInvoice).toHaveBeenCalledWith(123);
+
+    const result = await InvoicesService.deleteInvoice(123, null); 
+
+    expect(InvoicesModel.deleteInvoice).toHaveBeenCalledWith(123, null);
     expect(result).toBe(true);
   });
 

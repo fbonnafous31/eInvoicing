@@ -155,10 +155,10 @@ export default function InvoicesList() {
           {
             when: row => row.status === "cancelled",
             style: {
-              backgroundColor: "#f8f9fa", // gris clair
-              color: "#6c757d",           // texte gris sombre
+              backgroundColor: "#f8f9fa", 
+              color: "#6c757d",           
               fontStyle: "italic",
-              pointerEvents: "none",       // optionnel : désactive clic si nécessaire
+              pointerEvents: "none",       
             }
           }
         ]}

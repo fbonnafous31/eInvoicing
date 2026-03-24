@@ -9,7 +9,7 @@ import SupportingDocs from "./SupportingDocs";
 import FormSection from "../form/FormSection";
 import { useSellerService } from '../../services/sellers';
 import { validateInvoiceField, validateClientData } from "../../utils/validators/invoice";
-import { EditButton, CancelButton, DeleteButton, SaveButton } from '@/components/ui/buttons';
+import { EditButton, CancelButton, SaveButton, CancelInvoiceButton } from '@/components/ui/buttons';
 import { useInvoiceService } from "@/services/invoices";
 
 export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly = false }) {
@@ -440,6 +440,7 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
       </div>
 
       <div className="mt-4 mb-5 d-flex justify-content-end gap-2">
+        {/* Si on a déjà une facture */}
         {!readOnly && initialData && !isCancelled && (
           <>
             {canEditAttachments ? (
@@ -452,7 +453,17 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
               !isEditing ? (
                 <>
                   <EditButton onClick={() => setIsEditing(true)}>Modifier</EditButton>
-                  <DeleteButton onClick={onDelete} />
+                  <CancelInvoiceButton
+                    onCancel={async (reason) => {
+                      try {
+                        await onDelete(reason); 
+                        alert("Facture annulée ✅");
+                      } catch (err) {
+                        console.error("Erreur annulation facture :", err);
+                        alert("Impossible d'annuler la facture, réessayez.");
+                      }
+                    }}
+                  />
                 </>
               ) : (
                 <>
@@ -463,8 +474,12 @@ export default function InvoiceForm({ initialData, onDelete = () => {}, readOnly
             ) : null}
           </>
         )}
+
+        {/* Si on crée une nouvelle facture */}
         {!readOnly && !initialData && (
-          <button type="submit" className="btn btn-primary">Créer la facture</button>
+          <button type="submit" className="btn btn-primary">
+            Créer la facture
+          </button>
         )}
       </div>
 

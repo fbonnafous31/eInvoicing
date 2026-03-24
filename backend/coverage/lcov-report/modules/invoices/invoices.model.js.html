@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">8.37% </span>
+                <span class="strong">8.19% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>15/179</span>
+                <span class='fraction'>15/183</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0.75% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>1/132</span>
+                <span class='fraction'>1/133</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">9.31% </span>
+                <span class="strong">9.09% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>15/161</span>
+                <span class='fraction'>15/165</span>
             </div>
         
             
@@ -629,7 +629,20 @@
 <a name='L564'></a><a href='#L564'>564</a>
 <a name='L565'></a><a href='#L565'>565</a>
 <a name='L566'></a><a href='#L566'>566</a>
-<a name='L567'></a><a href='#L567'>567</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">3x</span>
+<a name='L567'></a><a href='#L567'>567</a>
+<a name='L568'></a><a href='#L568'>568</a>
+<a name='L569'></a><a href='#L569'>569</a>
+<a name='L570'></a><a href='#L570'>570</a>
+<a name='L571'></a><a href='#L571'>571</a>
+<a name='L572'></a><a href='#L572'>572</a>
+<a name='L573'></a><a href='#L573'>573</a>
+<a name='L574'></a><a href='#L574'>574</a>
+<a name='L575'></a><a href='#L575'>575</a>
+<a name='L576'></a><a href='#L576'>576</a>
+<a name='L577'></a><a href='#L577'>577</a>
+<a name='L578'></a><a href='#L578'>578</a>
+<a name='L579'></a><a href='#L579'>579</a>
+<a name='L580'></a><a href='#L580'>580</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
@@ -909,6 +922,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -916,6 +933,15 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1473,15 +1499,28 @@ async function <span class="fstat-no" title="function not covered" >createInvoic
  * "Supprime" une facture uniquement si elle est en draft
  * =&gt; passe en cancelled au lieu de DELETE
  */
-async function <span class="fstat-no" title="function not covered" >deleteInvoice(</span>id) {
-  const result = <span class="cstat-no" title="statement not covered" >await pool.query(</span>
-    `UPDATE ${SCHEMA}.invoices
-     SET status = 'cancelled'
-     WHERE id = $1 AND status = 'draft'
-     RETURNING *`,
-    [id]
-  );
-<span class="cstat-no" title="statement not covered" >  return result.rows[0] || null;</span>
+async function <span class="fstat-no" title="function not covered" >deleteInvoice(</span>id, cancelReason = <span class="branch-0 cbranch-no" title="branch not covered" >null)</span> {
+<span class="cstat-no" title="statement not covered" >  try {</span>
+    const result = <span class="cstat-no" title="statement not covered" >await pool.query(</span>
+      `UPDATE invoices
+       SET status = 'cancelled',
+           cancelled_at = NOW(),
+           cancel_reason = $2
+       WHERE id = $1 AND status = 'draft'
+       RETURNING *`,
+      [id, cancelReason]
+    );
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    logger.info(</span>
+      { event: "invoice_update", id, cancelReason, rows: result.rows },
+      "InvoicesModel.deleteInvoice updated rows"
+    );
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    return result.rows[0] || null;</span>
+  } catch (err) {
+<span class="cstat-no" title="statement not covered" >    logger.error({ event: "invoice_update_error", id, cancelReason, err }, "Erreur lors de la mise à jour de la facture");</span>
+<span class="cstat-no" title="statement not covered" >    throw err;</span>
+  }
 }
 &nbsp;
 /**
@@ -1768,7 +1807,7 @@ module.exports = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-24T08:39:08.908Z
+                at 2026-03-24T10:04:49.216Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

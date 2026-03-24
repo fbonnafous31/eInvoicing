@@ -167,11 +167,26 @@ const createInvoice = asyncHandler(async (req, res) => {
  * Supprime une facture par ID
  */
 const deleteInvoice = asyncHandler(async (req, res) => {
-  const deleted = await InvoicesService.deleteInvoice(req.params.id);
-  if (!deleted) {
-    return res.status(400).json({ message: 'Facture non trouvée ou non en draft' });
+  const { id } = req.params;
+  const { cancelReason = null } = req.body;
+
+  req.log.info(`[InvoicesController] deleteInvoice called`, { id, cancelReason });
+
+  try {
+    const deleted = await InvoicesService.deleteInvoice(id, cancelReason);
+
+    if (!deleted) {
+      req.log.warn(`[InvoicesController] Facture non trouvée ou non en draft`, { id });
+      return res.status(400).json({ message: 'Facture non trouvée ou non en draft' });
+    }
+
+    req.log.info(`[InvoicesController] Facture annulée avec succès`, { id, cancelReason });
+    res.status(200).json(deleted);
+
+  } catch (err) {
+    req.log.error(err, `[InvoicesController] Erreur lors de l'annulation de la facture`, { id, cancelReason });
+    res.status(500).json({ message: 'Erreur serveur' });
   }
-  res.status(204).send();
 });
 
 /**

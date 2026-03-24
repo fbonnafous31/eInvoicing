@@ -62,16 +62,16 @@ export default function InvoiceDetail() {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (cancelReason) => {
     if (!window.confirm("Voulez-vous vraiment supprimer cette facture ?")) return;
 
     try {
-      await invoiceService.deleteInvoice(id); 
-      alert("Facture supprimée avec succès !");
+      await invoiceService.deleteInvoice(id, cancelReason); 
+      alert("Facture annulée avec succès ✅");
       navigate("/invoices");
     } catch (err) {
-      console.error("Erreur delete invoice:", err);
-      alert(err.message || "Erreur lors de la suppression de la facture");
+      console.error("Erreur annulation facture:", err);
+      alert(err.message || "Impossible d'annuler la facture");
     }
   };
 

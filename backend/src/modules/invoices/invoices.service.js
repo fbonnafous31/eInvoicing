@@ -60,10 +60,28 @@ async function updateInvoice(id, data) {
   return { ...updatedInvoice, facturxPath: xmlPath, pdfPath: pdfA3Path };
 }
 
-async function deleteInvoice(id) {
-  return await InvoicesModel.deleteInvoice(id);
+async function deleteInvoice(id, cancelReason = null) {
+  logger.info({ event: "delete_invoice_called", id, cancelReason }, "InvoicesService.deleteInvoice called");
+
+  try {
+    const deleted = await InvoicesModel.deleteInvoice(id, cancelReason);
+
+    logger.info(
+      { event: "delete_invoice_result", id, cancelReason, deleted },
+      "InvoicesService.deleteInvoice result"
+    );
+
+    return deleted;
+  } catch (err) {
+    logger.error(
+      { event: "delete_invoice_error", id, cancelReason, err },
+      "InvoicesService.deleteInvoice failed"
+    );
+    throw err;
+  }
 }
 
+module.exports = { deleteInvoice };
 async function getInvoicesBySeller(sellerId) {
   return await InvoicesModel.getInvoicesBySeller(sellerId);
 }
