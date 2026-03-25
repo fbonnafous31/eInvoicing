@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">89.47% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/19</span>
+                <span class='fraction'>17/19</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">83.33% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/6</span>
+                <span class='fraction'>5/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">66.66% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/3</span>
+                <span class='fraction'>2/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">89.47% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/19</span>
+                <span class='fraction'>17/19</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -131,40 +131,40 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -191,41 +191,41 @@ import SellerForm from '../sellers/SellerForm';
 import Breadcrumb from '../../components/layout/Breadcrumb';
 import { useSellerService } from '../../services/sellers'; // &lt;-- hook
 &nbsp;
-export default function <span class="fstat-no" title="function not covered" >NewSeller() {</span>
-  const navigate = <span class="cstat-no" title="statement not covered" >useNavigate();</span>
-  const [successMessage, setSuccessMessage] = <span class="cstat-no" title="statement not covered" >useState('');</span>
-  const [errorMessage, setErrorMessage] = <span class="cstat-no" title="statement not covered" >useState('');</span>
-  const [isSubmitting, setIsSubmitting] = <span class="cstat-no" title="statement not covered" >useState(false);</span>
+export default function NewSeller() {
+  const navigate = useNavigate();
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 &nbsp;
-  const { createSeller } = <span class="cstat-no" title="statement not covered" >useSellerService(); // ← destructuring depuis le hook</span>
+  const { createSeller } = useSellerService(); // ← destructuring depuis le hook
 &nbsp;
-  const handleCreateSeller = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >async (f</span>ormData) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    setIsSubmitting(true);</span>
-<span class="cstat-no" title="statement not covered" >    setErrorMessage('');</span>
-<span class="cstat-no" title="statement not covered" >    try {</span>
-<span class="cstat-no" title="statement not covered" >      await createSeller(formData); </span>
+  const handleCreateSeller = async (formData) =&gt; {
+    setIsSubmitting(true);
+    setErrorMessage('');
+    try {
+      await createSeller(formData); 
 &nbsp;
-<span class="cstat-no" title="statement not covered" >      setSuccessMessage("Vendeur créé avec succès ! 🎉");</span>
-<span class="cstat-no" title="statement not covered" >      window.scrollTo({ top: 0, behavior: "smooth" }); </span>
+      setSuccessMessage("Vendeur créé avec succès ! 🎉");
+      window.scrollTo({ top: 0, behavior: "smooth" }); 
 &nbsp;
-<span class="cstat-no" title="statement not covered" >      setTimeout(<span class="fstat-no" title="function not covered" >() =&gt; {</span></span>
+      setTimeout(<span class="fstat-no" title="function not covered" >() =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >        setSuccessMessage('');</span>
 <span class="cstat-no" title="statement not covered" >        navigate('/');</span>
       }, 2000);
     } catch (error) {
-<span class="cstat-no" title="statement not covered" >      setErrorMessage(error.message || "Erreur lors de la création du vendeur");</span>
+      setErrorMessage(error.message || <span class="branch-1 cbranch-no" title="branch not covered" >"Erreur lors de la création du vendeur")</span>;
     } finally {
-<span class="cstat-no" title="statement not covered" >      setIsSubmitting(false);</span>
+      setIsSubmitting(false);
     }
   };
 &nbsp;
-  const breadcrumbItems = <span class="cstat-no" title="statement not covered" >[</span>
+  const breadcrumbItems = [
     { label: 'Accueil', path: '/' },
     { label: 'Vendeurs', path: '/sellers' },
     { label: 'Nouveau vendeur', path: '/sellers/new' },
   ];
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return (</span>
+  return (
     &lt;div className="container mt-4"&gt;
       &lt;h1 className="visually-hidden"&gt;Créer un nouveau vendeur&lt;/h1&gt;
 &nbsp;
@@ -253,7 +253,7 @@ export default function <span class="fstat-no" title="function not covered" >New
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-06T14:54:24.953Z
+                at 2026-03-25T11:30:41.303Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

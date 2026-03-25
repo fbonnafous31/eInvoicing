@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/20</span>
+                <span class='fraction'>20/20</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/6</span>
+                <span class='fraction'>3/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/4</span>
+                <span class='fraction'>4/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/17</span>
+                <span class='fraction'>17/17</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -100,67 +100,67 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { useState, useEffect } from "react";
 import { useClientService } from '@/services/clients';
 &nbsp;
-export default function <span class="fstat-no" title="function not covered" >useClients(</span>) {
-  const { fetchClients } = <span class="cstat-no" title="statement not covered" >useClientService();</span>
-  const [clients, setClients] = <span class="cstat-no" title="statement not covered" >useState([]);</span>
-  const [loading, setLoading] = <span class="cstat-no" title="statement not covered" >useState(true);</span>
-  const [error, setError] = <span class="cstat-no" title="statement not covered" >useState(null);</span>
+export default function useClients() {
+  const { fetchClients } = useClientService();
+  const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  useEffect(<span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
-    let isMounted = <span class="cstat-no" title="statement not covered" >true;</span>
+  useEffect(() =&gt; {
+    let isMounted = true;
 &nbsp;
-    const loadClients = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >async </span>() =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >      try {</span>
-        const data = <span class="cstat-no" title="statement not covered" >await fetchClients(); </span>
-<span class="cstat-no" title="statement not covered" >        if (isMounted) <span class="cstat-no" title="statement not covered" >setClients(data);</span></span>
+    const loadClients = async () =&gt; {
+      try {
+        const data = await fetchClients(); 
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (isMounted) setClients(data);
       } catch (err) {
-<span class="cstat-no" title="statement not covered" >        console.error(err);</span>
-<span class="cstat-no" title="statement not covered" >        if (isMounted) <span class="cstat-no" title="statement not covered" >setError("Erreur lors du chargement des clients");</span></span>
+        console.error(err);
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (isMounted) setError("Erreur lors du chargement des clients");
       } finally {
-<span class="cstat-no" title="statement not covered" >        if (isMounted) <span class="cstat-no" title="statement not covered" >setLoading(false);</span></span>
+        <span class="missing-if-branch" title="else path not taken" >E</span>if (isMounted) setLoading(false);
       }
     };
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    loadClients();</span>
+    loadClients();
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    return <span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >      isMounted = false;</span>
+    return () =&gt; {
+      isMounted = false;
     };
   }, [fetchClients]);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return { clients, loading, error };</span>
+  return { clients, loading, error };
 }
 &nbsp;</pre></td></tr></table></pre>
 
@@ -169,7 +169,7 @@ export default function <span class="fstat-no" title="function not covered" >use
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-06T14:54:24.953Z
+                at 2026-03-25T11:30:41.303Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

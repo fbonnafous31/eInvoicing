@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/4</span>
+                <span class='fraction'>4/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">96.42% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/27</span>
+                <span class='fraction'>27/28</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/3</span>
+                <span class='fraction'>3/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/4</span>
+                <span class='fraction'>4/4</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -109,8 +109,7 @@
 <a name='L44'></a><a href='#L44'>44</a>
 <a name='L45'></a><a href='#L45'>45</a>
 <a name='L46'></a><a href='#L46'>46</a>
-<a name='L47'></a><a href='#L47'>47</a>
-<a name='L48'></a><a href='#L48'>48</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L47'></a><a href='#L47'>47</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -127,11 +126,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">356x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">356x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -144,8 +141,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -157,27 +155,26 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import React from "react";
-&nbsp;
-export default function <span class="fstat-no" title="function not covered" >InputField({</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">export default function InputField({
   id,
   name,
   label,
-  type = <span class="branch-0 cbranch-no" title="branch not covered" >"text",</span>
+  type = "text",
   value,
   onChange,
   onBlur,
-  touched = <span class="branch-0 cbranch-no" title="branch not covered" >false,</span>
-  required = <span class="branch-0 cbranch-no" title="branch not covered" >false,</span>
-  error = <span class="branch-0 cbranch-no" title="branch not covered" >"",</span>
-  submitted = <span class="branch-0 cbranch-no" title="branch not covered" >false,</span>
-  hideLabel = <span class="branch-0 cbranch-no" title="branch not covered" >false,</span>
+  touched = false,
+  required = false,
+  error = "",
+  submitted = false,
+  hideLabel = false,
+  helpText = "",
+  maxLength,
   ...props
 }) {
-  // Détermination si le champ est en erreur
-  const hasError = <span class="cstat-no" title="statement not covered" >Boolean(error) || (required &amp;&amp; (touched || submitted) &amp;&amp; !value);</span>
+  const hasError = Boolean(error) || (required &amp;&amp; (touched || submitted) &amp;&amp; !value);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return (</span>
+  return (
     &lt;div className="mb-3"&gt;
       {!hideLabel &amp;&amp; (
         &lt;label htmlFor={id || name} className="form-label"&gt;
@@ -190,9 +187,10 @@ export default function <span class="fstat-no" title="function not covered" >Inp
         id={id || name}
         name={name}
         className={`form-control ${hasError ? "is-invalid" : ""}`}
-        value={value ?? ""}
-        onChange={<span class="fstat-no" title="function not covered" >(e</span>) =&gt; <span class="cstat-no" title="statement not covered" >onChange?.(e.target.value)}</span>
-        onBlur={<span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >o</span>nBlur?.(name)}</span>
+        value={value ?? <span class="branch-1 cbranch-no" title="branch not covered" >""}</span>
+        onChange={(e) =&gt; onChange?.(e.target.value)}
+        onBlur={() =&gt; onBlur?.(name)}
+        maxLength={maxLength}    
         {...props}
       /&gt;
 &nbsp;
@@ -203,15 +201,14 @@ export default function <span class="fstat-no" title="function not covered" >Inp
       )}
     &lt;/div&gt;
   );
-}
-&nbsp;</pre></td></tr></table></pre>
+}</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-06T14:54:24.953Z
+                at 2026-03-25T11:30:41.303Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

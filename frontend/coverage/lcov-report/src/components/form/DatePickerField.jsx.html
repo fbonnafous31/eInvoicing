@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">57.14% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/14</span>
+                <span class='fraction'>8/14</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">60% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/10</span>
+                <span class='fraction'>6/10</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">66.66% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/3</span>
+                <span class='fraction'>2/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">53.84% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/13</span>
+                <span class='fraction'>7/13</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -123,11 +123,23 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">15x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">37x</span>
+<span class="cline-any cline-yes">37x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">37x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -135,20 +147,8 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">37x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -176,19 +176,19 @@ import 'react-datepicker/dist/react-datepicker.css';
 import './DatePickerField.css'; // Pour les styles custom
 &nbsp;
 // Enregistre la locale 'fr' pour l'utiliser dans le date-picker
-<span class="cstat-no" title="statement not covered" >registerLocale('fr', fr);</span>
+registerLocale('fr', fr);
 &nbsp;
-export function <span class="fstat-no" title="function not covered" >DatePickerField({</span> id, label, value, onChange, onBlur, error, required, disabled }) {
+export function DatePickerField({ id, label, value, onChange, onBlur, error, required, disabled }) {
   // Pour éviter les soucis de fuseau horaire, on parse la date 'YYYY-MM-DD' manuellement.
   // new Date('2023-10-27') est interprété comme UTC, ce qui peut changer le jour.
-  const <span class="cstat-no" title="statement not covered" >selectedDate = (<span class="fstat-no" title="function not covered" >() =&gt; {</span></span>
-<span class="cstat-no" title="statement not covered" >    if (!value) <span class="cstat-no" title="statement not covered" >return null;</span></span>
-    const parts = <span class="cstat-no" title="statement not covered" >value.split('-');</span>
+  const selectedDate = (() =&gt; {
+    if (!value) return null;
+    const parts = value.split('-');
     // new Date(year, monthIndex, day) crée une date dans le fuseau horaire local.
-<span class="cstat-no" title="statement not covered" >    return new Date(parts[0], parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));</span>
+    return new Date(parts[0], parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
   })();
 &nbsp;
-  const handleChange = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(d</span>ate) =&gt; {</span>
+  const handleChange = <span class="fstat-no" title="function not covered" >(d</span>ate) =&gt; {
     // Le date-picker retourne un objet Date. On le formate en 'YYYY-MM-DD' pour le state parent.
 <span class="cstat-no" title="statement not covered" >    if (date) {</span>
       // On utilise les getters qui respectent le fuseau horaire local.
@@ -201,7 +201,7 @@ export function <span class="fstat-no" title="function not covered" >DatePickerF
     }
   };
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return (</span>
+  return (
     &lt;div className="mb-3"&gt;
       &lt;label htmlFor={id} className="form-label"&gt;
         {label} {required &amp;&amp; &lt;span className="required"&gt;*&lt;/span&gt;}
@@ -213,12 +213,12 @@ export function <span class="fstat-no" title="function not covered" >DatePickerF
         onBlur={onBlur}
         dateFormat="dd/MM/yyyy"
         locale="fr"
-        className={`form-control ${error ? 'is-invalid' : ''}`}
+        className={`form-control ${error ? <span class="branch-0 cbranch-no" title="branch not covered" >'is-invalid' : '</span>'}`}
         placeholderText="jj/mm/aaaa"
         disabled={disabled}
         autoComplete="off"
       /&gt;
-      {error &amp;&amp; &lt;div className="invalid-feedback"&gt;{error}&lt;/div&gt;}
+      {error &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >&lt;div className="invalid-feedback"&gt;{error}&lt;/div&gt;}</span>
     &lt;/div&gt;
   );
 }
@@ -229,7 +229,7 @@ export function <span class="fstat-no" title="function not covered" >DatePickerF
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-06T14:54:24.953Z
+                at 2026-03-25T11:30:41.303Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

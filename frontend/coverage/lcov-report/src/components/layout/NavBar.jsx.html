@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">66.66% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/5</span>
+                <span class='fraction'>4/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">36.36% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/8</span>
+                <span class='fraction'>4/11</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">33.33% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/3</span>
+                <span class='fraction'>1/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">66.66% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/5</span>
+                <span class='fraction'>4/6</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -188,7 +188,12 @@
 <a name='L123'></a><a href='#L123'>123</a>
 <a name='L124'></a><a href='#L124'>124</a>
 <a name='L125'></a><a href='#L125'>125</a>
-<a name='L126'></a><a href='#L126'>126</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L126'></a><a href='#L126'>126</a>
+<a name='L127'></a><a href='#L127'>127</a>
+<a name='L128'></a><a href='#L128'>128</a>
+<a name='L129'></a><a href='#L129'>129</a>
+<a name='L130'></a><a href='#L130'>130</a>
+<a name='L131'></a><a href='#L131'>131</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -196,12 +201,17 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -318,15 +328,20 @@ import React from "react";
 import { Link, NavLink } from "react-router-dom";
 import { FaUserTie, FaUsers, FaFileInvoice } from "react-icons/fa";
 import { useAuth0 } from "@auth0/auth0-react";
+import { getEnv } from "@/utils/getEnv";
 import "./NavBar.css";
 &nbsp;
-export default function <span class="fstat-no" title="function not covered" >NavBar() {</span>
-  const { isAuthenticated, loginWithRedirect, logout, user } = <span class="cstat-no" title="statement not covered" >useAuth0();</span>
-  const logoutUrl = <span class="cstat-no" title="statement not covered" >import.meta.env.PROD</span>
-    ? (window.__ENV__.VITE_APP_URL || window.location.origin) + "/login"
-    : "http://localhost:5173/login";  
+export default function NavBar() {
+  const { isAuthenticated, loginWithRedirect, logout, user } = useAuth0();
+  const env = getEnv();
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return (</span>
+  // URL de retour après logout
+  const logoutUrl =
+    env.VITE_APP_ENV === "docker-local" || import.meta.env.DEV || <span class="branch-2 cbranch-no" title="branch not covered" >window.location.hostname === "localhost"</span>
+      ? "http://localhost:5173/login"
+      : <span class="branch-1 cbranch-no" title="branch not covered" >`${env.VITE_APP_URL || window.location.origin}/login`;</span>
+&nbsp;
+  return (
     &lt;nav className="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm"&gt;
       &lt;div className="container-fluid"&gt;
         {/* Marque */}
@@ -409,7 +424,7 @@ export default function <span class="fstat-no" title="function not covered" >Nav
           {/* Login / Logout */}
           &lt;ul className="navbar-nav ms-auto"&gt;
             {isAuthenticated ? (
-              &lt;&gt;
+<span class="branch-0 cbranch-no" title="branch not covered" >              &lt;&gt;</span>
                 &lt;li className="nav-item d-flex align-items-center me-3 text-white"&gt;
                   {user?.name || user?.email}
                 &lt;/li&gt;
@@ -445,7 +460,7 @@ export default function <span class="fstat-no" title="function not covered" >Nav
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-06T14:54:24.953Z
+                at 2026-03-25T11:30:41.303Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

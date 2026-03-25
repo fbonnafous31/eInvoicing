@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/9</span>
+                <span class='fraction'>9/9</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">75% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/20</span>
+                <span class='fraction'>15/20</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/3</span>
+                <span class='fraction'>3/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/8</span>
+                <span class='fraction'>8/8</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -113,29 +113,29 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -158,30 +158,30 @@
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import React, { useState, useEffect } from "react";
 import { BUSINESS_STATUSES } from '../../constants/businessStatuses';
 &nbsp;
-export default function <span class="fstat-no" title="function not covered" >BusinessStatusCell({</span> row, getStatusComment }) {
-  const [status, setStatus] = <span class="cstat-no" title="statement not covered" >useState({</span>
-    code: row.business_status || 100,
-    label: BUSINESS_STATUSES[row.business_status || 100]?.label || 'Non renseigné',
+export default function BusinessStatusCell({ row, getStatusComment }) {
+  const [status, setStatus] = useState({
+    code: row.business_status || <span class="branch-1 cbranch-no" title="branch not covered" >100,</span>
+    label: BUSINESS_STATUSES[row.business_status || <span class="branch-1 cbranch-no" title="branch not covered" >100]</span>?.label || 'Non renseigné',
   });
 &nbsp;
-  const [comment, setComment] = <span class="cstat-no" title="statement not covered" >useState(null);</span>
+  const [comment, setComment] = useState(null);
 &nbsp;
   // Sync status si row.business_status change
-<span class="cstat-no" title="statement not covered" >  useEffect(<span class="fstat-no" title="function not covered" >() =&gt; {</span></span>
-<span class="cstat-no" title="statement not covered" >    setStatus({</span>
-      code: row.business_status || 100,
-      label: BUSINESS_STATUSES[row.business_status || 100]?.label || 'Non renseigné',
+  useEffect(() =&gt; {
+    setStatus({
+      code: row.business_status || <span class="branch-1 cbranch-no" title="branch not covered" >100,</span>
+      label: BUSINESS_STATUSES[row.business_status || <span class="branch-1 cbranch-no" title="branch not covered" >100]</span>?.label || 'Non renseigné',
     });
 &nbsp;
     // On récupère le commentaire si la fonction est passée
-<span class="cstat-no" title="statement not covered" >    if (getStatusComment) {</span>
-<span class="cstat-no" title="statement not covered" >      getStatusComment().then(<span class="fstat-no" title="function not covered" >c =&gt; <span class="cstat-no" title="statement not covered" >s</span>etComment(c))</span>;</span>
+    if (getStatusComment) {
+      getStatusComment().then(c =&gt; setComment(c));
     }
   }, [row.business_status, getStatusComment]);
 &nbsp;
-  const bgColor = <span class="cstat-no" title="statement not covered" >BUSINESS_STATUSES[status.code]?.color || 'gray';</span>
+  const bgColor = BUSINESS_STATUSES[status.code]?.color || 'gray';
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return (</span>
+  return (
     &lt;div style={{ textAlign: "center" }}&gt;
       &lt;span
         style={{
@@ -192,7 +192,7 @@ export default function <span class="fstat-no" title="function not covered" >Bus
           color: 'white',
           fontWeight: 500,
           fontSize: "0.85em",
-          cursor: row.submission_id ? 'pointer' : 'default',
+          cursor: row.submission_id ? <span class="branch-0 cbranch-no" title="branch not covered" >'pointer' : '</span>default',
         }}
         title={comment || status.label} // affiche le commentaire si existant
       &gt;
@@ -208,7 +208,7 @@ export default function <span class="fstat-no" title="function not covered" >Bus
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-06T14:54:24.953Z
+                at 2026-03-25T11:30:41.303Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/5</span>
+                <span class='fraction'>5/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">90% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/20</span>
+                <span class='fraction'>18/20</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/4</span>
+                <span class='fraction'>4/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/5</span>
+                <span class='fraction'>5/5</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -127,26 +127,26 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">114x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">114x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6645x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -161,7 +161,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import React from "react";
 &nbsp;
-export default function <span class="fstat-no" title="function not covered" >SelectField({</span>
+export default function SelectField({
   label,
   name,
   value,
@@ -169,17 +169,17 @@ export default function <span class="fstat-no" title="function not covered" >Sel
   onBlur,
   touched,      // ✅ vient du hook
   options = <span class="branch-0 cbranch-no" title="branch not covered" >[],</span>
-  required = <span class="branch-0 cbranch-no" title="branch not covered" >false,</span>
+  required = false,
   error,
-  submitted = <span class="branch-0 cbranch-no" title="branch not covered" >false,</span>
+  submitted = false,
   ...props
 }) {
   const hasError =
-    (<span class="cstat-no" title="statement not covered" >required &amp;&amp; touched &amp;&amp; !value) ||</span>
-    (required &amp;&amp; submitted &amp;&amp; !value) ||
+    (required &amp;&amp; touched &amp;&amp; !value) ||
+    (required &amp;&amp; submitted &amp;&amp; <span class="branch-5 cbranch-no" title="branch not covered" >!value) ||</span>
     Boolean(error);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return (</span>
+  return (
     &lt;div className="mb-3"&gt;
       &lt;label className="form-label"&gt;
         {label} {required &amp;&amp; "*"}
@@ -188,13 +188,13 @@ export default function <span class="fstat-no" title="function not covered" >Sel
         name={name}
         className={`form-control ${hasError ? "is-invalid" : ""}`}
         value={value || ""}
-        onChange={<span class="fstat-no" title="function not covered" >(e</span>) =&gt; <span class="cstat-no" title="statement not covered" >onChange?.(e.target.value)}  </span>
-        onBlur={<span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >o</span>nBlur?.(name)}   // appelle handleBlur(field) du hook</span>
+        onChange={(e) =&gt; onChange?.(e.target.value)}  
+        onBlur={() =&gt; onBlur?.(name)}   // appelle handleBlur(field) du hook
         {...props}
       &gt;
         &lt;option value=""&gt;-- Sélectionner --&lt;/option&gt;
-        {options.map(<span class="fstat-no" title="function not covered" >(o</span>pt) =&gt; (
-<span class="cstat-no" title="statement not covered" >          &lt;option key={opt.value} value={opt.value}&gt;</span>
+        {options.map((opt) =&gt; (
+          &lt;option key={opt.value} value={opt.value}&gt;
             {opt.label}
           &lt;/option&gt;
         ))}
@@ -214,7 +214,7 @@ export default function <span class="fstat-no" title="function not covered" >Sel
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-06T14:54:24.953Z
+                at 2026-03-25T11:30:41.303Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

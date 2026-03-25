@@ -12,7 +12,7 @@
     "start:all": "concurrently -k -n \"BACKEND,FRONTEND\" -c \"cyan,green\" \"cd ../backend && node server.js\" \"npm run dev\"",
     "start:full": "npm run start:db && npm run start:all",
     "test": "vitest run",
-    "test:dev": "vitest"
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.4.0",

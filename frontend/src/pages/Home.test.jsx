@@ -53,4 +53,16 @@ describe('Home page', () => {
     fireEvent.click(button);
     expect(mockNavigate).toHaveBeenCalledWith('/sellers/new');
   });
+
+  it('affiche un message vide si seller existe mais aucune facture', async () => {
+    useNavigate.mockReturnValue(vi.fn());
+    useSellerService.mockReturnValue({ fetchMySeller: async () => ({ id: 1 }) });
+    useInvoiceService.mockReturnValue({ fetchInvoicesBySeller: async () => [] });
+
+    render(<Home />);
+    await new Promise(r => setTimeout(r, 0));
+
+    expect(screen.getByText(/Tableau de bord/)).toBeDefined();
+    expect(screen.getByText(/Top 5 clients/)).toBeDefined();
+  });  
 });

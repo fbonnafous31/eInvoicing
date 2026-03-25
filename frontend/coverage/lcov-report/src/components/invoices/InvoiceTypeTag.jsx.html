@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/pages/sellers/SellersPage.jsx</title>
+    <title>Code coverage report for src/components/invoices/InvoiceTypeTag.jsx</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../../prettify.css" />
     <link rel="stylesheet" href="../../../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../../index.html">All files</a> / <a href="index.html">src/pages/sellers</a> SellersPage.jsx</h1>
+        <h1><a href="../../../index.html">All files</a> / <a href="index.html">src/components/invoices</a> InvoiceTypeTag.jsx</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/17</span>
+                <span class='fraction'>3/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/2</span>
+                <span class='fraction'>2/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/5</span>
+                <span class='fraction'>1/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/16</span>
+                <span class='fraction'>3/3</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -113,40 +113,11 @@
 <a name='L48'></a><a href='#L48'>48</a>
 <a name='L49'></a><a href='#L49'>49</a>
 <a name='L50'></a><a href='#L50'>50</a>
-<a name='L51'></a><a href='#L51'>51</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -163,64 +134,99 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// frontend/src/pages/SellersPage.jsx
-import React, { useState, useEffect } from 'react';
-import SellersList from '../modules/sellers/SellersList';
-import SellerForm from '../modules/sellers/SellerForm';
-import { fetchSellers, createSeller } from '../services/sellers';
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import React from "react";
 &nbsp;
-export default function <span class="fstat-no" title="function not covered" >SellersPage() {</span>
-  const [sellers, setSellers] = <span class="cstat-no" title="statement not covered" >useState([]);</span>
-  const [errorMessage, setErrorMessage] = <span class="cstat-no" title="statement not covered" >useState('');</span>
+const styles = {
+  standard: {
+    label: "Facture",
+    background: "#e9ecef",
+    color: "#333",
+  },
+  deposit: {
+    label: "Acompte",
+    background: "#fff3cd",
+    color: "#856404",
+  },
+  final: {
+    label: "Solde",
+    background: "#d4edda",
+    color: "#155724",
+  },
+  credit_note: {
+    label: "Avoir",
+    background: "#f8d7da",
+    color: "#721c24",
+  },
+  cancelled: {
+    label: "⚠️ Annulée",
+    background: "#ffe5b4", 
+    color: "#b36b00",      
+  },
+};
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  useEffect(<span class="fstat-no" title="function not covered" >() =&gt; {</span></span>
-    async function <span class="fstat-no" title="function not covered" >loadSellers() {</span>
-<span class="cstat-no" title="statement not covered" >      try {</span>
-        const data = <span class="cstat-no" title="statement not covered" >await fetchSellers();</span>
-<span class="cstat-no" title="statement not covered" >        setSellers(data);</span>
-      } catch (err) {
-<span class="cstat-no" title="statement not covered" >        console.error(err);</span>
-<span class="cstat-no" title="statement not covered" >        setErrorMessage('Erreur lors du chargement des vendeurs');</span>
-      }
-    }
-<span class="cstat-no" title="statement not covered" >    loadSellers();</span>
-  }, []);
+export default function InvoiceTypeTag({ type, status }) {
+  // Si la facture est annulée, on utilise le style cancelled
+  const config = status === "cancelled" ? <span class="branch-0 cbranch-no" title="branch not covered" >styles.cancelled : (s</span>tyles[type] || <span class="branch-1 cbranch-no" title="branch not covered" >styles.standard);</span>
 &nbsp;
-  const handleSellerCreated = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >async (f</span>ormData) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    try {</span>
-      const newSeller = <span class="cstat-no" title="statement not covered" >await createSeller(formData);</span>
-<span class="cstat-no" title="statement not covered" >      setSellers(<span class="fstat-no" title="function not covered" >prev =&gt; <span class="cstat-no" title="statement not covered" >[</span>newSeller, ...prev])</span>;</span>
-    } catch (err) {
-<span class="cstat-no" title="statement not covered" >      console.error(err);</span>
-<span class="cstat-no" title="statement not covered" >      setErrorMessage('Erreur lors de la création du vendeur');</span>
-    }
-  };
-&nbsp;
-<span class="cstat-no" title="statement not covered" >  return (</span>
-    &lt;div className="container-fluid mt-4"&gt;
-      {errorMessage &amp;&amp; (
-        &lt;div className="alert alert-danger" role="alert"&gt;
-          {errorMessage}
-        &lt;/div&gt;
-      )}
-      &lt;h2&gt;Créer un vendeur&lt;/h2&gt;
-      &lt;SellerForm onSubmit={handleSellerCreated} /&gt;
-&nbsp;
-      &lt;hr /&gt;
-&nbsp;
-      &lt;h2&gt;Liste des vendeurs&lt;/h2&gt;
-      &lt;SellersList sellers={sellers} /&gt;
-    &lt;/div&gt;
+  return (
+    &lt;span
+      style={{
+        display: "inline-block",
+        minWidth: "80px",
+        textAlign: "center",
+        padding: "3px 6px",
+        borderRadius: "6px",
+        fontSize: "12px",
+        fontWeight: 500,
+        background: config.background,
+        color: config.color,
+        whiteSpace: "nowrap", // force à rester sur une ligne
+      }}
+    &gt;
+      {config.label}
+    &lt;/span&gt;
   );
-}
-&nbsp;</pre></td></tr></table></pre>
+}</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-06T14:54:24.953Z
+                at 2026-03-25T11:30:41.303Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

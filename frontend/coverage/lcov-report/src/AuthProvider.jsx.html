@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">81.81% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/12</span>
+                <span class='fraction'>9/11</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">57.14% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/10</span>
+                <span class='fraction'>4/7</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/2</span>
+                <span class='fraction'>1/2</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">81.81% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/12</span>
+                <span class='fraction'>9/11</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -102,38 +102,28 @@
 <a name='L37'></a><a href='#L37'>37</a>
 <a name='L38'></a><a href='#L38'>38</a>
 <a name='L39'></a><a href='#L39'>39</a>
-<a name='L40'></a><a href='#L40'>40</a>
-<a name='L41'></a><a href='#L41'>41</a>
-<a name='L42'></a><a href='#L42'>42</a>
-<a name='L43'></a><a href='#L43'>43</a>
-<a name='L44'></a><a href='#L44'>44</a>
-<a name='L45'></a><a href='#L45'>45</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L40'></a><a href='#L40'>40</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -151,43 +141,38 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// frontend/src/AuthProvider.jsx
-import React from "react";
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import React from "react";
 import { Auth0Provider } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
+import { getEnv } from "./utils/getEnv";
 &nbsp;
-const AuthProvider = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >({</span> children }) =&gt; {</span>
-  const navigate = <span class="cstat-no" title="statement not covered" >useNavigate();</span>
+const AuthProvider = ({ children }) =&gt; {
+  const navigate = useNavigate();
 &nbsp;
-  const onRedirectCallback = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(a</span>ppState) =&gt; {</span>
+  const onRedirectCallback = <span class="fstat-no" title="function not covered" >(a</span>ppState) =&gt; {
 <span class="cstat-no" title="statement not covered" >    navigate(appState?.returnTo || "/");</span>
   };
 &nbsp;
-  // Récupère les variables selon l'environnement
-  const env = <span class="cstat-no" title="statement not covered" >import.meta.env.DEV</span>
-    ? import.meta.env            // dev → .env Vite
-    : window.__ENV__ || {};      // prod → config.js injecté par Nginx
+  const env = getEnv();
+  const domain = env.VITE_AUTH0_DOMAIN;
+  const clientId = env.VITE_AUTH0_CLIENT_ID;
+  const audience = env.VITE_AUTH0_AUDIENCE;
 &nbsp;
-  const domain = <span class="cstat-no" title="statement not covered" >env.VITE_AUTH0_DOMAIN;</span>
-  const clientId = <span class="cstat-no" title="statement not covered" >env.VITE_AUTH0_CLIENT_ID;</span>
-  const audience = <span class="cstat-no" title="statement not covered" >env.VITE_AUTH0_AUDIENCE;</span>
-&nbsp;
-<span class="cstat-no" title="statement not covered" >  if (!domain || !clientId) {</span>
-<span class="cstat-no" title="statement not covered" >    console.error("Auth0 variables are missing!", env);</span>
-<span class="cstat-no" title="statement not covered" >    return null; // stoppe le rendu si les variables manquent</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (!domain || !clientId || !audience) {
+<span class="cstat-no" title="statement not covered" >    return null; </span>
   }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return (</span>
+  return (
     &lt;Auth0Provider
       domain={domain}
       clientId={clientId}
       authorizationParams={{
-        redirect_uri: window.location.origin
+        redirect_uri: window.location.origin,
+        audience,
       }}
       onRedirectCallback={onRedirectCallback}
       cacheLocation="memory"
       useRefreshTokens={false}
-      audience={audience}
     &gt;
       {children}
     &lt;/Auth0Provider&gt;
@@ -202,7 +187,7 @@ export default AuthProvider;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-06T14:54:24.953Z
+                at 2026-03-25T11:30:41.303Z
             </div>
         <script src="../prettify.js"></script>
         <script>
