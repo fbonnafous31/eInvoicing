@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">89.47% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/19</span>
+                <span class='fraction'>17/19</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/4</span>
+                <span class='fraction'>4/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">66.66% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/3</span>
+                <span class='fraction'>2/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">89.47% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/19</span>
+                <span class='fraction'>17/19</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -134,40 +134,40 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -197,41 +197,41 @@ import ClientForm from '../clients/ClientForm';
 import Breadcrumb from '../../components/layout/Breadcrumb';
 import { useClientService } from "@/services/clients";
 &nbsp;
-export default function <span class="fstat-no" title="function not covered" >NewClient() {</span>
-  const navigate = <span class="cstat-no" title="statement not covered" >useNavigate();</span>
-  const [successMessage, setSuccessMessage] = <span class="cstat-no" title="statement not covered" >useState('');</span>
-  const [errorMessage, setErrorMessage] = <span class="cstat-no" title="statement not covered" >useState('');</span>
-  const [isSubmitting, setIsSubmitting] = <span class="cstat-no" title="statement not covered" >useState(false);</span>
+export default function NewClient() {
+  const navigate = useNavigate();
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 &nbsp;
-  const { createClient } = <span class="cstat-no" title="statement not covered" >useClientService();</span>
-  const handleCreateClient = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >async (f</span>ormData) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    setIsSubmitting(true);</span>
-<span class="cstat-no" title="statement not covered" >    setErrorMessage('');</span>
+  const { createClient } = useClientService();
+  const handleCreateClient = async (formData) =&gt; {
+    setIsSubmitting(true);
+    setErrorMessage('');
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    try {</span>
-<span class="cstat-no" title="statement not covered" >      await createClient(formData); </span>
+    try {
+      await createClient(formData); 
 &nbsp;
-<span class="cstat-no" title="statement not covered" >      setSuccessMessage("Client créé avec succès ! 🎉");</span>
-<span class="cstat-no" title="statement not covered" >      window.scrollTo({ top: 0, behavior: "smooth" });</span>
+      setSuccessMessage("Client créé avec succès ! 🎉");
+      window.scrollTo({ top: 0, behavior: "smooth" });
 &nbsp;
-<span class="cstat-no" title="statement not covered" >      setTimeout(<span class="fstat-no" title="function not covered" >() =&gt; {</span></span>
+      setTimeout(<span class="fstat-no" title="function not covered" >() =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >        setSuccessMessage('');</span>
 <span class="cstat-no" title="statement not covered" >        navigate('/clients');</span>
       }, 2000);
     } catch (error) {
-<span class="cstat-no" title="statement not covered" >      setErrorMessage(error.message);</span>
+      setErrorMessage(error.message);
     } finally {
-<span class="cstat-no" title="statement not covered" >      setIsSubmitting(false);</span>
+      setIsSubmitting(false);
     }
   };
 &nbsp;
-  const breadcrumbItems = <span class="cstat-no" title="statement not covered" >[</span>
+  const breadcrumbItems = [
     { label: 'Accueil', path: '/' },
     { label: 'Clients', path: '/clients' },
     { label: 'Nouveau client', path: '/clients/new' },
   ];
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return (</span>
+  return (
     &lt;div className="container mt-4"&gt;
       {/* H1 invisible pour SEO/accessibilité */}
       &lt;h1 className="visually-hidden"&gt;Créer un nouveau client&lt;/h1&gt;
@@ -262,7 +262,7 @@ export default function <span class="fstat-no" title="function not covered" >New
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-25T11:30:41.303Z
+                at 2026-03-25T15:40:09.935Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

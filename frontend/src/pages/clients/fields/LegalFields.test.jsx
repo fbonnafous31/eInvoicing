@@ -1,6 +1,37 @@
-import { render, screen } from "@testing-library/react";
+// LegalFields.test.jsx
+import React from "react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { vi } from "vitest";
 import LegalFields from "./LegalFields";
+
+// ─── Mock des composants InputField et InputSiret ──────────────────────────────
+vi.mock('@/components/form', async () => {
+  const actual = await vi.importActual('@/components/form');
+  return {
+    ...actual,
+    InputField: ({ value, onChange, onBlur, id, disabled }) => (
+      <input
+        id={id}
+        value={value}
+        disabled={disabled}
+        onChange={e => onChange(e.target.value)}
+        onBlur={onBlur}
+        data-testid={id}
+      />
+    ),
+    InputSiret: ({ value, onChange, onBlur, id, disabled }) => (
+      <input
+        id={id}
+        value={value}
+        disabled={disabled}
+        onChange={e => onChange(e.target.value)}
+        onBlur={onBlur}
+        data-testid={id}
+      />
+    ),
+  };
+});
 
 describe("LegalFields", () => {
   const handleChange = vi.fn();
@@ -43,13 +74,13 @@ describe("LegalFields", () => {
       />
     );
 
-    // Radio buttons
+    // Radios
     expect(screen.getByLabelText("Entreprise")).toBeChecked();
     expect(screen.getByLabelText("Particulier")).not.toBeChecked();
 
     // Champs entreprise
-    expect(screen.getByLabelText("Nom légal *")).toHaveValue(companyFormData.legal_name);
-    expect(screen.getByLabelText("SIRET")).toHaveValue(companyFormData.siret);
+    expect(screen.getByTestId("legal_name")).toHaveValue(companyFormData.legal_name);
+    expect(screen.getByTestId("siret")).toHaveValue(companyFormData.siret);
   });
 
   it("affiche les champs particulier si is_company=false", () => {
@@ -64,13 +95,13 @@ describe("LegalFields", () => {
       />
     );
 
-    // Radio buttons
+    // Radios
     expect(screen.getByLabelText("Entreprise")).not.toBeChecked();
     expect(screen.getByLabelText("Particulier")).toBeChecked();
 
     // Champs particulier
-    expect(screen.getByLabelText("Prénom *")).toHaveValue(individualFormData.firstname);
-    expect(screen.getByLabelText("Nom *")).toHaveValue(individualFormData.lastname);
+    expect(screen.getByTestId("firstname")).toHaveValue(individualFormData.firstname);
+    expect(screen.getByTestId("lastname")).toHaveValue(individualFormData.lastname);
   });
 
   it("désactive tous les champs si disabled=true", () => {
@@ -85,10 +116,47 @@ describe("LegalFields", () => {
       />
     );
 
-    // Radios et inputs
     expect(screen.getByLabelText("Entreprise")).toBeDisabled();
     expect(screen.getByLabelText("Particulier")).toBeDisabled();
-    expect(screen.getByLabelText("Nom légal *")).toBeDisabled();
-    expect(screen.getByLabelText("SIRET")).toBeDisabled();
+    expect(screen.getByTestId("legal_name")).toBeDisabled();
+    expect(screen.getByTestId("siret")).toBeDisabled();
+  });
+
+  it("blur des inputs appelle handleBlur", () => {
+    render(
+      <LegalFields
+        formData={companyFormData}
+        errors={errors}
+        touched={touched}
+        handleChange={handleChange}
+        handleBlur={handleBlur}
+        disabled={false}
+      />
+    );
+
+    const legalInput = screen.getByTestId("legal_name");
+    fireEvent.blur(legalInput);
+    expect(handleBlur).toHaveBeenCalledWith("legal_name");
+
+    const siretInput = screen.getByTestId("siret");
+    fireEvent.blur(siretInput);
+    expect(handleBlur).toHaveBeenCalledWith("siret");
+  });
+
+  it("changer le type de client appelle handleChange", async () => {
+    render(
+      <LegalFields
+        formData={{ ...companyFormData, is_company: false }}
+        errors={errors}
+        touched={touched}
+        handleChange={handleChange}
+        handleBlur={handleBlur}
+        disabled={false}
+      />
+    );
+
+    const radioEntreprise = screen.getByLabelText("Entreprise");
+    await userEvent.click(radioEntreprise);
+    expect(handleChange).toHaveBeenCalledWith("is_company", true);
   });
 });

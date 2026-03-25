@@ -11,7 +11,6 @@ import InvoicesList from './pages/invoices/InvoicesList';
 import NewInvoice from './pages/invoices/NewInvoice';
 import InvoiceDetail from './pages/invoices/InvoiceDetail';
 import InvoiceView from './pages/invoices/InvoiceView';
-import TestPdfViewer from './components/invoices/TestPdfViewer'; 
 
 import AuthTest from './pages/AuthTest.jsx';
 import NotFound from './pages/NotFound';
@@ -82,9 +81,6 @@ const routes = [
       <InvoiceView />
     </RequireSeller>
   },  
-
-  // Test PDFViewer
-  { path: '/test-pdf', element: <TestPdfViewer /> },
 
   // Test Auth0
   { path: '/auth-test', element: <AuthTest /> },

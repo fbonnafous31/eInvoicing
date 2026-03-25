@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">57.14% </span>
+                <span class="strong">78.57% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>8/14</span>
+                <span class='fraction'>11/14</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">60% </span>
+                <span class="strong">80% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>6/10</span>
+                <span class='fraction'>8/10</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">66.66% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>2/3</span>
+                <span class='fraction'>3/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">53.84% </span>
+                <span class="strong">76.92% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>7/13</span>
+                <span class='fraction'>10/13</span>
             </div>
         
             
@@ -123,32 +123,32 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">15x</span>
+<span class="cline-any cline-yes">14x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">37x</span>
-<span class="cline-any cline-yes">37x</span>
-<span class="cline-any cline-yes">10x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">10x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">37x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">37x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -182,21 +182,21 @@ export function DatePickerField({ id, label, value, onChange, onBlur, error, req
   // Pour éviter les soucis de fuseau horaire, on parse la date 'YYYY-MM-DD' manuellement.
   // new Date('2023-10-27') est interprété comme UTC, ce qui peut changer le jour.
   const selectedDate = (() =&gt; {
-    if (!value) return null;
-    const parts = value.split('-');
+    <span class="missing-if-branch" title="else path not taken" >E</span>if (!value) return null;
+    const parts = <span class="cstat-no" title="statement not covered" >value.split('-');</span>
     // new Date(year, monthIndex, day) crée une date dans le fuseau horaire local.
-    return new Date(parts[0], parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+<span class="cstat-no" title="statement not covered" >    return new Date(parts[0], parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));</span>
   })();
 &nbsp;
-  const handleChange = <span class="fstat-no" title="function not covered" >(d</span>ate) =&gt; {
+  const handleChange = (date) =&gt; {
     // Le date-picker retourne un objet Date. On le formate en 'YYYY-MM-DD' pour le state parent.
-<span class="cstat-no" title="statement not covered" >    if (date) {</span>
+    if (date) {
       // On utilise les getters qui respectent le fuseau horaire local.
-      const year = <span class="cstat-no" title="statement not covered" >date.getFullYear();</span>
-      const <span class="cstat-no" title="statement not covered" >month = (date.getMonth() + 1).toString().padStart(2, '0');</span>
-      const day = <span class="cstat-no" title="statement not covered" >date.getDate().toString().padStart(2, '0');</span>
-<span class="cstat-no" title="statement not covered" >      onChange(`${year}-${month}-${day}`);</span>
-    } else {
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      onChange(`${year}-${month}-${day}`);
+    } else <span class="missing-if-branch" title="else path not taken" >E</span>{
 <span class="cstat-no" title="statement not covered" >      onChange(null);</span>
     }
   };
@@ -213,12 +213,12 @@ export function DatePickerField({ id, label, value, onChange, onBlur, error, req
         onBlur={onBlur}
         dateFormat="dd/MM/yyyy"
         locale="fr"
-        className={`form-control ${error ? <span class="branch-0 cbranch-no" title="branch not covered" >'is-invalid' : '</span>'}`}
+        className={`form-control ${error ? 'is-invalid' : ''}`}
         placeholderText="jj/mm/aaaa"
         disabled={disabled}
         autoComplete="off"
       /&gt;
-      {error &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >&lt;div className="invalid-feedback"&gt;{error}&lt;/div&gt;}</span>
+      {error &amp;&amp; &lt;div className="invalid-feedback"&gt;{error}&lt;/div&gt;}
     &lt;/div&gt;
   );
 }
@@ -229,7 +229,7 @@ export function DatePickerField({ id, label, value, onChange, onBlur, error, req
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-25T11:30:41.303Z
+                at 2026-03-25T15:40:09.935Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

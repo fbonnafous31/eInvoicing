@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/8</span>
+                <span class='fraction'>8/8</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">90.62% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/32</span>
+                <span class='fraction'>29/32</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/7</span>
+                <span class='fraction'>7/7</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/8</span>
+                <span class='fraction'>8/8</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -155,11 +155,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -170,14 +168,16 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -186,10 +186,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -207,31 +207,31 @@
 import React from "react";
 import Creatable from "react-select/creatable";
 &nbsp;
-export default function <span class="fstat-no" title="function not covered" >CreatableSelect({</span>
+export default function CreatableSelect({
   id,
   name,
   label,
   value,
   onChange,
   onBlur,
-  error = <span class="branch-0 cbranch-no" title="branch not covered" >"",</span>
-  required = <span class="branch-0 cbranch-no" title="branch not covered" >false,</span>
-  disabled = <span class="branch-0 cbranch-no" title="branch not covered" >false,</span>
-  placeholder = <span class="branch-0 cbranch-no" title="branch not covered" >"",</span>
-  options = <span class="branch-0 cbranch-no" title="branch not covered" >[],</span>
-  isClearable = <span class="branch-0 cbranch-no" title="branch not covered" >true,</span>
+  error = "",
+  required = false,
+  disabled = false,
+  placeholder = "",
+  options = [],
+  isClearable = true,
   formatCreateLabel,
-  feedbackText = <span class="branch-0 cbranch-no" title="branch not covered" >"",     // Texte à afficher en dessous</span>
-  feedbackClass = <span class="branch-0 cbranch-no" title="branch not covered" >"",    // Classe CSS du feedback (ex: "text-success" ou "text-warning")</span>
+  feedbackText = "",     // Texte à afficher en dessous
+  feedbackClass = "",    // Classe CSS du feedback (ex: "text-success" ou "text-warning")
   ...props
 }) {
-  const showError = <span class="cstat-no" title="statement not covered" >Boolean(error) || (required &amp;&amp; !value);</span>
+  const showError = Boolean(error) || (required &amp;&amp; !value);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return (</span>
+  return (
     &lt;div className="mb-3"&gt;
       {label &amp;&amp; (
         &lt;label htmlFor={id || name} className="form-label"&gt;
-          {label} {required &amp;&amp; "*"}
+          {label} {required &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >"*"}</span>
         &lt;/label&gt;
       )}
 &nbsp;
@@ -240,26 +240,26 @@ export default function <span class="fstat-no" title="function not covered" >Cre
         name={name}
         value={value}
         onChange={onChange}
-        onBlur={<span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >o</span>nBlur?.(name)}</span>
+        onBlur={() =&gt; onBlur?.(name)}
         options={options}
         isClearable={isClearable}
         isDisabled={disabled}
         placeholder={placeholder}
         formatCreateLabel={formatCreateLabel}
         styles={{
-          control: <span class="fstat-no" title="function not covered" >(p</span>rovided, state) =&gt; (<span class="cstat-no" title="statement not covered" >{</span>
+          control: (provided, state) =&gt; ({
             ...provided,
-            backgroundColor: state.isDisabled ? "#e8ebeefa" : "#fff",
+            backgroundColor: state.isDisabled ? <span class="branch-0 cbranch-no" title="branch not covered" >"#e8ebeefa" : "</span>#fff",
             borderColor: showError ? "#dc3545" : "#ced4da",
             boxShadow: state.isFocused
-              ? "0 0 0 0.2rem rgba(0,123,255,.25)"
+              ? <span class="branch-0 cbranch-no" title="branch not covered" >"0 0 0 0.2rem rgba(0,123,255,.25)"</span>
               : "none",
             "&amp;:hover": { borderColor: "#adb5bd" },
           }),
-          singleValue: <span class="fstat-no" title="function not covered" >(p</span>rovided) =&gt; (<span class="cstat-no" title="statement not covered" >{ ...provided, color: "#212529" }),</span>
-          input: <span class="fstat-no" title="function not covered" >(p</span>rovided) =&gt; (<span class="cstat-no" title="statement not covered" >{ ...provided, color: "#212529" }),</span>
-          placeholder: <span class="fstat-no" title="function not covered" >(p</span>rovided) =&gt; (<span class="cstat-no" title="statement not covered" >{ ...provided, color: "#6c757d" }),</span>
-          menu: <span class="fstat-no" title="function not covered" >(p</span>rovided) =&gt; (<span class="cstat-no" title="statement not covered" >{ ...provided, backgroundColor: "#fff", zIndex: 9999 }),</span>
+          singleValue: (provided) =&gt; ({ ...provided, color: "#212529" }),
+          input: (provided) =&gt; ({ ...provided, color: "#212529" }),
+          placeholder: (provided) =&gt; ({ ...provided, color: "#6c757d" }),
+          menu: (provided) =&gt; ({ ...provided, backgroundColor: "#fff", zIndex: 9999 }),
         }}
         {...props}
       /&gt;
@@ -280,7 +280,7 @@ export default function <span class="fstat-no" title="function not covered" >Cre
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-25T11:30:41.303Z
+                at 2026-03-25T15:40:09.935Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

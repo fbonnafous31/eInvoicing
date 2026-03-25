@@ -17,7 +17,6 @@ vi.mock('./pages/invoices/NewInvoice', () => ({ default: () => <div>NewInvoice M
 vi.mock('./pages/invoices/InvoiceView', () => ({ default: () => <div>InvoiceView Mock</div> }));
 vi.mock('./pages/AuthTest', () => ({ default: () => <div>AuthTest Mock</div> }));
 vi.mock('./pages/NotFound', () => ({ default: () => <div>NotFound Mock</div> }));
-vi.mock('./components/invoices/TestPdfViewer', () => ({ default: () => <div>TestPdfViewer Mock</div> }));
 
 // Mock des guards pour qu’ils laissent passer
 vi.mock('./components/guard/RequireSeller', () => ({ default: ({ children }) => <>{children}</> }));
@@ -67,11 +66,6 @@ describe('AppRoutes', () => {
   it('rend NotFound pour une route inconnue', () => {
     renderRoute(['/unknown-route']);
     expect(screen.getByText(/NotFound Mock/i)).toBeInTheDocument();
-  });
-
-  it('rend TestPdfViewer pour /test-pdf', () => {
-    renderRoute(['/test-pdf']);
-    expect(screen.getByText(/TestPdfViewer Mock/i)).toBeInTheDocument();
   });
 
   it('rend AuthTest pour /auth-test', () => {
