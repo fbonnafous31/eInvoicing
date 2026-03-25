@@ -1,103 +1,198 @@
 /* global describe, it, expect, beforeEach */
-
 const fs = require('fs');
 const db = require('../../../config/db');
 const storageService = require('../../../services');
 
-// Mock partiel de path pour ne mocker que ce qu'on veut
 jest.mock('path', () => {
-  const actualPath = jest.requireActual('path'); // ✅ doit être à l'intérieur
+  const actualPath = jest.requireActual('path');
   return {
     ...actualPath,
-    relative: jest.fn().mockReturnValue('/123_main_file.pdf'), // mock pour relativePath
+    relative: jest.fn().mockReturnValue('/123_main_file.pdf'),
   };
 });
-
-const { generateStoredName, getFinalPath } = require('../../../utils/fileNaming');
-const {
-  saveAttachment,
-  getAttachment,
-  getAdditionalAttachments,
-} = require('../invoiceAttachments.model');
 
 jest.mock('../../../config/db');
 jest.mock('../../../utils/fileNaming', () => ({
   generateStoredName: jest.fn(),
   getFinalPath: jest.fn(),
 }));
-jest.mock('../../../services'); // Mock du storageService
+jest.mock('../../../services');
+
+const { generateStoredName, getFinalPath } = require('../../../utils/fileNaming');
+const {
+  saveAttachment,
+  cleanupAttachments,
+  getAttachment,
+  getAdditionalAttachments,
+} = require('../invoiceAttachments.model');
+
+const schema = process.env.DB_SCHEMA || 'public';
 
 describe('invoiceAttachments.model', () => {
   const conn = { query: jest.fn() };
-  const mockInvoiceId = 123;
-  const schema = process.env.DB_SCHEMA || 'public';
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Mocks fs.promises
     fs.promises.rename = jest.fn().mockResolvedValue();
     fs.promises.readdir = jest.fn().mockResolvedValue([]);
     fs.promises.unlink = jest.fn().mockResolvedValue();
-    fs.promises.readFile = jest.fn().mockResolvedValue(Buffer.from('dummy')); // <-- important
-
-    // Mock storageService
+    fs.promises.readFile = jest.fn().mockResolvedValue(Buffer.from('dummy'));
     storageService.save = jest.fn().mockResolvedValue();
+    storageService.list = jest.fn().mockResolvedValue([]);
+    storageService.delete = jest.fn().mockResolvedValue();
   });
 
-  it('✅ saveAttachment déplace le fichier et insère en DB', async () => {
-    generateStoredName.mockReturnValue('123_main_file.pdf');
-    getFinalPath.mockReturnValue('/uploads/123_main_file.pdf');
-    conn.query.mockResolvedValue({ rows: [{ id: 1 }] });
+  // ------------------- saveAttachment -------------------
 
-    const att = { file_name: 'file.pdf', file_path: '/tmp/file.pdf', attachment_type: 'main' };
-    const result = await saveAttachment(conn, mockInvoiceId, att);
+  describe('saveAttachment', () => {
+    it('déplace le fichier et insère en DB', async () => {
+      generateStoredName.mockReturnValue('123_main_file.pdf');
+      getFinalPath.mockReturnValue('/uploads/123_main_file.pdf');
+      conn.query.mockResolvedValue({ rows: [{ id: 1 }] });
 
-    // Vérification déplacement fichier
-    expect(fs.promises.rename).toHaveBeenCalledWith('/tmp/file.pdf', '/uploads/123_main_file.pdf');
+      const att = { file_name: 'file.pdf', file_path: '/tmp/file.pdf', attachment_type: 'main' };
+      const result = await saveAttachment(conn, 123, att);
 
-    // Vérification lecture du fichier
-    expect(fs.promises.readFile).toHaveBeenCalledWith('/uploads/123_main_file.pdf');
-
-    // Vérification storageService
-    expect(storageService.save).toHaveBeenCalledWith(expect.any(Buffer), '/123_main_file.pdf');
-
-    // Vérification insertion en DB
-    expect(conn.query).toHaveBeenCalledWith(
-      expect.stringContaining(`INSERT INTO ${schema}.invoice_attachments`),
-      [123, 'file.pdf', '/123_main_file.pdf', '123_main_file.pdf', 'main']
-    );
-
-    // Vérification du résultat retourné
-    expect(result).toEqual({ id: 1 });
-  });
-
-  it('📄 getAttachment retourne la première pièce jointe', async () => {
-    db.query.mockResolvedValue({ rows: [{ file_name: 'f.pdf', file_path: '/path/f.pdf' }] });
-
-    const result = await getAttachment(123, 'main');
-
-    expect(db.query).toHaveBeenCalledWith(
-      expect.stringContaining(`FROM ${schema}.invoice_attachments`),
-      [123, 'main']
-    );
-    expect(result).toEqual({ file_name: 'f.pdf', file_path: '/path/f.pdf' });
-  });
-
-  it('📁 getAdditionalAttachments retourne les pièces avec chemin absolu', async () => {
-    db.query.mockResolvedValue({
-      rows: [
-        { file_name: 'a.pdf', file_path: 'a.pdf' },
-        { file_name: 'b.pdf', file_path: 'b.pdf' },
-      ],
+      expect(fs.promises.rename).toHaveBeenCalledWith('/tmp/file.pdf', '/uploads/123_main_file.pdf');
+      expect(fs.promises.readFile).toHaveBeenCalledWith('/uploads/123_main_file.pdf');
+      expect(storageService.save).toHaveBeenCalledWith(expect.any(Buffer), '/123_main_file.pdf');
+      expect(conn.query).toHaveBeenCalledWith(
+        expect.stringContaining(`INSERT INTO ${schema}.invoice_attachments`),
+        [123, 'file.pdf', '/123_main_file.pdf', '123_main_file.pdf', 'main']
+      );
+      expect(result).toEqual({ id: 1 });
     });
 
-    const path = require('path'); // utilise le vrai path
-    const result = await getAdditionalAttachments(123);
+    it('déduit attachment_type depuis isMain si absent', async () => {
+      generateStoredName.mockReturnValue('123_main_inferred.pdf');
+      getFinalPath.mockReturnValue('/uploads/123_main_inferred.pdf');
+      conn.query.mockResolvedValue({ rows: [{ id: 2 }] });
 
-    expect(result).toEqual([
-      { file_name: 'a.pdf', file_path: path.resolve('a.pdf') },
-      { file_name: 'b.pdf', file_path: path.resolve('b.pdf') },
-    ]);
+      const att = { file_name: 'file.pdf', file_path: '/tmp/file.pdf', isMain: true };
+      const result = await saveAttachment(conn, 123, att);
+
+      expect(conn.query).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO'),
+        expect.arrayContaining(['main'])
+      );
+      expect(result).toEqual({ id: 2 });
+    });
+
+    it('déduit attachment_type à additional si isMain est false', async () => {
+      generateStoredName.mockReturnValue('123_additional_file.pdf');
+      getFinalPath.mockReturnValue('/uploads/123_additional_file.pdf');
+      conn.query.mockResolvedValue({ rows: [{ id: 3 }] });
+
+      const att = { file_name: 'file.pdf', file_path: '/tmp/file.pdf', isMain: false };
+      await saveAttachment(conn, 123, att);
+
+      expect(conn.query).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO'),
+        expect.arrayContaining(['additional'])
+      );
+    });
+  });
+
+  // ------------------- cleanupAttachments -------------------
+
+  describe('cleanupAttachments', () => {
+    beforeEach(() => {
+      getFinalPath.mockReturnValue('/uploads/invoices/');
+    });
+
+    it('supprime les fichiers orphelins non référencés en DB', async () => {
+      conn.query.mockResolvedValue({
+        rows: [{ stored_name: '123_main_file.pdf' }],
+      });
+      storageService.list.mockResolvedValue([
+        '123_main_file.pdf',
+        '123_old_orphan.pdf',
+      ]);
+
+      await cleanupAttachments(conn, 123);
+
+      expect(storageService.delete).toHaveBeenCalledTimes(1);
+      expect(storageService.delete).toHaveBeenCalledWith(
+        expect.stringContaining('123_old_orphan.pdf')
+      );
+      expect(storageService.delete).not.toHaveBeenCalledWith(
+        expect.stringContaining('123_main_file.pdf')
+      );
+    });
+
+    it('ne supprime pas les fichiers appartenant à une autre facture', async () => {
+      conn.query.mockResolvedValue({ rows: [] });
+      storageService.list.mockResolvedValue(['456_other_invoice.pdf']);
+
+      await cleanupAttachments(conn, 123);
+
+      expect(storageService.delete).not.toHaveBeenCalled();
+    });
+
+    it('ne supprime rien si aucun fichier orphelin', async () => {
+      conn.query.mockResolvedValue({
+        rows: [{ stored_name: '123_main_file.pdf' }],
+      });
+      storageService.list.mockResolvedValue(['123_main_file.pdf']);
+
+      await cleanupAttachments(conn, 123);
+
+      expect(storageService.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  // ------------------- getAttachment -------------------
+
+  describe('getAttachment', () => {
+    it('retourne la pièce jointe si trouvée', async () => {
+      db.query.mockResolvedValue({
+        rows: [{ file_name: 'f.pdf', file_path: '/path/f.pdf' }],
+      });
+
+      const result = await getAttachment(123, 'main');
+
+      expect(db.query).toHaveBeenCalledWith(
+        expect.stringContaining(`FROM ${schema}.invoice_attachments`),
+        [123, 'main']
+      );
+      expect(result).toEqual({ file_name: 'f.pdf', file_path: '/path/f.pdf' });
+    });
+
+    it('retourne null si aucune pièce jointe', async () => {
+      db.query.mockResolvedValue({ rows: [] });
+
+      const result = await getAttachment(123, 'main');
+
+      expect(result).toBeNull();
+    });
+  });
+
+  // ------------------- getAdditionalAttachments -------------------
+
+  describe('getAdditionalAttachments', () => {
+    it('retourne les pièces avec chemin absolu résolu', async () => {
+      db.query.mockResolvedValue({
+        rows: [
+          { file_name: 'a.pdf', file_path: 'a.pdf' },
+          { file_name: 'b.pdf', file_path: 'b.pdf' },
+        ],
+      });
+
+      const pathActual = jest.requireActual('path');
+      const result = await getAdditionalAttachments(123);
+
+      expect(result).toEqual([
+        { file_name: 'a.pdf', file_path: pathActual.resolve('a.pdf') },
+        { file_name: 'b.pdf', file_path: pathActual.resolve('b.pdf') },
+      ]);
+    });
+
+    it('retourne un tableau vide si aucune pièce jointe', async () => {
+      db.query.mockResolvedValue({ rows: [] });
+
+      const result = await getAdditionalAttachments(123);
+
+      expect(result).toEqual([]);
+    });
   });
 });

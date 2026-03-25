@@ -155,5 +155,62 @@ describe('SellersController', () => {
 
     expect(res.json).toHaveBeenCalledWith({ exists: true });
   });
+  
+  describe('testSmtpResend', () => {
+    beforeEach(() => {
+      jest.resetModules();
+    });
 
+    it('retourne 400 si smtp_from manquant', async () => {
+      req.body = {};
+      await SellersController.testSmtpResend(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'smtp_from manquant',
+      });
+    });
+
+    it('retourne succès si email envoyé via Resend', async () => {
+      req.body = { smtp_from: 'test@example.com' };
+
+      jest.doMock('resend', () => ({
+        Resend: jest.fn().mockImplementation(() => ({
+          emails: {
+            send: jest.fn().mockResolvedValue({ id: 'fake-id' }),
+          },
+        })),
+      }));
+
+      const { testSmtpResend } = require('../sellers.controller');
+      await testSmtpResend(req, res);
+
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Email envoyé via Resend ✅',
+      });
+    });
+
+    it('retourne 400 si Resend throw', async () => {
+      req.body = { smtp_from: 'test@example.com' };
+
+      jest.doMock('resend', () => ({
+        Resend: jest.fn().mockImplementation(() => ({
+          emails: {
+            send: jest.fn().mockRejectedValue(new Error('API down')),
+          },
+        })),
+      }));
+
+      const { testSmtpResend } = require('../sellers.controller');
+      await testSmtpResend(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'API down',
+      });
+    });
+  });
 });

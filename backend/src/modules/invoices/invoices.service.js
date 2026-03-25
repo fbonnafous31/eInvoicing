@@ -81,7 +81,6 @@ async function deleteInvoice(id, cancelReason = null) {
   }
 }
 
-module.exports = { deleteInvoice };
 async function getInvoicesBySeller(sellerId) {
   return await InvoicesModel.getInvoicesBySeller(sellerId);
 }
