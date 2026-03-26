@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">4.16% </span>
+                <span class="strong">70.83% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>1/24</span>
+                <span class='fraction'>17/24</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">55% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/20</span>
+                <span class='fraction'>11/20</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/6</span>
+                <span class='fraction'>3/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">4.16% </span>
+                <span class="strong">70.83% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>1/24</span>
+                <span class='fraction'>17/24</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -167,33 +167,33 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -267,33 +267,33 @@
 import { Modal, Button, Form, Alert } from 'react-bootstrap';
 import { validateEmail } from '../../utils/validators/email';
 &nbsp;
-const EmailModal = <span class="fstat-no" title="function not covered" >({</span> show, onClose, onSend, defaultValues }) =&gt; {
-  const [to, setTo] = <span class="cstat-no" title="statement not covered" >useState(defaultValues.to || '');</span>
-  const [subject, setSubject] = <span class="cstat-no" title="statement not covered" >useState(defaultValues.subject || '');</span>
-  const [message, setMessage] = <span class="cstat-no" title="statement not covered" >useState(defaultValues.message || '');</span>
-  const [error, setError] = <span class="cstat-no" title="statement not covered" >useState(null);</span>
+const EmailModal = ({ show, onClose, onSend, defaultValues }) =&gt; {
+  const [to, setTo] = useState(defaultValues.to || <span class="branch-1 cbranch-no" title="branch not covered" >'')</span>;
+  const [subject, setSubject] = useState(defaultValues.subject || <span class="branch-1 cbranch-no" title="branch not covered" >'')</span>;
+  const [message, setMessage] = useState(defaultValues.message || <span class="branch-1 cbranch-no" title="branch not covered" >'')</span>;
+  const [error, setError] = useState(null);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  useEffect(<span class="fstat-no" title="function not covered" >() =&gt; {</span></span>
-<span class="cstat-no" title="statement not covered" >    setTo(defaultValues.to || '');</span>
-<span class="cstat-no" title="statement not covered" >    setSubject(defaultValues.subject || '');</span>
-<span class="cstat-no" title="statement not covered" >    setMessage(defaultValues.message || '');</span>
-<span class="cstat-no" title="statement not covered" >    setError(validateEmail(defaultValues.to || ''));</span>
+  useEffect(() =&gt; {
+    setTo(defaultValues.to || <span class="branch-1 cbranch-no" title="branch not covered" >'')</span>;
+    setSubject(defaultValues.subject || <span class="branch-1 cbranch-no" title="branch not covered" >'')</span>;
+    setMessage(defaultValues.message || <span class="branch-1 cbranch-no" title="branch not covered" >'')</span>;
+    setError(validateEmail(defaultValues.to || <span class="branch-1 cbranch-no" title="branch not covered" >'')</span>);
   }, [defaultValues, show]);
 &nbsp;
-  const handleSubmit = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >() =&gt; {</span></span>
-    const validationError = <span class="cstat-no" title="statement not covered" >validateEmail(to);</span>
-<span class="cstat-no" title="statement not covered" >    if (validationError) {</span>
+  const handleSubmit = () =&gt; {
+    const validationError = validateEmail(to);
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (validationError) {
 <span class="cstat-no" title="statement not covered" >      setError(validationError);</span>
 <span class="cstat-no" title="statement not covered" >      return;</span>
     }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    onSend({ to, subject, message });</span>
-<span class="cstat-no" title="statement not covered" >    onClose();</span>
+    onSend({ to, subject, message });
+    onClose();
   };
 &nbsp;
-  const emailHasError = <span class="cstat-no" title="statement not covered" >!!error;</span>
+  const emailHasError = !!error;
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return (</span>
+  return (
     &lt;Modal show={show} onHide={onClose} centered&gt;
       &lt;Modal.Header closeButton&gt;
         &lt;Modal.Title&gt;✉️ Envoyer la facture par email&lt;/Modal.Title&gt;
@@ -301,7 +301,7 @@ const EmailModal = <span class="fstat-no" title="function not covered" >({</span
 &nbsp;
       &lt;Modal.Body&gt;
         {emailHasError &amp;&amp; (
-          &lt;Alert variant="danger" className="mb-3"&gt;
+<span class="branch-1 cbranch-no" title="branch not covered" >          &lt;Alert variant="danger" className="mb-3"&gt;</span>
             {error}
           &lt;/Alert&gt;
         )}
@@ -370,7 +370,7 @@ export default EmailModal;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-25T15:40:09.935Z
+                at 2026-03-26T08:53:10.692Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>
