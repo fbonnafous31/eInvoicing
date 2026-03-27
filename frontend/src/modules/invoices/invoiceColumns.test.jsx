@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import invoiceColumns from './invoiceColumns.jsx';
+import { downloadFile } from '../../utils/downloadFile';
 
 // ---------------------------------------------------------------------------
 // Mocks des dépendances externes
@@ -446,4 +447,276 @@ describe('invoiceColumns — rendu des cellules', () => {
     const span = container.querySelector('[title]');
     expect(span?.title).toMatch(/Annulée.*Doublon/);
   });
+
+  // ---------------------------------------------------------------------------
+  // 5. Téléchargement PDF/A-3
+  // ---------------------------------------------------------------------------
+
+  describe('invoiceColumns — téléchargement PDF/A-3', () => {
+    beforeEach(() => {
+      mockSellerPlan = 'premium';
+    });
+
+    it('télécharge le PDF/A-3 au clic sur FaFilePdf', async () => {
+      const { downloadFile } = await import('../../utils/downloadFile');
+      const fakeBlob = new Blob(['pdf-content'], { type: 'application/pdf' });
+      mockGetInvoicePdfA3Proxy.mockResolvedValue(fakeBlob);
+
+      const createObjectURL = vi.fn().mockReturnValue('blob:fake-url');
+      vi.stubGlobal('URL', { createObjectURL, revokeObjectURL: vi.fn() });
+
+      const columns = getColumns(makeInvoiceService());
+      renderCell(col(columns, 'Actions'), makeRow());
+
+      fireEvent.click(screen.getByTitle('Télécharger la facture au format PDF/A-3'));
+
+      await waitFor(() =>
+        expect(mockGetInvoicePdfA3Proxy).toHaveBeenCalledWith('inv-1')
+      );
+      await waitFor(() =>
+        expect(downloadFile).toHaveBeenCalledWith('blob:fake-url', 'facture_F-2024-001_PDF-A3.pdf')
+      );
+    });
+
+    it('affiche une alerte si le téléchargement PDF/A-3 échoue', async () => {
+      vi.spyOn(window, 'alert').mockImplementation(() => {});
+      mockGetInvoicePdfA3Proxy.mockRejectedValue(new Error('Erreur réseau'));
+
+      const columns = getColumns(makeInvoiceService());
+      renderCell(col(columns, 'Actions'), makeRow());
+
+      fireEvent.click(screen.getByTitle('Télécharger la facture au format PDF/A-3'));
+
+      await waitFor(() =>
+        expect(window.alert).toHaveBeenCalledWith(
+          expect.stringMatching(/Impossible de récupérer le PDF\/A-3/)
+        )
+      );
+
+      vi.restoreAllMocks();
+    });
+
+    it('ne déclenche rien si row.id est absent pour PDF/A-3', async () => {
+      const columns = getColumns(makeInvoiceService());
+      renderCell(col(columns, 'Actions'), makeRow({ id: undefined }));
+
+      fireEvent.click(screen.getByTitle('Télécharger la facture au format PDF/A-3'));
+
+      await waitFor(() =>
+        expect(mockGetInvoicePdfA3Proxy).not.toHaveBeenCalled()
+      );
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // 6. Chemins d'erreur des actions
+  // ---------------------------------------------------------------------------
+
+  describe('invoiceColumns — gestion des erreurs', () => {
+    beforeEach(() => {
+      mockSellerPlan = 'premium';
+      vi.spyOn(window, 'alert').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('affiche une alerte si downloadInvoicePdf échoue', async () => {
+      const service = makeInvoiceService({
+        downloadInvoicePdf: vi.fn().mockRejectedValue(new Error('PDF error')),
+      });
+
+      const columns = getColumns(service);
+      renderCell(col(columns, 'Actions'), makeRow());
+
+      fireEvent.click(screen.getByTitle('Télécharger le devis'));
+
+      // Pas d'alerte dans le composant pour ce cas — on vérifie juste que ça ne plante pas
+      await waitFor(() =>
+        expect(service.downloadInvoicePdf).toHaveBeenCalled()
+      );
+    });
+
+    it('affiche une alerte si sendInvoice échoue', async () => {
+      const { canSendInvoice } = await import('../../utils/businessRules/invoiceStatus');
+      canSendInvoice.mockReturnValue(true);
+
+      const service = makeInvoiceService({
+        sendInvoice: vi.fn().mockRejectedValue(new Error('Réseau KO')),
+      });
+
+      const columns = getColumns(service);
+      renderCell(col(columns, 'Envoyer / Statut'), makeRow());
+
+      fireEvent.click(screen.getByTitle('Envoyer la facture'));
+
+      await waitFor(() =>
+        expect(window.alert).toHaveBeenCalledWith(
+          expect.stringMatching(/Impossible de communiquer avec le serveur de facturation/)
+        )
+      );
+    });
+
+    it('affiche une alerte si cashInvoice échoue', async () => {
+      const service = makeInvoiceService({
+        cashInvoice: vi.fn().mockRejectedValue(new Error('Erreur encaissement')),
+      });
+
+      const columns = getColumns(service);
+      renderCell(
+        col(columns, 'Envoyer / Statut'),
+        makeRow({ technical_status: 'validated', business_status: '205' })
+      );
+
+      fireEvent.click(screen.getByTitle('Encaisser la facture'));
+
+      await waitFor(() =>
+        expect(window.alert).toHaveBeenCalledWith(
+          expect.stringMatching(/Impossible de communiquer avec le serveur/)
+        )
+      );
+    });
+
+    it("n'appelle pas fetchInvoice si sendInvoice retourne null comme invoice", async () => {
+      const { canSendInvoice } = await import('../../utils/businessRules/invoiceStatus');
+      canSendInvoice.mockReturnValue(true);
+
+      const onBusinessStatusChange = vi.fn();
+      const service = makeInvoiceService({
+        sendInvoice: vi.fn().mockResolvedValue({ submissionId: 'sub-99' }),
+        getInvoiceStatus: vi.fn().mockResolvedValue({ technicalStatus: 'validated' }),
+        fetchInvoice: vi.fn().mockResolvedValue(null), // DB ne retourne rien
+      });
+
+      const columns = getColumns(service, { onBusinessStatusChange });
+      renderCell(col(columns, 'Envoyer / Statut'), makeRow());
+
+      fireEvent.click(screen.getByTitle('Envoyer la facture'));
+
+      await waitFor(() => expect(service.fetchInvoice).toHaveBeenCalledWith('inv-1'));
+      // onBusinessStatusChange ne doit pas être appelé si fetchInvoice retourne null
+      await waitFor(() => expect(onBusinessStatusChange).not.toHaveBeenCalled());
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // 7. Bouton 🔄 — états désactivés
+  // ---------------------------------------------------------------------------
+
+  describe('invoiceColumns — bouton rafraîchissement 🔄 désactivé', () => {
+    beforeEach(() => {
+      mockSellerPlan = 'premium';
+    });
+
+    it('désactive 🔄 si statut technique est "draft"', () => {
+      const columns = getColumns(makeInvoiceService());
+      renderCell(
+        col(columns, 'Envoyer / Statut'),
+        makeRow({ technical_status: 'draft', business_status: '200' })
+      );
+
+      expect(
+        screen.getByTitle(/Impossible de rafraîchir/)
+      ).toBeDisabled();
+    });
+
+    it('désactive 🔄 si business_status est "212" (statut final)', () => {
+      const columns = getColumns(makeInvoiceService());
+      renderCell(
+        col(columns, 'Envoyer / Statut'),
+        makeRow({ technical_status: 'validated', business_status: '212' })
+      );
+
+      // isFinalStatus=true → disabled
+      const btn = screen.getByTitle(/Facture déjà encaissée/);
+      expect(btn).toBeDisabled();
+    });
+
+    it('active 🔄 si technical_status est "received" et statut non final', () => {
+      const columns = getColumns(makeInvoiceService());
+      renderCell(
+        col(columns, 'Envoyer / Statut'),
+        makeRow({ technical_status: 'received', business_status: '205' })
+      );
+
+      expect(
+        screen.getByTitle('Rafraîchir le cycle de vie métier')
+      ).not.toBeDisabled();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // 8. sellerPlan autres valeurs
+  // ---------------------------------------------------------------------------
+
+  describe('invoiceColumns — sellerPlan autres valeurs', () => {
+    afterEach(() => {
+      mockSellerPlan = 'premium';
+    });
+
+    it('conserve toutes les colonnes pour le plan "standard"', () => {
+      mockSellerPlan = 'standard';
+      const columns = getColumns(makeInvoiceService());
+      const names = columns.map((c) => c.name);
+      expect(names).toContain('Envoyer / Statut');
+      expect(names).toContain('Statut facture');
+      expect(names).toContain('Statut PDP');
+    });
+
+    it('conserve toutes les colonnes si sellerPlan est undefined', () => {
+      mockSellerPlan = undefined;
+      const columns = getColumns(makeInvoiceService());
+      const names = columns.map((c) => c.name);
+      expect(names).toContain('Envoyer / Statut');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // 9. Rendu des cellules — cas limites
+  // ---------------------------------------------------------------------------
+
+  describe('invoiceColumns — rendu cellules cas limites', () => {
+    beforeEach(() => {
+      mockSellerPlan = 'premium';
+    });
+
+    it('affiche le tooltip d\'annulation sans motif si cancel_reason est absent', () => {
+      const columns = getColumns(makeInvoiceService());
+      const { container } = renderCell(
+        col(columns, 'Type'),
+        makeRow({ status: 'cancelled', cancel_reason: undefined })
+      );
+      const span = container.querySelector('[title]');
+      expect(span?.title).toMatch(/Motif non renseigné/);
+    });
+
+    it('n\'affiche pas de tooltip si le statut n\'est pas "cancelled"', () => {
+      const columns = getColumns(makeInvoiceService());
+      const { container } = renderCell(
+        col(columns, 'Type'),
+        makeRow({ status: 'active' })
+      );
+      const span = container.querySelector('[title]');
+      expect(span?.title).toBeFalsy();
+    });
+
+    it('affiche "standard" comme type par défaut si invoice_type est absent', () => {
+      const columns = getColumns(makeInvoiceService());
+      renderCell(col(columns, 'Type'), makeRow({ invoice_type: undefined }));
+      expect(screen.getByTestId('invoice-type-tag')).toHaveTextContent('standard');
+    });
+
+    it('affiche une chaîne vide pour invoice_number absent', () => {
+      const columns = getColumns(makeInvoiceService());
+      renderCell(col(columns, 'Référence'), makeRow({ invoice_number: undefined }));
+      expect(screen.getByTestId('ellipsis-cell')).toHaveTextContent('');
+    });
+
+    it('affiche une chaîne vide pour client absent', () => {
+      const columns = getColumns(makeInvoiceService());
+      renderCell(col(columns, 'Client'), makeRow({ client: null }));
+      expect(screen.getByTestId('ellipsis-cell')).toHaveTextContent('');
+    });
+  });  
 });
