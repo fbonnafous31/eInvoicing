@@ -33,9 +33,7 @@ describe('invoiceMail.service avec Resend', () => {
     jest.clearAllMocks();
 
     fakePdfBuffer = Buffer.from('PDF CONTENT');
-
     storageService.get.mockResolvedValue(fakePdfBuffer);
-
     __sendMock.mockResolvedValue({ id: 'abc123', status: 'sent' });
 
     fakeInvoice = {
@@ -102,10 +100,61 @@ describe('invoiceMail.service avec Resend', () => {
   it("❌ échoue si resend.emails.send renvoie une erreur", async () => {
     getInvoiceById.mockResolvedValue(fakeInvoice);
     getSellerById.mockResolvedValue(fakeSeller);
-
     __sendMock.mockRejectedValueOnce(new Error('Resend fail'));
 
     await expect(sendInvoiceMail(1, 'Hello', 'Facture', 'client@test.com'))
       .rejects.toThrow('Resend fail');
+  });
+
+  // 🔹 Nouveaux tests pour couvrir les fallbacks
+  it('✅ fallback sur fromAddress, sellerName et invoiceNumber', async () => {
+    // Facture sans invoice_number, vendeur sans smtp_from et legal_name
+    getInvoiceById.mockResolvedValue({ ...fakeInvoice, invoice_number: null });
+    getSellerById.mockResolvedValue({ smtp_from: null, smtp_user: null, legal_name: null });
+
+    await sendInvoiceMail(fakeInvoice.id); // <-- pas de message pour tester fallback
+
+    expect(__sendMock).toHaveBeenCalledWith(expect.objectContaining({
+      from: 'no-reply@example.com',
+      to: fakeInvoice.client.email,
+      subject: `Votre facture n°${fakeInvoice.id}`,
+      html: expect.stringContaining('Votre société'),
+      text: expect.stringContaining('Votre société'),
+      attachments: expect.any(Array),
+    }));
+  });
+
+  it('✅ fallback sur sellerName si vide mais invoiceNumber présent', async () => {
+    // Vendeur sans legal_name, facture avec invoice_number présent
+    getInvoiceById.mockResolvedValue(fakeInvoice);
+    getSellerById.mockResolvedValue({ smtp_from: 'from@test.com', smtp_user: null, legal_name: null });
+
+    await sendInvoiceMail(fakeInvoice.id); // <-- pas de message
+
+    expect(__sendMock).toHaveBeenCalledWith(expect.objectContaining({
+      from: 'from@test.com',
+      to: fakeInvoice.client.email,
+      subject: expect.stringContaining(fakeInvoice.invoice_number),
+      html: expect.stringContaining('Votre société'), // fallback sur sellerName
+      text: expect.stringContaining('Votre société'),
+      attachments: expect.any(Array),
+    }));
+  });
+
+  it('✅ fallback sur invoiceNumber si null mais sellerName présent', async () => {
+    // Facture sans invoice_number, vendeur avec nom
+    getInvoiceById.mockResolvedValue({ ...fakeInvoice, invoice_number: null });
+    getSellerById.mockResolvedValue({ smtp_from: 'from@test.com', smtp_user: null, legal_name: 'Seller Name' });
+
+    await sendInvoiceMail(fakeInvoice.id); // <-- pas de message
+
+    expect(__sendMock).toHaveBeenCalledWith(expect.objectContaining({
+      from: 'from@test.com',
+      to: fakeInvoice.client.email,
+      subject: `Votre facture n°${fakeInvoice.id}`, // fallback sur invoiceId
+      html: expect.stringContaining('Seller Name'),
+      text: expect.stringContaining('Seller Name'),
+      attachments: expect.any(Array),
+    }));
   });
 });

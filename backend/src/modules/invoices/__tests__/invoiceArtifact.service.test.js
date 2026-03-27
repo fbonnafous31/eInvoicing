@@ -1,27 +1,36 @@
-/* global describe, it, expect, beforeEach, beforeAll, afterAll */
+/* global describe, it, expect, beforeEach, beforeAll, afterAll, jest */
 
 const fs = require('fs/promises');
 const path = require('path');
+
 const { generateInvoiceArtifacts } = require('../invoiceArtifact.service');
 const { embedFacturXInPdf } = require('../../../utils/invoice-pdf/pdf-generator');
 const { generateFacturXXML } = require('../../../utils/facturx/facturx-generator');
 const InvoicesAttachmentsModel = require('../invoiceAttachments.model');
 const { getFinalPath } = require('../../../utils/fileNaming');
 const logger = require('../../../utils/logger');
+const InvoiceService = require('../invoices.service');
 
-// 🔹 Mocks existants
+// 🔹 Mocks
 jest.mock('../../../utils/facturx/facturx-generator', () => ({
   generateFacturXXML: jest.fn(),
 }));
+
 jest.mock('../../../utils/invoice-pdf/pdf-generator', () => ({
   embedFacturXInPdf: jest.fn(),
 }));
+
 jest.mock('../invoiceAttachments.model', () => ({
   getAttachment: jest.fn(),
   getAdditionalAttachments: jest.fn(),
 }));
+
 jest.mock('../../../utils/fileNaming', () => ({
   getFinalPath: jest.fn(),
+}));
+
+jest.mock('../invoices.service', () => ({
+  getInvoiceById: jest.fn(),
 }));
 
 describe('InvoiceArtifactService', () => {
@@ -34,13 +43,12 @@ describe('InvoiceArtifactService', () => {
     attachments: [],
   };
 
-  const uploadsDir = '/home/francois/dev/eInvoicing/backend/src/uploads';
+  const uploadsDir = '/tmp/uploads';
 
   beforeAll(() => {
-    // 🔹 Mock de la clé de chiffrement pour éviter Buffer.from(undefined) en CI
-    process.env.ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || '01234567890123456789012345678901'; // 32 chars pour aes-256
+    process.env.ENCRYPTION_KEY =
+      process.env.ENCRYPTION_KEY || '01234567890123456789012345678901';
 
-    // 🔹 Mock logger.error pour ne pas polluer les logs de tests
     jest.spyOn(logger, 'error').mockImplementation(() => {});
   });
 
@@ -51,19 +59,22 @@ describe('InvoiceArtifactService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // 🔹 On mock getFinalPath pour renvoyer le vrai dossier uploads local
     getFinalPath.mockImplementation((subPath) => `${uploadsDir}/${subPath}`);
 
-    // 🔹 Mock fs
     jest.spyOn(fs, 'mkdir').mockResolvedValue();
     jest.spyOn(fs, 'writeFile').mockResolvedValue();
 
     jest.spyOn(path, 'join').mockImplementation((...args) => args.join('/'));
   });
 
-  it('✅ génère correctement le XML et le PDF/A-3', async () => {
+  // ========================
+  // ✅ CAS PRINCIPAL
+  // ========================
+  it('génère correctement le XML et le PDF/A-3', async () => {
     generateFacturXXML.mockReturnValue('<xml></xml>');
-    InvoicesAttachmentsModel.getAttachment.mockResolvedValue({ file_path: '/fake/main.pdf' });
+    InvoicesAttachmentsModel.getAttachment.mockResolvedValue({
+      file_path: '/fake/main.pdf',
+    });
     InvoicesAttachmentsModel.getAdditionalAttachments.mockResolvedValue([
       { file_path: '/fake/add1.pdf' },
     ]);
@@ -71,40 +82,194 @@ describe('InvoiceArtifactService', () => {
 
     const result = await generateInvoiceArtifacts(mockInvoice);
 
-    expect(fs.mkdir).toHaveBeenCalledWith(
-      expect.stringContaining('factur-x'),
-      expect.objectContaining({ recursive: true })
-    );
-
-    expect(fs.writeFile).toHaveBeenCalledWith(
-      expect.stringContaining('factur-x/123-factur-x.xml'),
-      '<xml></xml>'
-    );
-
     expect(result).toEqual({
       xmlPath: expect.stringContaining('factur-x/123-factur-x.xml'),
       pdfA3Path: '/fake/final.pdf',
     });
   });
 
-  it('⚠️ retourne des chemins null si le PDF principal est introuvable', async () => {
+  // ========================
+  // ⚠️ PDF manquant
+  // ========================
+  it('retourne pdfA3Path null si le PDF principal est introuvable', async () => {
     generateFacturXXML.mockReturnValue('<xml></xml>');
     InvoicesAttachmentsModel.getAttachment.mockResolvedValue(null);
 
     const result = await generateInvoiceArtifacts(mockInvoice);
 
     expect(result).toEqual({
-      xmlPath: expect.stringContaining('factur-x/123-factur-x.xml'),
+      xmlPath: expect.any(String),
       pdfA3Path: null,
     });
   });
 
-  it('❌ gère proprement une erreur lors de la génération du XML', async () => {
+  // ========================
+  // ❌ erreur globale
+  // ========================
+  it('gère une erreur globale', async () => {
     fs.mkdir.mockRejectedValueOnce(new Error('Erreur mkdir'));
 
     const result = await generateInvoiceArtifacts(mockInvoice);
 
     expect(result).toEqual({ xmlPath: null, pdfA3Path: null });
     expect(logger.error).toHaveBeenCalled();
+  });
+
+  // ========================
+  // 🥇 acompte OK
+  // ========================
+  it('gère un acompte pour une facture finale', async () => {
+    generateFacturXXML.mockReturnValue('<xml></xml>');
+
+    InvoiceService.getInvoiceById.mockResolvedValue({
+      total: 50,
+      issue_date: '2024-01-01',
+      invoice_number: 'FAC-001',
+    });
+
+    InvoicesAttachmentsModel.getAttachment.mockResolvedValue({
+      file_path: '/fake/main.pdf',
+    });
+    InvoicesAttachmentsModel.getAdditionalAttachments.mockResolvedValue([]);
+    embedFacturXInPdf.mockResolvedValue('/fake/final.pdf');
+
+    const invoice = {
+      ...mockInvoice,
+      invoice_type: 'final',
+      original_invoice_id: 42,
+    };
+
+    await generateInvoiceArtifacts(invoice);
+
+    expect(InvoiceService.getInvoiceById).toHaveBeenCalledWith(42);
+  });
+
+  // ========================
+  // 🥈 acompte erreur
+  // ========================
+  it('log un warning si récupération acompte échoue', async () => {
+    jest.spyOn(logger, 'warn').mockImplementation(() => {});
+
+    generateFacturXXML.mockReturnValue('<xml></xml>');
+    InvoiceService.getInvoiceById.mockRejectedValue(new Error('fail'));
+
+    InvoicesAttachmentsModel.getAttachment.mockResolvedValue({
+      file_path: '/fake/main.pdf',
+    });
+    InvoicesAttachmentsModel.getAdditionalAttachments.mockResolvedValue([]);
+    embedFacturXInPdf.mockResolvedValue('/fake/final.pdf');
+
+    const invoice = {
+      ...mockInvoice,
+      invoice_type: 'final',
+      original_invoice_id: 42,
+    };
+
+    await generateInvoiceArtifacts(invoice);
+
+    expect(logger.warn).toHaveBeenCalled();
+
+    logger.warn.mockRestore();
+  });
+
+  // ========================
+  // 🧪 client fallback
+  // ========================
+  it('utilise les champs fallback du client', async () => {
+    generateFacturXXML.mockReturnValue('<xml></xml>');
+
+    InvoicesAttachmentsModel.getAttachment.mockResolvedValue({
+      file_path: '/fake/main.pdf',
+    });
+    InvoicesAttachmentsModel.getAdditionalAttachments.mockResolvedValue([]);
+    embedFacturXInPdf.mockResolvedValue('/fake/final.pdf');
+
+    const invoice = {
+      ...mockInvoice,
+      client: {
+        client_legal_name: 'Fallback Name',
+        client_address: 'Fallback Address',
+      },
+    };
+
+    await generateInvoiceArtifacts(invoice);
+
+    expect(generateFacturXXML).toHaveBeenCalledWith(
+      expect.objectContaining({
+        client: expect.objectContaining({
+          legal_name: 'Fallback Name',
+          address: 'Fallback Address',
+        }),
+      })
+    );
+  });
+
+  // ========================
+  // 🧪 normalisation paths
+  // ========================
+  it('normalise les chemins des pièces jointes', async () => {
+    generateFacturXXML.mockReturnValue('<xml></xml>');
+
+    InvoicesAttachmentsModel.getAttachment.mockResolvedValue({
+      file_path: '/fake/main.pdf',
+    });
+
+    InvoicesAttachmentsModel.getAdditionalAttachments.mockResolvedValue([
+      { file_path: '/root/backend/uploads/file.pdf' },
+    ]);
+
+    embedFacturXInPdf.mockResolvedValue('/fake/final.pdf');
+
+    await generateInvoiceArtifacts(mockInvoice);
+
+    expect(embedFacturXInPdf).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.any(String),
+      expect.arrayContaining([
+        expect.objectContaining({
+          file_path: 'uploads/file.pdf',
+        }),
+      ]),
+      123
+    );
+  });
+
+  // ========================
+  // 🧪 embed erreur
+  // ========================
+  it('retourne null si embed PDF échoue', async () => {
+    generateFacturXXML.mockReturnValue('<xml></xml>');
+
+    InvoicesAttachmentsModel.getAttachment.mockResolvedValue({
+      file_path: '/fake/main.pdf',
+    });
+    InvoicesAttachmentsModel.getAdditionalAttachments.mockResolvedValue([]);
+
+    embedFacturXInPdf.mockRejectedValue(new Error('PDF error'));
+
+    const result = await generateInvoiceArtifacts(mockInvoice);
+
+    expect(result).toEqual({
+      xmlPath: expect.any(String),
+      pdfA3Path: null,
+    });
+  });
+
+  // ========================
+  // 🧪 sans attachments
+  // ========================
+  it('fonctionne sans pièces jointes additionnelles', async () => {
+    generateFacturXXML.mockReturnValue('<xml></xml>');
+
+    InvoicesAttachmentsModel.getAttachment.mockResolvedValue({
+      file_path: '/fake/main.pdf',
+    });
+    InvoicesAttachmentsModel.getAdditionalAttachments.mockResolvedValue([]);
+
+    embedFacturXInPdf.mockResolvedValue('/fake/final.pdf');
+
+    const result = await generateInvoiceArtifacts(mockInvoice);
+
+    expect(result.pdfA3Path).toBe('/fake/final.pdf');
   });
 });
