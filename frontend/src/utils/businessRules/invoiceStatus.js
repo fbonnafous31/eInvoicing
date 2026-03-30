@@ -15,6 +15,10 @@ const statusMapping = {
 export function canSendInvoice(row) {
   if (!row) return false;
 
+  if (row.invoice_type === "quote" || row.invoice_type === "devis") {
+    return false;
+  }
+  
   const provider = import.meta.env.VITE_PDP_PROVIDER || 'mock';
   const status = statusMapping[provider];
 
