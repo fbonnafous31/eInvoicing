@@ -263,6 +263,19 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
           />
         )}
 
+        {data.invoice_type !== "quote" && (
+          <InputField
+            id="original_quote_number"
+            label="Référence devis d’origine"
+            value={data.original_quote_number || ""}
+            onChange={val => handleChange("original_quote_number", val)}
+            onBlur={() => handleBlur("original_quote_number")}
+            error={getError("original_quote_number")}
+            disabled={disabled}
+            maxLength={20}
+          />
+        )}
+
         <DatePickerField
           id="issue_date"
           label="Date émission"

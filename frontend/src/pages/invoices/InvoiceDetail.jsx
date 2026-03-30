@@ -115,6 +115,7 @@ export default function InvoiceDetail() {
         payment_method: invoice.payment_method,
         invoice_type: invoice.invoice_type,
         original_invoice_number: invoice.original_invoice_number || "",
+        original_quote_number: invoice.original_quote_number || "",
       },
       client: mappedClient,
       lines: invoice.lines || [],
