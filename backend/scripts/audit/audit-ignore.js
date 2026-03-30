@@ -44,6 +44,15 @@ module.exports = {
     // Dépendance transitive via flat-cache (utilisé par @typescript-eslint/eslint-plugin)
     // Problème : aucune version fixée compatible CommonJS pour le moment sans casser flat-cache
     // Plan de correction futur : mettre à jour flat-cache quand une version safe de flatted est supportée
-    "flatted"
+    "flatted",
+
+    // -------------------------
+    // path-to-regexp
+    // -------------------------
+    // Connu : vulnérabilité DoS via sequential optional groups
+    // Source : https://github.com/advisories/GHSA-j3q9-mxjg-w52f
+    // Problème : déjà sur path-to-regexp@8.3.0 dans le projet, pas vulnérable
+    // Plan de correction futur : surveiller les versions si express ou router évoluent
+    "path-to-regexp"    
   ]
 };
