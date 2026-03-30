@@ -26,6 +26,11 @@ const styles = {
     background: "#ffe5b4", 
     color: "#b36b00",      
   },
+  quote: {
+    label: "Devis",
+    background: "#cce5ff",
+    color: "#004085",
+  },
 };
 
 export default function InvoiceTypeTag({ type, status }) {

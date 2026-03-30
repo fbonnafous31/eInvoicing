@@ -1,6 +1,6 @@
 const pool = require('../../config/db');
 const path = require('path');
-const { getSellerById } = require('../sellers/sellers.model'); 
+const { getSellerById } = require('../sellers/sellers.model');
 const { saveAttachment, cleanupAttachments } = require("./invoiceAttachments.model");
 const storageService = require('../../services');
 const SCHEMA = process.env.DB_SCHEMA || 'public';
@@ -10,28 +10,23 @@ const logger = require('../../utils/logger');
  * Récupère toutes les factures avec leurs lignes, taxes et justificatifs
  */
 async function getAllInvoices() {
-  // 1. Récupérer toutes les factures de base avec le nom du client joint
   const invoicesResult = await pool.query(
     `SELECT i.*, ic.legal_name as client_legal_name
      FROM ${SCHEMA}.invoices i
      LEFT JOIN ${SCHEMA}.invoice_client ic ON i.id = ic.invoice_id
      ORDER BY i.created_at DESC`
   );
-  if (invoicesResult.rows.length === 0) {
-    return [];
-  }
+  if (invoicesResult.rows.length === 0) return [];
 
   const invoices = invoicesResult.rows;
   const invoiceIds = invoices.map(inv => inv.id);
 
-  // 2. Récupérer toutes les données liées en 3 requêtes au lieu de N*3
   const [linesResult, taxesResult, attachmentsResult] = await Promise.all([
     pool.query(`SELECT * FROM ${SCHEMA}.invoice_lines WHERE invoice_id = ANY($1::int[])`, [invoiceIds]),
     pool.query(`SELECT * FROM ${SCHEMA}.invoice_taxes WHERE invoice_id = ANY($1::int[])`, [invoiceIds]),
-    pool.query(`SELECT * FROM ${SCHEMA}.invoice_attachments WHERE invoice_id = ANY($1::int[])`, [invoiceIds])
+    pool.query(`SELECT * FROM ${SCHEMA}.invoice_attachments WHERE invoice_id = ANY($1::int[])`, [invoiceIds]),
   ]);
 
-  // 3. Mapper les données pour un accès rapide
   const linesByInvoiceId = linesResult.rows.reduce((acc, line) => {
     (acc[line.invoice_id] = acc[line.invoice_id] || []).push(line);
     return acc;
@@ -45,7 +40,6 @@ async function getAllInvoices() {
     return acc;
   }, {});
 
-  // 4. Assembler le résultat final
   return invoices.map(invoice => ({
     ...invoice,
     lines: linesByInvoiceId[invoice.id] || [],
@@ -59,7 +53,7 @@ async function getAllInvoices() {
  */
 async function getDepositInvoices(seller, clientId = null) {
   if (!seller?.id) {
-    logger.error('[Model] getDepositInvoicesBySeller - Seller missing');
+    logger.error('[Model] getDepositInvoices - Seller missing');
     throw new Error("Seller is required");
   }
 
@@ -79,7 +73,7 @@ async function getDepositInvoices(seller, clientId = null) {
         SELECT 1
         FROM ${SCHEMA}.invoices i2
         WHERE i2.original_invoice_number = i.invoice_number
-      )      
+      )
   `;
 
   const params = [seller.id];
@@ -89,14 +83,14 @@ async function getDepositInvoices(seller, clientId = null) {
     params.push(clientId);
   }
 
-  logger.info({ query, params }, '[Model] getDepositInvoicesBySeller - executing query');
+  logger.info({ query, params }, '[Model] getDepositInvoices - executing query');
 
   try {
     const { rows } = await pool.query(query, params);
-    logger.info({ rowCount: rows.length }, '[Model] getDepositInvoicesBySeller - rows fetched');
+    logger.info({ rowCount: rows.length }, '[Model] getDepositInvoices - rows fetched');
     return rows;
   } catch (err) {
-    logger.error({ err }, '[Model] getDepositInvoicesBySeller - query failed');
+    logger.error({ err }, '[Model] getDepositInvoices - query failed');
     throw err;
   }
 }
@@ -107,14 +101,14 @@ async function getDepositInvoices(seller, clientId = null) {
 async function getInvoiceById(id) {
   const invoiceResult = await pool.query(`SELECT * FROM ${SCHEMA}.invoices WHERE id = $1`, [id]);
   if (invoiceResult.rows.length === 0) return null;
-  const invoice = invoiceResult.rows[0];  
+  const invoice = invoiceResult.rows[0];
 
   const [linesResult, taxesResult, attachmentsResult, clientResult, seller] = await Promise.all([
     pool.query(`SELECT * FROM ${SCHEMA}.invoice_lines WHERE invoice_id = $1`, [id]),
     pool.query(`SELECT * FROM ${SCHEMA}.invoice_taxes WHERE invoice_id = $1`, [id]),
     pool.query(`SELECT * FROM ${SCHEMA}.invoice_attachments WHERE invoice_id = $1`, [id]),
     pool.query(`SELECT * FROM ${SCHEMA}.invoice_client WHERE invoice_id = $1`, [id]),
-    invoice.seller_id ? getSellerById(invoice.seller_id) : Promise.resolve(null)
+    invoice.seller_id ? getSellerById(invoice.seller_id) : Promise.resolve(null),
   ]);
 
   return {
@@ -123,7 +117,7 @@ async function getInvoiceById(id) {
     taxes: taxesResult.rows,
     attachments: attachmentsResult.rows,
     client: clientResult.rows[0] || null,
-    seller 
+    seller,
   };
 }
 
@@ -159,7 +153,7 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
       );
     }
 
-    // --- Vérification unicité ---
+    // --- Vérification unicité invoice_number ---
     const existing = await conn.query(
       `SELECT id 
        FROM ${SCHEMA}.invoices 
@@ -204,20 +198,39 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
     );
     const invoiceId = invoiceRes.rows[0].id;
 
+    // --- Attribution de invoice_sequence_number (hors devis) ---
+    if (invoice.invoice_type !== "quote") {
+      // Upsert atomique : évite les race conditions
+      const seqRes = await conn.query(
+        `INSERT INTO ${SCHEMA}.invoice_sequence (seller_id, last_sequence)
+         VALUES ($1, 1)
+         ON CONFLICT (seller_id) DO UPDATE
+           SET last_sequence = invoice_sequence.last_sequence + 1
+         RETURNING last_sequence`,
+        [invoice.seller_id]
+      );
+      const nextSeq = seqRes.rows[0].last_sequence;
+
+      await conn.query(
+        `UPDATE ${SCHEMA}.invoices
+         SET invoice_sequence_number = $1
+         WHERE id = $2`,
+        [nextSeq, invoiceId]
+      );
+    }
+
     // --- Insertion client ---
     if (client) {
       await conn.query(
         `INSERT INTO ${SCHEMA}.invoice_client 
           (invoice_id, legal_name, legal_identifier_type, legal_identifier, address, city, postal_code, country_code, email, phone)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
         [
           invoiceId,
           client.client_legal_name ||
             `${client.client_first_name || ""} ${client.client_last_name || ""}`.trim(),
           client.client_siret ? "SIRET" : client.client_vat_number ? "VAT" : "NAME",
-          client.client_siret ||
-            client.client_vat_number ||
-            client.client_legal_name,
+          client.client_siret || client.client_vat_number || client.client_legal_name,
           client.client_address || null,
           client.client_city || null,
           client.client_postal_code || null,
@@ -235,9 +248,7 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
         const vals = Object.values(line);
         const placeholdersLine = vals.map((_, i) => `$${i + 1}`).join(", ");
         return conn.query(
-          `INSERT INTO ${SCHEMA}.invoice_lines (${cols}, invoice_id) VALUES (${placeholdersLine}, $${
-            vals.length + 1
-          })`,
+          `INSERT INTO ${SCHEMA}.invoice_lines (${cols}, invoice_id) VALUES (${placeholdersLine}, $${vals.length + 1})`,
           [...vals, invoiceId]
         );
       }),
@@ -246,24 +257,21 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
         const vals = Object.values(tax);
         const placeholdersTax = vals.map((_, i) => `$${i + 1}`).join(", ");
         return conn.query(
-          `INSERT INTO ${SCHEMA}.invoice_taxes (${cols}, invoice_id) VALUES (${placeholdersTax}, $${
-            vals.length + 1
-          })`,
+          `INSERT INTO ${SCHEMA}.invoice_taxes (${cols}, invoice_id) VALUES (${placeholdersTax}, $${vals.length + 1})`,
           [...vals, invoiceId]
         );
       }),
     ]);
 
-    // --- Gestion des attachments via le service ---
+    // --- Gestion des attachments ---
     for (const att of attachments) {
       await saveAttachment(conn, invoiceId, att);
     }
-
-    // Nettoyage sécurité (supprimer fichiers orphelins si besoin)
     await cleanupAttachments(conn, invoiceId);
 
     await conn.query("COMMIT");
     return await getInvoiceById(invoiceId);
+
   } catch (err) {
     await conn.query("ROLLBACK");
     throw err;
@@ -302,18 +310,14 @@ async function deleteInvoice(id, cancelReason = null) {
 
 /**
  * Met à jour une facture complète (facture, client, lignes, taxes, attachments)
- * dans une seule transaction.
  */
-async function updateInvoice(
-  id,
-  { invoice, client, lines, taxes, newAttachments, existingAttachments }
-) {
+async function updateInvoice(id, { invoice, client, lines, taxes, newAttachments, existingAttachments }) {
   const conn = await pool.connect();
   try {
     await conn.query("BEGIN");
+
     // --- 1. Update invoice main data ---
     if (invoice) {
-      // Trim invoice_number if present to ensure data quality
       if (invoice.invoice_number) {
         invoice.invoice_number = invoice.invoice_number.trim().slice(0, 20);
       }
@@ -361,13 +365,8 @@ async function updateInvoice(
       const legal_name =
         client.client_legal_name ||
         `${client.client_first_name || ""} ${client.client_last_name || ""}`.trim();
-      const legal_identifier_type = client.client_siret
-        ? "SIRET"
-        : client.client_vat_number
-        ? "VAT"
-        : "NAME";
-      const legal_identifier =
-        client.client_siret || client.client_vat_number || legal_name;
+      const legal_identifier_type = client.client_siret ? "SIRET" : client.client_vat_number ? "VAT" : "NAME";
+      const legal_identifier = client.client_siret || client.client_vat_number || legal_name;
 
       if (clientExistsResult.rows.length > 0) {
         await conn.query(
@@ -416,7 +415,7 @@ async function updateInvoice(
       }
     }
 
-    // --- 3. Update invoice lines ---
+    // --- 3. Update lines & taxes ---
     await conn.query(`DELETE FROM ${SCHEMA}.invoice_lines WHERE invoice_id = $1`, [id]);
     if (lines?.length) {
       for (const line of lines) {
@@ -425,9 +424,7 @@ async function updateInvoice(
         const vals = Object.values(lineData);
         const placeholdersLine = vals.map((_, i) => `$${i + 1}`).join(", ");
         await conn.query(
-          `INSERT INTO ${SCHEMA}.invoice_lines (${cols}, invoice_id) VALUES (${placeholdersLine}, $${
-            vals.length + 1
-          })`,
+          `INSERT INTO ${SCHEMA}.invoice_lines (${cols}, invoice_id) VALUES (${placeholdersLine}, $${vals.length + 1})`,
           [...vals, id]
         );
       }
@@ -441,22 +438,18 @@ async function updateInvoice(
         const vals = Object.values(taxData);
         const placeholdersTax = vals.map((_, i) => `$${i + 1}`).join(", ");
         await conn.query(
-          `INSERT INTO ${SCHEMA}.invoice_taxes (${cols}, invoice_id) VALUES (${placeholdersTax}, $${
-            vals.length + 1
-          })`,
+          `INSERT INTO ${SCHEMA}.invoice_taxes (${cols}, invoice_id) VALUES (${placeholdersTax}, $${vals.length + 1})`,
           [...vals, id]
         );
       }
     }
 
     // --- 4. Attachments ---
-    // Récupérer ceux existants en DB
     const { rows: dbAttachments } = await conn.query(
       `SELECT id, stored_name FROM ${SCHEMA}.invoice_attachments WHERE invoice_id = $1`,
       [id]
     );
 
-    // Parser ceux envoyés par le front
     let existingFromFront = [];
     if (typeof existingAttachments === "string" && existingAttachments.trim() !== "") {
       try {
@@ -470,23 +463,21 @@ async function updateInvoice(
 
     const keepIds = new Set(existingFromFront.map((a) => a.id).filter(Boolean));
 
-    // Supprimer ceux que le front ne veut pas garder
     for (const dbAtt of dbAttachments) {
       if (!keepIds.has(dbAtt.id)) {
         await conn.query(`DELETE FROM ${SCHEMA}.invoice_attachments WHERE id = $1`, [dbAtt.id]);
       }
     }
 
-    // Ajouter les nouveaux fichiers via saveAttachment
     if (newAttachments?.length) {
       for (const att of newAttachments) {
-        await saveAttachment(conn, id, att); 
+        await saveAttachment(conn, id, att);
       }
     }
 
     // Nettoyer les fichiers orphelins côté serveur
     const uploadDir = path.join(__dirname, "../../uploads/invoices");
-    const relativeDir = uploadDir.split('uploads/')[1]; // 'invoices'
+    const relativeDir = uploadDir.split('uploads/')[1];
 
     const { rows: dbFiles } = await conn.query(
       `SELECT stored_name FROM ${SCHEMA}.invoice_attachments WHERE invoice_id = $1`,
@@ -494,9 +485,7 @@ async function updateInvoice(
     );
     const dbFileSet = new Set(dbFiles.map((f) => f.stored_name));
 
-    // Lister tous les fichiers via storageService
     const allFiles = await storageService.list(relativeDir);
-
     for (const file of allFiles) {
       if (file.startsWith(`${id}_`) && !dbFileSet.has(file)) {
         try {
@@ -507,9 +496,9 @@ async function updateInvoice(
       }
     }
 
-
     await conn.query("COMMIT");
     return await getInvoiceById(id);
+
   } catch (err) {
     await conn.query("ROLLBACK");
     logger.error("Transaction rolled back due to error:", err);
@@ -519,7 +508,9 @@ async function updateInvoice(
   }
 }
 
-// ----------------- Get invoices by seller -----------------
+/**
+ * Récupère les factures d'un vendeur avec le client imbriqué
+ */
 async function getInvoicesBySeller(sellerId) {
   const result = await pool.query(
     `SELECT 
@@ -546,10 +537,9 @@ async function getInvoicesBySeller(sellerId) {
     [sellerId]
   );
 
-  // On transforme chaque row pour imbriquer les infos client dans un objet `client`
   return result.rows.map(row => ({
     ...row,
-    plan: row.seller_plan, 
+    plan: row.seller_plan,
     client: {
       id: row.client_id,
       is_company: row.client_is_company,
@@ -564,14 +554,13 @@ async function getInvoicesBySeller(sellerId) {
       country_code: row.client_country_code,
       email: row.client_email,
       phone: row.client_phone,
-    }
+    },
   }));
 }
 
-// Export de toutes les fonctions du modèle
 module.exports = {
   getAllInvoices,
-  getDepositInvoices,   
+  getDepositInvoices,
   getInvoiceById,
   createInvoice,
   deleteInvoice,
