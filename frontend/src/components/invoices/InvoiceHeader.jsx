@@ -197,19 +197,32 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
                 : "Référence facture d’origine"
             }
             value={
-              data.original_invoice_id
-                ? { 
-                    value: data.original_invoice_id,
-                    label: data.original_invoice_number.trim(),
+              (() => {
+                if (!data.original_invoice_number) return null;
+
+                // On cherche l'objet correspondant dans les options
+                const allOptions = [
+                  ...depositInvoices.map(inv => ({
+                    value: inv.id,
+                    label: `${inv.invoice_number.trim()} - ${inv.client_name || 'Client'} - ${inv.total} €`,
+                    invoice_number: inv.invoice_number
+                  }))
+                ];
+
+                // Ajouter la facture courante si elle n'est pas déjà dans la liste
+                if (
+                  data.original_invoice_number &&
+                  !allOptions.find(o => o.invoice_number === data.original_invoice_number)
+                ) {
+                  allOptions.push({
+                    value: data.original_invoice_id || data.original_invoice_number,
+                    label: `${data.original_invoice_number.trim()}`,
                     invoice_number: data.original_invoice_number
-                  }
-                : data.original_invoice_number
-                  ? {
-                      value: data.original_invoice_number, 
-                      label: data.original_invoice_number.trim(),
-                      __isNew__: true 
-                    }
-                  : null
+                  });
+                }
+
+                return allOptions.find(o => o.invoice_number === data.original_invoice_number) || null;
+              })()
             }
             onChange={(selectedOption) => {
               const newData = { ...data };
@@ -231,11 +244,25 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
             onBlur={handleBlur}
             options={
               data.invoice_type === "final"
-                ? depositInvoices.map(inv => ({
-                    value: inv.id,
-                    label: `${inv.invoice_number.trim()} - ${inv.client_name || 'Client'} - ${inv.total} €`,
-                    invoice_number: inv.invoice_number
-                  }))
+                ? (() => {
+                    const opts = depositInvoices.map(inv => ({
+                      value: inv.id,
+                      label: `${inv.invoice_number.trim()} - ${inv.client_name || 'Client'} - ${inv.total} €`,
+                      invoice_number: inv.invoice_number
+                    }));
+                    // Ajouter la facture courante si absente
+                    if (
+                      data.original_invoice_number &&
+                      !opts.find(o => o.invoice_number === data.original_invoice_number)
+                    ) {
+                      opts.push({
+                        value: data.original_invoice_id || data.original_invoice_number,
+                        label: `${data.original_invoice_number.trim()}`,
+                        invoice_number: data.original_invoice_number
+                      });
+                    }
+                    return opts;
+                  })()
                 : []
             }
             placeholder={
@@ -247,14 +274,14 @@ export default function InvoiceHeader({ data, onChange, submitted, errors = {}, 
             disabled={disabled}
             error={getError("original_invoice_number")}
             feedbackText={
-              referenceStatus === "found"
+              referenceStatus === "found" || data.original_invoice_number
                 ? "✅ Facture correspondante trouvée"
                 : referenceStatus === "not_found"
                 ? "⚠️ Aucune facture correspondante trouvée"
                 : ""
             }
             feedbackClass={
-              referenceStatus === "found"
+              referenceStatus === "found" || data.original_invoice_number
                 ? "text-success"
                 : referenceStatus === "not_found"
                 ? "text-warning"
