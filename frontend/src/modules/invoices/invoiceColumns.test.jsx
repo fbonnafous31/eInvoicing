@@ -215,16 +215,6 @@ describe('invoiceColumns — colonne Actions', () => {
     expect(screen.getByTitle('Modifier la facture')).not.toBeDisabled();
   });
 
-  it('télécharge le PDF au clic sur 📄', async () => {
-    const service = makeInvoiceService();
-    const columns = getColumns(service);
-    renderCell(col(columns, 'Actions'), makeRow());
-    fireEvent.click(screen.getByTitle('Télécharger le devis'));
-    await waitFor(() =>
-      expect(service.downloadInvoicePdf).toHaveBeenCalledWith(expect.objectContaining({ id: 'inv-1' }))
-    );
-  });
-
   it('affiche le bouton email si sellerActive est true', () => {
     mockSellerActive = true;
     const columns = getColumns(makeInvoiceService());
@@ -468,7 +458,7 @@ describe('invoiceColumns — rendu des cellules', () => {
       const columns = getColumns(makeInvoiceService());
       renderCell(col(columns, 'Actions'), makeRow());
 
-      fireEvent.click(screen.getByTitle('Télécharger la facture au format PDF/A-3'));
+      fireEvent.click(screen.getByTitle('Télécharger la facture PDF/A-3'));
 
       await waitFor(() =>
         expect(mockGetInvoicePdfA3Proxy).toHaveBeenCalledWith('inv-1')
@@ -485,7 +475,7 @@ describe('invoiceColumns — rendu des cellules', () => {
       const columns = getColumns(makeInvoiceService());
       renderCell(col(columns, 'Actions'), makeRow());
 
-      fireEvent.click(screen.getByTitle('Télécharger la facture au format PDF/A-3'));
+      fireEvent.click(screen.getByTitle('Télécharger la facture PDF/A-3'));
 
       await waitFor(() =>
         expect(window.alert).toHaveBeenCalledWith(
@@ -500,7 +490,7 @@ describe('invoiceColumns — rendu des cellules', () => {
       const columns = getColumns(makeInvoiceService());
       renderCell(col(columns, 'Actions'), makeRow({ id: undefined }));
 
-      fireEvent.click(screen.getByTitle('Télécharger la facture au format PDF/A-3'));
+      fireEvent.click(screen.getByTitle('Télécharger la facture PDF/A-3'));
 
       await waitFor(() =>
         expect(mockGetInvoicePdfA3Proxy).not.toHaveBeenCalled()
@@ -520,22 +510,6 @@ describe('invoiceColumns — rendu des cellules', () => {
 
     afterEach(() => {
       vi.restoreAllMocks();
-    });
-
-    it('affiche une alerte si downloadInvoicePdf échoue', async () => {
-      const service = makeInvoiceService({
-        downloadInvoicePdf: vi.fn().mockRejectedValue(new Error('PDF error')),
-      });
-
-      const columns = getColumns(service);
-      renderCell(col(columns, 'Actions'), makeRow());
-
-      fireEvent.click(screen.getByTitle('Télécharger le devis'));
-
-      // Pas d'alerte dans le composant pour ce cas — on vérifie juste que ça ne plante pas
-      await waitFor(() =>
-        expect(service.downloadInvoicePdf).toHaveBeenCalled()
-      );
     });
 
     it('affiche une alerte si sendInvoice échoue', async () => {

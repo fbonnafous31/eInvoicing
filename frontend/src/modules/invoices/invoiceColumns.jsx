@@ -81,25 +81,10 @@ import InvoiceTypeTag from '../../components/invoices/InvoiceTypeTag';
             ✏️
           </button>
 
-          <button
-            className="btn btn-sm btn-link p-0 m-0 align-middle text-decoration-none"
-            title="Télécharger le devis"
-            onClick={async () => {
-              try {
-                await invoiceService.downloadInvoicePdf(row);
-                console.log("✅ PDF téléchargé");
-              } catch (err) {
-                console.error("❌ Erreur génération PDF :", err);
-              }
-            }}
-          >
-            📄
-          </button>
-
           {/* Facture PDF/A-3 */}
           <button
             className="btn btn-sm btn-link p-0 m-0 align-middle text-decoration-none"
-            title="Télécharger la facture au format PDF/A-3"
+            title="Télécharger la facture PDF/A-3"
             onClick={async () => {
               if (!row?.id) return;
 
