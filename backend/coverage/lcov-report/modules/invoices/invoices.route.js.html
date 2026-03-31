@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">86.84% </span>
+                <span class="strong">82.92% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>66/76</span>
+                <span class='fraction'>68/82</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">80% </span>
+                <span class="strong">72.72% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>16/20</span>
+                <span class='fraction'>16/22</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">86.84% </span>
+                <span class="strong">82.92% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>66/76</span>
+                <span class='fraction'>68/82</span>
             </div>
         
             
@@ -212,7 +212,17 @@
 <a name='L147'></a><a href='#L147'>147</a>
 <a name='L148'></a><a href='#L148'>148</a>
 <a name='L149'></a><a href='#L149'>149</a>
-<a name='L150'></a><a href='#L150'>150</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L150'></a><a href='#L150'>150</a>
+<a name='L151'></a><a href='#L151'>151</a>
+<a name='L152'></a><a href='#L152'>152</a>
+<a name='L153'></a><a href='#L153'>153</a>
+<a name='L154'></a><a href='#L154'>154</a>
+<a name='L155'></a><a href='#L155'>155</a>
+<a name='L156'></a><a href='#L156'>156</a>
+<a name='L157'></a><a href='#L157'>157</a>
+<a name='L158'></a><a href='#L158'>158</a>
+<a name='L159'></a><a href='#L159'>159</a>
+<a name='L160'></a><a href='#L160'>160</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -326,13 +336,23 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
@@ -474,9 +494,24 @@ router.get('/:id/status', (req, res, next) =&gt; {
   InvoicesController.getInvoiceStatus(req, res, next);
 });
 &nbsp;
+router.post('/generate-pdf', (req, res, next) =&gt; {
+  req.log.info('Génération buffer PDF facture');
+  InvoicesController.generateInvoicePdfBuffer(req, res, next);
+});
+&nbsp;
+router.post('/generate-quote-pdf', <span class="fstat-no" title="function not covered" >(r</span>eq, res, next) =&gt; {
+<span class="cstat-no" title="statement not covered" >  req.log.info('Génération buffer PDF devis');</span>
+<span class="cstat-no" title="statement not covered" >  InvoicesController.generateQuotePdfBuffer(req, res, next);</span>
+});
+&nbsp;
 router.post('/:id/generate-pdf', <span class="fstat-no" title="function not covered" >(r</span>eq, res, next) =&gt; {
 <span class="cstat-no" title="statement not covered" >  req.log.info(`Génération PDF facture ${req.params.id}`);</span>
 <span class="cstat-no" title="statement not covered" >  InvoicesController.createInvoicePdf(req, res, next);</span>
+});
+&nbsp;
+router.post('/:id/generate-quote-pdf', <span class="fstat-no" title="function not covered" >(r</span>eq, res, next) =&gt; {
+<span class="cstat-no" title="statement not covered" >  req.log.info(`Génération PDF devis ${req.params.id}`);</span>
+<span class="cstat-no" title="statement not covered" >  InvoicesController.generateQuotePdfBuffer(req, res, next);</span>
 });
 &nbsp;
 router.post('/:id/refresh-status', (req, res, next) =&gt; {
@@ -499,11 +534,6 @@ router.get('/:id/status/:statusCode/comment', (req, res, next) =&gt; {
   InvoicesController.getInvoiceStatusComment(req, res, next);
 });
 &nbsp;
-router.post('/generate-pdf', (req, res, next) =&gt; {
-  req.log.info('Génération buffer PDF facture');
-  InvoicesController.generateInvoicePdfBuffer(req, res, next);
-});
-&nbsp;
 // ----------------------------
 // Proxy PDF
 // ----------------------------
@@ -517,7 +547,7 @@ module.exports = router;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-30T07:59:55.606Z
+                at 2026-03-31T16:42:50.734Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

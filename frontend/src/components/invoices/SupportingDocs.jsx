@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { SmallDeleteButton } from "@/components/ui/buttons";
-import { useAuth } from "@/hooks/useAuth";
 import { useInvoiceService } from "@/services/invoices";
 
 export default function SupportingDocs({ data, onChange, disabled, hideLabelsInView, invoice, canEditAdditional }) {
@@ -60,19 +59,28 @@ export default function SupportingDocs({ data, onChange, disabled, hideLabelsInV
   const handleGeneratePdf = async () => {
     if (!invoice) return console.error("❌ invoice missing");
 
-    try {
-      const blob = await invoiceService.fetchInvoicePdf(invoice);
-      const url = URL.createObjectURL(blob);
+    const type = invoice.invoice_type || invoice.header?.invoice_type;
+    const filePrefix = type === "quote" ? "devis" : "facture";
+    const invoiceNumber = invoice.header?.invoice_number || "preview";
 
+    try {
+      // 🔹 Récupération du PDF côté service
+      const blob = type === "quote"
+        ? await invoiceService.fetchQuotePdf(invoice)
+        : await invoiceService.fetchInvoicePdf(invoice);
+
+      console.log(type === "quote" ? "📝 PDF devis généré" : "✅ PDF facture généré");
+
+      // 🔹 Création et téléchargement du fichier
+      const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `facture_${invoice.header?.invoice_number || "preview"}.pdf`;
+      link.download = `${filePrefix}_${invoiceNumber}.pdf`;
       document.body.appendChild(link);
       link.click();
       link.remove();
 
       URL.revokeObjectURL(url);
-      console.log("✅ PDF généré avec succès");
     } catch (err) {
       console.error("❌ Erreur génération PDF :", err);
     }

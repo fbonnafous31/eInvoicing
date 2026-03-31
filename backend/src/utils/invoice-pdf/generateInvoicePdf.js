@@ -35,97 +35,78 @@ function formatDateFr(dateStr) {
 }
 
 async function generateQuotePdf(quote) {
-  logger.info("quote:", quote);
+  logger.info("➡️ Début generateQuotePdf");
+
   const pdfDoc = await PDFDocument.create();
   const ASSETS_PATH = path.join(process.cwd(), "public/pdf-assets");
 
-  // --- Début des modifications pour conformité PDF/A ---
-
-  // 1. Enregistrer fontkit pour la gestion des polices .ttf
   pdfDoc.registerFontkit(fontkit);
 
-  // 2. Définir les métadonnées XMP pour l'identification PDF/A-3B
   const now = new Date();
   const nowIso = now.toISOString();
-  const title = `Devis ${quote.invoice_number || quote.id}`;
-  const author = quote.seller?.legal_name || 'eInvoicing App';
-  // Le nom du fichier XML est requis pour les métadonnées Factur-X
+
+  // ── Normalisation des données (structure facture OU structure plate) ──
+  const header = quote.header || {};
+  const client = quote.client || {};
+  const lines = quote.lines || [];
+  const seller = Array.isArray(quote.seller) && quote.seller.length > 0
+    ? quote.seller[0]
+    : (quote.seller && typeof quote.seller === "object" ? quote.seller : {});
+
+  const invoiceNumber = header.invoice_number || quote.invoice_number || quote.id || 'preview';
+  const issueDate     = header.issue_date     || quote.issue_date;
+  const supplyDate    = header.supply_date    || quote.supply_date;
+
+  const title  = `Devis ${invoiceNumber}`;
+  const author = seller.legal_name || 'eInvoicing App';
   const xmlFileName = "factur-x.xml";
 
+  // ── Métadonnées XMP ──
   const xmpMetadata = `<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>
-  <x:xmpmeta xmlns:x="adobe:ns:meta/">
-    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-
-      <!-- Description principale PDF/A-3 -->
-      <rdf:Description rdf:about=""
-          xmlns:dc="http://purl.org/dc/elements/1.1/"
-          xmlns:xmp="http://ns.adobe.com/xap/1.0/"
-          xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/"
-          xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#"
-          pdfaid:part="3"
-          pdfaid:conformance="B"
-      >
-        <!-- Dublin Core -->
-        <dc:title><rdf:Alt><rdf:li xml:lang="x-default">${title}</rdf:li></rdf:Alt></dc:title>
-        <dc:creator><rdf:Seq><rdf:li>${author}</rdf:li></rdf:Seq></dc:creator>
-
-        <!-- XMP Basic -->
-        <xmp:CreateDate>${nowIso}</xmp:CreateDate>
-        <xmp:ModifyDate>${nowIso}</xmp:ModifyDate>
-        <xmp:CreatorTool>eInvoicing App</xmp:CreatorTool>
-
-        <!-- Factur-X -->
-        <fx:DocumentType>INVOICE</fx:DocumentType>
-        <fx:DocumentFileName>${xmlFileName}</fx:DocumentFileName>
-        <fx:Version>1.0</fx:Version>
-        <fx:ConformanceLevel>BASIC</fx:ConformanceLevel>
-      </rdf:Description>
-
-      <!-- Ajout de la description pour les fichiers attachés -->
-      <rdf:Description rdf:about=""
-          xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#"
-      >
-        <fx:AttachedFiles>
-          <rdf:Bag>
-            <rdf:li rdf:parseType="Resource">
-              <fx:DocumentFileName>${xmlFileName}</fx:DocumentFileName>
-              <fx:MimeType>application/xml</fx:MimeType>
-              <fx:Description>Factur-X invoice</fx:Description>
-              <fx:AFRelationship>Source</fx:AFRelationship>
-            </rdf:li>
-          </rdf:Bag>
-        </fx:AttachedFiles>
-      </rdf:Description>
-
-    </rdf:RDF>
-  </x:xmpmeta>
-  <?xpacket end="w"?>`;
+<x:xmpmeta xmlns:x="adobe:ns:meta/">
+  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <rdf:Description rdf:about=""
+        xmlns:dc="http://purl.org/dc/elements/1.1/"
+        xmlns:xmp="http://ns.adobe.com/xap/1.0/"
+        xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/"
+        xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#"
+        pdfaid:part="3"
+        pdfaid:conformance="B"
+    >
+      <dc:title><rdf:Alt><rdf:li xml:lang="x-default">${title}</rdf:li></rdf:Alt></dc:title>
+      <dc:creator><rdf:Seq><rdf:li>${author}</rdf:li></rdf:Seq></dc:creator>
+      <xmp:CreateDate>${nowIso}</xmp:CreateDate>
+      <xmp:ModifyDate>${nowIso}</xmp:ModifyDate>
+      <xmp:CreatorTool>eInvoicing App</xmp:CreatorTool>
+      <fx:DocumentType>QUOTE</fx:DocumentType>
+      <fx:DocumentFileName>${xmlFileName}</fx:DocumentFileName>
+      <fx:Version>1.0</fx:Version>
+      <fx:ConformanceLevel>BASIC</fx:ConformanceLevel>
+    </rdf:Description>
+  </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>`;
 
   const metadataStream = pdfDoc.context.stream(xmpMetadata, {
     Type: PDFName.of('Metadata'),
     Subtype: PDFName.of('XML'),
   });
-
   pdfDoc.catalog.set(PDFName.of('Metadata'), pdfDoc.context.register(metadataStream));
 
-  // 3. Ajouter un "OutputIntent" pour la gestion des couleurs (corrige l'erreur DeviceRGB)
+  // ── ICC / OutputIntent ──
   const iccProfilePath = path.join(ASSETS_PATH, "icc/sRGB.icc");
   if (fs.existsSync(iccProfilePath)) {
     const iccProfileBytes = fs.readFileSync(iccProfilePath);
     const outputIntent = pdfDoc.context.stream(iccProfileBytes);
-    pdfDoc.catalog.set(
-      PDFName.of('OutputIntents'),
-      pdfDoc.context.obj([{
-        Type: 'OutputIntent', S: 'GTS_PDFA1',
-        OutputConditionIdentifier: 'sRGB IEC61966-2.1',
-        DestOutputProfile: outputIntent,
-      }])
-    );
+    pdfDoc.catalog.set(PDFName.of('OutputIntents'), pdfDoc.context.obj([{
+      Type: 'OutputIntent', S: 'GTS_PDFA1',
+      OutputConditionIdentifier: 'sRGB IEC61966-2.1',
+      DestOutputProfile: outputIntent,
+    }]));
   } else {
-    logger.warn("Profil ICC manquant pour la conformité PDF/A. Le PDF généré ne sera pas conforme.");
+    logger.warn("Profil ICC manquant.");
   }
 
-  // 4. Synchroniser le dictionnaire d'informations du document
   pdfDoc.setTitle(title);
   pdfDoc.setAuthor(author);
   pdfDoc.setCreator('eInvoicing App');
@@ -133,288 +114,174 @@ async function generateQuotePdf(quote) {
   pdfDoc.setCreationDate(now);
   pdfDoc.setModificationDate(now);
 
-  const page = pdfDoc.addPage([595, 842]); // A4 portrait
+  // ── Page & polices ──
+  const page = pdfDoc.addPage([595, 842]);
   const { width, height } = page.getSize();
-
-  // Polices
-  // 5. Embarquer les polices pour la conformité PDF/A (corrige l'erreur sur les polices non-embarquées)
-  const fontPath = path.join(ASSETS_PATH, "fonts/DejaVuSans.ttf");
-  const fontBoldPath = path.join(ASSETS_PATH, "fonts/DejaVuSans-Bold.ttf");
-
-  if (!fs.existsSync(fontPath) || !fs.existsSync(fontBoldPath)) {
-    logger.error("Fichiers de police manquants ! Assurez-vous que DejaVuSans.ttf et DejaVuSans-Bold.ttf existent dans le dossier 'src/utils/invoice-pdf/fonts/'.");
-    throw new Error("Fichiers de police requis pour la génération de PDF non trouvés.");
-  }
-
-  const fontBytes = fs.readFileSync(fontPath);
-  const fontBoldBytes = fs.readFileSync(fontBoldPath);
-  const fontRegular = await pdfDoc.embedFont(fontBytes, { subset: true });
-  const fontBold = await pdfDoc.embedFont(fontBoldBytes, { subset: true });
-
-  // --- Fin des modifications pour conformité PDF/A ---
-
   const margin = 50;
 
-  // ---------------- Logo ----------------
-  const logoPath = path.join(ASSETS_PATH, "logo.png");
-  const logoWidthMax = 120 * 2.5; // largeur max multipliée par 2.5
-  const logoHeightMax = 60 * 2.5; // hauteur max multipliée par 2.5
+  const fontPath     = path.join(ASSETS_PATH, "fonts/DejaVuSans.ttf");
+  const fontBoldPath = path.join(ASSETS_PATH, "fonts/DejaVuSans-Bold.ttf");
+  if (!fs.existsSync(fontPath) || !fs.existsSync(fontBoldPath)) {
+    throw new Error("Fichiers de police requis non trouvés.");
+  }
+  const fontRegular = await pdfDoc.embedFont(fs.readFileSync(fontPath),     { subset: true });
+  const fontBold    = await pdfDoc.embedFont(fs.readFileSync(fontBoldPath), { subset: true });
 
+  let y = height - margin;
+
+  // ── Logo ──
+  const logoPath = path.join(ASSETS_PATH, "logo.png");
   let logoHeight = 0;
-  let yLogoTop = height - margin;
 
   if (fs.existsSync(logoPath)) {
-    // NOTE: Pour éviter les problèmes de transparence (erreur SMask), assurez-vous que votre logo.png n'a pas de canal alpha.
-    const logoBytes = await fs.promises.readFile(logoPath);
-    const logoImage = await pdfDoc.embedPng(logoBytes);
-    const logoDims = logoImage.scale(1);
-    const ratio = Math.min(logoWidthMax / logoDims.width, logoHeightMax / logoDims.height);
-    const logoWidth = logoDims.width * ratio;
-    logoHeight = logoDims.height * ratio;
-
-    page.drawImage(logoImage, {
-      x: margin,
-      y: yLogoTop - logoHeight,
-      width: logoWidth,
-      height: logoHeight,
-    });
+    const logoImage = await pdfDoc.embedPng(await fs.promises.readFile(logoPath));
+    const logoDims  = logoImage.scale(1);
+    const ratio     = Math.min(120 / logoDims.width, 60 / logoDims.height);
+    const logoWidth = logoDims.width  * ratio;
+    logoHeight      = logoDims.height * ratio;
+    page.drawImage(logoImage, { x: margin, y: y - logoHeight, width: logoWidth, height: logoHeight });
   } else {
-    // fallback rectangle si pas de logo
     logoHeight = 50;
-    page.drawRectangle({
-      x: margin,
-      y: yLogoTop - logoHeight,
-      width: 100,
-      height: logoHeight,
-      borderColor: rgb(0.7, 0.7, 0.7),
-      borderWidth: 1,
-    });
-    page.drawText("LOGO", {
-      x: margin + 25,
-      y: yLogoTop - 35,
-      size: 12,
-      font: fontBold,
-      color: rgb(0.5, 0.5, 0.5),
-    });
+    page.drawRectangle({ x: margin, y: y - logoHeight, width: 100, height: logoHeight, borderColor: rgb(0.7, 0.7, 0.7), borderWidth: 1 });
+    page.drawText("LOGO", { x: margin + 25, y: y - 35, size: 12, font: fontBold, color: rgb(0.5, 0.5, 0.5) });
   }
 
-  // ---------------- Seller (haut droite, aligné top logo) ----------------
+  const yTop = y;
+
+  // ── Seller (haut droite) ──
   const blockWidth = 220;
-  const seller = quote.seller || {};
   let sellerText = "";
   if (seller.legal_name) {
     sellerText += seller.company_type === 'AUTO'
       ? `${seller.legal_name} - Auto-entrepreneur\n`
       : `${seller.legal_name}\n`;
   }
-  if (seller.address) sellerText += `${seller.address}\n`;
-  if (seller.postal_code || seller.city)
-    sellerText += `${seller.postal_code || ""} ${seller.city || ""}\n`;
-  if (seller.phone_number) sellerText += `Tel: ${seller.phone_number}\n`;
-  if (seller.contact_email) sellerText += `Email: ${seller.contact_email}\n`;
-  if (seller.legal_identifier) sellerText += `SIRET: ${seller.legal_identifier}\n`;
-  if (seller.vat_number) sellerText += `TVA: ${seller.vat_number}\n`;
+  if (seller.address)                    sellerText += `${seller.address}\n`;
+  if (seller.postal_code || seller.city) sellerText += `${seller.postal_code || ""} ${seller.city || ""}\n`;
+  if (seller.phone_number)               sellerText += `Tel: ${seller.phone_number}\n`;
+  if (seller.contact_email)              sellerText += `Email: ${seller.contact_email}\n`;
+  if (seller.legal_identifier)           sellerText += `SIRET: ${seller.legal_identifier}\n`;
+  if (seller.vat_number)                 sellerText += `TVA: ${seller.vat_number}\n`;
 
-  const sellerLines = sellerText.split("\n").filter(Boolean);
-  let sellerY = yLogoTop - 40; 
-  sellerLines.forEach((line, i) => {
-    const font = i === 0 ? fontBold : fontRegular;
-    page.drawText(line, {
-      x: width - margin - blockWidth,
-      y: sellerY,
-      size: 10,
-      font,
-    });
+  let sellerY = yTop - 40;
+  sellerText.split("\n").filter(Boolean).forEach((line, i) => {
+    page.drawText(line, { x: width - margin - blockWidth, y: sellerY, size: 10, font: i === 0 ? fontBold : fontRegular });
     sellerY -= 12;
   });
 
-  // ---------------- Client (sous logo) ----------------
-  const client = quote.client || {};
+  // ── Client (sous logo) ──
+  // Gère les deux structures possibles : client_legal_name (facture) ou legal_name (ancienne)
   let clientText = "";
-  if (client.legal_name) clientText += `${client.legal_name}\n`;
-  if (client.address) clientText += `${client.address}\n`;
-  if (client.postal_code || client.city)
-    clientText += `${client.postal_code || ""} ${client.city || ""}\n`;
-  if (client.phone) clientText += `Tel: ${client.phone}\n`;
-  if (client.email) clientText += `Email: ${client.email}\n`;
-  if (client.legal_identifier && /^\d{14}$/.test(client.legal_identifier))
-    clientText += `SIRET: ${client.legal_identifier}\n`;
-  if (client.vat_number) clientText += `TVA: ${client.vat_number}\n`;
+  const clientName = client.client_legal_name || client.legal_name;
+  const clientAddr = client.client_address    || client.address;
+  const clientCp   = client.client_postal_code|| client.postal_code;
+  const clientCity = client.client_city       || client.city;
+  const clientTel  = client.client_phone      || client.phone;
+  const clientMail = client.client_email      || client.email;
+  const clientSiret= client.client_siret      || client.legal_identifier;
+  const clientVat  = client.client_vat_number || client.vat_number;
 
-  const clientLines = clientText.split("\n").filter(Boolean);
-  let clientY = yLogoTop - logoHeight - 10; // juste sous le logo
-  clientLines.forEach((line, i) => {
-    const font = i === 0 ? fontBold : fontRegular;
-    page.drawText(line, {
-      x: margin,
-      y: clientY,
-      size: 10,
-      font,
-    });
+  if (clientName)                                    clientText += `${clientName}\n`;
+  if (clientAddr)                                    clientText += `${clientAddr}\n`;
+  if (clientCp || clientCity)                        clientText += `${clientCp || ""} ${clientCity || ""}\n`;
+  if (clientTel)                                     clientText += `Tel: ${clientTel}\n`;
+  if (clientMail)                                    clientText += `Email: ${clientMail}\n`;
+  if (clientSiret && /^\d{14}$/.test(clientSiret))   clientText += `SIRET: ${clientSiret}\n`;
+  if (clientVat)                                     clientText += `TVA: ${clientVat}\n`;
+
+  let clientY = yTop - logoHeight - 20;
+  clientText.split("\n").filter(Boolean).forEach((line, i) => {
+    page.drawText(line, { x: margin, y: clientY, size: 10, font: i === 0 ? fontBold : fontRegular });
     clientY -= 12;
   });
 
-  // ---------------- Position du reste du contenu ----------------
-  let y = Math.min(sellerY, clientY) - 20;
+  // ── Référence & dates ──
+  y = Math.min(sellerY, clientY) - 20;
 
-  // ---------------- Dates & infos facture ----------------
-  if (quote.invoice_number) {
-    page.drawText(`Référence devis : ${quote.invoice_number}`, {
-      x: margin,
-      y,
-      size: 10,
-      font: fontBold,
-    });
-  }
+  page.drawText(`Référence devis : ${invoiceNumber}`, { x: margin, y, size: 10, font: fontBold });
   y -= 20;
 
-  if (quote.issue_date)
-    page.drawText(`Date d'émission : ${formatDateFr(quote.issue_date)}`, {
-      x: margin,
-      y,
-      size: 10,
-      font: fontRegular,
-    });
+  if (issueDate)
+    page.drawText(`Date d'émission : ${formatDateFr(issueDate)}`, { x: margin, y, size: 10, font: fontRegular });
+  if (supplyDate)
+    page.drawText(`Date de livraison : ${formatDateFr(supplyDate)}`, { x: margin + 200, y, size: 10, font: fontRegular });
+  y -= 40;
 
-  if (quote.supply_date)
-    page.drawText(`Date de livraison : ${formatDateFr(quote.supply_date)}`, {
-      x: margin + 200,
-      y,
-      size: 10,
-      font: fontRegular,
-    });
-
-  y -= 50;
-
-  // ---------------- Tableau des lignes ----------------
-  const tableX = margin;
-  let tableY = y;
+  // ── Tableau des lignes ──
+  const tableX     = margin;
+  let   tableY     = y;
   const tableWidth = width - 2 * margin;
-  const colWidths = [150, 40, 60, 60, 70, 70, 70];
-  const rowHeight = 20;
+  const colWidths  = [150, 40, 60, 60, 70, 70, 70];
+  const rowHeight  = 20;
 
-  // Header
-  page.drawRectangle({
-    x: tableX,
-    y: tableY - rowHeight,
-    width: tableWidth,
-    height: rowHeight,
-    color: rgb(0.9, 0.9, 0.9),
-    borderColor: rgb(0, 0, 0),
-    borderWidth: 1,
-  });
+  page.drawRectangle({ x: tableX, y: tableY - rowHeight, width: tableWidth, height: rowHeight, color: rgb(0.9, 0.9, 0.9), borderColor: rgb(0, 0, 0), borderWidth: 1 });
 
   let xCursor = tableX;
-  const headers = ["Description", "Qté", "PU", "Taux", "HT", "TVA", "TTC"];
-  headers.forEach((h, i) => {
-    page.drawText(h, {
-      x: xCursor + 5,
-      y: tableY - 15,
-      size: 9,
-      font: fontBold,
-    });
+  ["Description", "Qté", "PU", "Taux", "HT", "TVA", "TTC"].forEach((h, i) => {
+    page.drawText(h, { x: xCursor + 5, y: tableY - 15, size: 9, font: fontBold });
     xCursor += colWidths[i];
   });
-
   tableY -= rowHeight;
 
-  // Rows
-  quote.lines?.forEach((line) => {
+  lines.forEach((line) => {
     xCursor = tableX;
     const rowValues = [
-      line.description || "",
-      line.quantity || "",
-      `${line.unit_price || ""} €`,
+      line.description  || "",
+      String(line.quantity   || ""),
+      `${line.unit_price  || ""} €`,
       line.vat_rate ? `${line.vat_rate}%` : "",
-      line.line_net ? `${line.line_net} €` : "",
-      line.line_tax ? `${line.line_tax} €` : "",
-      line.line_total ? `${line.line_total} €` : "",
+      line.line_net   ? `${line.line_net}`   : "",
+      line.line_tax   ? `${line.line_tax}`   : "",
+      line.line_total ? `${line.line_total}` : "",
     ];
 
-    page.drawRectangle({
-      x: tableX,
-      y: tableY - rowHeight,
-      width: tableWidth,
-      height: rowHeight,
-      borderColor: rgb(0, 0, 0),
-      borderWidth: 1,
-    });
-
+    page.drawRectangle({ x: tableX, y: tableY - rowHeight, width: tableWidth, height: rowHeight, borderColor: rgb(0, 0, 0), borderWidth: 1 });
     rowValues.forEach((text, i) => {
-      page.drawText(text.toString(), {
-        x: xCursor + 5,
-        y: tableY - 15,
-        size: 9,
-        font: fontRegular,
-      });
+      page.drawText(text, { x: xCursor + 5, y: tableY - 15, size: 9, font: fontRegular });
       xCursor += colWidths[i];
     });
-
     tableY -= rowHeight;
   });
 
   y = tableY - 20;
 
-  // ---------------- Totaux ----------------
-  const totalLabels = ["Sous-total", "Total TVA", "Total TTC"];
-  const totalValues = [
-    quote.subtotal ? `${quote.subtotal} €` : "",
-    quote.total_taxes ? `${quote.total_taxes} €` : "",
-    quote.total ? `${quote.total} €` : "",
-  ];
-
-  const boxWidth = 180;
-  const boxHeight = totalLabels.length * 20;
-  const totalsX = width - margin - boxWidth;
-  let totalsY = y;
-
-  page.drawRectangle({
-    x: totalsX,
-    y: totalsY - boxHeight,
-    width: boxWidth,
-    height: boxHeight,
-    borderColor: rgb(0, 0, 0),
-    borderWidth: 1,
+  // ── Totaux (calculés depuis les lignes, comme la facture) ──
+  let subtotal = 0, totalTaxes = 0, totalTTC = 0;
+  lines.forEach((line) => {
+    subtotal    += parseFloat(line.line_net)   || 0;
+    totalTaxes  += parseFloat(line.line_tax)   || 0;
+    totalTTC    += parseFloat(line.line_total) || 0;
   });
 
+  const totalLabels = ["Sous-total", "Total TVA", "Total TTC"];
+  const totalValues = [`${subtotal.toFixed(2)} €`, `${totalTaxes.toFixed(2)} €`, `${totalTTC.toFixed(2)} €`];
+
+  const boxWidth  = 180;
+  const boxHeight = totalLabels.length * 20;
+  const totalsX   = width - margin - boxWidth;
+  let   totalsY   = y;
+
+  page.drawRectangle({ x: totalsX, y: totalsY - boxHeight, width: boxWidth, height: boxHeight, borderColor: rgb(0, 0, 0), borderWidth: 1 });
   totalsY -= 15;
   totalLabels.forEach((label, i) => {
-    page.drawText(label, {
-      x: totalsX + 15,
-      y: totalsY,
-      size: 10,
-      font: fontBold,
-    });
-    page.drawText(totalValues[i].toString(), {
-      x: totalsX + boxWidth - 70,
-      y: totalsY,
-      size: 10,
-      font: fontRegular,
-    });
+    page.drawText(label,         { x: totalsX + 15,            y: totalsY, size: 10, font: fontBold });
+    page.drawText(totalValues[i],{ x: totalsX + boxWidth - 70, y: totalsY, size: 10, font: fontRegular });
     totalsY -= 20;
   });
+
   y = totalsY - 30;
 
-  // ---------------- Mentions pour devis ----------------
+  // ── Mention devis ──
   const mentionDevis = "Les conditions de paiement et mentions légales seront précisées sur la facture.";
-  const maxWidth = 595 - 2 * margin;
-  const wrappedLines = wrapText(mentionDevis, fontRegular, 9, maxWidth);
 
-  wrappedLines.forEach(line => {
-    if (y < 50) {
-      page.addPage([595, 842]); // nouvelle page
-      y = 842 - margin;
-    }
+  wrapText(mentionDevis, fontRegular, 9, width - 2 * margin).forEach((line) => {
+    if (y < 50) { pdfDoc.addPage([595, 842]); y = 842 - margin; }
     page.drawText(line, { x: margin, y, size: 9, font: fontRegular });
     y -= 12;
   });
-  y -= 10;
-    
-  // ---------------- Save ----------------
-  const uploadDir = path.join(__dirname, "../../uploads/pdf");
-  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
   const pdfBytes = await pdfDoc.save();
+  logger.info('➡️ PDF devis généré, taille bytes:', pdfBytes.length);
   return pdfBytes;
 }
 
@@ -770,9 +637,9 @@ async function generateInvoicePdfBuffer(invoice) {
         line.quantity || "",
         `${line.unit_price || ""} €`,
         line.vat_rate ? `${line.vat_rate}%` : "",
-        line.line_net ? `${line.line_net} €` : "",
-        line.line_tax ? `${line.line_tax} €` : "",
-        line.line_total ? `${line.line_total} €` : "",
+        line.line_net ? `${line.line_net}` : "",
+        line.line_tax ? `${line.line_tax}` : "",
+        line.line_total ? `${line.line_total}` : "",
       ];
 
       page.drawRectangle({

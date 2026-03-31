@@ -343,6 +343,40 @@ const generateInvoicePdfBuffer = asyncHandler(async (req, res) => {
   res.send(pdfBytes);
 });
 
+const generateQuotePdfBuffer = asyncHandler(async (req, res) => {
+  logger.info("BODY:", JSON.stringify(req.body, null, 2));
+  const quoteBody = { ...req.body };
+
+  // ---------------- Vérifier seller_id avant création ----------------
+  const sellerIdFromBody = quoteBody.seller_id || quoteBody.header?.seller_id;
+  if (sellerIdFromBody && sellerIdFromBody !== req.seller.id) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+
+  // ---------------- Récupérer le seller complet ----------------
+  let seller = {};
+  if (sellerIdFromBody) {
+    seller = await getSellerById(sellerIdFromBody);
+  }
+
+  // ---------------- Composer l'objet quote complet ----------------
+  const quote = {
+    ...quoteBody,
+    seller
+  };
+
+  // ---------------- Générer le PDF en mémoire ----------------
+  const pdfBytes = await generateQuotePdf(quote);
+
+  // ---------------- Envoyer le PDF en mémoire ----------------
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename="devis_${quote.header?.quote_number || 'preview'}.pdf"`
+  );
+  res.send(pdfBytes);
+});
+
 const getInvoices = asyncHandler(async (req, res) => {
     if (!req.seller) {
       return res.status(403).json({ message: 'Vendeur non trouvé' });
@@ -641,6 +675,7 @@ module.exports = {
   deleteInvoice,
   createInvoicePdf,
   generateInvoicePdfBuffer,
+  generateQuotePdfBuffer,
   getInvoices,
   sendInvoice,
   getInvoiceStatus,

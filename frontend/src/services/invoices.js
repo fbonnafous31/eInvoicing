@@ -254,6 +254,26 @@ export function useInvoiceService() {
     [getToken]
   );
 
+  const fetchQuotePdf = useCallback(
+    async (invoice) => {
+      const token = await getToken();
+      const res = await fetch(`${API_BASE}/generate-quote-pdf`, {  // ← sans /:id
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(invoice),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Erreur génération PDF devis: ${res.status} - ${text}`);
+      }
+      return res.blob();
+    },
+    [getToken]
+  );
+
   const downloadInvoicePdf = useCallback(
     async (invoice) => {
       if (!invoice?.id) throw new Error("Invoice missing ID");
@@ -289,6 +309,26 @@ export function useInvoiceService() {
     [getToken]
   );
 
+  const downloadQuotePdf = useCallback(
+    async (invoice) => {
+      const blob = await fetchQuotePdf(invoice);
+      const url = URL.createObjectURL(blob);
+
+      const safeInvoiceNumber = invoice.invoice_number
+        ? invoice.invoice_number.trim().replace(/[\/\\?%*:|"<>#]/g, "_")
+        : invoice.id;
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `devis_${safeInvoiceNumber}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    },
+    [fetchQuotePdf]
+  );  
+
   return {
     API_ROOT,
     fetchInvoicesBySeller,
@@ -310,6 +350,8 @@ export function useInvoiceService() {
     getInvoicePdfA3Url,
     getInvoicePdfA3Proxy,
     fetchInvoicePdf,
+    fetchQuotePdf,
     downloadInvoicePdf,
+    downloadQuotePdf
   };
 }

@@ -111,9 +111,24 @@ router.get('/:id/status', (req, res, next) => {
   InvoicesController.getInvoiceStatus(req, res, next);
 });
 
+router.post('/generate-pdf', (req, res, next) => {
+  req.log.info('Génération buffer PDF facture');
+  InvoicesController.generateInvoicePdfBuffer(req, res, next);
+});
+
+router.post('/generate-quote-pdf', (req, res, next) => {
+  req.log.info('Génération buffer PDF devis');
+  InvoicesController.generateQuotePdfBuffer(req, res, next);
+});
+
 router.post('/:id/generate-pdf', (req, res, next) => {
   req.log.info(`Génération PDF facture ${req.params.id}`);
   InvoicesController.createInvoicePdf(req, res, next);
+});
+
+router.post('/:id/generate-quote-pdf', (req, res, next) => {
+  req.log.info(`Génération PDF devis ${req.params.id}`);
+  InvoicesController.generateQuotePdfBuffer(req, res, next);
 });
 
 router.post('/:id/refresh-status', (req, res, next) => {
@@ -134,11 +149,6 @@ router.get('/:id/lifecycle', (req, res, next) => {
 router.get('/:id/status/:statusCode/comment', (req, res, next) => {
   req.log.info(`Récupération commentaire statut ${req.params.statusCode} facture ${req.params.id}`);
   InvoicesController.getInvoiceStatusComment(req, res, next);
-});
-
-router.post('/generate-pdf', (req, res, next) => {
-  req.log.info('Génération buffer PDF facture');
-  InvoicesController.generateInvoicePdfBuffer(req, res, next);
 });
 
 // ----------------------------

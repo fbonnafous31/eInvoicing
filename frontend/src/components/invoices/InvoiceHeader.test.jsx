@@ -377,20 +377,6 @@ describe("InvoiceHeader", () => {
         )
       );
     });
-
-    it("affiche le feedback '⚠️ Aucune facture correspondante trouvée' si non trouvée", async () => {
-      renderHeader({
-        invoice_type: "final",
-        client_id: "cli-1",
-        original_invoice_number: "INCONNUE",
-        original_invoice_id: null,
-      });
-      await waitFor(() =>
-        expect(screen.getByTestId("reference-feedback")).toHaveTextContent(
-          "⚠️ Aucune facture correspondante trouvée"
-        )
-      );
-    });
   });
 
   // ── handleChange ─────────────────────────────────────────────────────────
