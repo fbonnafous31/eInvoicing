@@ -28,7 +28,7 @@ async function run() {
   await client.query(infraSQL);
 
   // 2️⃣ Migrations déjà exécutées
-  const { rows } = await client.query("SELECT name FROM migrations");
+  const { rows } = await client.query("SELECT name FROM invoicing.migrations");
   const executed = rows.map(r => r.name);
 
   // 3️⃣ Exécution des migrations

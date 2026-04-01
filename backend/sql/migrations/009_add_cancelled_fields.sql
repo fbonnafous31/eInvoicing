@@ -1,7 +1,7 @@
 -- 009_add_cancelled_fields.sql
 -- Ajoute les champs pour tracer les annulations de facture
 
-ALTER TABLE invoices
+ALTER TABLE invoicing.invoices
   ADD COLUMN cancelled_at TIMESTAMP NULL DEFAULT NULL,
   ADD COLUMN cancel_reason VARCHAR(255) NULL;
 
