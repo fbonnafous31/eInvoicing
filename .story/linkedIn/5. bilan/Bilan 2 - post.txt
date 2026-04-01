@@ -7,26 +7,40 @@ Depuis, le projet a continué à évoluer. Pas pour ajouter des fonctionnalités
 Voici ce que j'ai construit depuis ce bilan :
 
 🔒 Sécurité
-Audit JWT, isolation multi-tenant, hardening API. Protection contre les injections SQL et les uploads malveillants. L'interface protège déjà l'utilisateur. L'API est maintenant blindée même en cas d'attaque directe.
+Audit JWT, isolation multi-tenant, hardening API. Protection contre les injections SQL et les uploads malveillants.
+L'interface protège déjà l'utilisateur. L'API est maintenant blindée même en cas d'attaque directe.
 
 📊 Observabilité
-Logs structurés avec Pino, centralisés dans Loki, visualisés dans Grafana. Chaque action est tracée, chaque erreur est contextualisée. Du console.log à une vraie infrastructure.
+Logs structurés avec Pino, centralisés dans Loki, visualisés dans Grafana.
+Chaque action est tracée, chaque erreur est contextualisée.
+
+🧪 Qualité & fiabilité
+Couverture de tests portée à +85%.
+Mise en place d’un système de migrations pour industrialiser les évolutions de base de données.
+👉 Des changements maîtrisés, sans casser l’existant.
 
 🤖 MCP et LLM
-J'ai expérimenté l'intégration d'un LLM via MCP. Et j'ai décidé de ne pas l'intégrer. Pas par rejet de l'IA, mais par pragmatisme : mon app a besoin de déterminisme, de traçabilité, de conformité. Savoir ne pas intégrer une technologie est parfois une décision d'architecture plus forte que savoir l'intégrer.
+J'ai expérimenté l'intégration d'un LLM via MCP. Et j'ai décidé de ne pas l'intégrer.
+Pas par rejet de l'IA, mais par pragmatisme : besoin de déterminisme, de traçabilité et de conformité.
 
 📄 Flux complet
-Du devis à la facture, avec transmission vers une Plateforme de Dématérialisation. Le cycle de vie complet est couvert.
+Du devis à la facture, avec transmission vers une Plateforme de Dématérialisation.
+Le cycle de vie complet est couvert.
+
+🔌 Intégration PDP
+Ajout d’un second adapter PDP en complément d’Iopole, avec SuperPDP.
+Une approche API-first avec les deux plateformes agréées permettant une adoption rapide des PA.
 
 🧱 Souveraineté et déploiement
-Le code est sur GitHub, pas une boîte noire. L'app se déploie sur Render ou en local via Docker. Elle fonctionne hors ligne tant qu'on ne communique pas avec une PA.
+Le code est sur GitHub, pas une boîte noire.
+L'app se déploie sur Render ou en local via Docker.
+Elle fonctionne hors ligne tant qu'on ne communique pas avec une PA.
 
 Ce projet reste un laboratoire autant qu'un produit. Mais il est conforme, solide, et utilisable.
 
 Il m’a surtout permis d’aller au bout d’un sujet complexe, seul, et de mieux comprendre les exigences réelles derrière ce type d’application.
 
 Si le sujet t'intéresse ou que tu as des questions, les commentaires sont ouverts. 🌱
-
 
 Premier commentaire
 

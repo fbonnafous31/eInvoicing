@@ -4,10 +4,10 @@ const { Client } = require("pg");
 
 require("dotenv").config();
 
-const MIGRATIONS_DIR = path.join(__dirname, "../../sql/migrations");
+const MIGRATIONS_DIR = path.join(__dirname, "../sql/migrations");
 const INFRASTRUCTURE_SQL = path.join(
   __dirname,
-  "../../sql/infrastructure/create_migrations_table.sql"
+  "../sql/infrastructure/create_migrations_table.sql"
 );
 
 async function run() {
