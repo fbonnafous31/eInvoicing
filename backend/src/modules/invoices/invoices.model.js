@@ -288,7 +288,7 @@ async function createInvoice({ invoice, client, lines = [], taxes = [], attachme
 async function deleteInvoice(id, cancelReason = null) {
   try {
     const result = await pool.query(
-      `UPDATE invoices
+      `UPDATE ${SCHEMA}.invoices
        SET status = 'cancelled',
            cancelled_at = NOW(),
            cancel_reason = $2
