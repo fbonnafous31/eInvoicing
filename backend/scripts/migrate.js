@@ -47,7 +47,7 @@ async function run() {
     try {
       await client.query(sql);
       await client.query(
-        "INSERT INTO migrations(name) VALUES($1)",
+        "INSERT INTO invoicing.migrations(name) VALUES($1)",
         [file]
       );
       await client.query("COMMIT");
