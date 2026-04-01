@@ -304,7 +304,7 @@ describe('invoice.model', () => {
 
       expect(result).toEqual(fakeRow);
       expect(pool.query).toHaveBeenCalledWith(
-        expect.stringContaining('UPDATE invoices'),
+        expect.stringContaining('UPDATE invoicing.invoices'),
         [1, 'Erreur test']
       );
     });
